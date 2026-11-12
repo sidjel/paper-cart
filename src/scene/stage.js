@@ -3,7 +3,8 @@
 //  - « tout montrer » (fit) : tout le cadre est visible, avec des bandes.
 // Les calques sont créés d'après la pile déclarée dans les données du lieu.
 
-export function createStage(container, place, images) {
+// getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
+export function createStage(container, place, images, getValue) {
   const [W, H] = place.size;
   const el = document.createElement('div');
   el.className = 'stage';
@@ -22,12 +23,21 @@ export function createStage(container, place, images) {
       img.el.height = img.h;
       img.el.alt = '';
       img.el.draggable = false;
+      if (def.position) img.el.style.transform = `translate(${def.position[0]}px, ${def.position[1]}px)`;
       layer.appendChild(img.el);
     }
     el.appendChild(layer);
     layers[def.id] = layer;
   }
   container.appendChild(el);
+
+  // Opacité des calques qui la déclarent (par exemple le premier plan en transparence).
+  function applyOpacity() {
+    for (const def of place.layers) {
+      if (def.opacity) layers[def.id].style.opacity = getValue(def.opacity);
+    }
+  }
+  applyOpacity();
 
   const view = { scale: 1, offX: 0, offY: 0 };
 
@@ -55,5 +65,5 @@ export function createStage(container, place, images) {
     return out;
   }
 
-  return { el, layers, view, layout, clientToStage };
+  return { el, layers, view, layout, clientToStage, applyOpacity };
 }

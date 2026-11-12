@@ -19,8 +19,9 @@ export function characterImageEntries(data, rasterScale) {
   return entries;
 }
 
-// settings : config.character ; display : config.display (réduire les animations).
-export function createCharacterSprite(data, images, parent, settings, display) {
+// settings : config.character ; display : config.display (réduire les animations) ;
+// onSound(nom) : une image d'animation demande un son (par exemple un pas).
+export function createCharacterSprite(data, images, parent, settings, display, onSound) {
   const [w, h] = data.size;
   const [ax, ay] = data.anchor;
   const root = document.createElement('div');
@@ -72,6 +73,7 @@ export function createCharacterSprite(data, images, parent, settings, display) {
   let animStartTime = 0;
   let animStartDist = 0;
   let shown = null;
+  let shownIndex = -1;
   let lastFlip = NaN;
   let lastX = NaN;
   let lastY = NaN;
@@ -115,8 +117,13 @@ export function createCharacterSprite(data, images, parent, settings, display) {
       current = anim;
       animStartTime = time;
       animStartDist = distance;
+      shownIndex = -1;
     }
     const i = frameIndex(anim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed);
+    if (i !== shownIndex) {
+      shownIndex = i;
+      if (anim.sounds[i]) onSound(anim.sounds[i]);
+    }
     const frame = anim.els[i];
     if (frame !== shown) {
       if (shown) shown.hidden = true;

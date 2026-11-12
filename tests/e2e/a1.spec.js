@@ -147,3 +147,21 @@ test('la feuille se retourne quand il change de côté', async ({ page }, info) 
   await page.keyboard.up('ArrowLeft');
   await expect(flip).toHaveAttribute('style', /scaleX\(-1\)/);
 });
+
+test('descend jusqu’en bas de l’écran, de face, et le son démarre', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.keyboard.down('ArrowDown');
+  await page.waitForFunction(() => window.paperCart.hero().z < -140);
+  await page.keyboard.up('ArrowDown');
+  // Monter puis aller sur le côté : il se remet de face.
+  await page.keyboard.down('ArrowUp');
+  await page.waitForTimeout(250);
+  await page.keyboard.up('ArrowUp');
+  expect((await hero(page)).away).toBe(true);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(250);
+  await page.keyboard.up('ArrowRight');
+  expect((await hero(page)).away).toBe(false);
+  expect(await page.evaluate(() => window.paperCart.audioStarted())).toBe(true);
+  await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-bas.png` });
+});

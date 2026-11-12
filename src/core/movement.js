@@ -36,8 +36,9 @@ export function clearTarget(w) {
 function face(w, dx, dz) {
   if (dx > FACE_THRESHOLD) w.facing = 1;
   else if (dx < -FACE_THRESHOLD) w.facing = -1;
+  // De dos seulement en allant vers le fond ; de côté ou vers l'avant, on voit son visage.
   if (dz > FACE_THRESHOLD) w.away = true;
-  else if (dz < -FACE_THRESHOLD) w.away = false;
+  else if (dz < -FACE_THRESHOLD || dx > FACE_THRESHOLD || dx < -FACE_THRESHOLD) w.away = false;
 }
 
 // Rapproche la vitesse de la vitesse voulue, avec accélération ou freinage limités.

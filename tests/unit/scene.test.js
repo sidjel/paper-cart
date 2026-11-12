@@ -87,3 +87,27 @@ describe('distance parcourue', () => {
     expect(w.distance).toBe(still);
   });
 });
+
+import { compileSong } from '../../src/audio/music.js';
+import song from '../../src/data/music/supermarche.json';
+
+describe('musique et sons (données)', () => {
+  it('la partition se transforme en événements triés, dans la boucle', () => {
+    const s = compileSong(song);
+    expect(s.loopBeats).toBe(32);
+    for (let i = 1; i < s.events.length; i++) expect(s.events[i].beat).toBeGreaterThanOrEqual(s.events[i - 1].beat);
+    expect(s.events.every((e) => e.beat < s.loopBeats)).toBe(true);
+  });
+  it('les pas sonnent quand un pied se pose (images 1 et 3 de la marche)', () => {
+    const a = compileAnimation(hero.views.face.walk);
+    expect(a.sounds).toEqual(['pas', null, 'pas', null]);
+  });
+});
+
+describe('zone de marche jusqu’en bas de l’écran', () => {
+  it('on peut descendre derrière le rayon du premier plan', () => {
+    const m = compileMask(place.walkMask);
+    expect(isWalkable(m, 960, -140)).toBe(true);
+    expect(isWalkable(m, 960, -160)).toBe(false);
+  });
+});

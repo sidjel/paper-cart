@@ -21,8 +21,16 @@ export const config = {
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
+    foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
     fitMode: 'fill', // 'fill' : remplir l'écran (bords un peu coupés) ; 'fit' : tout montrer (bandes)
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
+  },
+  audio: {
+    muted: false, // couper tout le son
+    master: 0.8, // volume général
+    music: 0.4, // volume de la musique
+    steps: 0.7, // volume des pas
+    pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
   },
   input: {
     virtualJoystick: false, // téléphone : joystick virtuel à gauche de l'écran
@@ -49,6 +57,12 @@ export const TUNABLES = [
   { group: 'Contrôles', key: 'input.virtualJoystick', label: 'Joystick virtuel (téléphone)', type: 'bool' },
   { group: 'Contrôles', key: 'input.joystickRadius', label: 'Taille du joystick', min: 30, max: 120, step: 5, unit: 'px' },
   { group: 'Contrôles', key: 'input.stickDeadZone', label: 'Zone morte du stick', min: 0, max: 0.6, step: 0.02 },
+  { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
+  { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
+  { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
   {
     group: 'Affichage', key: 'display.fitMode', label: 'Cadrage', type: 'choice',

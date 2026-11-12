@@ -2,7 +2,7 @@
 // Aucune règle de jeu ici : la logique vit dans core/, l'affichage dans scene/ et ui/.
 
 import './style.css';
-import { config, onConfigChange, setValue, overrides } from './config.js';
+import { config, onConfigChange, setValue, getValue, overrides } from './config.js';
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
@@ -19,6 +19,8 @@ import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createDiagnostic } from './ui/diagnostic.js';
 import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
+import { createAudio } from './audio/audio.js';
+import song from './data/music/supermarche.json';
 import place from './data/places/rayon-essai.json';
 import heroData from './data/characters/heros.json';
 
@@ -39,7 +41,8 @@ const tmpStage = { x: 0, y: 0 };
 const tmpWorld = { x: 0, z: 0 };
 let renderLine = '';
 
-const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, touch });
+const audio = createAudio(config.audio, song);
+const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, touch, muted: config.audio.muted });
 const diag = createDiagnostic(uiEl, () => ({
   version: VERSION,
   state: sm.get(),
@@ -77,6 +80,9 @@ function handleAction(action) {
     case 'fullscreen':
       toggleFullscreen();
       break;
+    case 'mute':
+      setValue('audio.muted', !config.audio.muted);
+      break;
   }
 }
 
@@ -93,6 +99,7 @@ function toggleFullscreen() {
 
 sm.onChange((now, before) => {
   hud.setPaused(now === 'pause');
+  audio.setState(now);
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
@@ -134,6 +141,7 @@ function frame(now) {
   const dt = last < 0 ? 0 : now - last;
   last = now;
   input.pollDevices();
+  audio.update();
   const playing = sm.is('play');
   if (playing) {
     const n = stepper.advance(dt / 1000);
@@ -157,14 +165,14 @@ async function start() {
   ];
   const images = await loadImages(entries);
 
-  stage = createStage(gameEl, place, images);
+  stage = createStage(gameEl, place, images, getValue);
   proj = createProjection(place.projection);
   mask = compileMask(place.walkMask);
   walker = createWalker(place.spawn[0], place.spawn[1]);
   marker = createTargetMarker(stage.layers.acteurs);
   props = createProps(place, images, stage.layers.acteurs, proj);
   depthRefs = props.map((p) => p.depthRef);
-  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display);
+  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, (name) => audio.play(name));
   debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget });
@@ -173,12 +181,20 @@ async function start() {
     if (key === 'display.fitMode') layout();
     if (key === 'debug.showWalkMask') debugMask.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
+    if (key === 'display.foregroundOpacity') stage.applyOpacity();
+    if (key.startsWith('audio.')) audio.applyVolumes();
+    if (key === 'audio.muted') hud.setMuted(value);
   });
   window.addEventListener('resize', layout);
   window.visualViewport?.addEventListener('resize', layout);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sm.is('play')) sm.go('pause');
+    audio.setHidden(document.hidden);
   });
+  // Le son ne peut démarrer qu'après un premier geste du joueur.
+  const unlock = () => audio.unlock();
+  window.addEventListener('pointerdown', unlock, true);
+  window.addEventListener('keydown', unlock, true);
 
   layout();
   render();
@@ -199,6 +215,7 @@ async function start() {
       return { x: r.left + v.offX + worldToStageX(proj, x) * v.scale, y: r.top + v.offY + worldToStageY(proj, z) * v.scale };
     },
     report: () => diag.report(),
+    audioStarted: () => audio.started,
   };
 }
 

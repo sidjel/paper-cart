@@ -16,11 +16,14 @@ function button(label, title, action, onAction) {
   return b;
 }
 
-export function createHud(root, { version, onAction, touch }) {
+export function createHud(root, { version, onAction, touch, muted }) {
   const bar = document.createElement('div');
   bar.className = 'hud-bar';
+  const soundBtn = button('♪', 'Couper ou remettre le son', 'mute', onAction);
+  soundBtn.classList.toggle('off', muted);
   bar.append(
     button('II', 'Pause (Échap)', 'pause', onAction),
+    soundBtn,
     button('⚙', 'Réglages (F2)', 'settings', onAction),
     button('DBG', 'Diagnostic (F3)', 'diagnostic', onAction),
   );
@@ -81,6 +84,9 @@ export function createHud(root, { version, onAction, touch }) {
       if (hintGone) return;
       hintGone = true;
       hint.classList.add('gone');
+    },
+    setMuted(m) {
+      soundBtn.classList.toggle('off', m);
     },
     showError(message) {
       error.hidden = false;

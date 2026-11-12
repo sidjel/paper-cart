@@ -2,7 +2,7 @@
   "id": "rayon-essai",
   "name": "[TEMP] Rayon 7 — rayon d'essai",
   "size": [1920, 1080],
-  "cropFocusY": 640,
+  "cropFocusY": 720,
   "projection": {
     "comment": "Coordonnées du monde → scène. A1 : simple et sans perspective (la profondeur arrive en A2).",
     "floorFrontY": 880,
@@ -20,6 +20,10 @@
     "caddie": {
       "src": "art/placeholder/caddie.svg",
       "size": [335, 250]
+    },
+    "rayon-avant": {
+      "src": "art/placeholder/rayon-avant.svg",
+      "size": [1920, 300]
     }
   },
   "layers": [
@@ -33,12 +37,20 @@
       "id": "acteurs",
       "contains": "personnage, présentoir, caddie, repère du point visé — triés par profondeur",
       "hiddenBy": "rien"
+    },
+    {
+      "id": "premier-plan",
+      "image": "rayon-avant",
+      "position": [0, 780],
+      "opacity": "display.foregroundOpacity",
+      "contains": "rayon d'en face (côté caméra), en transparence",
+      "hiddenBy": "rien"
     }
   ],
   "spawn": [300, 60],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (0 = devant, 250 = au pied des étagères). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage.",
-    "area": [[90, 0], [1830, 0], [1830, 250], [90, 250]],
+    "comment": "x : le long du rayon ; z : profondeur (250 = au pied des étagères du fond, -150 = tout en bas de l'écran, derrière le rayon du premier plan). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage.",
+    "area": [[90, -150], [1830, -150], [1830, 250], [90, 250]],
     "obstacles": [
       {
         "name": "Présentoir Crousti-Gouffre",

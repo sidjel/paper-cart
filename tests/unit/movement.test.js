@@ -67,6 +67,21 @@ describe('déplacement par direction', () => {
     expect(w.away).toBe(true);
     expect(w.facing).toBe(-1); // garde le côté
   });
+
+  it('de dos, aller sur le côté le remet de face (on voit son visage)', () => {
+    const w = createWalker(200, 50);
+    run(w, { moveX: 0, moveZ: 1 }, 2);
+    expect(w.away).toBe(true);
+    run(w, { moveX: 1, moveZ: 0 }, 2);
+    expect(w.away).toBe(false);
+    expect(w.facing).toBe(1);
+  });
+
+  it('en diagonale vers le fond, il reste de dos', () => {
+    const w = createWalker(200, 50);
+    run(w, { moveX: 1, moveZ: 1 }, 2);
+    expect(w.away).toBe(true);
+  });
 });
 
 describe('déplacement vers un point', () => {

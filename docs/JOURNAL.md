@@ -10,6 +10,50 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 3 — 12/11/2026 — Visage de profil, rayon du premier plan, vraie marche, sons
+
+**Retours de l'auteur**
+- Ce qui gêne : de dos, en allant sur le côté, on voyait l'arrière de sa tête ; les jambes faisaient du « moonwalk ».
+- Ce qui manque : marcher jusqu'en bas de l'écran ; un rayon devant, en transparence ; des bruits de pas et une petite musique.
+
+**Jouable maintenant**
+- **Côté = visage** : il n'est de dos que quand il va vers le fond. Dès qu'il va à gauche ou à droite, on voit son visage, avec le retournement de la feuille.
+- **Zone de marche agrandie** jusqu'en bas de l'écran.
+- **Rayon du premier plan** en bas de l'écran, en transparence : le personnage marche entre deux rayons et passe derrière celui de devant.
+- **Marche corrigée** : le pied posé recule sous le corps pendant que l'autre, levé, passe devant. Plus de « moonwalk ».
+- **Son** : un bruit de pas chaque fois qu'un pied se pose, et une petite bossa de supermarché provisoire, un peu étouffée comme par les haut-parleurs du plafond, plus douce en pause. Tout est fabriqué par le jeu, aucun fichier audio. Le son démarre au premier geste (exigence des navigateurs). Bouton ♪ pour couper ou remettre le son.
+
+**Vérifié, et comment**
+- 36 tests de logique (Vitest) réussis. Ils couvrent le visage de face sur le côté, la zone jusqu'en bas, la partition de la musique et les pas sur les bonnes images.
+- 14 tests navigateur (PC et téléphone simulé) réussis, sans erreur console. Nouveau test : descendre en bas, monter, aller sur le côté (il se remet de face), le son a démarré.
+- Captures regardées : bas de l'écran derrière le rayon transparent, vue téléphone simulé.
+- **Pas vérifiable ici** : l'écoute du son (le navigateur de test n'a pas de haut-parleur). **À vérifier par l'auteur** : le son, le volume sur téléphone, la sensation, la fluidité (rapport DBG).
+
+**Comment tester**
+1. Touche une touche ou le sol : la musique démarre.
+2. Marche : un bruit de pas à chaque pied posé.
+3. Monte vers le fond, puis va à droite : il se tourne de face.
+4. Descends tout en bas : il passe derrière le rayon transparent.
+5. ♪ coupe le son ; F2 → « Son » pour les volumes.
+
+**Quoi essayer**
+1. La musique : agréable, ou lassante au bout de quelques minutes ? Trop forte ?
+2. Les pas : bien synchronisés avec les jambes, assez discrets ?
+3. Le rayon de devant : assez transparent ? (réglage « Opacité du rayon de devant »)
+
+**Nouveaux réglages (F2 ou ⚙)** : Son (couper, volume général, musique, pas, musique en pause) ; Affichage (opacité du rayon de devant).
+
+**Décisions prises seul (détails mineurs)**
+- En diagonale vers le fond, il reste de dos ; seul un mouvement surtout horizontal le remet de face.
+- En mode « remplir l'écran », le cadrage privilégie le bas de la scène, pour que le rayon de devant et le sol restent visibles. Le haut (panneau « Rayon 7 ») est un peu coupé sur téléphone.
+- Les images, la musique et les pas provisoires sont inscrits dans `CREDITS.md`.
+
+**À préparer par l'auteur** : rien pour l'instant.
+
+**Proposition pour la séance suivante** : suite de l'étape A2 (échelle selon la profondeur, ombre, rebond et respiration, caméra qui glisse, banc d'essai).
+
+---
+
 ## Séance 2 — 12/11/2026 — Retournement, marche, clignement, passer derrière les objets
 
 **Retours de l'auteur sur A1**

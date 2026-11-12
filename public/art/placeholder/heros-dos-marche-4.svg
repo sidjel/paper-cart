@@ -12,10 +12,10 @@
 <path d="M144 172 q22 12 22 42 q0 8 -8 8 q-6 0 -8 -6 q-2 -18 -14 -28 z" fill="#5f84a8"/>
 <circle cx="156" cy="220" r="9" fill="#f0d2b0"/>
 </g>
-<path d="M83 236 L105 236 L106 300 L82 300 z" fill="#46526a"/>
-<path d="M80 300 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
-<path d="M117 236 L139 236 L140 290 L116 290 z" fill="#3f4a5a"/>
-<path d="M114 290 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
+<path d="M83 236 L105 236 L106 289 L82 289 z" fill="#46526a"/>
+<path d="M80 289 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
+<path d="M117 236 L139 236 L140 300 L116 300 z" fill="#3f4a5a"/>
+<path d="M114 300 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
 <g transform="translate(0 -4)">
 <path d="M60 226 q-8 -40 12 -64 q14 -10 30 -10 h24 q22 2 30 22 q8 22 2 52 q-2 14 -12 16 h-74 q-10 -2 -12 -16 z" fill="#6a8fb3"/>
 <path d="M76 222 h72 v18 h-72 z" fill="#5a7ea2"/>
