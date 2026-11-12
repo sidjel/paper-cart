@@ -16,6 +16,7 @@ import { createDebugMask } from './scene/debugMask.js';
 import { createTargetMarker } from './scene/targetMarker.js';
 import { createProps } from './scene/props.js';
 import { actorLevel } from './scene/depth.js';
+import { createDust } from './scene/dust.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createDiagnostic } from './ui/diagnostic.js';
@@ -36,7 +37,12 @@ const uiEl = document.getElementById('ui');
 const sm = createStateMachine('loading');
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
-let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs;
+let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust;
+// Dernière position affichée du personnage (pour placer la poussière d'un pas).
+const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
+const DUST_IMAGE = 'art/placeholder/poussiere.svg';
+const DUST_SIZE = [120, 72];
+const DUST_ANCHOR = [60, 68];
 const intent = { moveX: 0, moveZ: 0 };
 const tmpStage = { x: 0, y: 0 };
 const tmpWorld = { x: 0, z: 0 };
@@ -52,6 +58,8 @@ const diag = createDiagnostic(uiEl, () => ({
   images: assetStats.images,
   pixels: assetStats.pixels,
   loadMs: assetStats.loadMs,
+  slowest: [...assetStats.perImage].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([n, ms]) => `${n} ${ms} ms`).join(', '),
+  audio: audio.describe(),
   gamepad: input?.gamepad.connected ?? false,
   overrides: overrides(),
 }));
@@ -128,13 +136,25 @@ function layout() {
   renderLine = `${mode} · scène ×${stage.view.scale.toFixed(3)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${config.display.maxPixelRatio})`;
 }
 
+// Une image d'animation du personnage demande un son ou un effet (un pas : bruit + poussière).
+function onFrameEvent(sound, effect) {
+  if (sound) audio.play(sound);
+  if (effect === 'poussiere') dust.spawn(shown.x, shown.y, walker.facing, shown.scale * heroData.scale, shown.level, shown.time);
+}
+
 function render() {
   const a = stepper.alpha;
   const x = walker.prevX + (walker.x - walker.prevX) * a;
   const z = walker.prevZ + (walker.z - walker.prevZ) * a;
   const time = stepper.time + a * stepper.step; // temps de jeu lissé, figé en pause
-  sprite.render(worldToStageX(proj, x), worldToStageY(proj, z), scaleAt(proj, z), walker.facing, walker.away, walker.moving, time, walker.distance);
-  sprite.setLevel(actorLevel(depthRefs, z));
+  shown.x = worldToStageX(proj, x);
+  shown.y = worldToStageY(proj, z);
+  shown.scale = scaleAt(proj, z);
+  shown.level = actorLevel(depthRefs, z);
+  shown.time = time;
+  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance);
+  sprite.setLevel(shown.level);
+  dust.update(time);
   if (!walker.hasTarget) marker.hide();
 }
 
@@ -166,6 +186,7 @@ async function start() {
   const entries = [
     ...Object.entries(place.images).map(([id, im]) => ({ id, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
     ...characterImageEntries(heroData, rasterScale).map((e) => ({ ...e, url: BASE + e.url })),
+    { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
   ];
   const images = await loadImages(entries);
 
@@ -176,7 +197,8 @@ async function start() {
   marker = createTargetMarker(stage.layers.acteurs);
   props = createProps(place, images, stage.layers.acteurs, proj);
   depthRefs = props.map((p) => p.depthRef);
-  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, (name) => audio.play(name));
+  dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
+  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);
   debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget });

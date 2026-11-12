@@ -42,6 +42,15 @@ export function createSettingsPanel(root, { onClose }) {
   const controls = new Map(); // clé → fonction de mise à jour de l'affichage
   const startValues = new Map(TUNABLES.filter((t) => t.reload).map((t) => [t.key, getValue(t.key)]));
   let group = null;
+  const presetButtons = [];
+  // Le profil dont toutes les valeurs correspondent aux réglages actuels est mis en évidence.
+  function updatePresets() {
+    for (const [preset, b] of presetButtons) {
+      const active = Object.entries(preset.values).every(([k, v]) => getValue(k) === v);
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', active);
+    }
+  }
 
   for (const t of TUNABLES) {
     if (t.group !== group) {
@@ -60,6 +69,7 @@ export function createSettingsPanel(root, { onClose }) {
           b.addEventListener('click', () => {
             for (const [k, v] of Object.entries(preset.values)) setValue(k, v);
           });
+          presetButtons.push([preset, b]);
           row.appendChild(b);
         }
         panel.appendChild(row);
@@ -139,10 +149,12 @@ export function createSettingsPanel(root, { onClose }) {
 
   onConfigChange((key) => {
     controls.get(key)?.();
+    updatePresets();
     note.hidden = ![...startValues].some(([k, v]) => getValue(k) !== v);
     save();
   });
   for (const update of controls.values()) update();
+  updatePresets();
 
   return {
     open() {

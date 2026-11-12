@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="72" viewBox="0 0 120 72">
+  <!-- [TEMP] Petit nuage de poussière en papier (un pas). Ancrage : milieu du bas (60, 68). -->
+  <defs>
+    <filter id="crayon" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="4"/>
+      <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+    <g id="nuage">
+      <circle cx="38" cy="46" r="20" fill="#f1ebdc"/>
+      <circle cx="62" cy="36" r="24" fill="#f4efe2"/>
+      <circle cx="86" cy="48" r="17" fill="#ece5d3"/>
+      <rect x="30" y="46" width="62" height="20" rx="10" fill="#efe9da"/>
+    </g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#nuage" xlink:href="#nuage" stroke="#fbf8ee" stroke-width="7" stroke-linejoin="round"/>
+    <use href="#nuage" xlink:href="#nuage" stroke="#8a8170" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M50 30 q8 -6 16 -2 M80 44 q5 -3 9 0" fill="none" stroke="#fbf8ee" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -79,3 +79,11 @@ describe('réglages', () => {
     expect(overrides()).toEqual({});
   });
 });
+
+import { WALK_PRESETS, getDefault } from '../../src/config.js';
+describe('profil de marche par défaut', () => {
+  it('les valeurs par défaut sont celles du profil « Paper Mario »', () => {
+    const pm = WALK_PRESETS.find((p) => p.name === 'Paper Mario');
+    for (const [k, v] of Object.entries(pm.values)) expect(getDefault(k)).toBe(v);
+  });
+});

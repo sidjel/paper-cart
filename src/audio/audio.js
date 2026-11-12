@@ -14,15 +14,31 @@ export function createAudio(settings, song) {
   function init() {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    ctx = new AC();
+    try {
+      ctx = new AC({ latencyHint: settings.latency });
+    } catch {
+      ctx = new AC();
+    }
+    // Limiteur en sortie : évite toute saturation si plusieurs sons s'additionnent.
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -10;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.2;
+    limiter.connect(ctx.destination);
     master = ctx.createGain();
-    master.connect(ctx.destination);
+    master.connect(limiter);
     // La musique passe par un filtre qui imite les haut-parleurs du plafond.
     const speaker = ctx.createBiquadFilter();
     speaker.type = 'lowpass';
     speaker.frequency.value = 3800;
+    // Les très basses fréquences font vibrer (grésiller) les petits haut-parleurs de téléphone : on les retire.
+    const lowCut = ctx.createBiquadFilter();
+    lowCut.type = 'highpass';
+    lowCut.frequency.value = 90;
     musicBus = ctx.createGain();
-    musicBus.connect(speaker).connect(master);
+    musicBus.connect(lowCut).connect(speaker).connect(master);
     sfxBus = ctx.createGain();
     sfxBus.connect(master);
     // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et le shaker.
@@ -78,6 +94,12 @@ export function createAudio(settings, song) {
     },
     get started() {
       return !!ctx;
+    },
+    // Pour le rapport de diagnostic.
+    describe() {
+      if (!ctx) return 'pas encore démarré';
+      const ms = (v) => (v ? `${Math.round(v * 1000)} ms` : '?');
+      return `${ctx.state} · ${ctx.sampleRate} Hz · réserve « ${settings.latency} » · latence ${ms(ctx.baseLatency)} + sortie ${ms(ctx.outputLatency)}`;
     },
     applyVolumes,
     setState(state) {

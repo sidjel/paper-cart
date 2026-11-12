@@ -10,6 +10,34 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 5 — 12/11/2026 — Poussière, profil Paper Mario par défaut, son et chargement
+
+**Retours de l'auteur**
+- Ce qui plaît : profil « Paper Mario » ; pas validés ; contournement validé.
+- Ce qui gêne : la musique grésille sur le téléphone.
+- Ce qui manque : un petit nuage de poussière à chaque pas ; la respiration (prévue en A2).
+- Questions : faut-il dessiner avant l'étape suivante (non) ; le saut (décision en attente).
+- Rapport du téléphone (ec1a29f) : 61 images/s, p95 16,5 ms, 4 images > 33 ms sur 2206, calcul 0,57 ms en moyenne (pire 4,8 ms), **chargement 8,2 s**.
+
+**Jouable maintenant**
+- **Poussière** : un petit nuage de papier se dégage derrière le pied à chaque pas, recule et s'efface.
+- **Profil Paper Mario par défaut**, mis en évidence (✓) dans ⚙ → Marche. Les autres profils restent disponibles.
+- **Son** : graves très basses coupées (elles font vibrer les petits haut-parleurs), limiteur en sortie, réserve de son « moyenne ». Nouveau réglage « Réserve de son ».
+- **Rapport de diagnostic** : il indique maintenant les images les plus lentes à préparer et l'état du son.
+
+**Vérifié, et comment**
+- 43 tests de logique et 18 tests navigateur réussis (PC et téléphone simulé), sans erreur console. Nouveaux tests : la poussière apparaît en marchant puis disparaît ; le profil Paper Mario est sélectionné par défaut.
+- Capture de la poussière regardée.
+- **Pas vérifiable ici** : le grésillement (pas de haut-parleur) et le temps de chargement réel du téléphone (le PC de test charge en 0,4 s).
+
+**Décisions prises seul (détails mineurs)**
+- Poussière désactivée par l'option « réduire les animations ».
+- Réserve de son « moyenne » par défaut.
+
+**Proposition pour la séance suivante** : A2, avec en premier l'échelle selon la profondeur, l'ombre, le rebond et la respiration.
+
+---
+
 ## Séance 4 — 12/11/2026 — Contournement des objets, pas plus doux, profils de marche, suivi
 
 **Retours de l'auteur**

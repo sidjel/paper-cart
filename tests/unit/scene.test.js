@@ -111,3 +111,10 @@ describe('zone de marche jusqu’en bas de l’écran', () => {
     expect(isWalkable(m, 960, -160)).toBe(false);
   });
 });
+
+describe('poussière et profil par défaut', () => {
+  it('les images où un pied se pose font un bruit de pas et de la poussière', () => {
+    const a = compileAnimation(hero.views.dos.walk);
+    expect(a.effects).toEqual(['poussiere', null, 'poussiere', null]);
+  });
+});

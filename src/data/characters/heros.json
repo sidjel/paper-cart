@@ -1,10 +1,16 @@
 {
   "id": "heros",
   "name": "[TEMP] Héros en papier",
-  "size": [220, 320],
-  "anchor": [110, 312],
+  "size": [
+    220,
+    320
+  ],
+  "anchor": [
+    110,
+    312
+  ],
   "scale": 0.85,
-  "comment": "Vues dessinées tournées vers la droite ; la gauche est obtenue en miroir. Une animation = une liste d'images. Une image peut être un chemin, ou {src, ms} pour la tenir ms millisecondes. 'stride' : changer d'image tous les N pixels parcourus (pas synchronisés avec la marche). Une image peut aussi déclencher un son : {src, sound} (ici, les pas quand un pied se pose).",
+  "comment": "Vues dessinées tournées vers la droite ; la gauche est obtenue en miroir. Une animation = une liste d'images. Une image peut être un chemin, ou {src, ms} pour la tenir ms millisecondes. 'stride' : changer d'image tous les N pixels parcourus (pas synchronisés avec la marche). Une image peut aussi déclencher un son et un effet : {src, sound, effect} (ici, le bruit de pas et la poussière quand un pied se pose).",
   "views": {
     "face": {
       "idle": {
@@ -40,12 +46,14 @@
         "frames": [
           {
             "src": "art/placeholder/heros-face-marche-1.svg",
-            "sound": "pas"
+            "sound": "pas",
+            "effect": "poussiere"
           },
           "art/placeholder/heros-face-marche-2.svg",
           {
             "src": "art/placeholder/heros-face-marche-3.svg",
-            "sound": "pas"
+            "sound": "pas",
+            "effect": "poussiere"
           },
           "art/placeholder/heros-face-marche-4.svg"
         ]
@@ -62,12 +70,14 @@
         "frames": [
           {
             "src": "art/placeholder/heros-dos-marche-1.svg",
-            "sound": "pas"
+            "sound": "pas",
+            "effect": "poussiere"
           },
           "art/placeholder/heros-dos-marche-2.svg",
           {
             "src": "art/placeholder/heros-dos-marche-3.svg",
-            "sound": "pas"
+            "sound": "pas",
+            "effect": "poussiere"
           },
           "art/placeholder/heros-dos-marche-4.svg"
         ]

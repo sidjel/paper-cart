@@ -20,8 +20,8 @@ export function characterImageEntries(data, rasterScale) {
 }
 
 // settings : config.character ; display : config.display (réduire les animations) ;
-// onSound(nom) : une image d'animation demande un son (par exemple un pas).
-export function createCharacterSprite(data, images, parent, settings, display, onSound) {
+// onFrameEvent(son, effet) : une image d'animation demande un son et/ou un effet (un pas, de la poussière).
+export function createCharacterSprite(data, images, parent, settings, display, onFrameEvent) {
   const [w, h] = data.size;
   const [ax, ay] = data.anchor;
   const root = document.createElement('div');
@@ -122,7 +122,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     const i = frameIndex(anim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed);
     if (i !== shownIndex) {
       shownIndex = i;
-      if (anim.sounds[i]) onSound(anim.sounds[i]);
+      if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
     const frame = anim.els[i];
     if (frame !== shown) {

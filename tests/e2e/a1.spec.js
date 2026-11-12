@@ -169,3 +169,17 @@ test('descend jusqu’en bas de l’écran, de face, et le son démarre', async 
   expect(await page.evaluate(() => window.paperCart.audioStarted())).toBe(true);
   await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-bas.png` });
 });
+
+test('de la poussière apparaît en marchant, puis disparaît', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(() => page.locator('.dust:not([hidden])').count(), { timeout: 2000 }).toBeGreaterThan(0);
+  await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-poussiere.png` });
+  await page.keyboard.up('ArrowRight');
+  await expect.poll(() => page.locator('.dust:not([hidden])').count(), { timeout: 3000 }).toBe(0);
+});
+
+test('le profil « Paper Mario » est sélectionné par défaut', async ({ page }) => {
+  await page.locator('.hud-button', { hasText: '⚙' }).click();
+  await expect(page.locator('.presets button.active')).toHaveText(/Paper Mario/);
+});

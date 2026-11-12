@@ -53,7 +53,7 @@ export function createMusic(song) {
       tone(ctx, out, 'sine', freq(e.midi), t, 0.05 * e.vel, 0.012, len + 0.5);
       tone(ctx, out, 'triangle', freq(e.midi) * 2, t, 0.008 * e.vel, 0.01, len * 0.6 + 0.2);
     } else if (e.kind === 'bass') {
-      tone(ctx, out, 'triangle', freq(e.midi), t, 0.16, 0.015, len + 0.15);
+      tone(ctx, out, 'triangle', freq(e.midi), t, 0.11, 0.015, len + 0.15);
     } else if (e.kind === 'melody') {
       // Vibraphone : son pur avec une petite harmonique aiguë.
       tone(ctx, out, 'sine', freq(e.midi), t, 0.07, 0.006, len + 0.9);

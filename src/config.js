@@ -7,9 +7,10 @@ export const config = {
     maxStepsPerFrame: 5, // au-delà (onglet en veille…), on abandonne le retard plutôt que d'accélérer
   },
   walk: {
-    maxSpeed: 480, // vitesse de marche, en pixels de scène par seconde
-    acceleration: 3600, // pour atteindre la vitesse max (px/s²)
-    deceleration: 4800, // pour s'arrêter quand on lâche (px/s²)
+    // Valeurs du profil « Paper Mario » (choisi par l'auteur, séance 5) : démarrage et arrêt vifs.
+    maxSpeed: 520, // vitesse de marche, en pixels de scène par seconde
+    acceleration: 10000, // pour atteindre la vitesse max (px/s²)
+    deceleration: 12000, // pour s'arrêter quand on lâche (px/s²)
     depthFactor: 0.8, // vitesse quand on va vers le fond ou vers l'avant (× vitesse de marche)
     arrivalRadius: 4, // distance à laquelle on considère être arrivé au point touché (px)
   },
@@ -18,6 +19,10 @@ export const config = {
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
+    dust: true, // petit nuage de poussière à chaque pas
+    dustSize: 1.3, // taille du nuage (×)
+    dustDuration: 0.45, // durée de vie du nuage (s)
+    dustOpacity: 0.85, // opacité de départ du nuage
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
@@ -31,6 +36,9 @@ export const config = {
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
+    // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
+    // mais les pas sonnent un tout petit peu plus tard.
+    latency: 'balanced',
   },
   input: {
     virtualJoystick: false, // téléphone : joystick virtuel à gauche de l'écran
@@ -53,6 +61,10 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.flipDuration', label: 'Durée du retournement', min: 0, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Personnage', key: 'character.edgeThickness', label: 'Épaisseur de la tranche', min: 0, max: 0.25, step: 0.01 },
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
+  { group: 'Personnage', key: 'character.dust', label: 'Poussière à chaque pas', type: 'bool' },
+  { group: 'Personnage', key: 'character.dustSize', label: 'Taille de la poussière', min: 0.3, max: 2.5, step: 0.05, unit: '×' },
+  { group: 'Personnage', key: 'character.dustDuration', label: 'Durée de la poussière', min: 0.15, max: 1.5, step: 0.05, unit: 's' },
+  { group: 'Personnage', key: 'character.dustOpacity', label: 'Opacité de la poussière', min: 0.1, max: 1, step: 0.05 },
   { group: 'Personnage', key: 'character.walkAnimSpeed', label: 'Vitesse des pas (images)', min: 0.4, max: 2.5, step: 0.05, unit: '×' },
   { group: 'Contrôles', key: 'input.virtualJoystick', label: 'Joystick virtuel (téléphone)', type: 'bool' },
   { group: 'Contrôles', key: 'input.joystickRadius', label: 'Taille du joystick', min: 30, max: 120, step: 5, unit: 'px' },
@@ -61,6 +73,10 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
+  {
+    group: 'Son', key: 'audio.latency', label: 'Réserve de son (anti-grésillement)', type: 'choice', reload: true,
+    options: [['interactive', 'Petite (réactive)'], ['balanced', 'Moyenne'], ['playback', 'Grande (la plus stable)']],
+  },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },

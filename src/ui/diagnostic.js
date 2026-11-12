@@ -106,6 +106,8 @@ export function createDiagnostic(root, getContext) {
       `Écran : ${screen.width}×${screen.height} (CSS) · densité ${fmt(window.devicePixelRatio, 3)} · fenêtre ${window.innerWidth}×${window.innerHeight} · plein écran ${document.fullscreenElement ? 'oui' : 'non'}`,
       `Rendu : ${c.renderLine}`,
       `Images : ${c.images} chargées, ${fmt(c.pixels / 1e6, 2)} Mpx en mémoire (≈ ${fmt((c.pixels * 4) / 1048576, 0)} Mo), chargement du lieu ${c.loadMs} ms`,
+      `Images les plus lentes à préparer : ${c.slowest}`,
+      `Son : ${c.audio}`,
       `Lieu : ${c.place} · état ${c.state} · manette ${c.gamepad ? 'oui' : 'non'}`,
       `Mesures en jeu : ${count} dernières images (${framesEver} depuis la remise à zéro)`,
       `  images/s (dernière seconde) : ${fmt(recentFps())}`,

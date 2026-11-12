@@ -9,6 +9,7 @@ export const assetStats = {
   images: 0,
   pixels: 0, // pixels d'images gardés en mémoire (≈ 4 octets chacun)
   loadMs: 0,
+  perImage: [], // [nom, ms] : temps de préparation de chaque image (pour trouver les plus lentes)
   rasterScale: 1,
 };
 
@@ -44,6 +45,7 @@ export async function loadImages(entries) {
   try {
     for (const e of entries) {
       if (out.has(e.id)) continue;
+      const t1 = performance.now();
       const src = await loadImage(e.url);
       let s = e.scale;
       s = Math.min(s, MAX_SIDE / e.w, MAX_SIDE / e.h);
@@ -59,6 +61,7 @@ export async function loadImages(entries) {
       out.set(e.id, { el, url, w: e.w, h: e.h, pw, ph });
       assetStats.images += 1;
       assetStats.pixels += pw * ph;
+      assetStats.perImage.push([e.url.split('/').pop(), Math.round(performance.now() - t1)]);
     }
   } finally {
     canvas.width = 0;

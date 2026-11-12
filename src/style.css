@@ -53,6 +53,8 @@ html, body {
   top: 0;
 }
 .layer { width: 100%; height: 100%; isolation: isolate; }
+.dust { position: absolute; left: 0; top: 0; display: block; pointer-events: none; will-change: transform, opacity; }
+.dust[hidden] { display: none; }
 .prop { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
 .layer-image { display: block; pointer-events: none; }
 
@@ -216,6 +218,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .setting-value { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; }
 .presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: 14px; }
 .presets button { min-height: 36px; padding: 4px 12px; }
+.presets button.active { background: var(--accent); font-weight: 700; }
+.presets button.active::before { content: '✓ '; }
 .settings-note { margin: 10px 0 0; font-size: 13px; }
 
 .overlay {
