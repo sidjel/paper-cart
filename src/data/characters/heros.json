@@ -1,0 +1,18 @@
+{
+  "id": "heros",
+  "name": "[TEMP] Héros en papier",
+  "size": [220, 320],
+  "anchor": [110, 312],
+  "scale": 0.85,
+  "comment": "Vues dessinées tournées vers la droite ; la gauche est obtenue en miroir. Chaque animation : une liste d'images et une vitesse (images par seconde). Une seule image suffit.",
+  "views": {
+    "face": {
+      "idle": { "fps": 0, "frames": ["art/placeholder/heros-face.svg"] },
+      "walk": { "fps": 0, "frames": ["art/placeholder/heros-face.svg"] }
+    },
+    "dos": {
+      "idle": { "fps": 0, "frames": ["art/placeholder/heros-dos.svg"] },
+      "walk": { "fps": 0, "frames": ["art/placeholder/heros-dos.svg"] }
+    }
+  }
+}

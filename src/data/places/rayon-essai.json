@@ -1,0 +1,36 @@
+{
+  "id": "rayon-essai",
+  "name": "[TEMP] Rayon 7 — rayon d'essai",
+  "size": [1920, 1080],
+  "cropFocusY": 640,
+  "projection": {
+    "comment": "Coordonnées du monde → scène. A1 : simple et sans perspective (la profondeur arrive en A2).",
+    "floorFrontY": 880,
+    "depthToScreen": 1
+  },
+  "images": {
+    "rayon-fond": { "src": "art/placeholder/rayon-fond.svg", "size": [1920, 1080] }
+  },
+  "layers": [
+    {
+      "id": "fond",
+      "image": "rayon-fond",
+      "contains": "plafond, panneau du rayon, étagères du fond, tête de gondole, caddie, sol",
+      "hiddenBy": "rien (le personnage passe devant, sur une petite surface)"
+    },
+    {
+      "id": "acteurs",
+      "contains": "personnage, repère du point visé",
+      "hiddenBy": "rien"
+    }
+  ],
+  "spawn": [300, 60],
+  "walkMask": {
+    "comment": "x : le long du rayon ; z : profondeur (0 = devant, 250 = au pied des étagères). Marges incluses pour la largeur du personnage.",
+    "area": [[90, 0], [1830, 0], [1830, 250], [90, 250]],
+    "obstacles": [
+      { "name": "Tête de gondole Crousti-Gouffre", "points": [[595, 122], [905, 122], [905, 300], [595, 300]] },
+      { "name": "Caddie abandonné", "points": [[1250, 158], [1585, 158], [1585, 300], [1250, 300]] }
+    ]
+  }
+}
