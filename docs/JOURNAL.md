@@ -10,6 +10,37 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 12 — 13/11/2026 — Analyse du diagnostic en 4 configurations ; plan des tests T0, T1, T2
+
+**Mesures sur le téléphone (921b78d, Oppo Reno 2, en charge 70 → 78 %)** — images > 20 ms par minute (essais 1/2/3) :
+1. immobile, caméra fixe : 11 (6/13/14) ;
+2. marche, caméra fixe : 22 (18/26/21) ;
+3. immobile, caméra mobile : 125 (117/129/130) ;
+4. marche, caméra mobile : 162 (154/154/179).
+
+Images > 33 ms : 0 / 0,7 / 5,7 / 4,7 par minute ; aucune > 50 ms. Calcul du jeu 0,5 à 0,7 ms ; rendu de la page 3,3 à 3,9 ms ; ménage mémoire 91 fois, lié à environ 1 % des images lentes seulement.
+
+**Comptages du navigateur de test** (organisation du rendu ; ne prouvent rien sur la carte graphique du téléphone) :
+- personnage redessiné environ 60 fois/s dans les 4 configurations, même immobile ;
+- poussière redessinée 64 fois/s en marchant ;
+- mises en page 1/s à l'arrêt, 17/s en marche ;
+- la caméra mobile n'ajoute aucun redessin.
+
+**Démontré (téléphone)** : le problème est reproductible ; la caméra mobile multiplie les images lentes par 11 ; ce sont des images ratées (exactement 2 ou 3 rafraîchissements), pas des calculs longs ; la caméra n'augmente pas le rendu côté page ; le ménage mémoire n'est pas la cause ; aucun chargement d'image pendant les mesures.
+
+**Probable** : la caméra oblige la carte graphique à recomposer tout l'écran à pleine finesse (2400×1080), plusieurs calques empilés ; le redessin du personnage à chaque image pèse sur toutes les configurations.
+
+**Inconnu** : temps réel de la carte graphique ; effet de la chaleur et de l'ordre des configurations ; pics isolés de la mesure de rendu ; part respective du dessin du personnage et de la poussière ; gain réel d'un passage à PixiJS.
+
+**Décision de l'auteur** : mesurer avant de corriger. Tests sur le téléphone sans changer le code :
+- T0 : référence, réglages par défaut ;
+- T1 : « Réduire les animations » (coupe rebond, respiration, écrasements, retournement et poussière ; vérifié par comptage : personnage redessiné 1 fois/s à l'arrêt, 13 fois/s en marche, poussière 0) ;
+- T2 : opacité du rayon de devant à 0.
+
+Conditions identiques : téléphone débranché, refroidi, économie d'énergie coupée, « Ne pas déranger », mêmes durées (chauffe 30 s, 3 × 60 s). Ensuite : corrections une à une, avec comparaison avant/après. Pas de PixiJS pour l'instant.
+
+---
+
 ## Séance 11 — 12/11/2026 — Diagnostic fiable en 4 configurations (aucune correction)
 
 **Demande de l'auteur** : consolider le diagnostic avant tout essai PixiJS, sans modifier le moteur ni l'architecture. Quatre configurations (marche oui/non × caméra mobile oui/non) ; 60 s de chauffe, 3 mesures de 60 s chacune ; relever images/s, images > 20, 33 et 50 ms, p95, calcul du jeu, rendu si possible ; vérifier que les conditions sont identiques ; examiner les causes possibles (ménage mémoire, chargement d'images, caméra, autre traitement du navigateur). Ne pas commencer PixiJS avant d'avoir examiné les résultats ensemble.
