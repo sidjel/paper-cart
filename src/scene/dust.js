@@ -25,11 +25,14 @@ export function createDust(parent, image, anchor, settings, display) {
   const anchorX = anchor[0];
   const anchorY = anchor[1];
 
+  const counter = { spawns: 0 }; // pour le diagnostic
   return {
+    counter,
     // (sx, sy) : pieds du personnage sur la scène ; facing : 1 vers la droite, -1 vers la gauche.
     spawn(sx, sy, facing, scale, level, time) {
       if (!settings.dust || display.reduceMotion) return;
       const it = items[next];
+      counter.spawns++;
       next = (next + 1) % POOL;
       it.active = true;
       it.start = time;

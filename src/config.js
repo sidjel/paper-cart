@@ -71,6 +71,11 @@ export const config = {
     noShadow: false,
     fixedCamera: false,
   },
+  protocol: {
+    warmup: 60, // diagnostic complet : chauffe par configuration (s)
+    measure: 60, // durée d'une mesure (s)
+    repeats: 3, // nombre de mesures par configuration
+  },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
   },
@@ -128,6 +133,9 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'bench.noDust', label: 'Essai sans poussière', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noShadow', label: 'Essai sans ombre', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.fixedCamera', label: 'Essai caméra immobile', type: 'bool' },
+  { group: 'Diagnostic', key: 'protocol.warmup', label: 'Diagnostic complet : chauffe', min: 5, max: 120, step: 5, unit: 's' },
+  { group: 'Diagnostic', key: 'protocol.measure', label: 'Diagnostic complet : durée d’une mesure', min: 5, max: 120, step: 5, unit: 's' },
+  { group: 'Diagnostic', key: 'protocol.repeats', label: 'Diagnostic complet : mesures par configuration', min: 1, max: 5, step: 1 },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
 ];
 

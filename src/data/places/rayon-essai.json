@@ -150,5 +150,11 @@
         "wait": 0.6
       }
     ]
+  },
+  "diagnostic": {
+    "comment": "Diagnostic en 4 configurations : aller-retour en ligne droite entre a et b (aucun obstacle), personnage immobile en idle. Caméra fixe centrée entre a et b.",
+    "a": [1300, 40],
+    "b": [2300, 40],
+    "idle": [1800, 40]
   }
 }

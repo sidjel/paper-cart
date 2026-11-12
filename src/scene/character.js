@@ -90,6 +90,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let lastY = NaN;
   let lastS = NaN;
   let lastLevel = -1;
+  const stats = { frameChanges: 0, flipping: false }; // pour le diagnostic
   let lastBody = NaN;
   let lastLift = NaN;
   let wasMoving = false;
@@ -130,6 +131,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
   function render(sx, sy, scale, facing, away, moving, time, distance) {
     const width = flipScale(time, facing, away);
+    stats.flipping = flipStart >= 0;
 
     const anim = shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
     if (anim !== current) {
@@ -145,6 +147,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     const frame = anim.els[i];
     if (frame !== shown) {
+      stats.frameChanges++;
       if (shown) shown.hidden = true;
       frame.hidden = false;
       shown = frame;
@@ -196,5 +199,5 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     lastLevel = level;
   }
 
-  return { el: root, shadowEl: shadow, render, setLevel };
+  return { el: root, shadowEl: shadow, render, setLevel, stats };
 }

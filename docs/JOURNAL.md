@@ -10,6 +10,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 11 — 12/11/2026 — Diagnostic fiable en 4 configurations (aucune correction)
+
+**Demande de l'auteur** : consolider le diagnostic avant tout essai PixiJS, sans modifier le moteur ni l'architecture. Quatre configurations (marche oui/non × caméra mobile oui/non) ; 60 s de chauffe, 3 mesures de 60 s chacune ; relever images/s, images > 20, 33 et 50 ms, p95, calcul du jeu, rendu si possible ; vérifier que les conditions sont identiques ; examiner les causes possibles (ménage mémoire, chargement d'images, caméra, autre traitement du navigateur). Ne pas commencer PixiJS avant d'avoir examiné les résultats ensemble.
+
+**Construit (diagnostic seulement, le jeu normal ne change pas)**
+- ⚙ → Diagnostic → **« Lancer le diagnostic complet »** : les 4 configurations s'enchaînent toutes seules, en 16 min environ. L'écran est maintenu allumé, un bandeau indique l'avancement et le temps restant.
+- **Conditions identiques** : même endroit du rayon (aller-retour entre x 1300 et 2300 à la même profondeur), même vitesse, ligne droite (aucun calcul de chemin). Le personnage immobile est au milieu de cet aller-retour. La caméra fixe est centrée sur l'aller-retour. La caméra mobile suit le personnage (config. 4) ou un « fantôme » invisible qui fait le même aller-retour (config. 3), donc la même trajectoire de caméra.
+- **Par mesure** : images/s, images > 20, > 33 et > 50 ms, médiane, p95, pire ; calcul du jeu moy/p95/pire ; **rendu côté page** moy/p95/pire (approximation : temps entre la fin du calcul et la fin de la préparation de l'image par le navigateur ; le travail de la carte graphique n'est pas mesurable depuis la page) ; images > 50 ms signalées par le navigateur (LoAF) ; tâches longues du navigateur.
+- **Causes examinées** : pour chaque image lente, le rapport indique ce qui venait de se passer : ménage de la mémoire (détecté par des « objets témoins » que le navigateur signale quand il les jette ; la mesure de mémoire du navigateur s'est révélée figée, donc inutilisable), changement de dessin du personnage, retournement, poussière, mouvement de caméra. Il donne aussi la part normale de ces moments, pour distinguer un vrai lien d'une coïncidence. Il compte les images chargées pendant les mesures (doit être 0).
+- **Contrôle des conditions** : taille de fenêtre, plein écran, densité, passage en arrière-plan, touchers pendant la mesure, batterie au début et à la fin. Toute mesure dont les conditions ont changé est marquée.
+
+**Vérifié** : 63 tests de logique (ordre des phases, durée totale 16 min, chaque configuration fait bouger exactement ce qu'elle doit, aller-retour en ligne droite sur un trajet sans obstacle) ; 34 tests navigateur, dont un diagnostic raccourci complet (rapport à 4 configurations, 8 mesures, conditions inchangées). Les temps du navigateur de test ne valent rien.
+
+**À faire par l'auteur** : lancer le diagnostic complet sur le téléphone et coller le rapport. Ensuite : tableau comparatif et bilan « démontré / probable / inconnu ».
+
+---
+
 ## Séance 10 — 12/11/2026 — Analyse des saccades (deux bancs d'essai)
 
 **Rapports de l'auteur (5973115, Oppo Reno 2, plein écran)**

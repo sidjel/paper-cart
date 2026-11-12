@@ -276,13 +276,28 @@ test('banc d’essai : lancé depuis l’onglet Diagnostic, annulable, rapport a
   await page.locator('.settings-tab', { hasText: /^Diagnostic$/ }).click();
   await page.getByRole('button', { name: "Lancer le banc d'essai" }).click();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('bench');
-  await expect(page.locator('.bench-banner')).toBeVisible();
+  await expect(page.locator('.bench-banner:not([hidden])')).toBeVisible();
   await page.waitForTimeout(1500);
   const moved = await hero(page);
   expect(moved.x).not.toBe(300); // il marche tout seul
   await page.keyboard.press('Escape');
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
-  await expect(page.locator('.bench-result')).toBeVisible();
-  await expect(page.locator('.bench-result pre')).toContainText('annulé');
+  const result = page.locator('.bench-result:not([hidden])');
+  await expect(result).toBeVisible();
+  await expect(result.locator('pre')).toContainText('annulé');
   await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-banc.png` });
+});
+
+test('diagnostic en 4 configurations (version courte) : rapport complet', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'une fois suffit');
+  test.setTimeout(90_000);
+  await page.evaluate(() => window.paperCart.startProtocol(1, 2, 2));
+  await page.waitForFunction(() => window.paperCart.protocolReport(), null, { timeout: 60_000 });
+  const r = await page.evaluate(() => window.paperCart.protocolReport());
+  expect(r).toContain('Résultat : terminé');
+  for (const k of ['[1]', '[2]', '[3]', '[4]']) expect(r).toContain(k);
+  expect(r.match(/essai \d/g).length).toBe(8);
+  expect(r).not.toContain('CONDITIONS CHANGÉES');
+  expect(r.length).toBeLessThan(6000);
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
 });
