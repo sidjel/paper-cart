@@ -6,7 +6,8 @@ import { config, onConfigChange, setValue, getValue, overrides } from './config.
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
-import { createWalker, setTarget, stepWalker } from './core/movement.js';
+import { createWalker, setPath, stepWalker } from './core/movement.js';
+import { findPath } from './core/pathfinding.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createStage } from './scene/stage.js';
 import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
@@ -113,8 +114,11 @@ function onTarget(cx, cy) {
   tmpWorld.x = stageToWorldX(proj, tmpStage.x);
   tmpWorld.z = stageToWorldZ(proj, tmpStage.y);
   clampToBounds(mask, tmpWorld);
-  setTarget(walker, tmpWorld.x, tmpWorld.z);
-  marker.showAt(worldToStageX(proj, tmpWorld.x), worldToStageY(proj, tmpWorld.z));
+  // Chemin qui contourne les objets si la ligne droite est bloquée.
+  const path = findPath(mask, walker.x, walker.z, tmpWorld.x, tmpWorld.z);
+  setPath(walker, path);
+  const [gx, gz] = path[path.length - 1];
+  marker.showAt(worldToStageX(proj, gx), worldToStageY(proj, gz));
 }
 
 function layout() {

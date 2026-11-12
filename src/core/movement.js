@@ -1,19 +1,23 @@
 // Déplacement du personnage dans le monde (logique pure, sans affichage).
 // Deux façons de le diriger :
 //  - une direction (clavier, stick, joystick virtuel) : il glisse le long des obstacles ;
-//  - un point à atteindre (clic, toucher) : il y va en ligne droite et s'arrête s'il bute.
+//  - un point à atteindre (clic, toucher) : il suit un chemin (voir pathfinding.js), point par point,
+//    sans s'arrêter aux points intermédiaires, et s'arrête s'il bute malgré tout.
 
 import { isWalkable } from './walkmask.js';
 
 const FACE_THRESHOLD = 0.25; // part de direction nécessaire pour changer d'orientation
 const STUCK_STEPS = 6; // pas sans progrès avant d'abandonner le point visé
+const MAX_WAYPOINTS = 16;
+const WAYPOINT_RADIUS = 10; // distance à laquelle un point intermédiaire est considéré comme atteint
 
 export function createWalker(x, z) {
   return {
     x, z,
     prevX: x, prevZ: z, // position au pas précédent (pour l'affichage interpolé)
     vx: 0, vz: 0,
-    hasTarget: false, tx: 0, tz: 0,
+    hasTarget: false, tx: 0, tz: 0, // point visé actuel
+    path: new Float64Array(MAX_WAYPOINTS * 2), pathLen: 0, pathIdx: 0, // chemin (points successifs)
     stuck: 0,
     facing: 1, // 1 = vers la droite, -1 = vers la gauche
     away: false, // true = de dos (vers le fond), false = de face
@@ -23,9 +27,33 @@ export function createWalker(x, z) {
 }
 
 export function setTarget(w, x, z) {
-  w.hasTarget = true;
-  w.tx = x;
-  w.tz = z;
+  setPath(w, [[x, z]]);
+}
+
+// points : [[x, z], …], le dernier étant l'arrivée.
+export function setPath(w, points) {
+  const n = Math.min(points.length, MAX_WAYPOINTS);
+  const skip = points.length - n; // chemin trop long : on garde la fin
+  for (let i = 0; i < n; i++) {
+    w.path[i * 2] = points[i + skip][0];
+    w.path[i * 2 + 1] = points[i + skip][1];
+  }
+  w.pathLen = n;
+  w.pathIdx = 0;
+  w.tx = w.path[0];
+  w.tz = w.path[1];
+  w.hasTarget = n > 0;
+  w.stuck = 0;
+}
+
+function lastWaypoint(w) {
+  return w.pathIdx >= w.pathLen - 1;
+}
+
+function nextWaypoint(w) {
+  w.pathIdx++;
+  w.tx = w.path[w.pathIdx * 2];
+  w.tz = w.path[w.pathIdx * 2 + 1];
   w.stuck = 0;
 }
 
@@ -104,11 +132,13 @@ export function stepWalker(w, input, mask, p, dt) {
     wantZ = iz * k * p.maxSpeed * p.depthFactor;
     face(w, ix * k, iz * k);
   } else if (w.hasTarget) {
+    // Point intermédiaire atteint : on enchaîne sur le suivant sans s'arrêter.
+    while (!lastWaypoint(w) && Math.hypot(w.tx - w.x, w.tz - w.z) <= WAYPOINT_RADIUS) nextWaypoint(w);
     // On mesure la distance « en effort » : la profondeur coûte plus cher si depthFactor < 1.
     const dx = w.tx - w.x;
     const ez = (w.tz - w.z) / p.depthFactor;
     const dist = Math.hypot(dx, ez);
-    if (dist <= p.arrivalRadius) {
+    if (dist <= p.arrivalRadius && lastWaypoint(w)) {
       // Arrivé : on se pose sur le point, sans glisser au-delà.
       w.hasTarget = false;
       if (isWalkable(mask, w.tx, w.tz)) {
@@ -121,8 +151,8 @@ export function stepWalker(w, input, mask, p, dt) {
       w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
       return;
     } else {
-      // Ralentit en approchant pour s'arrêter pile, sans dépasser.
-      const speed = Math.min(p.maxSpeed, Math.sqrt(2 * p.deceleration * dist));
+      // Ralentit en approchant de l'arrivée pour s'arrêter pile, sans dépasser.
+      const speed = lastWaypoint(w) ? Math.min(p.maxSpeed, Math.sqrt(2 * p.deceleration * dist)) : p.maxSpeed;
       const ux = dx / dist;
       const uz = ez / dist;
       wantX = ux * speed;
@@ -133,8 +163,8 @@ export function stepWalker(w, input, mask, p, dt) {
 
   steer(w, wantX, wantZ, p, dt);
 
-  if (w.hasTarget) {
-    // Ne pas dépasser le point visé dans ce pas.
+  if (w.hasTarget && lastWaypoint(w)) {
+    // Ne pas dépasser l'arrivée dans ce pas.
     const stepLen = Math.hypot(w.vx, w.vz) * dt;
     const remaining = Math.hypot(w.tx - w.x, w.tz - w.z);
     if (stepLen >= remaining && isWalkable(mask, w.tx, w.tz)) {

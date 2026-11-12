@@ -29,7 +29,7 @@ export const config = {
     muted: false, // couper tout le son
     master: 0.8, // volume général
     music: 0.4, // volume de la musique
-    steps: 0.7, // volume des pas
+    steps: 0.35, // volume des pas
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
   },
   input: {
@@ -71,6 +71,13 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
+];
+
+// Profils de marche à essayer (bouton dans le panneau) : ils règlent vitesse, accélération, freinage.
+export const WALK_PRESETS = [
+  { name: 'Doux', values: { 'walk.maxSpeed': 480, 'walk.acceleration': 3600, 'walk.deceleration': 4800 } },
+  { name: 'Paper Mario', values: { 'walk.maxSpeed': 520, 'walk.acceleration': 10000, 'walk.deceleration': 12000 } },
+  { name: 'Moderne', values: { 'walk.maxSpeed': 600, 'walk.acceleration': 6000, 'walk.deceleration': 8000 } },
 ];
 
 const DEFAULTS = structuredClone(config);

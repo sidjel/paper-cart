@@ -49,34 +49,23 @@ export function createAudio(settings, song) {
     return ctx && ctx.state === 'running' && !hidden;
   }
 
-  // Un pas : petit claquement de semelle sur le lino + un léger choc sourd. Pieds gauche et droit
-  // légèrement différents, pour ne pas sonner comme une machine.
+  // Un pas : frottement étouffé d'une semelle souple sur le lino, sans claquement.
+  // Pieds gauche et droit légèrement différents, pour ne pas sonner comme une machine.
   function step() {
     const t = ctx.currentTime;
     foot = 1 - foot;
     const src = ctx.createBufferSource();
     src.buffer = noise;
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = foot ? 1500 : 1200;
-    bp.Q.value = 1.3;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = foot ? 700 : 600;
+    lp.Q.value = 0.5;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.5, t + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
-    src.connect(bp).connect(g).connect(sfxBus);
-    src.start(t, foot ? 0.2 : 0.6, 0.1);
-
-    const o = ctx.createOscillator();
-    const og = ctx.createGain();
-    o.frequency.setValueAtTime(foot ? 120 : 105, t);
-    o.frequency.exponentialRampToValueAtTime(50, t + 0.07);
-    og.gain.setValueAtTime(0.0001, t);
-    og.gain.exponentialRampToValueAtTime(0.35, t + 0.005);
-    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-    o.connect(og).connect(sfxBus);
-    o.start(t);
-    o.stop(t + 0.12);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    src.connect(lp).connect(g).connect(sfxBus);
+    src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
   const SOUNDS = { pas: step };

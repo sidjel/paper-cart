@@ -1,7 +1,7 @@
 // Panneau de réglages (F2 ou bouton « ⚙ »), construit d'après TUNABLES (src/config.js).
 // Les réglages modifiés sont gardés dans le navigateur (localStorage) d'une partie à l'autre.
 
-import { TUNABLES, getValue, getDefault, setValue, overrides, applyOverrides, resetAll, onConfigChange } from '../config.js';
+import { WALK_PRESETS, TUNABLES, getValue, getDefault, setValue, overrides, applyOverrides, resetAll, onConfigChange } from '../config.js';
 
 const STORAGE_KEY = 'paper-cart.reglages.v1';
 
@@ -49,6 +49,21 @@ export function createSettingsPanel(root, { onClose }) {
       const h = document.createElement('h3');
       h.textContent = group;
       panel.appendChild(h);
+      if (group === 'Marche') {
+        // Profils de marche : un toucher règle vitesse, accélération et freinage d'un coup.
+        const row = document.createElement('div');
+        row.className = 'presets';
+        row.append('Profil : ');
+        for (const preset of WALK_PRESETS) {
+          const b = document.createElement('button');
+          b.textContent = preset.name;
+          b.addEventListener('click', () => {
+            for (const [k, v] of Object.entries(preset.values)) setValue(k, v);
+          });
+          row.appendChild(b);
+        }
+        panel.appendChild(row);
+      }
     }
     const row = document.createElement('label');
     row.className = 'setting';

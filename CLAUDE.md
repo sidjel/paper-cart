@@ -5,11 +5,13 @@
 - Claude code, teste, propose. Il ne décide jamais seul d'une règle qui change l'expérience de jeu.
 
 ## Une séance
-1. Relire docs/VISION.md, ce fichier et le dernier rapport dans docs/JOURNAL.md.
+1. Relire docs/VISION.md, ce fichier, le dernier rapport dans docs/JOURNAL.md et docs/SUIVI.md.
 2. Annoncer en 3 à 5 lignes : **ce que le joueur va pouvoir ressentir de nouveau** (pas seulement ce qui sera codé), et ce qui va être construit. Puis enchaîner sans attendre, sauf question bloquante.
 3. Chaque séance produit une **amélioration perceptible par le joueur**, pas seulement une amélioration du code. Le travail technique sert une expérience que l'auteur peut observer.
 4. Finir avec une version JOUABLE, vérifiée (tests verts, aucune erreur console, captures en taille PC et en taille téléphone simulée), poussée sur `main` et publiée.
 5. Écrire le rapport (voir plus bas), copié en tête de docs/JOURNAL.md.
+6. Mettre à jour **docs/SUIVI.md** : chaque demande ou remarque de l'auteur y est notée avec son état (fait, à faire, à revoir, décision en attente), pour ne rien perdre.
+7. **Terminer chaque réponse de fin de séance (et chaque fin de conversation) par le lien pour jouer** : https://sidjel.github.io/paper-cart/
 
 ## Git
 - On travaille directement sur `main` : chaque push publie le jeu, que l'auteur teste aussitôt sur son téléphone.
@@ -35,6 +37,7 @@
 - Décisions prises seul (détails mineurs uniquement) et pourquoi.
 - Ce que l'auteur doit préparer pour la suite (dessins, sons, textes), seulement si c'est utile maintenant, avec le format exact.
 - Proposition pour la séance suivante (une seule).
+- Le lien pour jouer : https://sidjel.github.io/paper-cart/
 
 ## Progression par étapes
 - Chaque prototype se construit en petites étapes, chacune jouable et commitée avant la suivante.

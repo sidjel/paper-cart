@@ -10,6 +10,41 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 4 — 12/11/2026 — Contournement des objets, pas plus doux, profils de marche, suivi
+
+**Retours de l'auteur**
+- Décisions : contourner seul les objets (A) ; A1 pas encore validée (marche encore en test) ; retournement face/dos gardé.
+- Ce qui gêne : les pas, désagréables et pas assez discrets.
+- À revoir plus tard : la musique, la durée du retournement.
+- Question de l'auteur : quel comportement de marche serait agréable et moderne, façon Paper Mario ?
+- Nouvelles règles : noter tous les changements (docs/SUIVI.md) ; donner le lien pour jouer à chaque fin de conversation.
+
+**Jouable maintenant**
+- **Toucher ou cliquer derrière un objet** : le personnage le contourne seul par le chemin le plus court. Un toucher sur l'objet lui-même l'envoie juste à côté.
+- **Pas plus doux** : un frottement étouffé de semelle souple, sans claquement, à volume réduit de moitié (0,35).
+- **Profils de marche** dans ⚙ → Marche : « Doux » (actuel), « Paper Mario », « Moderne ». Un toucher règle vitesse, accélération et freinage d'un coup.
+
+**Vérifié, et comment**
+- 41 tests de logique réussis, dont la recherche de chemin : ligne droite si rien ne gêne, contournement du présentoir et du caddie, point ramené hors d'un objet, chemin suivi jusqu'au bout.
+- 15 tests navigateur réussis (PC et téléphone simulé, au doigt), sans erreur console. Nouveau test : toucher derrière le présentoir, il y arrive et passe derrière.
+- **Pas vérifiable ici** : l'écoute des nouveaux pas. **À vérifier par l'auteur** : les profils de marche, le contournement au doigt.
+
+**Comment tester**
+1. Touche (ou clique) le sol derrière le caddie : il en fait le tour.
+2. ⚙ → Marche → Profil : essaie « Paper Mario » puis « Moderne » ; marche quelques secondes avec chacun.
+3. Écoute les pas.
+
+**Quoi essayer**
+1. Quel profil de marche te plaît le plus ?
+2. Les pas sont-ils devenus assez discrets ?
+
+**Décisions prises seul (détails mineurs)**
+- Les profils ne changent pas les valeurs par défaut : c'est l'auteur qui choisira.
+
+**Proposition pour la séance suivante** : une fois la marche validée (A1), suite de l'étape A2 (échelle selon la profondeur, ombre, rebond et respiration, caméra qui glisse, banc d'essai).
+
+---
+
 ## Séance 3 — 12/11/2026 — Visage de profil, rayon du premier plan, vraie marche, sons
 
 **Retours de l'auteur**

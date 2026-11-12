@@ -62,16 +62,20 @@ test('va au point cliqué ou touché', async ({ page }, info) => {
   expect(Math.abs(h.z - 80)).toBeLessThan(8);
 });
 
-test('s’arrête contre un obstacle', async ({ page }, info) => {
-  test.skip(info.project.name === 'telephone', 'même logique que sur PC');
-  // Derrière la tête de gondole : il bute devant, sans recherche de chemin.
-  const p = await page.evaluate(() => window.paperCart.worldToClient(750, 200));
-  const from = await page.evaluate(() => window.paperCart.worldToClient(750, 40));
-  await page.mouse.click(from.x, from.y);
-  await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 4000 }).toBe(false);
-  await page.mouse.click(p.x, p.y);
-  await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 4000 }).toBe(false);
-  expect((await hero(page)).z).toBeLessThan(122);
+test('contourne le présentoir quand on touche derrière', async ({ page }, info) => {
+  const tap = async (x, z) => {
+    const p = await page.evaluate(([x, z]) => window.paperCart.worldToClient(x, z), [x, z]);
+    if (info.project.name === 'telephone') await page.touchscreen.tap(p.x, p.y);
+    else await page.mouse.click(p.x, p.y);
+    await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 6000 }).toBe(false);
+  };
+  await tap(750, 40); // devant le présentoir
+  await tap(750, 215); // derrière lui
+  const h = await hero(page);
+  expect(Math.abs(h.x - 750)).toBeLessThan(8);
+  expect(Math.abs(h.z - 215)).toBeLessThan(8);
+  const lv = await page.evaluate(() => window.paperCart.levels());
+  expect(lv.hero).toBeLessThan(lv['presentoir-crousti']);
 });
 
 test('la pause fige le personnage', async ({ page }, info) => {

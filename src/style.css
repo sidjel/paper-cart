@@ -214,6 +214,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .setting input[type='checkbox'] { width: 26px; height: 26px; justify-self: start; accent-color: #5f7a96; }
 .setting select { min-height: 36px; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); }
 .setting-value { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; }
+.presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: 14px; }
+.presets button { min-height: 36px; padding: 4px 12px; }
 .settings-note { margin: 10px 0 0; font-size: 13px; }
 
 .overlay {
