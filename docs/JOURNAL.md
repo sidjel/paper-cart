@@ -10,6 +10,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 7 — 12/11/2026 — Bords de la zone au doigt, zone agrandie, réglages en onglets
+
+**Retours de l'auteur**
+- Ce qui plaît : tout le travail de la séance 6 est validé.
+- Ce qui gêne : difficile de viser le bord de la zone de marche au doigt.
+- Ce qui manque : zone de marche encore plus grande en haut et en bas ; réglages en onglets par thème.
+- Question : le plein écran marche-t-il sur d'autres écrans ?
+
+**Jouable maintenant**
+- **Toucher hors du sol** (sur une étagère, sur le rayon de devant, sur le plafond) : le personnage va jusqu'au bord de la zone de marche, au plus près de l'endroit touché. Ce comportement existait, il est rendu plus fiable (le point visé est placé juste à l'intérieur du bord).
+- **Zone de marche agrandie** : jusqu'au pied de l'étagère du fond, et jusqu'au bord bas de l'écran.
+- **Réglages en onglets** : Marche, Personnage, Contrôles, Son, Affichage, Caméra, Technique, Debug. Le dernier onglet ouvert est retenu.
+
+**Vérifié, et comment**
+- 52 tests de logique, 31 tests navigateur, sans erreur console. Nouveaux : toucher l'étagère du fond puis le bas de l'écran (au doigt et à la souris) amène bien au bord ; onglets (un seul par thème) ; formes d'écran 4:3, 16:10 et 21:9 (toute la hauteur, personnage et boutons visibles).
+- Capture des onglets en téléphone simulé regardée.
+
+**Proposition pour la séance suivante** : fin de A2 : banc d'essai et test automatique des comptages, puis validation de A2.
+
+---
+
 ## Séance 6 — 12/11/2026 — A2 : profondeur, corps vivant, caméra et parallaxe
 
 **Retours de l'auteur**

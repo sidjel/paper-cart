@@ -224,3 +224,48 @@ test('toute la hauteur du décor est visible, même sur un écran allongé', asy
   // Largeur visible (en pixels de scène) proportionnelle à la forme de l'écran.
   expect(v.viewW).toBeCloseTo((1080 * vp.width) / vp.height, 0);
 });
+
+test('toucher hors du sol : il va jusqu’au bord de la zone de marche', async ({ page }, info) => {
+  const tapAt = async (x, y) => {
+    if (info.project.name === 'telephone') await page.touchscreen.tap(x, y);
+    else await page.mouse.click(x, y);
+    await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 6000 }).toBe(false);
+  };
+  // Sur l'étagère du fond, bien au-dessus du sol.
+  const shelf = await page.evaluate(() => window.paperCart.worldToClient(400, 500));
+  await tapAt(shelf.x, shelf.y);
+  expect((await hero(page)).z).toBeGreaterThan(258);
+  // Tout en bas de l'écran, sur le rayon de devant.
+  const vp = page.viewportSize();
+  await tapAt(shelf.x, vp.height - 3);
+  expect((await hero(page)).z).toBeLessThan(-185);
+});
+
+test('réglages rangés en onglets par thème', async ({ page }) => {
+  await page.locator('.hud-button', { hasText: '⚙' }).click();
+  const tabs = page.locator('.settings-tab');
+  expect(await tabs.count()).toBeGreaterThan(4);
+  await expect(page.locator('input[data-key="walk.maxSpeed"]')).toBeVisible();
+  await tabs.filter({ hasText: /^Son$/ }).click();
+  await expect(page.locator('input[data-key="audio.music"]')).toBeVisible();
+  await expect(page.locator('input[data-key="walk.maxSpeed"]')).toBeHidden();
+});
+
+for (const [name, w, h] of [['4:3 (tablette)', 1024, 768], ['21:9 (très allongé)', 1260, 540], ['16:10 (PC portable)', 1280, 800]]) {
+  test(`autre forme d’écran ${name} : tout le décor en hauteur, personnage visible`, async ({ page }, info) => {
+    test.skip(info.project.name === 'telephone', 'une fois suffit');
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(200);
+    const v = await page.evaluate(() => window.paperCart.camera());
+    expect(v.viewW).toBeCloseTo((1080 * w) / h, 0);
+    const box = await page.locator('.actor').boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(h);
+    await expect(page.locator('.hud-bar')).toBeInViewport();
+  });
+}
+
+test('chaque thème n’a qu’un seul onglet', async ({ page }) => {
+  const names = await page.locator('.settings-tab').allTextContents();
+  expect(new Set(names).size).toBe(names.length);
+});

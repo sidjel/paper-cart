@@ -42,6 +42,36 @@ export function createSettingsPanel(root, { onClose }) {
   const controls = new Map(); // clé → fonction de mise à jour de l'affichage
   const startValues = new Map(TUNABLES.filter((t) => t.reload).map((t) => [t.key, getValue(t.key)]));
   let group = null;
+  let section = null;
+  const TAB_KEY = 'paper-cart.onglet';
+  let currentTab = 'Marche';
+  try {
+    currentTab = localStorage.getItem(TAB_KEY) || 'Marche';
+  } catch {
+    /* pas de mémoire : premier onglet */
+  }
+  if (!TUNABLES.some((t) => t.group === currentTab)) currentTab = TUNABLES[0].group;
+  const tabBar = document.createElement('div');
+  tabBar.className = 'settings-tabs';
+  tabBar.setAttribute('role', 'tablist');
+  const sectionsHolder = document.createElement('div');
+  panel.append(tabBar, sectionsHolder);
+  const tabs = [];
+  const sections = new Map();
+  function showTab(name) {
+    currentTab = name;
+    for (const [g, tab, sec] of tabs) {
+      const on = g === name;
+      sec.hidden = !on;
+      tab.classList.toggle('active', on);
+      tab.setAttribute('aria-selected', on);
+    }
+    try {
+      localStorage.setItem(TAB_KEY, name);
+    } catch {
+      /* rien */
+    }
+  }
   const presetButtons = [];
   // Le profil dont toutes les valeurs correspondent aux réglages actuels est mis en évidence.
   function updatePresets() {
@@ -53,11 +83,27 @@ export function createSettingsPanel(root, { onClose }) {
   }
 
   for (const t of TUNABLES) {
-    if (t.group !== group) {
+    if (t.group !== group && sections.has(t.group)) {
+      // Thème déjà rencontré plus haut dans la liste : on complète son onglet.
       group = t.group;
-      const h = document.createElement('h3');
-      h.textContent = group;
-      panel.appendChild(h);
+      section = sections.get(group);
+    } else if (t.group !== group) {
+      group = t.group;
+      // Un onglet par thème ; une seule section visible à la fois.
+      section = document.createElement('section');
+      section.className = 'settings-section';
+      section.dataset.group = group;
+      section.hidden = group !== currentTab;
+      const tab = document.createElement('button');
+      tab.className = 'settings-tab';
+      tab.textContent = group;
+      tab.setAttribute('role', 'tab');
+      const g = group;
+      tab.addEventListener('click', () => showTab(g));
+      tabBar.appendChild(tab);
+      tabs.push([g, tab, section]);
+      sectionsHolder.appendChild(section);
+      sections.set(group, section);
       if (group === 'Marche') {
         // Profils de marche : un toucher règle vitesse, accélération et freinage d'un coup.
         const row = document.createElement('div');
@@ -72,7 +118,7 @@ export function createSettingsPanel(root, { onClose }) {
           presetButtons.push([preset, b]);
           row.appendChild(b);
         }
-        panel.appendChild(row);
+        section.appendChild(row);
       }
     }
     const row = document.createElement('label');
@@ -102,7 +148,7 @@ export function createSettingsPanel(root, { onClose }) {
     }
     input.dataset.key = t.key;
     row.append(name, input, out);
-    panel.appendChild(row);
+    section.appendChild(row);
 
     controls.set(t.key, () => {
       const v = getValue(t.key);
@@ -155,6 +201,7 @@ export function createSettingsPanel(root, { onClose }) {
   });
   for (const update of controls.values()) update();
   updatePresets();
+  showTab(currentTab);
 
   return {
     open() {

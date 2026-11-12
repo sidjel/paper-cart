@@ -107,8 +107,9 @@ describe('musique et sons (données)', () => {
 describe('zone de marche jusqu’en bas de l’écran', () => {
   it('on peut descendre derrière le rayon du premier plan', () => {
     const m = compileMask(place.walkMask);
-    expect(isWalkable(m, 960, -140)).toBe(true);
-    expect(isWalkable(m, 960, -160)).toBe(false);
+    expect(isWalkable(m, 960, -190)).toBe(true);
+    expect(isWalkable(m, 960, -200)).toBe(false);
+    expect(isWalkable(m, 960, 260)).toBe(true); // jusqu'au pied de l'étagère du fond
   });
 });
 

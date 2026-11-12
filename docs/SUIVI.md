@@ -23,15 +23,17 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Sensation de marche (vitesse, démarrage, arrêt) | 4 | ✅ | Profil « Paper Mario » choisi (séance 5), devenu la valeur par défaut. Les autres profils restent dans le menu. |
 | Toucher ou joystick virtuel sur téléphone | 4 | ❓ | Pas encore décidé. |
 | Contourner seul les objets quand on touche derrière | 4 | ✅ | Choix A, validé en séance 5. |
+| Difficile de viser le bord de la zone au doigt | 7 | ✅ | Toucher hors du sol (étagère, rayon de devant) envoie jusqu'au bord de la zone. Testé automatiquement. |
 
 ## Décor
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Passer derrière le caddie et le présentoir « -30 % » | 2 | ✅ | |
-| Zone de marche jusqu'en bas de l'écran | 3 | ✅ | |
+| Zone de marche jusqu'en bas de l'écran | 3 | ✅ | Séance 7 : agrandie encore, du pied de l'étagère du fond (z 264) au bord bas de l'écran (z -195). |
 | Rayon en bas, en transparence (personnage entouré de rayons) | 3 | ✅ | Opacité 0,55 : « oui pour le moment ». |
 | Le plein écran cachait une partie du décor (écran 20:9) | 6 | ✅ | Réglé avec la caméra : toute la hauteur est toujours visible, un écran allongé montre plus de largeur. Le personnage paraît un peu plus petit sur téléphone : réglage « Zoom ». |
-| Rayon plus long que l'écran, caméra qui suit, rayons lointains (parallaxe) | 6 | ✅ | A2 (2/2). Deux ouvertures dans l'étagère du fond montrent le magasin sans fin. |
+| Rayon plus long que l'écran, caméra qui suit, rayons lointains (parallaxe) | 6 | ✅ | A2 (2/2). Validé par l'auteur (séance 7). |
+| Plein écran sur d'autres formes d'écran | 7 | ✅ | Testé automatiquement en 4:3, 16:10, 16:9, 20:9 et 21:9 : toute la hauteur, personnage et boutons visibles. |
 
 ## Son
 | Demande | Séance | État | Notes |
@@ -51,11 +53,17 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Étape | État | Notes |
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
-| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Fait : profondeur, ombre, rebond, respiration, caméra, parallaxe. Reste : banc d'essai et test des comptages. Puis validation par l'auteur. |
+| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Ressenti validé par l'auteur (séance 7). Reste : banc d'essai et test des comptages, puis validation finale de A2. |
+
+## Interface
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Menu des réglages rangé en onglets par thème | 7 | ✅ | Garder toutes les options dans le menu (demande de l'auteur). |
 
 ## Règles de travail ajoutées par l'auteur
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).
 - Noter tous les changements et modifications pour ne pas se perdre : ce fichier (séance 4).
+- Garder toutes les options dans le menu des réglages, même validées (séances 5 et 7).
 
 ## Questions de l'auteur (réponses données)
 - Faut-il dessiner les personnages avant l'étape suivante ? Non : les dessins arrivent au prototype D, préparé une séance à l'avance avec docs/IMAGES.md (séance 5).

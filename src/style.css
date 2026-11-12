@@ -227,6 +227,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .setting input[type='checkbox'] { width: 26px; height: 26px; justify-self: start; accent-color: #5f7a96; }
 .setting select { min-height: 36px; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); }
 .setting-value { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; }
+.settings-tabs {
+  position: sticky;
+  top: -10px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 -16px 6px;
+  padding: 6px 16px 8px;
+  background: var(--paper);
+  border-bottom: 2px solid rgb(61 53 42 / 0.2);
+}
+.settings-tab { min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.settings-tab.active { background: var(--accent); font-weight: 700; }
+.settings-section[hidden] { display: none; }
 .presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: 14px; }
 .presets button { min-height: 36px; padding: 4px 12px; }
 .presets button.active { background: var(--accent); font-weight: 700; }

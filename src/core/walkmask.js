@@ -23,9 +23,12 @@ export function compileMask(data) {
   };
 }
 
+// Un point touché hors du sol (sur une étagère, sur le rayon de devant…) est ramené au bord
+// de la zone, un tout petit peu à l'intérieur : le personnage va jusqu'à la limite.
+const EDGE_INSET = 1;
 export function clampToBounds(mask, out) {
-  out.x = Math.min(mask.maxX, Math.max(mask.minX, out.x));
-  out.z = Math.min(mask.maxZ, Math.max(mask.minZ, out.z));
+  out.x = Math.min(mask.maxX - EDGE_INSET, Math.max(mask.minX + EDGE_INSET, out.x));
+  out.z = Math.min(mask.maxZ - EDGE_INSET, Math.max(mask.minZ + EDGE_INSET, out.z));
   return out;
 }
 
