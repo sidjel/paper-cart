@@ -1,5 +1,13 @@
 # Journal des séances
 
+Le rapport le plus récent est en haut. Les étapes validées par l'auteur y sont inscrites avec leur commit (points de retour sûrs).
+
+## Étapes validées
+
+| Étape | Commit | Date |
+|---|---|---|
+| — | — | — |
+
 ---
 
 ## Séance 1 — 12/11/2026 — Socle et étape A1 (« le personnage est agréable à déplacer »)
@@ -38,11 +46,3 @@
 **À préparer par l'auteur** : rien pour l'instant.
 
 **Proposition pour la séance suivante** : étape A2. Le personnage rapetisse vers le fond, avec ombre au sol, pivot de la feuille, rebond et respiration. La caméra glisse dans un rayon plus large que l'écran, avec parallaxe et un pilier au premier plan. Banc d'essai et premier test des comptages.
-
-Le rapport le plus récent est en haut. Les étapes validées par l'auteur y sont inscrites avec leur commit (points de retour sûrs).
-
-## Étapes validées
-
-| Étape | Commit | Date |
-|---|---|---|
-| — | — | — |
