@@ -197,3 +197,30 @@ test('ombre au sol et personnage plus petit au fond', async ({ page }, info) => 
   await page.waitForTimeout(300);
   expect(await size()).toBeLessThan(front * 0.85);
 });
+
+test('la caméra suit le personnage le long du rayon, avec parallaxe', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  const cam0 = await page.evaluate(() => window.paperCart.camera());
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 2200, null, { timeout: 10000 });
+  await page.keyboard.up('ArrowRight');
+  await page.waitForTimeout(800);
+  const cam = await page.evaluate(() => window.paperCart.camera());
+  expect(cam.x).toBeGreaterThan(cam0.x + 800);
+  // Le personnage reste à l'écran.
+  const box = await page.locator('.actor').boundingBox();
+  const vp = page.viewportSize();
+  expect(box.x).toBeGreaterThan(0);
+  expect(box.x + box.width).toBeLessThan(vp.width);
+  // Les rayons lointains ont glissé moins que le sol : décalage positif par rapport au fond.
+  const far = await page.locator('.layer-lointain').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+  expect(far).toBeGreaterThan(cam.x * 0.3);
+  await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-camera.png` });
+});
+
+test('toute la hauteur du décor est visible, même sur un écran allongé', async ({ page }) => {
+  const v = await page.evaluate(() => window.paperCart.camera());
+  const vp = page.viewportSize();
+  // Largeur visible (en pixels de scène) proportionnelle à la forme de l'écran.
+  expect(v.viewW).toBeCloseTo((1080 * vp.width) / vp.height, 0);
+});

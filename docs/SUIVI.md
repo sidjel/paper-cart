@@ -13,7 +13,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | De dos, aller à gauche/droite : voir son visage, pas l'arrière de la tête | 3 | ✅ | De dos seulement en allant vers le fond. |
 | Jambes en « moonwalk » | 3 | ✅ | Le pied levé passe devant. |
 | Rythme des jambes | 4 | ✅ | « Oui » (bon rythme). |
-| Respiration à l'arrêt | 5 | 🔧 | Pas un bug : prévue à l'étape A2 (avec rebond, ombre, échelle selon la profondeur). |
+| Respiration à l'arrêt | 5 | ✅ | Faite en A2 (séance 6), avec rebond, écrasement à l'arrêt, ombre au sol et taille selon la profondeur. Tout réglable. |
 | Petit nuage de poussière à chaque pas, comme dans Paper Mario | 5 | ✅ | Taille, durée, opacité réglables ; désactivable. |
 | Saut (secrets, monter sur des tabourets…) | 5 | 🔧 | Choix B (séance 6) : **saut libre** avec un bouton, partout, comme dans Paper Mario. À construire après le prototype A. VISION.md non modifié (à la demande de l'auteur seulement). |
 
@@ -30,13 +30,15 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Passer derrière le caddie et le présentoir « -30 % » | 2 | ✅ | |
 | Zone de marche jusqu'en bas de l'écran | 3 | ✅ | |
 | Rayon en bas, en transparence (personnage entouré de rayons) | 3 | ✅ | Opacité 0,55 : « oui pour le moment ». |
+| Le plein écran cachait une partie du décor (écran 20:9) | 6 | ✅ | Réglé avec la caméra : toute la hauteur est toujours visible, un écran allongé montre plus de largeur. Le personnage paraît un peu plus petit sur téléphone : réglage « Zoom ». |
+| Rayon plus long que l'écran, caméra qui suit, rayons lointains (parallaxe) | 6 | ✅ | A2 (2/2). Deux ouvertures dans l'étagère du fond montrent le magasin sans fin. |
 
 ## Son
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Bruits de pas | 3 | ✅ | Son étouffé, volume 0,35 : validé en séance 5. Garder toutes les options dans le menu. |
 | Petite musique de supermarché (provisoire) | 3 | 👀 | « On la changera plus tard. » |
-| La musique grésille sur le téléphone | 5 | 👀 | Correctifs probables appliqués (graves coupés, limiteur, réserve de son moyenne). Test : ⚙ → Son → Réserve « Grande ». En attente du retour de l'auteur. |
+| La musique grésille sur le téléphone | 5 | ✅ | Réglé (confirmé par l'auteur, séance 6). |
 
 ## Fluidité
 | Constat | Séance | État | Notes |
@@ -49,7 +51,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Étape | État | Notes |
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
-| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Prochaine étape. |
+| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Fait : profondeur, ombre, rebond, respiration, caméra, parallaxe. Reste : banc d'essai et test des comptages. Puis validation par l'auteur. |
 
 ## Règles de travail ajoutées par l'auteur
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).

@@ -45,7 +45,9 @@ html, body {
   transform-origin: 0 0;
   overflow: hidden;
   contain: strict;
+  will-change: transform;
 }
+.layer-parallax { will-change: transform; }
 
 .layer, .layer-image, .debug-mask {
   position: absolute;

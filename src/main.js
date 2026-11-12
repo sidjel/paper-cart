@@ -17,6 +17,7 @@ import { createTargetMarker } from './scene/targetMarker.js';
 import { createProps } from './scene/props.js';
 import { actorLevel } from './scene/depth.js';
 import { createDust } from './scene/dust.js';
+import { createCamera, updateCamera } from './scene/camera.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createDiagnostic } from './ui/diagnostic.js';
@@ -131,10 +132,13 @@ function onTarget(cx, cy) {
 
 function layout() {
   if (!stage) return;
-  stage.layout(config.display.fitMode);
-  const mode = config.display.fitMode === 'fit' ? 'tout montrer' : 'remplir';
-  renderLine = `${mode} · scène ×${stage.view.scale.toFixed(3)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${config.display.maxPixelRatio})`;
+  stage.layout(config.camera.zoom);
+  const v = stage.view;
+  renderLine = `zoom ${config.camera.zoom} · scène ×${v.scale.toFixed(3)} · visible ${Math.round(v.viewW)}×${Math.round(v.viewH)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${config.display.maxPixelRatio})`;
 }
+
+const camera = createCamera();
+let lastCamTime = -1;
 
 // Une image d'animation du personnage demande un son ou un effet (un pas : bruit + poussière).
 function onFrameEvent(sound, effect) {
@@ -155,6 +159,12 @@ function render() {
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance);
   sprite.setLevel(shown.level);
   dust.update(time);
+  // La caméra suit le milieu du corps du personnage.
+  const v = stage.view;
+  const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
+  lastCamTime = time;
+  updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
+  stage.setCamera(camera.x, camera.y);
   if (!walker.hasTarget) marker.hide();
 }
 
@@ -183,7 +193,7 @@ function frame(now) {
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
   const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
-  const rasterScale = computeRasterScale(place.size[0], place.size[1], config.display.maxPixelRatio);
+  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
   assetStats.rasterScale = rasterScale;
   const entries = [
     ...Object.entries(place.images).map(([id, im]) => ({ id, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
@@ -207,7 +217,7 @@ async function start() {
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget });
 
   onConfigChange((key, value) => {
-    if (key === 'display.fitMode') layout();
+    if (key === 'camera.zoom') layout();
     if (key === 'debug.showWalkMask') debugMask.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity') stage.applyOpacity();
@@ -239,11 +249,10 @@ async function start() {
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
     worldToClient(x, z) {
-      const r = gameEl.getBoundingClientRect();
-      const v = stage.view;
-      return { x: r.left + v.offX + worldToStageX(proj, x) * v.scale, y: r.top + v.offY + worldToStageY(proj, z) * v.scale };
+      return stage.stageToClient(worldToStageX(proj, x), worldToStageY(proj, z), { x: 0, y: 0 });
     },
     report: () => diag.report(),
+    camera: () => ({ x: camera.x, y: camera.y, viewW: stage.view.viewW }),
     audioStarted: () => audio.started,
   };
 }

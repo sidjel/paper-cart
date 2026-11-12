@@ -65,7 +65,7 @@ describe('réglages', () => {
   it('borne les valeurs et refuse les invalides', () => {
     expect(sanitize('walk.maxSpeed', 99999)).toBe(1200);
     expect(sanitize('walk.maxSpeed', 'abc')).toBeUndefined();
-    expect(sanitize('display.fitMode', 'zoom')).toBeUndefined();
+    expect(sanitize('audio.latency', 'enorme')).toBeUndefined();
     expect(sanitize('inconnu.truc', 1)).toBeUndefined();
   });
   it('ne garde que les écarts aux valeurs par défaut', () => {

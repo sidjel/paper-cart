@@ -1,7 +1,9 @@
-// La scène : un cadre logique de 1920×1080 mis à l'échelle de l'écran sans déformer.
-//  - « remplir » (fill) : couvre tout l'écran, les bords du décor sont un peu coupés ;
-//  - « tout montrer » (fit) : tout le cadre est visible, avec des bandes.
-// Les calques sont créés d'après la pile déclarée dans les données du lieu.
+// La scène : le lieu entier (par exemple 3600×1080), vu à travers la caméra.
+// - toute la hauteur du décor est visible (zoom 1) quelle que soit la forme de l'écran ;
+//   un écran plus allongé (20:9) montre simplement plus de largeur, sans rien couper ;
+// - la caméra fait glisser la scène ; les calques avec une parallaxe (rayons lointains,
+//   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
+// - les calques sont créés d'après la pile déclarée dans les données du lieu.
 
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
 export function createStage(container, place, images, getValue) {
@@ -12,10 +14,12 @@ export function createStage(container, place, images, getValue) {
   el.style.height = `${H}px`;
 
   const layers = {};
+  const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
   for (const def of place.layers) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
     layer.dataset.contains = def.contains;
+    const pos = def.position ?? [0, 0];
     if (def.image) {
       const img = images.get(def.image);
       img.el.className = 'layer-image';
@@ -23,8 +27,13 @@ export function createStage(container, place, images, getValue) {
       img.el.height = img.h;
       img.el.alt = '';
       img.el.draggable = false;
-      if (def.position) img.el.style.transform = `translate(${def.position[0]}px, ${def.position[1]}px)`;
+      img.el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
       layer.appendChild(img.el);
+    }
+    const f = def.parallax ?? 1;
+    if (f !== 1) {
+      layer.classList.add('layer-parallax');
+      parallax.push({ el: layer, f, last: NaN });
     }
     el.appendChild(layer);
     layers[def.id] = layer;
@@ -39,31 +48,62 @@ export function createStage(container, place, images, getValue) {
   }
   applyOpacity();
 
-  const view = { scale: 1, offX: 0, offY: 0 };
+  // scale : taille d'un pixel de scène à l'écran ; viewW/viewH : partie visible (pixels de scène).
+  const view = { scale: 1, offX: 0, offY: 0, viewW: W, viewH: H, camX: 0, camY: 0 };
+  let lastCamX = NaN;
+  let lastCamY = NaN;
 
-  function layout(mode) {
+  function apply() {
+    const s = view.scale;
+    el.style.transform = `translate3d(${view.offX - view.camX * s}px, ${view.offY - view.camY * s}px, 0) scale(${s})`;
+    for (const p of parallax) {
+      // Décalage par rapport au sol : un calque lointain (f < 1) « recule » moins vite.
+      const dx = view.camX * (1 - p.f);
+      if (dx !== p.last) {
+        p.el.style.transform = `translate3d(${dx}px, 0, 0)`;
+        p.last = dx;
+      }
+    }
+  }
+
+  function layout(zoom) {
     const vw = container.clientWidth;
     const vh = container.clientHeight;
-    const s = mode === 'fit' ? Math.min(vw / W, vh / H) : Math.max(vw / W, vh / H);
-    const offX = (vw - W * s) / 2;
-    // En mode « remplir », on garde centrée la hauteur utile du lieu (là où l'on marche).
-    let offY = (vh - H * s) / 2;
-    if (mode !== 'fit' && H * s > vh) {
-      offY = Math.min(0, Math.max(vh - H * s, vh / 2 - place.cropFocusY * s));
-    }
+    const s = (vh / H) * zoom;
     view.scale = s;
-    view.offX = offX;
-    view.offY = offY;
-    el.style.transform = `translate(${offX}px, ${offY}px) scale(${s})`;
+    view.viewW = vw / s;
+    view.viewH = vh / s;
+    // Écran plus large que tout le lieu : on centre.
+    view.offX = view.viewW > W ? (vw - W * s) / 2 : 0;
+    view.offY = 0;
+    lastCamX = NaN;
+    apply();
+  }
+
+  // Position de la caméra (coin haut-gauche de la partie visible, en pixels de scène).
+  function setCamera(x, y) {
+    view.camX = view.viewW > W ? 0 : x;
+    view.camY = y;
+    if (view.camX === lastCamX && view.camY === lastCamY) return;
+    lastCamX = view.camX;
+    lastCamY = view.camY;
+    apply();
   }
 
   // Écran (pixels CSS de la fenêtre) → scène. Écrit dans `out` pour ne rien créer.
   function clientToStage(cx, cy, out) {
     const r = container.getBoundingClientRect();
-    out.x = (cx - r.left - view.offX) / view.scale;
-    out.y = (cy - r.top - view.offY) / view.scale;
+    out.x = (cx - r.left - view.offX) / view.scale + view.camX;
+    out.y = (cy - r.top - view.offY) / view.scale + view.camY;
     return out;
   }
 
-  return { el, layers, view, layout, clientToStage, applyOpacity };
+  function stageToClient(sx, sy, out) {
+    const r = container.getBoundingClientRect();
+    out.x = r.left + view.offX + (sx - view.camX) * view.scale;
+    out.y = r.top + view.offY + (sy - view.camY) * view.scale;
+    return out;
+  }
+
+  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity };
 }

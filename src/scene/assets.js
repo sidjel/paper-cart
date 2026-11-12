@@ -13,13 +13,12 @@ export const assetStats = {
   rasterScale: 1,
 };
 
-// Échelle de rendu utile : taille de la scène sur cet écran (en paysage) × densité plafonnée.
-export function computeRasterScale(stageW, stageH, maxPixelRatio) {
-  const sw = Math.max(screen.width, screen.height, window.innerWidth);
+// Échelle de rendu utile : la hauteur du lieu remplit la hauteur de l'écran (× zoom),
+// × densité de pixels plafonnée. Calculée sur l'écran en paysage (ne change pas en tournant).
+export function computeRasterScale(stageH, zoom, maxPixelRatio) {
   const sh = Math.min(screen.width, screen.height) || window.innerHeight;
-  const cover = Math.max(sw / stageW, sh / stageH);
   const dpr = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
-  return cover * dpr;
+  return (sh / stageH) * zoom * dpr;
 }
 
 function loadImage(url) {

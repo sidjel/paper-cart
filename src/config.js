@@ -32,13 +32,18 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  camera: {
+    zoom: 1, // 1 = toute la hauteur du décor visible ; plus grand = plus près (le haut et le bas sont coupés)
+    follow: 5, // vitesse à laquelle la caméra rattrape le personnage
+    lookAhead: 140, // la caméra regarde un peu devant le personnage (px)
+    deadZone: 0.12, // zone centrale où la caméra ne bouge pas (part de la largeur visible)
+  },
   scene: {
     depthScale: 1, // force de l'effet « plus petit au fond » (0 = aucun, 1 = normal)
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
     foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
-    fitMode: 'fill', // 'fill' : remplir l'écran (bords un peu coupés) ; 'fit' : tout montrer (bandes)
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
   },
   audio: {
@@ -99,11 +104,11 @@ export const TUNABLES = [
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
+  { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
+  { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
+  { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
+  { group: 'Caméra', key: 'camera.deadZone', label: 'Zone sans mouvement', min: 0, max: 0.4, step: 0.01 },
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
-  {
-    group: 'Affichage', key: 'display.fitMode', label: 'Cadrage', type: 'choice',
-    options: [['fill', "Remplir l'écran"], ['fit', 'Tout montrer']],
-  },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },

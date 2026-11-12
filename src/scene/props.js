@@ -8,9 +8,13 @@ import { propLevels } from './depth.js';
 export function createProps(place, images, parent, proj) {
   const defs = place.props ?? [];
   const levels = propLevels(defs.map((d) => d.depthRef));
+  const used = new Set();
   return defs.map((def, i) => {
     const img = images.get(def.image);
-    const el = img.el;
+    // Une même image peut servir pour plusieurs objets : les suivants en reçoivent une copie.
+    const el = used.has(def.image) ? new Image() : img.el;
+    if (el !== img.el) el.src = img.url;
+    used.add(def.image);
     el.className = 'prop';
     el.width = img.w;
     el.height = img.h;

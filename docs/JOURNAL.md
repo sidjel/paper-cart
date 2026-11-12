@@ -10,6 +10,35 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 6 — 12/11/2026 — A2 : profondeur, corps vivant, caméra et parallaxe
+
+**Retours de l'auteur**
+- A1 validée (1445d25). Saut : choix B (saut libre), après le prototype A. La musique ne grésille plus.
+- Rapport du téléphone : 61 images/s, p95 16,5 ms, chargement 1,4 s (le décor du fond prend 0,44 s).
+- Question : le plein écran cache une partie du décor (écran 20:9).
+
+**Jouable maintenant**
+- **Profondeur** : le personnage rapetisse en allant vers le fond et grandit un peu tout devant.
+- **Ombre au sol**, séparée du dessin, qui s'amenuise quand il s'élève.
+- **Corps vivant** : rebond à chaque pas avec léger écrasement au contact, respiration à l'arrêt, petit écrasement en s'arrêtant.
+- **Rayon long (3600 px)** et **caméra** qui glisse pour le suivre. Elle regarde un peu devant lui et reste immobile tant qu'il est au centre.
+- **Parallaxe** : par deux ouvertures dans l'étagère du fond, on voit des rayons lointains (« RAYON 41 », « RAYON ∞ »…) qui glissent plus lentement ; le rayon de devant glisse plus vite.
+- **Plus rien n'est coupé** : toute la hauteur du décor est visible, quel que soit l'écran. Un écran allongé montre simplement plus de rayon. L'ancien choix « remplir / tout montrer » est remplacé par un zoom.
+
+**Vérifié, et comment**
+- 52 tests de logique : taille selon la profondeur, rebond, respiration, écrasement, caméra (placement, glissement, zone sans mouvement, bout du rayon, zoom).
+- 22 tests navigateur (PC et téléphone simulé), sans erreur console. Nouveaux tests : ombre et taille au fond ; la caméra suit et les rayons lointains glissent moins vite ; toute la hauteur visible.
+- Captures PC et téléphone simulé regardées.
+- **À vérifier par l'auteur** : la sensation sur le téléphone, la fluidité (rapport DBG), le temps de chargement (le décor est plus grand).
+
+**Décisions prises seul (détails mineurs)**
+- Zoom 1 par défaut : sur téléphone, le personnage paraît environ 20 % plus petit qu'avant, en échange d'un décor entier. Réglage « Zoom » dans ⚙ → Caméra.
+- Un deuxième présentoir Crousti-Gouffre plus loin dans le rayon (même image).
+
+**Proposition pour la séance suivante** : fin de l'étape A2 : banc d'essai (parcours automatique du rayon, rapport à copier) et test automatique des comptages. Puis validation de A2.
+
+---
+
 ## Séance 5 — 12/11/2026 — Poussière, profil Paper Mario par défaut, son et chargement
 
 **Retours de l'auteur**
