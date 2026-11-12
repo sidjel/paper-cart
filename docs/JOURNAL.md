@@ -10,6 +10,33 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 10 — 12/11/2026 — Analyse des saccades (deux bancs d'essai)
+
+**Rapports de l'auteur (5973115, Oppo Reno 2, plein écran)**
+
+| | Normal | Caméra immobile |
+|---|---|---|
+| Images/s moyennes | 58,8 | 60,1 |
+| Médiane / p95 / p99 | 16,4 / 16,5 / 32,8 ms | 16,4 / 16,5 / 32,8 ms |
+| Images > 20 ms | 124 (3,7 %) | 47 (1,4 %) |
+| Images > 33 ms | 3 | 3 |
+| Calcul JS pire | 15,0 ms | 8,9 ms |
+| Rafales | 122 épisodes, 2 images au plus | 45 épisodes, 3 images au plus |
+| Chargement | 1,2 s | 1,2 s |
+
+**Ce que les mesures prouvent**
+1. **Le défilement de la caméra cause environ 60 % des images lentes** (124 → 47 quand elle ne bouge plus).
+2. **Il reste une autre cause** (47 images lentes caméra immobile, en marche comme à l'arrêt). Elle n'est pas encore identifiée.
+3. Les saccades sont **isolées** : une image saute un rafraîchissement, pas de longue rafale.
+4. Le **calcul du jeu** est très faible (0,7 ms), avec de rares pics à 9–15 ms, probablement le nettoyage automatique de la mémoire du navigateur (non prouvé).
+5. Le calcul du chemin n'est pas la cause principale (3 images lentes sur 42).
+
+**Ce que cela veut dire** : la technique d'affichage actuelle (DOM + CSS) tient 60 images/s en moyenne, mais ne tient pas encore l'objectif « aucune image > 33 ms ». C'est le point de décision prévu avant A3 : essayer PixiJS (WebGL), chiffres à l'appui.
+
+**Décision demandée à l'auteur** : voir les options proposées en séance 10.
+
+---
+
 ## Séance 9 — 12/11/2026 — Premier banc d'essai sur le téléphone : mesurer la cause des saccades
 
 **Rapport de l'auteur (9756425, Oppo Reno 2, plein écran)** : 58,0 images/s ; médiane 16,4 ms ; p95 16,6 ms ; **p99 32,9 ms** ; pire 49,3 ms ; **5 images > 33 ms (0,15 %)** ; **163 images > 20 ms (5 %)** ; calcul JS moyen 0,74 ms, **pire 21,3 ms** ; chargement 3,9 s.
