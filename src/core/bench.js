@@ -22,6 +22,7 @@ export function createBench(def, passes, warmup) {
     seg: -1,
     segTime: 0,
     measuring: false,
+    segStarts: 0,
   };
 }
 
@@ -38,6 +39,7 @@ export function placeAtStart(b, w) {
 
 function startSegment(b, w, mask) {
   b.segTime = 0;
+  b.segStarts++; // compteur : l'interface voit qu'un chemin vient d'être calculé
   const s = b.def.route[b.seg];
   if (s.to) setPath(w, findPath(mask, w.x, w.z, s.to[0], s.to[1]));
 }

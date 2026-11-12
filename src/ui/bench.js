@@ -15,6 +15,7 @@ function percentile(sorted, n, q) {
 export function createBenchUi(root, { onStart, getContext }) {
   const frames = new Float32Array(MAX);
   const js = new Float32Array(MAX);
+  const ctx = new Uint8Array(MAX); // bit 1 : caméra en mouvement ; bit 2 : chemin calculé ; bit 4 : personnage en marche
   let n = 0;
   let duration = 0;
 
@@ -73,6 +74,29 @@ export function createBenchUi(root, { onStart, getContext }) {
     const p95 = percentile(sorted, n, 0.95);
     const jsWorst = n ? jsSorted[n - 1] : NaN;
     const ok = n > 0 && over33 === 0 && jsWorst <= 8 && 1000 / avg >= 58;
+    // Où tombent les images lentes (> 20 ms) ? Selon le moment de l'image.
+    const cat = (mask, want) => {
+      let total = 0, slow = 0;
+      for (let i = 0; i < n; i++) {
+        if ((ctx[i] & mask) !== want) continue;
+        total++;
+        if (frames[i] > 20) slow++;
+      }
+      return `${slow} sur ${total} (${fmt((slow / Math.max(1, total)) * 100)} %)`;
+    };
+    let worstJsAt = -1;
+    for (let i = 0; i < n; i++) if (worstJsAt < 0 || js[i] > js[worstJsAt]) worstJsAt = i;
+    const where = (i) =>
+      i < 0 ? '—' : [ctx[i] & 2 ? 'calcul de chemin' : '', ctx[i] & 1 ? 'caméra en mouvement' : 'caméra immobile', ctx[i] & 4 ? 'en marche' : 'à l’arrêt'].filter(Boolean).join(', ');
+    // Images lentes successives : isolées, ou en rafales ?
+    let bursts = 0, run = 0, longestRun = 0;
+    for (let i = 0; i < n; i++) {
+      if (frames[i] > 20) {
+        run++;
+        if (run === 1) bursts++;
+        longestRun = Math.max(longestRun, run);
+      } else run = 0;
+    }
     return [
       "Paper Cart — banc d'essai",
       `Résultat : ${status}`,
@@ -89,6 +113,13 @@ export function createBenchUi(root, { onStart, getContext }) {
       `  images > 33 ms : ${over33} (${fmt((over33 / Math.max(1, n)) * 100, 2)} %) · images > 20 ms : ${over20}`,
       `  calcul JavaScript par image : moy ${fmt(jsSum / Math.max(1, n), 2)} ms · p95 ${fmt(percentile(jsSorted, n, 0.95), 2)} · pire ${fmt(jsWorst, 2)}`,
       `  (le reste du temps d'image est pris par le navigateur et la carte graphique)`,
+      `Images > 20 ms selon le moment :`,
+      `  caméra en mouvement : ${cat(1, 1)} · caméra immobile : ${cat(1, 0)}`,
+      `  personnage en marche : ${cat(4, 4)} · à l'arrêt : ${cat(4, 0)}`,
+      `  image où un chemin est calculé : ${cat(2, 2)}`,
+      `  en ${bursts} épisode(s), le plus long : ${longestRun} image(s) de suite`,
+      `  calcul JS le plus long : ${fmt(worstJsAt < 0 ? NaN : js[worstJsAt], 2)} ms (${where(worstJsAt)})`,
+      `Images les plus lentes à préparer au chargement : ${c.slowest}`,
       `Réglages modifiés : ${JSON.stringify(c.overrides)}`,
       `Objectifs (60 i/s, aucune image > 33 ms, calcul ≤ 8 ms) : ${ok ? 'atteints' : 'non atteints'}`,
     ].join('\n');
@@ -121,10 +152,11 @@ export function createBenchUi(root, { onStart, getContext }) {
       banner.textContent = "Banc d'essai : chauffe…";
     },
     // À chaque image pendant le parcours mesuré.
-    record(dt, jsMs) {
+    record(dt, jsMs, camMoving, pathStart, walking) {
       if (n >= MAX || dt <= 0) return;
       frames[n] = dt;
       js[n] = jsMs;
+      ctx[n] = (camMoving ? 1 : 0) | (pathStart ? 2 : 0) | (walking ? 4 : 0);
       n++;
       duration += dt / 1000;
     },

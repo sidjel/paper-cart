@@ -69,6 +69,7 @@ export const config = {
     noFarLayer: false,
     noDust: false,
     noShadow: false,
+    fixedCamera: false,
   },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
@@ -126,6 +127,7 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'bench.noFarLayer', label: 'Essai sans rayons lointains', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noDust', label: 'Essai sans poussière', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noShadow', label: 'Essai sans ombre', type: 'bool' },
+  { group: 'Diagnostic', key: 'bench.fixedCamera', label: 'Essai caméra immobile', type: 'bool' },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
 ];
 

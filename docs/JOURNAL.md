@@ -10,6 +10,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 9 — 12/11/2026 — Premier banc d'essai sur le téléphone : mesurer la cause des saccades
+
+**Rapport de l'auteur (9756425, Oppo Reno 2, plein écran)** : 58,0 images/s ; médiane 16,4 ms ; p95 16,6 ms ; **p99 32,9 ms** ; pire 49,3 ms ; **5 images > 33 ms (0,15 %)** ; **163 images > 20 ms (5 %)** ; calcul JS moyen 0,74 ms, **pire 21,3 ms** ; chargement 3,9 s.
+
+**Lecture** : 95 % des images sont parfaites. Environ 1 image sur 20 « saute » un rafraîchissement : elle dure 33 ms au lieu de 16. C'est une petite saccade, peut-être visible. Le calcul du jeu est presque toujours minuscule (0,7 ms), mais au moins une image a demandé 21 ms de calcul. Les objectifs ne sont donc pas tenus.
+
+**Ce qui a été fait (mesure seulement, aucune correction)**
+- Le rapport du banc classe maintenant les images lentes (> 20 ms) selon le moment : caméra en mouvement ou immobile, personnage en marche ou à l'arrêt, image où un chemin est calculé. Il dit si elles arrivent isolées ou en rafales, et à quel moment a eu lieu le calcul le plus long.
+- Il indique aussi les images les plus lentes à préparer au chargement.
+- Nouvel interrupteur d'essai : **caméra immobile**, pour prouver ou écarter le défilement du décor comme cause.
+
+**Vérifié** : 58 tests de logique, 33 tests navigateur ; banc lancé dans le navigateur de test (nouvelles lignes du rapport correctes).
+
+**À faire par l'auteur** : deux bancs d'essai sur le téléphone (un normal, un avec « Essai caméra immobile »), puis coller les deux rapports.
+
+---
+
 ## Séance 8 — 12/11/2026 — Banc d'essai et test des comptages (fin de A2)
 
 **Retours de l'auteur** : changements de la séance 7 validés ; joystick désactivé par défaut (il l'était déjà ; un test le garantit désormais).

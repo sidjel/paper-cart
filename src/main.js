@@ -74,6 +74,7 @@ const benchUi = createBenchUi(uiEl, {
     images: assetStats.images,
     pixels: assetStats.pixels,
     loadMs: assetStats.loadMs,
+    slowest: [...assetStats.perImage].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([nm, ms]) => `${nm} ${ms} ms`).join(', '),
     place: place.id,
     switches: activeSwitches(),
     overrides: overrides(),
@@ -87,7 +88,7 @@ const NO_INPUT = { moveX: 0, moveZ: 0 };
 
 function activeSwitches() {
   const b = config.bench;
-  return [b.noForeground && 'sans rayon de devant', b.noFarLayer && 'sans rayons lointains', b.noDust && 'sans poussière', b.noShadow && 'sans ombre']
+  return [b.noForeground && 'sans rayon de devant', b.noFarLayer && 'sans rayons lointains', b.noDust && 'sans poussière', b.noShadow && 'sans ombre', b.fixedCamera && 'caméra immobile']
     .filter(Boolean)
     .join(', ');
 }
@@ -227,7 +228,8 @@ function render() {
   const v = stage.view;
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
-  updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
+  const camFrozen = bench && config.bench.fixedCamera && camera.ready;
+  if (!camFrozen) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   stage.setCamera(camera.x, camera.y);
   if (!walker.hasTarget) marker.hide();
 }
@@ -252,12 +254,15 @@ function frame(now) {
   } else if (sm.is('bench')) {
     // Banc d'essai : le parcours remplace les commandes du joueur.
     const n = stepper.advance(dt / 1000);
+    const segBefore = bench.segStarts;
+    const camBefore = camera.x;
     for (let i = 0; i < n && bench.phase !== 'done'; i++) {
       stepBench(bench, walker, mask, stepper.step);
       stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
     }
     render();
-    if (bench.measuring) benchUi.record(dt, performance.now() - t0);
+    // Contexte de l'image, pour savoir à quel moment les images lentes arrivent.
+    if (bench.measuring) benchUi.record(dt, performance.now() - t0, Math.abs(camera.x - camBefore) > 0.05, bench.segStarts !== segBefore, walker.moving);
     benchUi.progress(bench);
     if (bench.phase === 'done') endBench('terminé');
   }
