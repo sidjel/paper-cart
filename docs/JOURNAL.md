@@ -6,7 +6,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 | Étape | Commit | Date |
 |---|---|---|
-| — | — | — |
+| A1 — le personnage est agréable à déplacer | `1445d25` (« A1 validée : 1445d25 ») | 12/11/2026 |
 
 ---
 

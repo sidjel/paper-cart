@@ -15,7 +15,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Rythme des jambes | 4 | ✅ | « Oui » (bon rythme). |
 | Respiration à l'arrêt | 5 | 🔧 | Pas un bug : prévue à l'étape A2 (avec rebond, ombre, échelle selon la profondeur). |
 | Petit nuage de poussière à chaque pas, comme dans Paper Mario | 5 | ✅ | Taille, durée, opacité réglables ; désactivable. |
-| Saut (secrets, monter sur des tabourets…) | 5 | ❓ | Décision de jeu en attente : voir les options proposées en séance 5. Pas encore dans VISION.md. |
+| Saut (secrets, monter sur des tabourets…) | 5 | 🔧 | Choix B (séance 6) : **saut libre** avec un bouton, partout, comme dans Paper Mario. À construire après le prototype A. VISION.md non modifié (à la demande de l'auteur seulement). |
 
 ## Marche et contrôles
 | Demande | Séance | État | Notes |
@@ -36,18 +36,20 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 |---|---|---|---|
 | Bruits de pas | 3 | ✅ | Son étouffé, volume 0,35 : validé en séance 5. Garder toutes les options dans le menu. |
 | Petite musique de supermarché (provisoire) | 3 | 👀 | « On la changera plus tard. » |
-| La musique grésille sur le téléphone | 5 | 👀 | Correctifs probables appliqués (graves coupés, limiteur, réserve de son moyenne). Test : ⚙ → Son → Réserve « Grande ». À réécouter. |
+| La musique grésille sur le téléphone | 5 | 👀 | Correctifs probables appliqués (graves coupés, limiteur, réserve de son moyenne). Test : ⚙ → Son → Réserve « Grande ». En attente du retour de l'auteur. |
 
 ## Fluidité
 | Constat | Séance | État | Notes |
 |---|---|---|---|
 | Téléphone : 61 images/s, p95 16,5 ms, calcul 0,6 ms en moyenne | 5 | ✅ | Objectifs presque atteints : 4 images > 33 ms sur 2206. |
-| Chargement du lieu : 8,2 s sur le téléphone | 5 | 🔧 | À mesurer : le rapport donne maintenant les images les plus lentes à préparer. |
+| Chargement du lieu : 8,2 s sur le téléphone | 5 | 👀 | Séance 6 : 1,4 s au rechargement (le décor du fond prend 0,44 s). Les 8 s venaient sans doute du premier téléchargement. À surveiller quand les vrais dessins arriveront. |
+| Son : latence de sortie 176 ms sur le téléphone | 6 | 👀 | Les pas peuvent sonner un peu en retard. À vérifier au ressenti. |
 
 ## Étapes
 | Étape | État | Notes |
 |---|---|---|
-| A1 — le personnage est agréable à déplacer | 🔧 | Pas encore validée : l'auteur teste la marche. |
+| A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
+| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Prochaine étape. |
 
 ## Règles de travail ajoutées par l'auteur
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).
