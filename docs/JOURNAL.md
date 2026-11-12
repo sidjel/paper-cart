@@ -10,6 +10,22 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 13 — 13/11/2026 — Test rapide T0 / T1 / T2 (≈ 7 min)
+
+**Demande de l'auteur** : un test sur mesure, plus court mais exploitable.
+
+**Construit (diagnostic seulement)** : ⚙ → Diagnostic → « Lancer le test rapide T0 / T1 / T2 ».
+- Un seul essai : 30 s de chauffe, puis 4 tours. À chaque tour, 5 conditions de 20 s (les 2 premières secondes de chaque bloc sont ignorées).
+- Conditions : A = marche, caméra fixe ; B = marche, caméra mobile ; T0 = référence, T1 = réduire les animations, T2 = rayon de devant invisible → A-T0, A-T1, B-T0, B-T1, B-T2.
+- **Alternance** : l'ordre des conditions est inversé un tour sur deux. La chaleur et l'état du téléphone pèsent donc pareil sur toutes les variantes, ce qui est plus fiable que trois tests successifs, et sans rien régler à la main. Les variantes sont appliquées en mémoire seulement, puis tout est remis comme avant.
+- Rapport : par condition, images, i/s, images > 20 ms par minute (avec l'écart entre blocs), > 33, > 50, p95, calcul du jeu. Puis 4 comparaisons (T1/T0 caméra fixe, T1/T0 caméra mobile, T2/T0 caméra mobile, caméra mobile/fixe) : rapport ×, marge d'incertitude à 95 %, et verdict « démontré » ou non. On y lit aussi la batterie (en charge ou non) et le maintien de l'écran, relevé au début.
+
+**Puissance attendue**, d'après les mesures précédentes : environ 26 images lentes par condition en caméra fixe et environ 195 en caméra mobile. Un effet de moitié en caméra fixe est à la limite du démontrable ; si besoin, on passe à 6 tours (≈ 10 min).
+
+**Vérifié** : 67 tests de logique (durée 430 s, même temps de mesure par condition, ordre alterné, marche continue sur l'aller-retour, calcul de la marge) ; 35 tests navigateur, dont un test rapide court complet (rayon de devant bien invisible pendant B-T2, réglages remis, rien d'enregistré).
+
+---
+
 ## Séance 12 — 13/11/2026 — Analyse du diagnostic en 4 configurations ; plan des tests T0, T1, T2
 
 **Mesures sur le téléphone (921b78d, Oppo Reno 2, en charge 70 → 78 %)** — images > 20 ms par minute (essais 1/2/3) :

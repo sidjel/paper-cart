@@ -76,6 +76,12 @@ export const config = {
     measure: 60, // durée d'une mesure (s)
     repeats: 3, // nombre de mesures par configuration
   },
+  quick: {
+    warmup: 30, // test rapide : chauffe (s)
+    block: 20, // durée d'un bloc (s)
+    settle: 2, // début de bloc ignoré après un changement de variante (s)
+    rounds: 4, // nombre de tours (chaque tour mesure les 5 conditions)
+  },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
   },
@@ -133,6 +139,10 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'bench.noDust', label: 'Essai sans poussière', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noShadow', label: 'Essai sans ombre', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.fixedCamera', label: 'Essai caméra immobile', type: 'bool' },
+  { group: 'Diagnostic', key: 'quick.warmup', label: 'Test rapide : chauffe', min: 0, max: 120, step: 5, unit: 's' },
+  { group: 'Diagnostic', key: 'quick.block', label: 'Test rapide : durée d’un bloc', min: 5, max: 60, step: 5, unit: 's' },
+  { group: 'Diagnostic', key: 'quick.settle', label: 'Test rapide : début de bloc ignoré', min: 0, max: 5, step: 0.5, unit: 's' },
+  { group: 'Diagnostic', key: 'quick.rounds', label: 'Test rapide : nombre de tours', min: 1, max: 10, step: 1 },
   { group: 'Diagnostic', key: 'protocol.warmup', label: 'Diagnostic complet : chauffe', min: 5, max: 120, step: 5, unit: 's' },
   { group: 'Diagnostic', key: 'protocol.measure', label: 'Diagnostic complet : durée d’une mesure', min: 5, max: 120, step: 5, unit: 's' },
   { group: 'Diagnostic', key: 'protocol.repeats', label: 'Diagnostic complet : mesures par configuration', min: 1, max: 5, step: 1 },

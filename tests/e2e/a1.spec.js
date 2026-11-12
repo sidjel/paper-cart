@@ -301,3 +301,22 @@ test('diagnostic en 4 configurations (version courte) : rapport complet', async 
   expect(r.length).toBeLessThan(6000);
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
 });
+
+test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'une fois suffit');
+  test.setTimeout(60_000);
+  await page.evaluate(() => window.paperCart.startQuick(1, 2, 0.5, 2));
+  // Pendant B-T2, le rayon de devant est invisible.
+  await page.waitForFunction(() => /B-T2/.test([...document.querySelectorAll('.bench-banner')].map((e) => e.textContent).join('')), null, { timeout: 30_000 });
+  await page.waitForTimeout(300);
+  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('0');
+  await page.waitForFunction(() => window.paperCart.quickReport(), null, { timeout: 40_000 });
+  const r = await page.evaluate(() => window.paperCart.quickReport());
+  expect(r).toContain('Résultat : terminé');
+  for (const k of ['A-T0', 'A-T1', 'B-T0', 'B-T1', 'B-T2']) expect(r).toContain(k);
+  expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(4);
+  expect(r.length).toBeLessThan(4000);
+  // Réglages remis comme avant, rien d'enregistré.
+  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('0.55');
+  expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
+});

@@ -12,6 +12,8 @@ import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
 import { createProtocol, stepProtocol, placeForConfig, protocolConfig, totalSeconds } from './core/protocol.js';
 import { createProtocolUi, F_CAMERA, F_FRAME, F_FLIP, F_DUST } from './ui/protocol.js';
+import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickElapsed, quickTotalSeconds, QUICK_CONDITIONS } from './core/quicktest.js';
+import { createQuickTestUi } from './ui/quicktest.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createStage } from './scene/stage.js';
 import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
@@ -94,9 +96,68 @@ const protocolUi = createProtocolUi(uiEl, {
     wakeLock: protocolUi.wakeLockActive ? 'oui' : 'non (pense à garder l’écran allumé)',
   }),
 });
+const quickUi = createQuickTestUi(uiEl, {
+  onStart: () => startQuick({ ...config.quick }),
+  getContext: () => ({ version: VERSION, renderLine, overrides: overrides() }),
+});
 const diagTools = document.createElement('div');
-diagTools.append(benchUi.launcher, protocolUi.launcher);
+diagTools.append(quickUi.launcher, benchUi.launcher, protocolUi.launcher);
 const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: diagTools } });
+
+// ---------- Test rapide T0 / T1 / T2 ----------
+// Les variantes sont appliquées en mémoire seulement (rien n'est enregistré) et annulées à la fin.
+let quick = null;
+let quickSavedReduce = false;
+
+function applyVariant(variant) {
+  config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
+  stage.layers['premier-plan'].style.opacity = variant === 'T2' ? 0 : config.display.foregroundOpacity;
+}
+
+async function startQuick(params) {
+  if (!sm.is('menu')) return;
+  quick = createQuickTest(place.diagnostic, params);
+  startQuickTest(quick, walker, ghost);
+  quickSavedReduce = config.display.reduceMotion;
+  applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+  camera.ready = false;
+  lastCamTime = -1;
+  marker.hide();
+  hud.playerMoved();
+  sm.go('bench');
+  await quickUi.begin(params);
+}
+
+function endQuick(status) {
+  if (!quick) return;
+  quick = null;
+  config.display.reduceMotion = quickSavedReduce;
+  stage.applyOpacity();
+  sm.go('play');
+  quickUi.finish(status);
+}
+
+function quickStep(dt, t0) {
+  const n = stepper.advance(dt / 1000);
+  for (let i = 0; i < n && quick.phase !== 'done'; i++) {
+    stepQuickTest(quick, walker, stepper.step);
+    if (quick.changed && quick.phase === 'block') {
+      quickUi.nextBlock();
+      applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+    }
+    stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
+  }
+  if (quick.phase === 'done') {
+    endQuick('terminé');
+    return;
+  }
+  render();
+  if (quick.measuring) quickUi.record(dt, performance.now() - t0, quickCondition(quick));
+  const c = QUICK_CONDITIONS[quickCondition(quick)];
+  const left = Math.ceil((quickTotalSeconds(quick) - quickElapsed(quick)) / 60);
+  const what = quick.phase === 'warmup' ? 'chauffe' : `tour ${quick.round + 1}/${quick.rounds} · ${c.id}`;
+  quickUi.progress(`Test rapide : ${what} · reste ≈ ${left} min`);
+}
 
 // ---------- Diagnostic en 4 configurations ----------
 let protocol = null;
@@ -218,14 +279,16 @@ function endBench(status) {
 function handleAction(action) {
   switch (action) {
     case 'back':
-      if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
+      if (quick) endQuick('annulé par le joueur (résultats partiels)');
+      else if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
       break;
     case 'pause':
-      if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
+      if (quick) endQuick('annulé par le joueur (résultats partiels)');
+      else if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
@@ -317,7 +380,7 @@ function render() {
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
   const camFrozen = bench && config.bench.fixedCamera && camera.ready;
-  const pc = protocol && protocolConfig(protocol);
+  const pc = protocol ? protocolConfig(protocol) : quick ? QUICK_CONDITIONS[quickCondition(quick)] : null;
   if (pc && pc.camera === 'fixed') {
     // Diagnostic : caméra fixe, centrée sur l'aller-retour.
     const mid = (place.diagnostic.a[0] + place.diagnostic.b[0]) / 2;
@@ -351,6 +414,8 @@ function frame(now) {
     }
     if (walker.moving) hud.playerMoved();
     render();
+  } else if (quick) {
+    quickStep(dt, t0);
   } else if (protocol) {
     protocolStep(dt, t0);
   } else if (sm.is('bench')) {
@@ -411,6 +476,7 @@ async function start() {
   window.visualViewport?.addEventListener('resize', layout);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sm.is('play')) sm.go('pause');
+    if (document.hidden && quick) endQuick('interrompu : le jeu est passé en arrière-plan (écran éteint ?)');
     if (document.hidden && protocol) endProtocol('interrompu : le jeu est passé en arrière-plan (écran éteint ?)');
     if (document.hidden && sm.is('bench')) endBench("interrompu : le jeu est passé en arrière-plan");
     audio.setHidden(document.hidden);
@@ -449,6 +515,11 @@ async function start() {
       startProtocol(warmup, measure, repeats);
     },
     protocolReport: () => protocolUi.lastReport,
+    startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1) {
+      if (sm.is('play')) sm.go('menu');
+      startQuick({ warmup, block, settle, rounds });
+    },
+    quickReport: () => quickUi.lastReport,
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
   };

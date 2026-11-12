@@ -58,7 +58,7 @@ export function placeForConfig(p, hero, ghost) {
 }
 
 // Aller-retour : dès qu'un bout est atteint, repartir vers l'autre (ligne droite).
-function patrol(w, def) {
+export function patrol(w, def) {
   if (w.hasTarget) return;
   const toB = Math.abs(w.x - def.a[0]) <= Math.abs(w.x - def.b[0]);
   const [x, z] = toB ? def.b : def.a;
