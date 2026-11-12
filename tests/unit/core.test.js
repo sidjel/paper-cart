@@ -87,3 +87,9 @@ describe('profil de marche par défaut', () => {
     for (const [k, v] of Object.entries(pm.values)) expect(getDefault(k)).toBe(v);
   });
 });
+
+describe('valeurs par défaut demandées par l’auteur', () => {
+  it('le joystick virtuel est désactivé par défaut (séance 8)', () => {
+    expect(getDefault('input.virtualJoystick')).toBe(false);
+  });
+});

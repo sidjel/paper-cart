@@ -21,9 +21,9 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Sensation de marche (vitesse, démarrage, arrêt) | 4 | ✅ | Profil « Paper Mario » choisi (séance 5), devenu la valeur par défaut. Les autres profils restent dans le menu. |
-| Toucher ou joystick virtuel sur téléphone | 4 | ❓ | Pas encore décidé. |
+| Toucher ou joystick virtuel sur téléphone | 4 | ✅ | Séance 8 : toucher par défaut, **joystick désactivé par défaut** (option gardée dans ⚙ → Contrôles). Vérifié par un test automatique. |
 | Contourner seul les objets quand on touche derrière | 4 | ✅ | Choix A, validé en séance 5. |
-| Difficile de viser le bord de la zone au doigt | 7 | ✅ | Toucher hors du sol (étagère, rayon de devant) envoie jusqu'au bord de la zone. Testé automatiquement. |
+| Difficile de viser le bord de la zone au doigt | 7 | ✅ | Toucher hors du sol (étagère, rayon de devant) envoie jusqu'au bord de la zone. Testé automatiquement. Validé (séance 8). |
 
 ## Décor
 | Demande | Séance | État | Notes |
@@ -58,7 +58,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 ## Interface
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| Menu des réglages rangé en onglets par thème | 7 | ✅ | Garder toutes les options dans le menu (demande de l'auteur). |
+| Menu des réglages rangé en onglets par thème | 7 | ✅ | Validé (séance 8). Garder toutes les options dans le menu. |
 
 ## Règles de travail ajoutées par l'auteur
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).
