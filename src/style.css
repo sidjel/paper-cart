@@ -53,6 +53,15 @@ html, body {
   top: 0;
 }
 .layer { width: 100%; height: 100%; isolation: isolate; }
+.shadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(40 32 22 / 0.9), rgb(40 32 22 / 0.55) 55%, rgb(40 32 22 / 0) 100%);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
 .dust { position: absolute; left: 0; top: 0; display: block; pointer-events: none; will-change: transform, opacity; }
 .dust[hidden] { display: none; }
 .prop { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }

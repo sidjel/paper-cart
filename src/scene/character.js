@@ -2,9 +2,11 @@
 // - deux vues dessinées (face, dos), tournées vers la droite ; la gauche en miroir (scaleX) ;
 // - retournement de la feuille quand il change de sens : elle s'amincit jusqu'à sa tranche,
 //   l'autre orientation la remplace, puis elle se rouvre (scaleX, jamais rotateY) ;
-// - animations décrites dans les données (voir animation.js) ; illustrations entières.
+// - animations décrites dans les données (voir animation.js) ; illustrations entières ;
+// - corps vivant : rebond en marchant, respiration à l'arrêt, petit écrasement en s'arrêtant ;
+// - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève.
 
-import { compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
+import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
 
 export function characterImageEntries(data, rasterScale) {
   const entries = [];
@@ -24,6 +26,15 @@ export function characterImageEntries(data, rasterScale) {
 export function createCharacterSprite(data, images, parent, settings, display, onFrameEvent) {
   const [w, h] = data.size;
   const [ax, ay] = data.anchor;
+  // Ombre : un élément à part, posé au sol sous les pieds, dessiné avant le personnage.
+  const shadowW = (data.shadow?.width ?? 120) * data.scale;
+  const shadowH = (data.shadow?.height ?? 28) * data.scale;
+  const shadow = document.createElement('div');
+  shadow.className = 'shadow';
+  shadow.style.width = `${shadowW}px`;
+  shadow.style.height = `${shadowH}px`;
+  parent.appendChild(shadow);
+
   const root = document.createElement('div');
   root.className = 'actor';
   root.style.transformOrigin = `${ax}px ${ay}px`;
@@ -79,6 +90,14 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let lastY = NaN;
   let lastS = NaN;
   let lastLevel = -1;
+  let lastBody = NaN;
+  let lastLift = NaN;
+  let wasMoving = false;
+  let stopTime = -1;
+  let idleStart = 0;
+  const motion = { lift: 0, sx: 1, sy: 1 };
+  // Distance parcourue pendant un pas : 2 images de marche (pied gauche puis pied droit).
+  const walkStride = (data.views.face.walk?.stride ?? 40) * 2;
 
   function flipScale(time, facing, away) {
     const needed = facing !== shownFacing || away !== shownAway;
@@ -131,10 +150,28 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       shown = frame;
     }
 
-    const fx = shownFacing * width;
-    if (fx !== lastFlip) {
-      flip.style.transform = fx === 1 ? 'none' : `scaleX(${fx})`;
+    // Corps vivant (rebond, respiration, écrasement), sauf si l'on réduit les animations.
+    if (moving !== wasMoving) {
+      if (!moving) {
+        stopTime = time;
+        idleStart = time;
+      }
+      wasMoving = moving;
+    }
+    if (display.reduceMotion) {
+      motion.lift = 0;
+      motion.sx = 1;
+      motion.sy = 1;
+    } else {
+      bodyMotion(motion, settings, moving, distance, walkStride / settings.walkAnimSpeed, time - idleStart, stopTime < 0 ? -1 : time - stopTime);
+    }
+
+    const fx = shownFacing * width * motion.sx;
+    if (fx !== lastFlip || motion.sy !== lastBody || motion.lift !== lastLift) {
+      flip.style.transform = `translateY(${-motion.lift}px) scale(${fx}, ${motion.sy})`;
       lastFlip = fx;
+      lastBody = motion.sy;
+      lastLift = motion.lift;
     }
     const s = scale * data.scale;
     if (sx !== lastX || sy !== lastY || s !== lastS) {
@@ -143,12 +180,19 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       lastY = sy;
       lastS = s;
     }
+
+    // Ombre : sous les pieds, à l'échelle de la profondeur ; s'amenuise quand il s'élève.
+    const up = settings.bounceHeight > 0 ? motion.lift / settings.bounceHeight : 0;
+    const k = scale * settings.shadowSize * (1 - 0.18 * up);
+    shadow.style.transform = `translate3d(${sx - shadowW / 2}px, ${sy - shadowH / 2}px, 0) scale(${k})`;
+    shadow.style.opacity = settings.shadowOpacity * (1 - 0.35 * up);
   }
 
   // Niveau d'affichage (devant ou derrière les objets du décor), changé seulement s'il le faut.
   function setLevel(level) {
     if (level === lastLevel) return;
     root.style.zIndex = level;
+    shadow.style.zIndex = level;
     lastLevel = level;
   }
 

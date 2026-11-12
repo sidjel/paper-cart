@@ -118,3 +118,36 @@ describe('poussière et profil par défaut', () => {
     expect(a.effects).toEqual(['poussiere', null, 'poussiere', null]);
   });
 });
+
+import { bodyMotion } from '../../src/scene/animation.js';
+import { createProjection, scaleAt } from '../../src/scene/projection.js';
+
+describe('profondeur et corps vivant', () => {
+  const P = { bounceHeight: 7, walkSquash: 0.05, breathAmount: 0.02, breathRate: 0.5, stopSquash: 0.1, stopDuration: 0.2 };
+  const out = { lift: 0, sx: 1, sy: 1 };
+  it('plus petit au fond, plus grand devant', () => {
+    const proj = createProjection(place.projection, { depthScale: 1 });
+    expect(scaleAt(proj, 0)).toBe(1);
+    expect(scaleAt(proj, 250)).toBeLessThan(0.8);
+    expect(scaleAt(proj, -150)).toBeGreaterThan(1.1);
+    expect(scaleAt(createProjection(place.projection, { depthScale: 0 }), 250)).toBe(1);
+  });
+  it('rebondit au milieu d’un pas, touche le sol au début', () => {
+    bodyMotion(out, P, true, 0, 80, 0, -1);
+    expect(out.lift).toBeCloseTo(0);
+    expect(out.sy).toBeLessThan(1); // écrasé au contact
+    bodyMotion(out, P, true, 40, 80, 0, -1);
+    expect(out.lift).toBeCloseTo(7);
+  });
+  it('respire à l’arrêt, sans quitter le sol', () => {
+    bodyMotion(out, P, false, 0, 80, 0.5, -1); // un quart de respiration
+    expect(out.lift).toBe(0);
+    expect(out.sy).toBeCloseTo(1.02);
+  });
+  it('s’écrase un instant en s’arrêtant', () => {
+    bodyMotion(out, P, false, 0, 80, 0, 0.05);
+    expect(out.sy).toBeLessThan(1);
+    bodyMotion(out, P, false, 0, 80, 0, 0.5);
+    expect(out.sy).toBeCloseTo(1);
+  });
+});

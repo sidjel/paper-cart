@@ -19,10 +19,21 @@ export const config = {
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
+    bounceHeight: 7, // hauteur du rebond à chaque pas (px)
+    walkSquash: 0.05, // écrasement quand le pied se pose (part de la hauteur)
+    breathAmount: 0.018, // ampleur de la respiration à l'arrêt
+    breathRate: 0.35, // respirations par seconde
+    stopSquash: 0.09, // petit écrasement quand il s'arrête
+    stopDuration: 0.2, // durée de cet écrasement (s)
+    shadowOpacity: 0.5, // opacité de l'ombre au sol
+    shadowSize: 1, // taille de l'ombre (×)
     dust: true, // petit nuage de poussière à chaque pas
     dustSize: 1.3, // taille du nuage (×)
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
+  },
+  scene: {
+    depthScale: 1, // force de l'effet « plus petit au fond » (0 = aucun, 1 = normal)
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
@@ -61,6 +72,15 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.flipDuration', label: 'Durée du retournement', min: 0, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Personnage', key: 'character.edgeThickness', label: 'Épaisseur de la tranche', min: 0, max: 0.25, step: 0.01 },
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
+  { group: 'Personnage', key: 'character.bounceHeight', label: 'Rebond en marchant', min: 0, max: 30, step: 1, unit: 'px' },
+  { group: 'Personnage', key: 'character.walkSquash', label: 'Écrasement à chaque pas', min: 0, max: 0.2, step: 0.01 },
+  { group: 'Personnage', key: 'character.breathAmount', label: 'Respiration (ampleur)', min: 0, max: 0.06, step: 0.002 },
+  { group: 'Personnage', key: 'character.breathRate', label: 'Respiration (rythme)', min: 0.1, max: 1.2, step: 0.05, unit: '/s' },
+  { group: 'Personnage', key: 'character.stopSquash', label: "Écrasement à l'arrêt", min: 0, max: 0.3, step: 0.01 },
+  { group: 'Personnage', key: 'character.stopDuration', label: "Durée de l'écrasement", min: 0.05, max: 0.6, step: 0.01, unit: 's' },
+  { group: 'Personnage', key: 'character.shadowOpacity', label: "Opacité de l'ombre", min: 0, max: 0.8, step: 0.02 },
+  { group: 'Personnage', key: 'character.shadowSize', label: "Taille de l'ombre", min: 0.3, max: 2, step: 0.05, unit: '×' },
+  { group: 'Personnage', key: 'scene.depthScale', label: 'Plus petit au fond (force)', min: 0, max: 2, step: 0.05, unit: '×' },
   { group: 'Personnage', key: 'character.dust', label: 'Poussière à chaque pas', type: 'bool' },
   { group: 'Personnage', key: 'character.dustSize', label: 'Taille de la poussière', min: 0.3, max: 2.5, step: 0.05, unit: '×' },
   { group: 'Personnage', key: 'character.dustDuration', label: 'Durée de la poussière', min: 0.15, max: 1.5, step: 0.05, unit: 's' },

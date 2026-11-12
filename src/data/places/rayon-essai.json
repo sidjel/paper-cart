@@ -4,9 +4,10 @@
   "size": [1920, 1080],
   "cropFocusY": 720,
   "projection": {
-    "comment": "Coordonnées du monde → scène. A1 : simple et sans perspective (la profondeur arrive en A2).",
+    "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond).",
     "floorFrontY": 880,
-    "depthToScreen": 1
+    "depthToScreen": 1,
+    "scalePerDepth": 0.0012
   },
   "images": {
     "rayon-fond": {

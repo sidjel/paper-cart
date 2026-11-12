@@ -181,17 +181,20 @@ function frame(now) {
 }
 
 async function start() {
+  const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
+  const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
   const rasterScale = computeRasterScale(place.size[0], place.size[1], config.display.maxPixelRatio);
   assetStats.rasterScale = rasterScale;
   const entries = [
     ...Object.entries(place.images).map(([id, im]) => ({ id, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
-    ...characterImageEntries(heroData, rasterScale).map((e) => ({ ...e, url: BASE + e.url })),
+    // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
+    ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
     { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
   ];
   const images = await loadImages(entries);
 
   stage = createStage(gameEl, place, images, getValue);
-  proj = createProjection(place.projection);
+  proj = createProjection(place.projection, config.scene);
   mask = compileMask(place.walkMask);
   walker = createWalker(place.spawn[0], place.spawn[1]);
   marker = createTargetMarker(stage.layers.acteurs);

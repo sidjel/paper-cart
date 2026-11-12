@@ -143,13 +143,15 @@ test('passe derrière le présentoir puis revient devant', async ({ page }, info
 
 test('la feuille se retourne quand il change de côté', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
-  const flip = page.locator('.actor-flip');
+  // Largeur apparente de la feuille (négative = tournée vers la gauche), lue dans le style.
+  const width = () => page.locator('.actor-flip').evaluate((el) => Number(/scale\((-?[\d.e-]+),/.exec(el.style.transform)?.[1] ?? 1));
   await page.keyboard.down('ArrowLeft');
-  // Pendant le retournement, la feuille est plus étroite qu'en entier.
-  await expect.poll(async () => flip.evaluate((el) => el.style.transform), { timeout: 2000, intervals: [16] }).toMatch(/scaleX\(-?0\.\d+\)/);
+  // Pendant le retournement, la feuille est nettement plus étroite qu'en entier.
+  await expect.poll(async () => Math.abs(await width()), { timeout: 2000, intervals: [16] }).toBeLessThan(0.7);
   await page.waitForTimeout(400);
   await page.keyboard.up('ArrowLeft');
-  await expect(flip).toHaveAttribute('style', /scaleX\(-1\)/);
+  await page.waitForTimeout(300);
+  expect(await width()).toBeLessThan(-0.9);
 });
 
 test('descend jusqu’en bas de l’écran, de face, et le son démarre', async ({ page }, info) => {
@@ -182,4 +184,16 @@ test('de la poussière apparaît en marchant, puis disparaît', async ({ page },
 test('le profil « Paper Mario » est sélectionné par défaut', async ({ page }) => {
   await page.locator('.hud-button', { hasText: '⚙' }).click();
   await expect(page.locator('.presets button.active')).toHaveText(/Paper Mario/);
+});
+
+test('ombre au sol et personnage plus petit au fond', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await expect(page.locator('.shadow')).toHaveCount(1);
+  const size = () => page.locator('.actor').evaluate((el) => el.getBoundingClientRect().height);
+  const front = await size();
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 240);
+  await page.keyboard.up('ArrowUp');
+  await page.waitForTimeout(300);
+  expect(await size()).toBeLessThan(front * 0.85);
 });

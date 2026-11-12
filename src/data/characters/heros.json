@@ -83,5 +83,10 @@
         ]
       }
     }
+  },
+  "shadow": {
+    "comment": "Ombre au sol, séparée du dessin : ellipse sous les pieds (taille avant échelle).",
+    "width": 150,
+    "height": 34
   }
 }

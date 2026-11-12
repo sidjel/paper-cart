@@ -40,3 +40,32 @@ export function frameIndex(anim, elapsedMs, distance, speed = 1) {
 export function flipWidth(p, edge) {
   return Math.max(edge, Math.abs(Math.cos(p * Math.PI)));
 }
+
+// Mouvement du corps en papier, calculé à partir de l'état (fonction pure, écrit dans `out`) :
+//  - en marchant : petit rebond à chaque pas, léger écrasement quand le pied se pose ;
+//  - à l'arrêt : respiration (la feuille s'étire et se tasse doucement) ;
+//  - à l'arrêt juste après avoir marché : petit écrasement d'atterrissage.
+// p : réglages (config.character) ; stepLen : distance parcourue pendant un pas (px).
+export function bodyMotion(out, p, moving, distance, stepLen, idleTime, stopAge) {
+  out.lift = 0;
+  out.sx = 1;
+  out.sy = 1;
+  if (moving) {
+    const s = Math.abs(Math.sin((Math.PI * distance) / stepLen));
+    out.lift = p.bounceHeight * s;
+    const contact = (1 - s) * (1 - s);
+    out.sy = 1 - p.walkSquash * contact;
+    out.sx = 1 + p.walkSquash * 0.6 * contact;
+    return out;
+  }
+  const breath = Math.sin(2 * Math.PI * p.breathRate * idleTime);
+  out.sy = 1 + p.breathAmount * breath;
+  out.sx = 1 - p.breathAmount * 0.5 * breath;
+  if (stopAge >= 0 && stopAge < p.stopDuration) {
+    const q = stopAge / p.stopDuration;
+    const k = p.stopSquash * Math.sin(Math.PI * q) * (1 - q);
+    out.sy *= 1 - k;
+    out.sx *= 1 + k * 0.7;
+  }
+  return out;
+}
