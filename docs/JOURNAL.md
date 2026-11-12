@@ -10,6 +10,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 14 — 13/11/2026 — Analyse du test rapide T0 / T1 / T2 (téléphone)
+
+**Conditions** : téléphone débranché (89 → 87 %), écran maintenu allumé (oui), **pas en plein écran** (zone de jeu 800×272, 3002 px de rayon visibles). Les comparaisons entre variantes restent valables (même essai, même alternance), mais les chiffres absolus ne se comparent pas aux tests en plein écran. Le réglage « Essai caméra immobile » restait coché ; il ne joue pas sur le test rapide.
+
+**Résultats (images > 20 ms par minute, blocs min–max)**
+- A-T0 (marche, caméra fixe) : 21,7 (13–30) ; > 33 ms : 0.
+- A-T1 (sans animations) : 32,5 (23–43) ; > 33 ms : 1.
+- B-T0 (marche, caméra mobile) : 137,6 (113–177) ; > 33 ms : 11 ; > 50 ms : 2.
+- B-T1 (sans animations) : 179,3 (167–197) ; > 33 ms : 14.
+- B-T2 (sans rayon de devant) : 61,7 (57–67) ; > 33 ms : 2.
+- Calcul du jeu : 0,6–0,7 ms en moyenne ; pires 14,6–22 ms.
+
+**Démontré (téléphone)**
+1. La caméra mobile multiplie les images lentes (×6,3, marge 4,2–9,6) : confirmé une troisième fois.
+2. Le rayon de premier plan transparent pèse lourd en caméra mobile : sans lui, ×0,45 (marge 0,34–0,59). Les blocs ne se chevauchent pas (57–67 contre 113–177). Images > 33 ms : 11 → 2.
+3. Couper les animations du personnage et la poussière **n'améliore pas** la fluidité en marche. L'hypothèse tirée des comptages du navigateur de test (personnage redessiné 60 fois/s) ne se traduit pas en coût réel sur ce téléphone.
+
+**Probable** : le téléphone est limité par la quantité de pixels que la carte graphique doit assembler à chaque image quand tout l'écran bouge. Retirer environ 28 % de l'écran en pixels transparents suffit à diviser les saccades par deux : le travail est juste à la limite des 16 ms.
+
+**Inconnu** : la cause de la légère dégradation avec T1 (peut-être le hasard : la marge suppose des images lentes indépendantes, et les blocs varient) ; l'effet de T1 personnage immobile ; la cause des pics de calcul (14–22 ms) ; le gain réel d'une correction des rayons lointains.
+
+**Leçon** : les comptages du navigateur de test décrivent l'organisation du rendu, pas son coût sur le téléphone. Seules les mesures du téléphone décident.
+
+---
+
 ## Séance 13 — 13/11/2026 — Test rapide T0 / T1 / T2 (≈ 7 min)
 
 **Demande de l'auteur** : un test sur mesure, plus court mais exploitable.
