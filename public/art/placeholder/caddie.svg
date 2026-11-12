@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="335" height="250" viewBox="1205 530 335 250">
+<!-- [TEMP] Caddie abandonné : objet du décor que le personnage peut contourner. Généré, provisoire. -->
+<defs><filter id="crayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter></defs>
+<g filter="url(#crayon)"><g transform="translate(0 70)">
+<g><path d="M1296 520 h236 l-22 120 h-196 z" fill="#c9cdc8" fill-opacity="0.55" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1296 520 h236 l-22 120 h-196 z" fill="#c9cdc8" fill-opacity="0.55" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<line x1="1320" y1="522" x2="1327.52" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1346" y1="522" x2="1351.44" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1372" y1="522" x2="1375.36" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1398" y1="522" x2="1399.28" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1424" y1="522" x2="1423.2" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1450" y1="522" x2="1447.12" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1476" y1="522" x2="1471.04" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1502" y1="522" x2="1494.96" y2="638" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1302.24" y1="552" x2="1521.92" y2="552" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1304.48" y1="584" x2="1515.84" y2="584" stroke="#7d817c" stroke-width="2.2"/>
+<line x1="1306.58" y1="614" x2="1510.14" y2="614" stroke="#7d817c" stroke-width="2.2"/>
+<g><path d="M1296 520 l-34 -40 h-26" fill="none" stroke-linecap="round" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1296 520 l-34 -40 h-26" fill="none" stroke-linecap="round" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><rect x="1218" y="470" width="44" height="16" rx="7" fill="#c0614b" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><rect x="1218" y="470" width="44" height="16" rx="7" fill="#c0614b" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><path d="M1330 640 l-6 40 M1500 640 l8 40 M1324 680 h190" fill="none" stroke-linecap="round" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1330 640 l-6 40 M1500 640 l8 40 M1324 680 h190" fill="none" stroke-linecap="round" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><circle cx="1322" cy="690" r="11" fill="#5b574e" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><circle cx="1322" cy="690" r="11" fill="#5b574e" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><circle cx="1512" cy="690" r="11" fill="#5b574e" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><circle cx="1512" cy="690" r="11" fill="#5b574e" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><circle cx="1360" cy="676" r="11" fill="#5b574e" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><circle cx="1360" cy="676" r="11" fill="#5b574e" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><circle cx="1478" cy="676" r="11" fill="#5b574e" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><circle cx="1478" cy="676" r="11" fill="#5b574e" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><path d="M1350 540 h46 v-30 h-46 z" fill="#6f8f6a" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1350 540 h46 v-30 h-46 z" fill="#6f8f6a" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g><path d="M1420 520 q20 -60 50 -48 q-6 30 -30 50 z" fill="#d9c84a" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1420 520 q20 -60 50 -48 q-6 30 -30 50 z" fill="#d9c84a" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>
+</g></g></svg>

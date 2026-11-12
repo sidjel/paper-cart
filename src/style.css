@@ -52,7 +52,8 @@ html, body {
   left: 0;
   top: 0;
 }
-.layer { width: 100%; height: 100%; }
+.layer { width: 100%; height: 100%; isolation: isolate; }
+.prop { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
 .layer-image { display: block; pointer-events: none; }
 
 .actor {
@@ -81,7 +82,8 @@ html, body {
 }
 .target-marker.visible { opacity: 0.85; transition: none; }
 
-.debug-mask { pointer-events: none; }
+.debug-mask { pointer-events: none; z-index: 1; }
+.mask-depth { stroke: rgb(40 90 200); stroke-width: 4; stroke-dasharray: 12 8; }
 .mask-area { fill: rgb(80 200 90 / 0.25); stroke: rgb(30 140 50); stroke-width: 3; }
 .mask-obstacle { fill: rgb(220 60 50 / 0.35); stroke: rgb(170 30 20); stroke-width: 3; }
 

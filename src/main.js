@@ -13,6 +13,8 @@ import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToW
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
 import { createDebugMask } from './scene/debugMask.js';
 import { createTargetMarker } from './scene/targetMarker.js';
+import { createProps } from './scene/props.js';
+import { actorLevel } from './scene/depth.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createDiagnostic } from './ui/diagnostic.js';
@@ -31,7 +33,7 @@ const uiEl = document.getElementById('ui');
 const sm = createStateMachine('loading');
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
-let stage, proj, mask, walker, sprite, marker, debugMask, input;
+let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs;
 const intent = { moveX: 0, moveZ: 0 };
 const tmpStage = { x: 0, y: 0 };
 const tmpWorld = { x: 0, z: 0 };
@@ -119,7 +121,9 @@ function render() {
   const a = stepper.alpha;
   const x = walker.prevX + (walker.x - walker.prevX) * a;
   const z = walker.prevZ + (walker.z - walker.prevZ) * a;
-  sprite.render(worldToStageX(proj, x), worldToStageY(proj, z), scaleAt(proj, z), walker.facing, walker.away, walker.moving, stepper.time);
+  const time = stepper.time + a * stepper.step; // temps de jeu lissé, figé en pause
+  sprite.render(worldToStageX(proj, x), worldToStageY(proj, z), scaleAt(proj, z), walker.facing, walker.away, walker.moving, time, walker.distance);
+  sprite.setLevel(actorLevel(depthRefs, z));
   if (!walker.hasTarget) marker.hide();
 }
 
@@ -158,8 +162,10 @@ async function start() {
   mask = compileMask(place.walkMask);
   walker = createWalker(place.spawn[0], place.spawn[1]);
   marker = createTargetMarker(stage.layers.acteurs);
-  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs);
-  debugMask = createDebugMask(stage.el, place, proj);
+  props = createProps(place, images, stage.layers.acteurs, proj);
+  depthRefs = props.map((p) => p.depthRef);
+  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display);
+  debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget });
 
@@ -185,6 +191,8 @@ async function start() {
     version: VERSION,
     state: () => sm.get(),
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
+    // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
+    levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
     worldToClient(x, z) {
       const r = gameEl.getBoundingClientRect();
       const v = stage.view;

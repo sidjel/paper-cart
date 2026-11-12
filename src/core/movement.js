@@ -18,6 +18,7 @@ export function createWalker(x, z) {
     facing: 1, // 1 = vers la droite, -1 = vers la gauche
     away: false, // true = de dos (vers le fond), false = de face
     moving: false,
+    distance: 0, // distance totale parcourue (sert au rythme des pas)
   };
 }
 
@@ -116,6 +117,7 @@ export function stepWalker(w, input, mask, p, dt) {
       w.vx = 0;
       w.vz = 0;
       w.moving = w.x !== w.prevX || w.z !== w.prevZ;
+      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
       return;
     } else {
       // Ralentit en approchant pour s'arrêter pile, sans dépasser.
@@ -141,6 +143,7 @@ export function stepWalker(w, input, mask, p, dt) {
       w.vz = 0;
       w.hasTarget = false;
       w.moving = true;
+      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
       return;
     }
   }
@@ -160,4 +163,5 @@ export function stepWalker(w, input, mask, p, dt) {
   }
 
   w.moving = w.x !== w.prevX || w.z !== w.prevZ;
+  if (w.moving) w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
 }

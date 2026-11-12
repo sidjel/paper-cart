@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="220" height="320" viewBox="0 0 220 320">
+  <!-- [TEMP] Héros, trois quarts dos, marche 1/4. Pieds en (110, 312). Généré, provisoire. -->
+  <defs>
+    <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+    <g id="silhouette">
+<g transform="translate(0 2)">
+<path d="M150 204 h34 q8 0 8 8 v6 q0 6 -8 6 h-34 z" fill="#8f8a7e"/>
+<path d="M184 206 h6 v14 h-6 z" fill="#c0614b"/>
+<path d="M144 172 q22 12 22 42 q0 8 -8 8 q-6 0 -8 -6 q-2 -18 -14 -28 z" fill="#5f84a8"/>
+<circle cx="156" cy="220" r="9" fill="#f0d2b0"/>
+</g>
+<path d="M83 236 L105 236 L122 300 L98 300 z" fill="#46526a"/>
+<path d="M96 300 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
+<path d="M117 236 L139 236 L124 300 L100 300 z" fill="#3f4a5a"/>
+<path d="M98 300 q0 -8 12 -8 h16 q4 4 2 14 h-28 q-4 0 -2 -6 z" fill="#efe7d4"/>
+<g transform="translate(0 2)">
+<path d="M60 226 q-8 -40 12 -64 q14 -10 30 -10 h24 q22 2 30 22 q8 22 2 52 q-2 14 -12 16 h-74 q-10 -2 -12 -16 z" fill="#6a8fb3"/>
+<path d="M76 222 h72 v18 h-72 z" fill="#5a7ea2"/>
+<g transform="rotate(10 70 172)"><path d="M70 172 q-18 26 -12 58 q2 8 10 6 q6 -2 4 -10 q-4 -24 6 -44 z" fill="#6a8fb3"/><circle cx="66" cy="236" r="9" fill="#f0d2b0"/></g>
+<path d="M78 156 q34 -14 64 2 q4 26 -30 34 q-34 -6 -34 -36 z" fill="#5a7ea2"/>
+<circle cx="112" cy="92" r="62" fill="#5b4433"/>
+<ellipse cx="166" cy="100" rx="8" ry="12" fill="#e8c29e"/>
+<path d="M150 140 q14 -10 22 -30 q2 18 -10 34 z" fill="#f0d2b0"/>
+<path d="M90 32 q10 -24 34 -18 q-14 8 -14 20 z" fill="#5b4433"/>
+</g>
+    </g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#silhouette" xlink:href="#silhouette" stroke="#fbf8ee" stroke-width="10" stroke-linejoin="round"/>
+    <use href="#silhouette" xlink:href="#silhouette" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/>
+<g transform="translate(0 2)">
+<path d="M80 80 q20 -30 60 -26 M76 108 q30 -20 70 -6 M90 132 q20 -6 40 0" fill="none" stroke="#4a3628" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M110 176 v40" stroke="#4f7397" stroke-width="2.4" stroke-linecap="round"/>
+</g>
+  </g>
+</svg>

@@ -110,3 +110,40 @@ test('diagnostic : affichage et rapport', async ({ page }, info) => {
   expect(report.length).toBeLessThan(4000);
   await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-diag.png` });
 });
+
+test('passe derrière le présentoir puis revient devant', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  // Monter au pied des étagères, puis longer le rayon jusque derrière le présentoir.
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 240);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 740);
+  await page.keyboard.up('ArrowRight');
+  await page.waitForTimeout(200);
+  let lv = await page.evaluate(() => window.paperCart.levels());
+  expect(lv.hero).toBeLessThan(lv['presentoir-crousti']);
+  await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-derriere.png` });
+
+  // Contourner par la droite et redescendre devant.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 930);
+  await page.keyboard.up('ArrowRight');
+  await page.keyboard.down('ArrowDown');
+  await page.waitForFunction(() => window.paperCart.hero().z < 60);
+  await page.keyboard.up('ArrowDown');
+  await page.waitForTimeout(100);
+  lv = await page.evaluate(() => window.paperCart.levels());
+  expect(lv.hero).toBeGreaterThan(lv['presentoir-crousti']);
+});
+
+test('la feuille se retourne quand il change de côté', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  const flip = page.locator('.actor-flip');
+  await page.keyboard.down('ArrowLeft');
+  // Pendant le retournement, la feuille est plus étroite qu'en entier.
+  await expect.poll(async () => flip.evaluate((el) => el.style.transform), { timeout: 2000, intervals: [16] }).toMatch(/scaleX\(-?0\.\d+\)/);
+  await page.waitForTimeout(400);
+  await page.keyboard.up('ArrowLeft');
+  await expect(flip).toHaveAttribute('style', /scaleX\(-1\)/);
+});

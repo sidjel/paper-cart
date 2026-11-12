@@ -9,28 +9,62 @@
     "depthToScreen": 1
   },
   "images": {
-    "rayon-fond": { "src": "art/placeholder/rayon-fond.svg", "size": [1920, 1080] }
+    "rayon-fond": {
+      "src": "art/placeholder/rayon-fond.svg",
+      "size": [1920, 1080]
+    },
+    "presentoir-crousti": {
+      "src": "art/placeholder/presentoir-crousti.svg",
+      "size": [290, 315]
+    },
+    "caddie": {
+      "src": "art/placeholder/caddie.svg",
+      "size": [335, 250]
+    }
   },
   "layers": [
     {
       "id": "fond",
       "image": "rayon-fond",
-      "contains": "plafond, panneau du rayon, étagères du fond, tête de gondole, caddie, sol",
-      "hiddenBy": "rien (le personnage passe devant, sur une petite surface)"
+      "contains": "plafond, panneau du rayon, étagères du fond, sol",
+      "hiddenBy": "en partie par les objets et le personnage (petites surfaces)"
     },
     {
       "id": "acteurs",
-      "contains": "personnage, repère du point visé",
+      "contains": "personnage, présentoir, caddie, repère du point visé — triés par profondeur",
       "hiddenBy": "rien"
     }
   ],
   "spawn": [300, 60],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (0 = devant, 250 = au pied des étagères). Marges incluses pour la largeur du personnage.",
+    "comment": "x : le long du rayon ; z : profondeur (0 = devant, 250 = au pied des étagères). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage.",
     "area": [[90, 0], [1830, 0], [1830, 250], [90, 250]],
     "obstacles": [
-      { "name": "Tête de gondole Crousti-Gouffre", "points": [[595, 122], [905, 122], [905, 300], [595, 300]] },
-      { "name": "Caddie abandonné", "points": [[1250, 158], [1585, 158], [1585, 300], [1250, 300]] }
+      {
+        "name": "Présentoir Crousti-Gouffre",
+        "points": [[595, 98], [905, 98], [905, 182], [595, 182]]
+      },
+      {
+        "name": "Caddie abandonné",
+        "points": [[1265, 105], [1570, 105], [1570, 150], [1265, 150]]
+      }
     ]
-  }
+  },
+  "props": [
+    {
+      "id": "presentoir-crousti",
+      "image": "presentoir-crousti",
+      "at": [750, 110],
+      "anchor": [135, 300],
+      "depthRef": 140,
+      "comment": "at : point du sol sous le bord avant, au milieu. depthRef : profondeur à laquelle le personnage passe de devant à derrière."
+    },
+    {
+      "id": "caddie",
+      "image": "caddie",
+      "at": [1417, 120],
+      "anchor": [212, 230],
+      "depthRef": 127
+    }
+  ]
 }

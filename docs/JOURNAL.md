@@ -10,6 +10,49 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 2 — 12/11/2026 — Retournement, marche, clignement, passer derrière les objets
+
+**Retours de l'auteur sur A1**
+- Ce qui manque : retournement de la feuille façon Paper Mario ; images de marche et de clignement ; pouvoir passer derrière le caddie et le présentoir.
+
+**Jouable maintenant**
+- **Retournement** : quand le personnage change de côté, la feuille s'amincit jusqu'à sa tranche, puis se rouvre de l'autre côté. Même chose quand il passe de face à dos.
+- **Marche** : 4 images de marche de face et 4 de dos. Les pas suivent la distance parcourue, donc les pieds ne glissent pas, même si on change la vitesse.
+- **Clignement** : à l'arrêt et de face, il cligne des yeux, avec un double clignement de temps en temps.
+- **Passer derrière** : le caddie et le présentoir « -30 % » sont maintenant des objets à part, décollés de l'étagère. Le personnage passe derrière eux : seule sa tête dépasse du présentoir, et on le voit à travers la grille du caddie.
+
+**Vérifié, et comment**
+- 31 tests de logique (Vitest) réussis. Ils couvrent les animations, le retournement, l'ordre devant/derrière, les couloirs derrière les objets et la distance parcourue.
+- 13 tests navigateur (Playwright, PC et téléphone simulé) réussis, sans erreur console. Deux nouveaux tests : passer derrière le présentoir puis revenir devant ; la feuille passe par une largeur réduite puis finit retournée.
+- Captures regardées : derrière le caddie, derrière le présentoir, retournement ralenti à mi-chemin, 4 instants de marche.
+- **Reste à vérifier par l'auteur** : la sensation sur le vrai téléphone, la manette, la fluidité (rapport DBG).
+
+**Comment tester**
+1. Marche à gauche puis à droite : la feuille se retourne.
+2. Reste immobile de face quelques secondes : il cligne des yeux.
+3. Monte vers les étagères (Z ou flèche haut), puis longe le rayon : il passe derrière le présentoir et derrière le caddie.
+4. F4 montre la zone de marche, avec en pointillés bleus la ligne où il passe de devant à derrière chaque objet.
+
+**Quoi essayer**
+1. Le retournement (0,18 s) : trop rapide, trop lent ? Et sur le passage face/dos, gardé ou gênant ?
+2. Le rythme des pas : est-ce que les jambes vont trop vite ou trop lentement par rapport au déplacement ?
+3. Toucher derrière un objet sur téléphone : il bute contre l'objet (pas de contournement automatique). Est-ce gênant ? (voir questions)
+
+**Nouveaux réglages (F2 ou ⚙)**
+- Personnage : durée du retournement, épaisseur de la tranche, retournement face/dos, vitesse des pas.
+- Affichage : réduire les animations (retournement instantané).
+
+**Décisions prises seul (détails mineurs)**
+- L'ordre devant/derrière se décide par une ligne de profondeur par objet (données du lieu). Le personnage ne change de plan qu'en la franchissant.
+- Le personnage ne rapetisse pas encore en s'éloignant : c'est prévu en A2, avec la caméra.
+- Les nouvelles images sont provisoires et générées. Le format des animations accepte une durée par image, ce qui permet le clignement sans code.
+
+**À préparer par l'auteur** : rien pour l'instant.
+
+**Proposition pour la séance suivante** : suite de l'étape A2 (échelle selon la profondeur, ombre, rebond et respiration, caméra qui glisse, banc d'essai).
+
+---
+
 ## Séance 1 — 12/11/2026 — Socle et étape A1 (« le personnage est agréable à déplacer »)
 
 **Jouable maintenant** : un rayon provisoire en papier découpé (Rayon 7). Un petit personnage en papier y marche, accélère et freine en douceur, se tourne (face/dos, gauche/droite en miroir) et bute contre la tête de gondole et le caddie. Pause, réglages en jeu, diagnostic, version affichée.
