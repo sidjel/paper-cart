@@ -102,5 +102,53 @@
       "anchor": [135, 300],
       "depthRef": 140
     }
-  ]
+  ],
+  "bench": {
+    "comment": "Banc d'essai : parcours automatique, toujours le même. Passe derrière les objets, descend derrière le rayon de devant, fait des allers-retours (retournements) et des arrêts (respiration). Revient au départ.",
+    "start": [300, 60],
+    "route": [
+      {
+        "to": [1100, 60]
+      },
+      {
+        "wait": 0.8
+      },
+      {
+        "to": [1100, 240]
+      },
+      {
+        "to": [750, 230]
+      },
+      {
+        "to": [750, 40]
+      },
+      {
+        "to": [1400, 220]
+      },
+      {
+        "to": [2000, -180]
+      },
+      {
+        "wait": 0.6
+      },
+      {
+        "to": [3300, 200]
+      },
+      {
+        "wait": 1
+      },
+      {
+        "to": [2650, 230]
+      },
+      {
+        "to": [2650, 30]
+      },
+      {
+        "to": [300, 60]
+      },
+      {
+        "wait": 0.6
+      }
+    ]
+  }
 }

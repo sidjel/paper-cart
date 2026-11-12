@@ -269,3 +269,20 @@ test('chaque thème n’a qu’un seul onglet', async ({ page }) => {
   const names = await page.locator('.settings-tab').allTextContents();
   expect(new Set(names).size).toBe(names.length);
 });
+
+test('banc d’essai : lancé depuis l’onglet Diagnostic, annulable, rapport affiché', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.locator('.hud-button', { hasText: '⚙' }).click();
+  await page.locator('.settings-tab', { hasText: /^Diagnostic$/ }).click();
+  await page.getByRole('button', { name: "Lancer le banc d'essai" }).click();
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('bench');
+  await expect(page.locator('.bench-banner')).toBeVisible();
+  await page.waitForTimeout(1500);
+  const moved = await hero(page);
+  expect(moved.x).not.toBe(300); // il marche tout seul
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  await expect(page.locator('.bench-result')).toBeVisible();
+  await expect(page.locator('.bench-result pre')).toContainText('annulé');
+  await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-banc.png` });
+});

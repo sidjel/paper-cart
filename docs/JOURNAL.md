@@ -10,6 +10,29 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 8 — 12/11/2026 — Banc d'essai et test des comptages (fin de A2)
+
+**Retours de l'auteur** : changements de la séance 7 validés ; joystick désactivé par défaut (il l'était déjà ; un test le garantit désormais).
+
+**Jouable maintenant**
+- **Banc d'essai** : ⚙ → onglet Diagnostic → « Lancer le banc d'essai ». Le personnage parcourt seul le rayon : derrière les présentoirs, derrière le caddie, en bas de l'écran derrière le rayon de devant, avec des allers-retours (retournements) et des arrêts (respiration), et toujours le même trajet. Il commence par 3 s de chauffe, puis fait 3 tours, soit environ une minute. Un bandeau indique l'avancement. À la fin, un rapport s'affiche avec « Copier le rapport » : images/s moyennes, temps d'image (médiane, 95e et 99e percentiles, pire), nombre d'images > 33 ms, calcul JavaScript séparé du temps total. Échap ou ⏸ annule, et le rapport indique alors « annulé ».
+- **Interrupteurs d'essai** (même onglet) : refaire le même parcours sans rayon de devant, sans rayons lointains, sans poussière ou sans ombre, pour comparer deux rapports. Ils ne s'appliquent que pendant le banc.
+- Réglages du banc : nombre de tours, durée de la chauffe.
+
+**Vérifié, et comment**
+- 58 tests de logique, dont le banc : chaque point du parcours est praticable et réellement atteint, le trajet est identique d'une fois à l'autre, chauffe puis tours, puis fin ; nouvel état « banc d'essai » dans la machine à états.
+- 33 tests navigateur, dont :
+  - le lancement depuis l'onglet Diagnostic, l'annulation et le rapport ;
+  - le **test des comptages** pendant un tour complet : 39 éléments dans la scène, 4 calques, 10 images visibles au plus, surface d'image 1,85 × l'écran, 17 images (5,5 Mpx). Pendant le jeu : 0 élément créé, 0 canevas, 0 nœud ajouté, 0 lecture de pixels. Les limites sont fixées avec une petite marge ; le test échoue si une modification les dépasse.
+- Banc complet lancé dans le navigateur de test : il dure environ 57 s et le rapport est correct. Ses temps ne valent rien (pas de carte graphique) ; seul le rapport du téléphone compte.
+- **Limite honnête** : les « objets créés à chaque image » ne sont pas comptés directement (le navigateur ne le permet pas de façon fiable). On compte les éléments, images et canevas créés pendant le jeu (zéro). Seuls de petits textes de position sont recréés à chaque image, ce qui est inévitable avec l'affichage DOM.
+
+**À faire par l'auteur** : lancer le banc d'essai sur le téléphone (plein écran, ne rien toucher pendant une minute), puis coller le rapport.
+
+**Proposition pour la séance suivante** : si le rapport du téléphone est bon, validation de A2, puis étape A3 : les produits sur les étagères, le scanner et les premières cartes.
+
+---
+
 ## Séance 7 — 12/11/2026 — Bords de la zone au doigt, zone agrandie, réglages en onglets
 
 **Retours de l'auteur**

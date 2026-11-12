@@ -1,0 +1,15 @@
+{
+  "rayon-essai": {
+    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900, séance 8 : 39 éléments, 4 calques, 10 images visibles, surface d'image 1,85 × l'écran, 17 images, 5,49 Mpx). On ne relève une limite qu'après accord de l'auteur, en expliquant pourquoi.",
+    "stageElements": 45,
+    "layers": 4,
+    "visibleImages": 14,
+    "overdraw": 2.2,
+    "images": 20,
+    "megapixels": 6.5,
+    "elementsCreatedInPlay": 0,
+    "canvasesInPlay": 0,
+    "domNodesAddedInPlay": 0,
+    "pixelReads": 0
+  }
+}

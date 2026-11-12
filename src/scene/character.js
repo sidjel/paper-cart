@@ -196,5 +196,5 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     lastLevel = level;
   }
 
-  return { el: root, render, setLevel };
+  return { el: root, shadowEl: shadow, render, setLevel };
 }

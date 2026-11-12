@@ -108,7 +108,7 @@ html, body {
   font-size: 15px;
 }
 #ui > * { pointer-events: auto; }
-#ui > .hint, #ui > .version, #ui > .joystick { pointer-events: none; }
+#ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner { pointer-events: none; }
 
 button, select {
   font: inherit;
@@ -316,3 +316,36 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   background: var(--paper);
   border-top: 2px solid rgb(61 53 42 / 0.2);
 }
+
+/* Banc d'essai */
+.bench-launch { margin: 4px 0 8px; }
+.bench-result {
+  top: var(--safe-top);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(640px, calc(100vw - 24px));
+  max-height: calc(100vh - 20px);
+  overflow: auto;
+  padding: 10px 16px 14px;
+}
+.bench-result h2 { margin: 0 0 6px; font-size: 20px; }
+.bench-result pre {
+  margin: 0;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  user-select: text;
+}
+.bench-banner {
+  position: absolute;
+  left: 50%;
+  top: var(--safe-top);
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  background: rgb(251 248 238 / 0.92);
+  font-weight: 700;
+  pointer-events: none;
+}
+.bench-banner[hidden] { display: none; }

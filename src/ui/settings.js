@@ -27,8 +27,8 @@ function formatValue(t, v) {
   return `${Number(v).toFixed(decimals).replace('.', ',')}${t.unit ? ` ${t.unit}` : ''}`;
 }
 
-// onClose : demandé quand on ferme le panneau.
-export function createSettingsPanel(root, { onClose }) {
+// onClose : demandé quand on ferme le panneau ; extras : { nomOnglet: élément } ajouté en tête de l'onglet.
+export function createSettingsPanel(root, { onClose, extras = {} }) {
   const panel = document.createElement('div');
   panel.className = 'settings panel';
   panel.hidden = true;
@@ -104,6 +104,7 @@ export function createSettingsPanel(root, { onClose }) {
       tabs.push([g, tab, section]);
       sectionsHolder.appendChild(section);
       sections.set(group, section);
+      if (extras[group]) section.appendChild(extras[group]);
       if (group === 'Marche') {
         // Profils de marche : un toucher règle vitesse, accélération et freinage d'un coup.
         const row = document.createElement('div');

@@ -46,6 +46,8 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Constat | Séance | État | Notes |
 |---|---|---|---|
 | Téléphone : 61 images/s, p95 16,5 ms, calcul 0,6 ms en moyenne | 5 | ✅ | Objectifs presque atteints : 4 images > 33 ms sur 2206. |
+| Banc d'essai (parcours automatique, rapport à copier) | 8 | ✅ | ⚙ → Diagnostic → « Lancer le banc d'essai » : chauffe 3 s + 3 tours (~1 min). Interrupteurs d'essai : sans rayon de devant, sans rayons lointains, sans poussière, sans ombre. **À lancer par l'auteur sur son téléphone.** |
+| Test automatique des comptages | 8 | ✅ | À chaque publication. Mesures : 39 éléments, 4 calques, 10 images visibles, surface d'image 1,85 × l'écran, 5,5 Mpx ; rien créé pendant le jeu. Limites dans tests/e2e/comptages-limites.json. |
 | Chargement du lieu : 8,2 s sur le téléphone | 5 | 👀 | Séance 6 : 1,4 s au rechargement (le décor du fond prend 0,44 s). Les 8 s venaient sans doute du premier téléchargement. À surveiller quand les vrais dessins arriveront. |
 | Son : latence de sortie 176 ms sur le téléphone | 6 | 👀 | Les pas peuvent sonner un peu en retard. À vérifier au ressenti. |
 
@@ -53,7 +55,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Étape | État | Notes |
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
-| A2 — le personnage semble évoluer dans un décor profond | 🔧 | Ressenti validé par l'auteur (séance 7). Reste : banc d'essai et test des comptages, puis validation finale de A2. |
+| A2 — le personnage semble évoluer dans un décor profond | ❓ | Tout est construit (séance 8). Reste : rapport du banc d'essai sur le téléphone, puis validation finale de A2 par l'auteur. |
 
 ## Interface
 | Demande | Séance | État | Notes |

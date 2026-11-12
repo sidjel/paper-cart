@@ -61,6 +61,15 @@ export const config = {
     joystickRadius: 60, // rayon du joystick virtuel (px d'écran)
     stickDeadZone: 0.2, // manette : zone morte du stick (0 à 1)
   },
+  bench: {
+    passes: 3, // nombre de tours mesurés
+    warmup: 3, // secondes de chauffe, non mesurées
+    // Interrupteurs d'essai : rejouer le même parcours sans une option, pour comparer deux rapports.
+    noForeground: false,
+    noFarLayer: false,
+    noDust: false,
+    noShadow: false,
+  },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
   },
@@ -111,6 +120,12 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
+  { group: 'Diagnostic', key: 'bench.passes', label: 'Banc : nombre de tours', min: 1, max: 10, step: 1 },
+  { group: 'Diagnostic', key: 'bench.warmup', label: 'Banc : chauffe', min: 0, max: 10, step: 1, unit: 's' },
+  { group: 'Diagnostic', key: 'bench.noForeground', label: 'Essai sans rayon de devant', type: 'bool' },
+  { group: 'Diagnostic', key: 'bench.noFarLayer', label: 'Essai sans rayons lointains', type: 'bool' },
+  { group: 'Diagnostic', key: 'bench.noDust', label: 'Essai sans poussière', type: 'bool' },
+  { group: 'Diagnostic', key: 'bench.noShadow', label: 'Essai sans ombre', type: 'bool' },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
 ];
 

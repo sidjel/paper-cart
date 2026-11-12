@@ -8,6 +8,8 @@ import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker } from './core/movement.js';
 import { findPath } from './core/pathfinding.js';
+import { createBench, stepBench, placeAtStart } from './core/bench.js';
+import { createBenchUi } from './ui/bench.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createStage } from './scene/stage.js';
 import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
@@ -64,17 +66,79 @@ const diag = createDiagnostic(uiEl, () => ({
   gamepad: input?.gamepad.connected ?? false,
   overrides: overrides(),
 }));
-const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back') });
+const benchUi = createBenchUi(uiEl, {
+  onStart: () => startBench(config.bench.passes, config.bench.warmup),
+  getContext: () => ({
+    version: VERSION,
+    renderLine,
+    images: assetStats.images,
+    pixels: assetStats.pixels,
+    loadMs: assetStats.loadMs,
+    place: place.id,
+    switches: activeSwitches(),
+    overrides: overrides(),
+  }),
+});
+const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: benchUi.launcher } });
+
+// ---------- Banc d'essai ----------
+let bench = null;
+const NO_INPUT = { moveX: 0, moveZ: 0 };
+
+function activeSwitches() {
+  const b = config.bench;
+  return [b.noForeground && 'sans rayon de devant', b.noFarLayer && 'sans rayons lointains', b.noDust && 'sans poussière', b.noShadow && 'sans ombre']
+    .filter(Boolean)
+    .join(', ');
+}
+
+// Interrupteurs d'essai : appliqués seulement pendant le parcours, sans toucher aux réglages enregistrés.
+let savedDust = true;
+function applySwitches(on) {
+  const b = config.bench;
+  stage.layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
+  stage.layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
+  sprite.shadowEl.style.display = on && b.noShadow ? 'none' : '';
+  if (on) {
+    savedDust = config.character.dust;
+    if (b.noDust) config.character.dust = false;
+  } else {
+    config.character.dust = savedDust;
+  }
+}
+
+function startBench(passes, warmup) {
+  if (!sm.is('menu')) return;
+  bench = createBench(place.bench, passes, warmup);
+  placeAtStart(bench, walker);
+  camera.ready = false;
+  lastCamTime = -1;
+  marker.hide();
+  hud.playerMoved(); // l'aide aux contrôles n'a plus lieu d'être
+  applySwitches(true);
+  benchUi.begin();
+  sm.go('bench');
+}
+
+function endBench(status) {
+  if (!bench) return;
+  applySwitches(false);
+  benchUi.finish(status, bench);
+  bench = null;
+  sm.go('play');
+}
 
 function handleAction(action) {
   switch (action) {
     case 'back':
-      if (sm.is('menu')) sm.back();
+      if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
+      else if (sm.is('menu')) sm.back();
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
       break;
     case 'pause':
-      if (sm.is('play')) sm.go('pause');
+      if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
+      else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
       break;
     case 'settings':
@@ -113,7 +177,7 @@ sm.onChange((now, before) => {
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
-  if (now === 'play') stepper.reset();
+  if (now === 'play' || now === 'bench') stepper.reset();
 });
 
 // Un point de l'écran touché ou cliqué → un point du sol à atteindre (fonction de core/).
@@ -185,6 +249,17 @@ function frame(now) {
     }
     if (walker.moving) hud.playerMoved();
     render();
+  } else if (sm.is('bench')) {
+    // Banc d'essai : le parcours remplace les commandes du joueur.
+    const n = stepper.advance(dt / 1000);
+    for (let i = 0; i < n && bench.phase !== 'done'; i++) {
+      stepBench(bench, walker, mask, stepper.step);
+      stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
+    }
+    render();
+    if (bench.measuring) benchUi.record(dt, performance.now() - t0);
+    benchUi.progress(bench);
+    if (bench.phase === 'done') endBench('terminé');
   }
   // Sous un menu ou en pause, la scène n'est pas redessinée.
   diag.frame(dt, performance.now() - t0, playing);
@@ -228,6 +303,7 @@ async function start() {
   window.visualViewport?.addEventListener('resize', layout);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sm.is('play')) sm.go('pause');
+    if (document.hidden && sm.is('bench')) endBench("interrompu : le jeu est passé en arrière-plan");
     audio.setHidden(document.hidden);
   });
   // Le son ne peut démarrer qu'après un premier geste du joueur.
@@ -253,6 +329,13 @@ async function start() {
     },
     report: () => diag.report(),
     camera: () => ({ x: camera.x, y: camera.y, viewW: stage.view.viewW }),
+    // Banc d'essai pour les tests automatiques (ouvre le menu puis lance le parcours).
+    startBench(passes = 1, warmup = 0) {
+      if (sm.is('play')) sm.go('menu');
+      startBench(passes, warmup);
+    },
+    benchReport: () => benchUi.lastReport,
+    assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
   };
 }

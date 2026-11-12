@@ -103,7 +103,7 @@ export function createAudio(settings, song) {
     },
     applyVolumes,
     setState(state) {
-      paused = state !== 'play' && state !== 'menu';
+      paused = state === 'pause';
       applyVolumes();
     },
     setHidden(h) {

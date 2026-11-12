@@ -6,7 +6,8 @@ export const TRANSITIONS = {
   loading: ['play'],
   play: ['pause', 'menu'],
   pause: ['play', 'menu'],
-  menu: ['play', 'pause'],
+  menu: ['play', 'pause', 'bench'],
+  bench: ['play'], // banc d'essai : le personnage se déplace tout seul, on mesure
 };
 
 export function createStateMachine(initial = 'loading') {
