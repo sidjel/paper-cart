@@ -10,6 +10,29 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 15 — 13/11/2026 — Correction n° 1 : rayons lointains limités aux ouvertures, et test T3
+
+**Décision de l'auteur** : proposition A validée. Ne modifier que le rendu des rayons lointains ; garder l'ancien pour comparer ; même protocole ; vérifier la surface réellement rendue ; ne pas tenir le mécanisme GPU pour acquis ; ne toucher ni au rayon de devant, ni aux animations, ni à la poussière.
+
+**Modification (seulement les rayons lointains)**
+- Avant : une bande de 3600×470 dessinée entière, presque entièrement cachée par l'étagère du fond.
+- Après : deux « fenêtres » placées sur les ouvertures de l'étagère (montants compris, avec une marge), qui découpent la même image. Elle y glisse avec la même parallaxe. Fenêtres décrites dans les données du lieu.
+- L'ancien rendu reste disponible (réglage Diagnostic « Rayons lointains limités aux ouvertures », activé par défaut) ; un seul des deux est affiché à la fois.
+
+**Vérifications (navigateur de test : organisation du rendu, pas une mesure de la carte graphique)**
+- **Image identique** : hors des ouvertures, identique au pixel près ; dans les ouvertures, aucun décalage, seulement de légers écarts de lissage sur les contours (médiane 2/255). Test automatique ajouté.
+- **Surface réellement dessinée par le compositeur** (rectangles dessinés, après découpage) : rayons lointains 0,71 → 0,06 écran (téléphone simulé) et 0,85 → 0,07 (PC) ; total par image 3,38 → 2,73 et 3,40 → 2,62. Les autres calques sont inchangés.
+- Les fenêtres sont bien des calques à part : le décor du fond n'est pas redessiné quand la caméra bouge (redessin des grands calques 17,9 → 5 par seconde).
+- Test des comptages : surface d'image affichée 1,85 → 1,51 écran (calcul corrigé pour tenir compte du découpage par les fenêtres) ; calques affichés : 4 ; rien créé pendant le jeu.
+
+**Test T3** (⚙ → Diagnostic, premier bouton) : même protocole que le test rapide (chauffe 30 s, blocs de 20 s, 2 s ignorées, 4 tours, ordre inversé un tour sur deux, 72 s mesurées par condition). Conditions : A-ancien, A-nouveau (caméra fixe, contrôle), B-ancien, B-nouveau (caméra mobile). Mêmes indicateurs et même calcul de marge. Durée ≈ 6 min.
+
+**Vérifié** : 70 tests de logique, 37 tests navigateur (dont T3 court : chaque variante affiche le bon rendu et tout est remis en place ; identité de l'image).
+
+**À faire par l'auteur** : lancer T3 en plein écran, téléphone débranché, « Essai caméra immobile » décoché.
+
+---
+
 ## Séance 14 — 13/11/2026 — Analyse du test rapide T0 / T1 / T2 (téléphone)
 
 **Conditions** : téléphone débranché (89 → 87 %), écran maintenu allumé (oui), **pas en plein écran** (zone de jeu 800×272, 3002 px de rayon visibles). Les comparaisons entre variantes restent valables (même essai, même alternance), mais les chiffres absolus ne se comparent pas aux tests en plein écran. Le réglage « Essai caméra immobile » restait coché ; il ne joue pas sur le test rapide.

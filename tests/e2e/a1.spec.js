@@ -212,8 +212,8 @@ test('la caméra suit le personnage le long du rayon, avec parallaxe', async ({ 
   const vp = page.viewportSize();
   expect(box.x).toBeGreaterThan(0);
   expect(box.x + box.width).toBeLessThan(vp.width);
-  // Les rayons lointains ont glissé moins que le sol : décalage positif par rapport au fond.
-  const far = await page.locator('.layer-lointain').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+  // Les rayons lointains (dans leurs fenêtres) ont glissé moins que le sol : décalage positif par rapport au fond.
+  const far = await page.locator('.far-window-image').first().evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41 + parseFloat(el.parentElement.style.left));
   expect(far).toBeGreaterThan(cam.x * 0.3);
   await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-camera.png` });
 });
@@ -319,4 +319,70 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   // Réglages remis comme avant, rien d'enregistré.
   expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('0.55');
   expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
+});
+
+test('test T3 (version courte) : chaque variante affiche le bon rendu, tout est remis en place', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'une fois suffit');
+  test.setTimeout(60_000);
+  const shown = () => page.evaluate(() => ({
+    bande: document.querySelector('.layer-lointain').style.display !== 'none',
+    fenetres: document.querySelector('.layer-lointain-fenetres').style.display !== 'none',
+  }));
+  const banner = (re) => page.waitForFunction((src) => new RegExp(src).test([...document.querySelectorAll('.bench-banner')].map((e) => e.textContent).join('')), re, { timeout: 30_000 });
+  await page.evaluate(() => window.paperCart.startQuick(1, 2, 0.5, 1, 'T3'));
+  await banner('B-ancien');
+  await page.waitForTimeout(300);
+  expect(await shown()).toEqual({ bande: true, fenetres: false });
+  await banner('B-nouveau');
+  await page.waitForTimeout(300);
+  expect(await shown()).toEqual({ bande: false, fenetres: true });
+  await page.waitForFunction(() => window.paperCart.quickReport(), null, { timeout: 30_000 });
+  const r = await page.evaluate(() => window.paperCart.quickReport());
+  expect(r).toContain('rayons lointains : ancien contre nouveau');
+  for (const k of ['A-ancien', 'A-nouveau', 'B-ancien', 'B-nouveau']) expect(r).toContain(k);
+  expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(3);
+  expect(await shown()).toEqual({ bande: false, fenetres: true }); // réglage par défaut rendu
+});
+
+test('rayons lointains : le nouveau rendu donne la même image que l’ancien', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'une fois suffit');
+  test.setTimeout(60_000);
+  // Se placer devant les ouvertures, attendre que la caméra soit immobile.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 2200, null, { timeout: 20_000 });
+  await page.keyboard.up('ArrowRight');
+  await page.waitForFunction(() => {
+    const c = window.paperCart.camera();
+    const still = window.__cam !== undefined && Math.abs(c.x - window.__cam) < 1e-6;
+    window.__cam = c.x;
+    return still;
+  }, null, { polling: 500, timeout: 15_000 });
+  const toggle = () => page.evaluate(() => document.querySelector('input[data-key="scene.farWindows"]').click());
+  // On compare en dehors du personnage (il respire et cligne des yeux entre deux captures).
+  const actor = await page.locator('.actor').boundingBox();
+  const clip = { x: 0, y: 0, width: Math.max(1, Math.floor(actor.x) - 20), height: 900 };
+  const nouveau = await page.screenshot({ clip });
+  await toggle();
+  await page.waitForTimeout(150);
+  const ancien = await page.screenshot({ clip });
+  await toggle();
+  const res = await page.evaluate(async ([a, b]) => {
+    const load = (b64) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = 'data:image/png;base64,' + b64; });
+    const [ia, ib] = await Promise.all([load(a), load(b)]);
+    const c = document.createElement('canvas');
+    c.width = ia.width; c.height = ia.height;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(ia, 0, 0); const da = x.getImageData(0, 0, c.width, c.height).data;
+    x.drawImage(ib, 0, 0); const db = x.getImageData(0, 0, c.width, c.height).data;
+    let diff = 0, big = 0;
+    for (let i = 0; i < da.length; i += 4) {
+      const d = Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2]));
+      if (d > 0) diff++;
+      if (d > 64) big++;
+    }
+    return { total: da.length / 4, diff, big };
+  }, [nouveau.toString('base64'), ancien.toString('base64')]);
+  // Écarts seulement de lissage sur quelques contours dans les ouvertures : très peu de pixels, peu de gros écarts.
+  expect(res.diff / res.total).toBeLessThan(0.03);
+  expect(res.big / res.total).toBeLessThan(0.003);
 });

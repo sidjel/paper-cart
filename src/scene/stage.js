@@ -3,7 +3,11 @@
 //   un écran plus allongé (20:9) montre simplement plus de largeur, sans rien couper ;
 // - la caméra fait glisser la scène ; les calques avec une parallaxe (rayons lointains,
 //   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
-// - les calques sont créés d'après la pile déclarée dans les données du lieu.
+// - les calques sont créés d'après la pile déclarée dans les données du lieu ;
+// - un calque lointain peut déclarer des « fenêtres » (les seules zones où on le voit, par exemple
+//   les ouvertures de l'étagère) : il n'est alors dessiné que dans ces fenêtres, l'image glissant
+//   à l'intérieur avec la même parallaxe. L'ancienne façon (bande entière) reste disponible pour
+//   comparer les deux (test T3), une seule étant affichée à la fois.
 
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
 export function createStage(container, place, images, getValue) {
@@ -14,7 +18,9 @@ export function createStage(container, place, images, getValue) {
   el.style.height = `${H}px`;
 
   const layers = {};
-  const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
+  const parallax = []; // calques qui ne glissent pas à la vitesse du sol : { el, f, last }
+  const windowImgs = []; // images dans les fenêtres : { el, f, ox, oy, last }
+  const far = { full: null, windows: null }; // les deux rendus possibles d'un calque à fenêtres
   for (const def of place.layers) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
@@ -37,6 +43,34 @@ export function createStage(container, place, images, getValue) {
     }
     el.appendChild(layer);
     layers[def.id] = layer;
+    if (def.windows && def.image) {
+      // Même image, découpée par des fenêtres fixes (elles suivent le décor du fond).
+      const src = images.get(def.image);
+      const box = document.createElement('div');
+      box.className = `layer layer-${def.id}-fenetres`;
+      box.dataset.contains = `${def.contains} (seulement dans les fenêtres)`;
+      for (const [x, y, w, h] of def.windows) {
+        const win = document.createElement('div');
+        win.className = 'far-window';
+        win.style.left = `${x}px`;
+        win.style.top = `${y}px`;
+        win.style.width = `${w}px`;
+        win.style.height = `${h}px`;
+        const im = new Image();
+        im.src = src.url;
+        im.className = 'far-window-image';
+        im.width = src.w;
+        im.height = src.h;
+        im.alt = '';
+        im.draggable = false;
+        win.appendChild(im);
+        box.appendChild(win);
+        windowImgs.push({ el: im, f, ox: pos[0] - x, oy: pos[1] - y, last: NaN });
+      }
+      el.appendChild(box);
+      far.full = layer;
+      far.windows = box;
+    }
   }
   container.appendChild(el);
 
@@ -64,6 +98,21 @@ export function createStage(container, place, images, getValue) {
         p.last = dx;
       }
     }
+    for (const w of windowImgs) {
+      const dx = view.camX * (1 - w.f);
+      if (dx !== w.last) {
+        w.el.style.transform = `translate3d(${w.ox + dx}px, ${w.oy}px, 0)`;
+        w.last = dx;
+      }
+    }
+  }
+
+  // Rendu du calque lointain : dans les fenêtres seulement (true) ou en bande entière (false) ;
+  // hidden : le masquer complètement (interrupteur d'essai du banc).
+  function setFar(windows, hidden = false) {
+    if (!far.full) return;
+    far.full.style.display = hidden || windows ? 'none' : '';
+    far.windows.style.display = hidden || !windows ? 'none' : '';
   }
 
   function layout(zoom) {
@@ -105,5 +154,5 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity };
+  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity, setFar };
 }

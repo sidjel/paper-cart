@@ -12,7 +12,7 @@ import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
 import { createProtocol, stepProtocol, placeForConfig, protocolConfig, totalSeconds } from './core/protocol.js';
 import { createProtocolUi, F_CAMERA, F_FRAME, F_FLIP, F_DUST } from './ui/protocol.js';
-import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickElapsed, quickTotalSeconds, QUICK_CONDITIONS } from './core/quicktest.js';
+import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds } from './core/quicktest.js';
 import { createQuickTestUi } from './ui/quicktest.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createStage } from './scene/stage.js';
@@ -97,7 +97,7 @@ const protocolUi = createProtocolUi(uiEl, {
   }),
 });
 const quickUi = createQuickTestUi(uiEl, {
-  onStart: () => startQuick({ ...config.quick }),
+  onStart: (suite) => startQuick({ ...config.quick }, suite),
   getContext: () => ({ version: VERSION, renderLine, overrides: overrides() }),
 });
 const diagTools = document.createElement('div');
@@ -112,20 +112,22 @@ let quickSavedReduce = false;
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
   stage.layers['premier-plan'].style.opacity = variant === 'T2' ? 0 : config.display.foregroundOpacity;
+  // T3 : rayons lointains en bande entière (ancien) ou limités aux ouvertures (nouveau) ; sinon le réglage.
+  stage.setFar(variant === 'far-windows' ? true : variant === 'far-full' ? false : config.scene.farWindows);
 }
 
-async function startQuick(params) {
+async function startQuick(params, suite = 'T012') {
   if (!sm.is('menu')) return;
-  quick = createQuickTest(place.diagnostic, params);
+  quick = createQuickTest(place.diagnostic, params, suite);
   startQuickTest(quick, walker, ghost);
   quickSavedReduce = config.display.reduceMotion;
-  applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+  applyVariant(quickConditionDef(quick).variant);
   camera.ready = false;
   lastCamTime = -1;
   marker.hide();
   hud.playerMoved();
   sm.go('bench');
-  await quickUi.begin(params);
+  await quickUi.begin(params, suite);
 }
 
 function endQuick(status) {
@@ -133,6 +135,7 @@ function endQuick(status) {
   quick = null;
   config.display.reduceMotion = quickSavedReduce;
   stage.applyOpacity();
+  stage.setFar(config.scene.farWindows);
   sm.go('play');
   quickUi.finish(status);
 }
@@ -143,7 +146,7 @@ function quickStep(dt, t0) {
     stepQuickTest(quick, walker, stepper.step);
     if (quick.changed && quick.phase === 'block') {
       quickUi.nextBlock();
-      applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+      applyVariant(quickConditionDef(quick).variant);
     }
     stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
   }
@@ -153,7 +156,7 @@ function quickStep(dt, t0) {
   }
   render();
   if (quick.measuring) quickUi.record(dt, performance.now() - t0, quickCondition(quick));
-  const c = QUICK_CONDITIONS[quickCondition(quick)];
+  const c = quickConditionDef(quick);
   const left = Math.ceil((quickTotalSeconds(quick) - quickElapsed(quick)) / 60);
   const what = quick.phase === 'warmup' ? 'chauffe' : `tour ${quick.round + 1}/${quick.rounds} · ${c.id}`;
   quickUi.progress(`Test rapide : ${what} · reste ≈ ${left} min`);
@@ -245,7 +248,7 @@ let savedDust = true;
 function applySwitches(on) {
   const b = config.bench;
   stage.layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
-  stage.layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
+  stage.setFar(config.scene.farWindows, on && b.noFarLayer);
   sprite.shadowEl.style.display = on && b.noShadow ? 'none' : '';
   if (on) {
     savedDust = config.character.dust;
@@ -380,7 +383,7 @@ function render() {
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
   const camFrozen = bench && config.bench.fixedCamera && camera.ready;
-  const pc = protocol ? protocolConfig(protocol) : quick ? QUICK_CONDITIONS[quickCondition(quick)] : null;
+  const pc = protocol ? protocolConfig(protocol) : quick ? quickConditionDef(quick) : null;
   if (pc && pc.camera === 'fixed') {
     // Diagnostic : caméra fixe, centrée sur l'aller-retour.
     const mid = (place.diagnostic.a[0] + place.diagnostic.b[0]) / 2;
@@ -469,6 +472,7 @@ async function start() {
     if (key === 'debug.showWalkMask') debugMask.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity') stage.applyOpacity();
+    if (key === 'scene.farWindows') stage.setFar(value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
   });
@@ -486,6 +490,7 @@ async function start() {
   window.addEventListener('pointerdown', unlock, true);
   window.addEventListener('keydown', unlock, true);
 
+  stage.setFar(config.scene.farWindows);
   layout();
   render();
   hud.ready();
@@ -515,9 +520,9 @@ async function start() {
       startProtocol(warmup, measure, repeats);
     },
     protocolReport: () => protocolUi.lastReport,
-    startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1) {
+    startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1, suite = 'T012') {
       if (sm.is('play')) sm.go('menu');
-      startQuick({ warmup, block, settle, rounds });
+      startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => quickUi.lastReport,
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
