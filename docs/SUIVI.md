@@ -24,6 +24,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Toucher ou joystick virtuel sur téléphone | 4 | ✅ | Séance 8 : toucher par défaut, **joystick désactivé par défaut** (option gardée dans ⚙ → Contrôles). Vérifié par un test automatique. |
 | Contourner seul les objets quand on touche derrière | 4 | ✅ | Choix A, validé en séance 5. |
 | Difficile de viser le bord de la zone au doigt | 7 | ✅ | Toucher hors du sol (étagère, rayon de devant) envoie jusqu'au bord de la zone. Testé automatiquement. Validé (séance 8). |
+| Essai : scanner un produit posé sur une table ou dans le caddie, de profil ou de face | 28 | 👀 | Pomme sur une petite table de dégustation (fin du rayon), boîte d'œufs dans le caddie. De côté : de profil ; derrière : de face ; devant : de dos. Portées réglables (⚙ → Scanner). À tester par l'auteur. |
 | Scanner naturellement au doigt par un double toucher | 27 | 👀 | Double toucher (ou double clic) sur un produit : le personnage va devant et le scanne. Délai et écart réglables (⚙ → Contrôles). À tester par l'auteur. |
 
 ## Décor
@@ -152,6 +153,15 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | A2 — le personnage semble évoluer dans un décor profond | ✅ | **A2 validée : 6be7130** (séance 26). Rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état (choix C) ; essai PixiJS non retenu pour l'instant. |
 | A3 — scanner un produit est satisfaisant | ✅ | **Validée : 630fec0** (séance 28). Limites du test des comptages relevées (80/5/20/32) : validées par l'auteur. |
 
+## Histoire et sens du jeu (séance 28)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | ❓ | 3 pistes proposées (carte de fidélité, date de péremption, stagiaire de l'inventaire). Choix de l'auteur attendu. |
+| Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Réponse comprise dans chaque piste. |
+| Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
+| Interaction avec les cartes dans le Panier | 28 | 👀 | Normal pour l'instant : le prototype A vérifie seulement « scanner est agréable ». Les cartes serviront au combat (prototype B). |
+| Utilité du caddie, pouvoir le pousser | 28 | ❓ | 3 pistes proposées (décor seulement, le pousser, le caddie devient le Panier). Mécanique à construire après le prototype A au plus tôt. |
+
 ## Interface
 | Demande | Séance | État | Notes |
 |---|---|---|---|
@@ -164,3 +174,4 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 
 ## Questions de l'auteur (réponses données)
 - Faut-il dessiner les personnages avant l'étape suivante ? Non : les dessins arrivent au prototype D, préparé une séance à l'avance avec docs/IMAGES.md (séance 5).
+- Pourquoi le clignotement du caddie n'existait pas avant ? Mesuré (séance 28) : la bascule de calque était déjà là en A1 et A2, de façon identique. Ce n'est pas un défaut ajouté ensuite. Ce qui a changé, c'est sans doute sa visibilité (hypothèses non prouvées : plus d'images en mémoire depuis A3, et des images lentes qui le masquaient avant).

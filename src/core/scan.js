@@ -3,29 +3,44 @@
 //
 // Déroulé : lever la douchette → laser (bip) → le produit se dissout (aspiration) → la carte apparaît.
 
-// shelf : [{ x, scanned }] ; hero : { x, z } ; p : réglages (config.scan).
-// Renvoie l'indice du produit le plus proche à portée, ou -1.
+// Produits scannables : [{ x, scanned, loose?, z? }].
+//  - sur l'étagère du fond (loose absent) : on les scanne depuis le pied de l'étagère (z ≥ minDepth),
+//    à moins de `range` le long du rayon ;
+//  - posés ailleurs (loose : table, caddie…, à la profondeur z) : à moins de looseRange le long du
+//    rayon et de looseDepth en profondeur, de n'importe quel côté.
+// Renvoie un écart « normalisé » (0 = juste devant, 1 = limite de portée), ou Infinity hors de portée.
+function reachOf(it, hero, p) {
+  if (!it || it.scanned) return Infinity;
+  const dx = Math.abs(it.x - hero.x);
+  if (it.loose) {
+    const r = Math.max(dx / p.looseRange, Math.abs(it.z - hero.z) / p.looseDepth);
+    return r <= 1 ? r : Infinity;
+  }
+  if (hero.z < p.minDepth) return Infinity; // il faut être au pied de l'étagère
+  return dx <= p.range ? dx / p.range : Infinity;
+}
+
+// Indice du produit le plus proche à portée, ou -1.
 export function nearestProduct(shelf, hero, p) {
-  if (hero.z < p.minDepth) return -1; // il faut être au pied de l'étagère
   let best = -1;
-  let bestD = Infinity;
+  let bestR = Infinity;
   for (let i = 0; i < shelf.length; i++) {
-    if (shelf[i].scanned) continue;
-    const d = Math.abs(shelf[i].x - hero.x);
-    if (d <= p.range && d < bestD) {
+    const r = reachOf(shelf[i], hero, p);
+    if (r < bestR) {
       best = i;
-      bestD = d;
+      bestR = r;
     }
   }
   return best;
 }
 
-// Produit visé par un double toucher : le non scanné le plus proche de x (à tolerance près), ou -1.
+// Produit de l'étagère du fond visé par un double toucher : le non scanné le plus proche de x
+// (à tolérance près), ou -1. (Les produits posés ailleurs se visent en touchant leur dessin.)
 export function productNear(shelf, x, tolerance) {
   let best = -1;
   let bestD = Infinity;
   for (let i = 0; i < shelf.length; i++) {
-    if (shelf[i].scanned) continue;
+    if (shelf[i].scanned || shelf[i].loose) continue;
     const d = Math.abs(shelf[i].x - x);
     if (d <= tolerance && d < bestD) {
       best = i;
@@ -37,8 +52,21 @@ export function productNear(shelf, x, tolerance) {
 
 // Ce produit précis est-il à portée du personnage ?
 export function inReach(shelf, index, hero, p) {
-  const it = shelf[index];
-  return !!it && !it.scanned && hero.z >= p.minDepth && Math.abs(it.x - hero.x) <= p.range;
+  return reachOf(shelf[index], hero, p) < Infinity;
+}
+
+// Où se placer pour scanner un produit posé ailleurs : l'endroit prévu le plus proche du personnage.
+export function standSpot(item, hero) {
+  let best = item.standAt[0];
+  let bestD = Infinity;
+  for (const s of item.standAt) {
+    const d = Math.hypot(s[0] - hero.x, s[1] - hero.z);
+    if (d < bestD) {
+      best = s;
+      bestD = d;
+    }
+  }
+  return best;
 }
 
 const PHASES = ['raise', 'laser', 'dissolve', 'card'];

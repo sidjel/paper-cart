@@ -12,6 +12,32 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 28 — 13/11/2026 — A3 validée, essai de scan hors de l'étagère, pistes pour l'histoire
+
+**Décisions de l'auteur** : clignotement corrigé (confirmé) ; nouvelles limites du test des comptages validées ; **A3 validée : 630fec0**.
+
+**« Pourquoi il n'y avait pas ce problème avant ? »**
+- Mesure : j'ai rejoué le même trajet (passer deux fois derrière le présentoir) sur les versions A1 (1445d25), A2 (6be7130) et A3 (e5efbc8). Les trois versions donnent exactement les mêmes 4 bascules de calque. La nouvelle version n'en donne aucune.
+- Ce n'est donc pas un défaut ajouté ensuite : la cause existait dès A1. Ce qui a changé, c'est sans doute sa **visibilité**. Deux hypothèses, que je ne peux pas prouver car seule la dernière version est en ligne :
+  - depuis A3, le jeu garde 29 images en mémoire au lieu de 17, donc le téléphone met plus de temps à redessiner le caddie ;
+  - avant, les images lentes masquaient peut-être ce petit trou.
+
+**Jouable maintenant : essai de scan hors de l'étagère**
+- Une **pomme** sur une petite table de dégustation (au bout du rayon) et une **boîte d'œufs** dans le caddie.
+- On les scanne de n'importe quel côté : **à côté, de profil** ; **derrière, de face** ; devant, de dos.
+- Double toucher (ou double clic) sur le produit : le personnage va à l'endroit prévu le plus proche, sur le côté de préférence.
+- Le produit est dessiné juste au-dessus de son support. On peut passer derrière la table et le caddie, et ils ne clignotent pas (calque fixe).
+
+**Vérifié, et comment**
+- 85 tests de logique, dont la portée de tous les côtés, l'endroit où se placer et la pose (profil, face ou dos).
+- 44 tests navigateur sans erreur console, dont le scan de la boîte d'œufs de profil au doigt et à la souris.
+- Captures en téléphone simulé : profil au caddie, puis à la table de côté, derrière et devant.
+- Comptages : 77 éléments, 18 images visibles, 32 images chargées (la limite est atteinte : un nouveau contenu demandera de la relever), toujours aucune bascule de calque.
+
+**Décisions prises seul (détails mineurs)** : une table « dégustation » (elle a sa place dans un magasin), placée au bout du rayon pour ne pas gêner le banc d'essai ni le test rapide ; une pomme et des œufs comme produits d'essai ; devant la table, le personnage se met de dos (c'est la seule pose possible) et cache un peu la pomme.
+
+---
+
 ## Séance 27 — 13/11/2026 — Clignotement du caddie corrigé, scan par double toucher
 
 **Retours de l'auteur** : rapport du diagnostic sur e5efbc8 : 61 images/s, aucune image au-delà de 33 ms sur les 600 dernières (30 depuis la remise à zéro, sur 7047 images), calcul moyen 0,67 ms. Deux demandes : le caddie et le carton « -30 % » clignotent ou disparaissent par moments ; pouvoir scanner au doigt par un double toucher.

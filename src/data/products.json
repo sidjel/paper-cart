@@ -10,6 +10,8 @@
     "cereales": { "name": "[TEMP] Céréales", "image": "art/placeholder/produits/cereales.svg", "size": [80, 100], "power": 2, "stage": "frais", "properties": ["poudre", "croustillant", "sucré"], "colors": ["#d9a441", "#b98a5a", "#f3ecd8"] },
     "biere": { "name": "[TEMP] Bière", "image": "art/placeholder/produits/biere.svg", "size": [72, 90], "power": 3, "stage": "frais", "properties": ["liquide", "pétillant"], "colors": ["#8a5a2b", "#efe3c2", "#d9a441"] },
     "plante": { "name": "[TEMP] Plante", "image": "art/placeholder/produits/plante.svg", "size": [80, 100], "power": 2, "stage": "frais", "properties": ["végétal"], "colors": ["#6f8f6a", "#c0714b"] },
-    "fromage": { "name": "[TEMP] Fromage", "image": "art/placeholder/produits/fromage.svg", "size": [84, 105], "power": 4, "stage": "mur", "properties": ["gras", "odorant"], "colors": ["#ecc94b", "#c9a12e"] }
+    "fromage": { "name": "[TEMP] Fromage", "image": "art/placeholder/produits/fromage.svg", "size": [84, 105], "power": 4, "stage": "mur", "properties": ["gras", "odorant"], "colors": ["#ecc94b", "#c9a12e"] },
+    "pomme": { "name": "[TEMP] Pomme", "image": "art/placeholder/produits/pomme.svg", "size": [84, 105], "power": 3, "stage": "frais", "properties": ["sucré", "végétal"], "colors": ["#c0503f", "#7f9a5a", "#e88f7c"] },
+    "oeufs": { "name": "[TEMP] Œufs", "image": "art/placeholder/produits/oeufs.svg", "size": [84, 105], "power": 3, "stage": "frais", "properties": ["fragile", "organique"], "colors": ["#f4ead6", "#e9d2ae", "#b9ad97"] }
   }
 }

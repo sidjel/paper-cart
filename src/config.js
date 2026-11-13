@@ -35,6 +35,10 @@ export const config = {
   scan: {
     range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
     minDepth: 150, // il faut être assez près de l'étagère du fond (profondeur minimale)
+    // Produits posés ailleurs (table, caddie) : portée autour du produit, sur le sol.
+    looseRange: 170, // écart maximal le long du rayon (px)
+    looseDepth: 90, // écart maximal en profondeur
+    awayDepth: 30, // produit plus loin que ça en profondeur : le personnage se met de dos pour le scanner
     raise: 0.15, // durée : lever la douchette (s)
     laser: 0.22, // durée : le laser part vers le produit (s)
     dissolve: 0.55, // durée : le produit se dissout et est aspiré (s)
@@ -145,6 +149,8 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
+  { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou caddie : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },
+  { group: 'Scanner', key: 'scan.looseDepth', label: 'Produit sur table ou caddie : portée en profondeur', min: 30, max: 200, step: 5 },
   { group: 'Scanner', key: 'scan.raise', label: 'Lever la douchette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.laser', label: 'Laser', min: 0.05, max: 0.8, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.dissolve', label: 'Dissolution du produit', min: 0.1, max: 1.5, step: 0.05, unit: 's' },

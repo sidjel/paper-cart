@@ -7,7 +7,7 @@ import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceShelf } from './core/movement.js';
-import { nearestProduct, productNear, inReach, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
+import { nearestProduct, productNear, inReach, standSpot, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -66,7 +66,7 @@ const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, touch, m
 // ---------- Scanner, cartes et Panier ----------
 let shelf = null; // produits sur l'étagère (affichage)
 let loadedImages = null;
-let shelfState = null; // [{ x, scanned }] (logique)
+let shelfState = null; // [{ x, scanned, loose?, z? }] (logique)
 const scan = createScan();
 const basket = createBasket();
 const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back') });
@@ -76,6 +76,7 @@ const cardFrom = { x: 0, y: 0 };
 const cardTo = { x: 0, y: 0 };
 let highlighted = -1;
 let pendingScan = -1; // double toucher : produit à scanner à l'arrivée du personnage
+const DOUBLE_TAP_MARGIN = 50; // marge autour du dessin d'un produit posé ailleurs (px de scène)
 
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
@@ -85,10 +86,20 @@ function tryScan() {
 function scanProduct(i) {
   pendingScan = -1;
   if (i < 0) return;
-  faceShelf(walker, shelfState[i].x); // fonction de core/ : s'arrêter et se tourner vers l'étagère
+  const target = shelfState[i];
+  faceShelf(walker, target.x, target.loose ? target.z : undefined, config.scan.awayDepth); // s'arrêter, se tourner vers le produit
   marker.hide();
   startScan(scan, i);
   hud.playerMoved();
+}
+
+// Produit → plus grande taille à laquelle il est affiché (étagère : 1 ; table, caddie : scale).
+function productScales() {
+  const m = new Map();
+  const add = (id, k) => m.set(id, Math.max(m.get(id) ?? 0, k));
+  for (const it of place.shelfProducts.items) add(it.product, 1);
+  for (const it of place.looseProducts?.items ?? []) add(it.product, it.scale ?? 1);
+  return m;
 }
 
 function imageUrlOf(def) {
@@ -439,15 +450,24 @@ function walkTo(target) {
 function onDoubleTap(cx, cy) {
   if (!sm.is('play') || scan.active) return;
   stage.clientToStage(cx, cy, tmpStage);
-  const i = productNear(shelfState, stageToWorldX(proj, tmpStage.x), config.scan.range);
+  // D'abord un produit posé ailleurs, si l'on touche son dessin (avec une marge pour le doigt).
+  let i = shelf.items.findIndex(
+    (it) => it.loose && !it.scanned && Math.abs(tmpStage.x - it.x) <= it.w / 2 + DOUBLE_TAP_MARGIN && tmpStage.y <= it.y + DOUBLE_TAP_MARGIN && tmpStage.y >= it.y - it.h - DOUBLE_TAP_MARGIN,
+  );
+  if (i < 0) i = productNear(shelfState, stageToWorldX(proj, tmpStage.x), config.scan.range);
   if (i < 0) return;
   if (inReach(shelfState, i, walker, config.scan)) {
     scanProduct(i);
     return;
   }
-  tmpWorld.x = shelfState[i].x;
-  // Garder sa profondeur s'il est déjà au pied de l'étagère, sinon y aller (bord haut de la zone).
-  tmpWorld.z = walker.z >= config.scan.minDepth ? walker.z : 1e6;
+  if (shelfState[i].loose) {
+    // Se placer à l'endroit prévu le plus proche (à côté : de profil ; derrière : de face).
+    [tmpWorld.x, tmpWorld.z] = standSpot(shelf.items[i], walker);
+  } else {
+    tmpWorld.x = shelfState[i].x;
+    // Garder sa profondeur s'il est déjà au pied de l'étagère, sinon y aller (bord haut de la zone).
+    tmpWorld.z = walker.z >= config.scan.minDepth ? walker.z : 1e6;
+  }
   walkTo(tmpWorld);
   pendingScan = i;
 }
@@ -581,10 +601,10 @@ async function start() {
     // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
     ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
     { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
-    // Produits de l'étagère (préparés à leur taille d'affichage).
-    ...[...new Set(place.shelfProducts.items.map((it) => it.product))].map((id) => {
+    // Produits à scanner (préparés à leur plus grande taille d'affichage).
+    ...[...productScales()].map(([id, k]) => {
       const def = catalog.products[id];
-      return { id: def.image, url: BASE + def.image, w: def.size[0], h: def.size[1], scale: rasterScale };
+      return { id: def.image, url: BASE + def.image, w: def.size[0], h: def.size[1], scale: rasterScale * k };
     }),
   ];
   const images = await loadImages(entries);
@@ -596,10 +616,14 @@ async function start() {
   walker = createWalker(place.spawn[0], place.spawn[1]);
   ghost = createWalker(place.diagnostic.a[0], place.diagnostic.a[1]);
   marker = createTargetMarker(stage.layers.acteurs);
-  shelf = createShelfProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display);
-  shelfState = shelf.items.map((it) => ({ x: it.x, scanned: false }));
   props = createProps(place, images, stage.layers.acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
+  shelf = createShelfProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display, {
+    parent: stage.layers.acteurs,
+    proj,
+    levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
+  });
+  shelfState = shelf.items.map((it) => ({ x: it.x, scanned: false, loose: !!it.loose, z: it.wz }));
   depthRefs = props.map((p) => p.depthRef);
   dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);

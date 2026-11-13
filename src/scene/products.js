@@ -1,10 +1,14 @@
 // Produits sur l'étagère et effets du scanner (affichage seulement ; la logique est dans core/scan.js).
-// - chaque produit est une illustration entière posée sur une tablette ;
+// - chaque produit est une illustration entière posée sur une tablette de l'étagère du fond,
+//   ou ailleurs (sur une table, dans le caddie : « loose ») ; ces derniers sont dessinés juste
+//   au-dessus de l'objet qui les porte, sur leur propre calque comme lui (pas de clignotement) ;
 // - un repère en papier flotte au-dessus du produit à portée ;
 // - pendant un scan : laser, dissolution du produit, confettis aspirés par la douchette.
 // Tout est créé au chargement et réutilisé ; animé par le temps de jeu (figé en pause),
 // seulement en transform et opacity. Les éléments qui bougent ont leur propre calque pendant
 // l'effet seulement (will-change posé au début, retiré à la fin).
+
+import { worldToStageY } from './projection.js';
 
 const BITS_MAX = 24;
 
@@ -14,8 +18,9 @@ function noise(i, k) {
   return v - Math.floor(v);
 }
 
-export function createShelfProducts(place, catalog, images, parent, effectsParent, settings, display) {
-  const items = place.shelfProducts.items.map((it) => {
+// loose : { parent, proj, levelOf(idObjet) } pour les produits posés ailleurs que sur l'étagère.
+export function createShelfProducts(place, catalog, images, parent, effectsParent, settings, display, loose) {
+  function make(it, x, y, scale, into) {
     const def = catalog.products[it.product];
     const img = images.get(def.image);
     const el = new Image();
@@ -23,14 +28,24 @@ export function createShelfProducts(place, catalog, images, parent, effectsParen
     el.className = 'shelf-product';
     el.alt = '';
     el.draggable = false;
-    const [w, h] = def.size;
+    const w = Math.round(def.size[0] * scale);
+    const h = Math.round(def.size[1] * scale);
     el.width = w;
     el.height = h;
-    const [x, y] = it.at;
     el.style.transform = `translate(${x - w / 2}px, ${y - h}px)`;
-    parent.appendChild(el);
+    into.appendChild(el);
     return { id: it.product, def, x, y, w, h, el, scanned: false };
-  });
+  }
+  const items = place.shelfProducts.items.map((it) => make(it, it.at[0], it.at[1], 1, parent));
+  // Produits posés ailleurs : x, y sur la scène (bas du produit) ; on garde aussi leur place au sol.
+  for (const it of place.looseProducts?.items ?? []) {
+    const [wx, wz] = it.at;
+    const p = make(it, wx, worldToStageY(loose.proj, wz) - it.lift, it.scale ?? 1, loose.parent);
+    p.el.classList.add('prop'); // même calque fixe que les objets du décor
+    p.el.style.zIndex = loose.levelOf(it.on);
+    Object.assign(p, { loose: true, wz, standAt: it.standAt });
+    items.push(p);
+  }
 
   // Repère au-dessus du produit à portée.
   const marker = document.createElement('div');

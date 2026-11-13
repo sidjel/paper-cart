@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { nearestProduct, productNear, inReach, createScan, startScan, stepScan, scanProgress } from '../../src/core/scan.js';
+import { nearestProduct, productNear, inReach, standSpot, createScan, startScan, stepScan, scanProgress } from '../../src/core/scan.js';
 import { createBasket, addToBasket, STAGES } from '../../src/core/cards.js';
 import { createWalker, faceShelf } from '../../src/core/movement.js';
 import { createStateMachine } from '../../src/core/state.js';
@@ -7,7 +7,7 @@ import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import catalog from '../../src/data/products.json';
 import place from '../../src/data/places/rayon-essai.json';
 
-const P = { range: 150, minDepth: 150, raise: 0.15, laser: 0.22, dissolve: 0.55, card: 1.0 };
+const P = { range: 150, minDepth: 150, looseRange: 170, looseDepth: 90, awayDepth: 30, raise: 0.15, laser: 0.22, dissolve: 0.55, card: 1.0 };
 
 describe('produit à portée', () => {
   const shelf = [{ x: 300, scanned: false }, { x: 600, scanned: false }, { x: 650, scanned: true }];
@@ -34,6 +34,38 @@ describe('double toucher : produit visé', () => {
     expect(inReach(shelf, 0, { x: 560, z: 200 }, P)).toBe(false); // trop loin
     expect(inReach(shelf, 1, { x: 560, z: 50 }, P)).toBe(false); // pas au pied de l'étagère
     expect(inReach(shelf, 2, { x: 650, z: 200 }, P)).toBe(false); // déjà scanné
+  });
+});
+
+describe('produits posés ailleurs (table, caddie)', () => {
+  const items = [{ x: 3050, z: 50, loose: true, scanned: false, standAt: [[2900, 50], [3200, 50], [3050, 130]] }, { x: 3380, scanned: false }];
+  it('à portée de n’importe quel côté, sans être au pied de l’étagère', () => {
+    expect(nearestProduct(items, { x: 2900, z: 50 }, P)).toBe(0); // à gauche
+    expect(nearestProduct(items, { x: 3200, z: 50 }, P)).toBe(0); // à droite
+    expect(nearestProduct(items, { x: 3050, z: 130 }, P)).toBe(0); // derrière
+    expect(nearestProduct(items, { x: 3050, z: -20 }, P)).toBe(0); // devant
+    expect(nearestProduct(items, { x: 2800, z: 50 }, P)).toBe(-1); // trop loin
+    expect(nearestProduct(items, { x: 3050, z: 200 }, P)).toBe(-1); // trop loin en profondeur
+  });
+  it('au pied de l’étagère, le produit de l’étagère et celui de la table ne se confondent pas', () => {
+    expect(nearestProduct(items, { x: 3380, z: 250 }, P)).toBe(1);
+    expect(productNear(items, 3060, 150)).toBe(-1); // le double toucher par x ne vise que l’étagère
+  });
+  it('endroit où se placer : le plus proche du personnage', () => {
+    expect(standSpot(items[0], { x: 2000, z: 0 })).toEqual([2900, 50]);
+    expect(standSpot(items[0], { x: 3500, z: 60 })).toEqual([3200, 50]);
+    expect(standSpot(items[0], { x: 3050, z: 250 })).toEqual([3050, 130]);
+  });
+  it('se tourner vers lui : de profil à côté, de face derrière, de dos devant', () => {
+    const w = createWalker(2900, 50);
+    faceShelf(w, 3050, 50, P.awayDepth);
+    expect(w).toMatchObject({ facing: 1, away: false });
+    const b = createWalker(3040, 130);
+    faceShelf(b, 3050, 50, P.awayDepth);
+    expect(b.away).toBe(false);
+    const f = createWalker(3060, -20);
+    faceShelf(f, 3050, 50, P.awayDepth);
+    expect(f).toMatchObject({ facing: -1, away: true });
   });
 });
 

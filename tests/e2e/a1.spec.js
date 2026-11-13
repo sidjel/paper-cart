@@ -455,6 +455,27 @@ test('A3 à la souris : double clic sur un produit, puis le clavier annule une a
   expect((await page.evaluate(() => window.paperCart.scanState())).cards.length).toBe(1);
 });
 
+test('Essai : scanner la boîte d’œufs dans le caddie, de profil (double toucher ou double clic)', async ({ page }, info) => {
+  const n = await page.locator('.shelf-product').count();
+  const eggs = page.locator('.shelf-product').nth(n - 1); // le dernier produit : les œufs du caddie
+  const r = await eggs.boundingBox();
+  const c = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  if (info.project.name === 'telephone') {
+    await page.touchscreen.tap(c.x, c.y);
+    await page.touchscreen.tap(c.x, c.y);
+  } else {
+    await page.mouse.dblclick(c.x, c.y);
+  }
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 10000 }).toBe(true);
+  // À gauche du caddie, tourné vers la droite, de face (donc de profil vers le produit).
+  const h = await hero(page);
+  expect(h).toMatchObject({ facing: 1, away: false });
+  await page.waitForTimeout(450);
+  await page.screenshot({ path: `test-results/captures/essai-${info.project.name}-caddie.png` });
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Œufs']);
+  await expect(eggs).toBeHidden();
+});
+
 test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
   await page.keyboard.down('ArrowUp');

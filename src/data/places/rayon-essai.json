@@ -21,6 +21,10 @@
       "src": "art/placeholder/caddie.svg",
       "size": [335, 250]
     },
+    "petite-table": {
+      "src": "art/placeholder/petite-table.svg",
+      "size": [230, 140]
+    },
     "rayon-avant": {
       "src": "art/placeholder/rayon-avant.svg",
       "size": [4300, 300]
@@ -81,6 +85,10 @@
       {
         "name": "Présentoir Crousti-Gouffre n°2",
         "points": [[2495, 98], [2805, 98], [2805, 182], [2495, 182]]
+      },
+      {
+        "name": "Petite table de dégustation",
+        "points": [[2960, 28], [3140, 28], [3140, 78], [2960, 78]]
       }
     ]
   },
@@ -106,6 +114,13 @@
       "at": [2650, 110],
       "anchor": [135, 300],
       "depthRef": 140
+    },
+    {
+      "id": "petite-table",
+      "image": "petite-table",
+      "at": [3050, 40],
+      "anchor": [115, 136],
+      "depthRef": 56
     }
   ],
   "bench": {
@@ -161,6 +176,13 @@
     "a": [1300, 40],
     "b": [2300, 40],
     "idle": [1800, 40]
+  },
+  "looseProducts": {
+    "comment": "[ESSAI] Produits posés ailleurs que sur l'étagère du fond : on les scanne de profil, de face ou de dos selon où l'on se tient. at = [x, z] dans le monde ; lift = hauteur (px de scène) entre le sol en at et le bas du produit ; on = objet du décor qui le porte (le produit est dessiné juste au-dessus de lui) ; scale = taille ; standAt = endroits où se placer pour le scanner (double toucher).",
+    "items": [
+      { "product": "pomme", "at": [3050, 50], "lift": 104, "scale": 1.2, "on": "petite-table", "standAt": [[2900, 50], [3200, 50], [3050, 130]] },
+      { "product": "oeufs", "at": [1360, 120], "lift": 160, "scale": 1.1, "on": "caddie", "standAt": [[1205, 120], [1360, 200]] }
+    ]
   },
   "shelfProducts": {
     "comment": "Produits à scanner : at = [x, y] sur la scène, y = dessus de la tablette (282, 394 ou 506). On les scanne depuis le pied de l'étagère.",
