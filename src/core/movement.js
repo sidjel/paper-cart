@@ -61,6 +61,16 @@ export function clearTarget(w) {
   w.hasTarget = false;
 }
 
+// S'arrêter net et se tourner vers l'étagère du fond, du côté d'un point x (pour scanner).
+export function faceShelf(w, x) {
+  w.hasTarget = false;
+  w.vx = 0;
+  w.vz = 0;
+  if (x > w.x + 1) w.facing = 1;
+  else if (x < w.x - 1) w.facing = -1;
+  w.away = true;
+}
+
 function face(w, dx, dz) {
   if (dx > FACE_THRESHOLD) w.facing = 1;
   else if (dx < -FACE_THRESHOLD) w.facing = -1;

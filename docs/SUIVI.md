@@ -148,7 +148,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
 | A2 — le personnage semble évoluer dans un décor profond | ✅ | **A2 validée : 6be7130** (séance 26). Rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état (choix C) ; essai PixiJS non retenu pour l'instant. |
-| A3 — scanner un produit est satisfaisant | 🔧 | En cours (séance 26). |
+| A3 — scanner un produit est satisfaisant | 👀 | Construite (séance 26) : 10 produits, repère, scan (laser, bip, confettis, carte), Panier. **À tester par l'auteur**, puis validation. Limites du test des comptages relevées à cause du nouveau contenu : **à valider par l'auteur**. |
 
 ## Interface
 | Demande | Séance | État | Notes |

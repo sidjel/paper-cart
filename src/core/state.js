@@ -4,7 +4,8 @@
 
 export const TRANSITIONS = {
   loading: ['play'],
-  play: ['pause', 'menu'],
+  play: ['pause', 'menu', 'panier'],
+  panier: ['play'], // écran du Panier (les cartes obtenues)
   pause: ['play', 'menu'],
   menu: ['play', 'pause', 'bench'],
   bench: ['play'], // banc d'essai : le personnage se déplace tout seul, on mesure

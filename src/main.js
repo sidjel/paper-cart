@@ -6,7 +6,9 @@ import { config, onConfigChange, setValue, getValue, overrides } from './config.
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
-import { createWalker, setPath, stepWalker } from './core/movement.js';
+import { createWalker, setPath, stepWalker, faceShelf } from './core/movement.js';
+import { nearestProduct, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
+import { createBasket, addToBasket } from './core/cards.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -24,6 +26,8 @@ import { createProps } from './scene/props.js';
 import { actorLevel } from './scene/depth.js';
 import { createDust } from './scene/dust.js';
 import { createCamera, updateCamera } from './scene/camera.js';
+import { createShelfProducts } from './scene/products.js';
+import { createBasketUi, createFlyingCard } from './ui/cards.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createDiagnostic } from './ui/diagnostic.js';
@@ -32,6 +36,7 @@ import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import place from './data/places/rayon-essai.json';
 import heroData from './data/characters/heros.json';
+import catalog from './data/products.json';
 
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;
@@ -57,6 +62,65 @@ let renderLine = '';
 
 const audio = createAudio(config.audio, song);
 const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, touch, muted: config.audio.muted });
+
+// ---------- Scanner, cartes et Panier ----------
+let shelf = null; // produits sur l'étagère (affichage)
+let loadedImages = null;
+let shelfState = null; // [{ x, scanned }] (logique)
+const scan = createScan();
+const basket = createBasket();
+const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back') });
+const flyingCard = createFlyingCard(uiEl);
+const tip = { x: 0, y: 0 }; // bout de la douchette sur la scène
+const cardFrom = { x: 0, y: 0 };
+const cardTo = { x: 0, y: 0 };
+let highlighted = -1;
+
+function tryScan() {
+  if (!sm.is('play') || scan.active) return;
+  const i = nearestProduct(shelfState, walker, config.scan);
+  if (i < 0) return;
+  faceShelf(walker, shelfState[i].x); // fonction de core/ : s'arrêter et se tourner vers l'étagère
+  marker.hide();
+  startScan(scan, i);
+  hud.playerMoved();
+}
+
+function imageUrlOf(def) {
+  return loadedImages.get(def.image).url;
+}
+
+// Événements du scan, émis par core/scan.js au fil du temps de jeu.
+function onScanEvent(ev) {
+  if (!ev) return;
+  if (ev === 'bip' || ev === 'aspire') audio.play(ev);
+  else if (ev === 'carte') {
+    const it = shelf.items[scan.index];
+    shelf.remove(scan.index);
+    shelfState[scan.index].scanned = true;
+    const card = addToBasket(basket, it.id, it.def);
+    const url = imageUrlOf(it.def);
+    basketUi.add(card, url);
+    flyingCard.show(card, url);
+    // Points de départ et d'arrivée de la carte, calculés une fois.
+    stage.stageToClient(shown.x, shown.y - 330 * shown.scale * heroData.scale, cardFrom);
+    const r = basketUi.button.getBoundingClientRect();
+    cardTo.x = r.left + r.width / 2;
+    cardTo.y = r.top + r.height / 2;
+    audio.play('carte');
+  } else if (ev === 'fin') {
+    flyingCard.hide();
+    basketUi.setCount(basket.cards.length);
+  }
+}
+
+// Bout de la douchette (dans l'image du personnage) → scène.
+function updateTip() {
+  const s = shown.scale * heroData.scale;
+  const [tx, ty] = heroData.scanTip[walker.away ? 'dos' : 'face'];
+  tip.x = shown.x + walker.facing * (tx - heroData.anchor[0]) * s;
+  tip.y = shown.y + (ty - heroData.anchor[1]) * s;
+}
 const diag = createDiagnostic(uiEl, () => ({
   version: VERSION,
   state: sm.get(),
@@ -287,6 +351,7 @@ function handleAction(action) {
       else if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
+      else if (sm.is('panier')) sm.go('play');
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
       break;
@@ -313,6 +378,13 @@ function handleAction(action) {
     case 'mute':
       setValue('audio.muted', !config.audio.muted);
       break;
+    case 'action':
+      tryScan();
+      break;
+    case 'panier':
+      if (sm.is('panier')) sm.go('play');
+      else if (sm.is('play') && !scan.active) sm.go('panier');
+      break;
   }
 }
 
@@ -332,6 +404,8 @@ sm.onChange((now, before) => {
   audio.setState(now);
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
+  if (now === 'panier') basketUi.open();
+  if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
   if (now === 'play' || now === 'bench') stepper.reset();
 });
@@ -376,9 +450,20 @@ function render() {
   shown.scale = scaleAt(proj, z);
   shown.level = actorLevel(depthRefs, z);
   shown.time = time;
-  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance);
+  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active);
   sprite.setLevel(shown.level);
   dust.update(time);
+  // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
+  const reach = sm.is('play') && !scan.active ? nearestProduct(shelfState, walker, config.scan) : -1;
+  shelf.setMarker(reach, time);
+  if (reach !== highlighted) {
+    hud.setScanAvailable(reach >= 0);
+    highlighted = reach;
+  }
+  updateTip();
+  const progress = scanProgress(scan, config.scan);
+  shelf.update(scan, progress, tip);
+  if (scan.phase === 'card') flyingCard.update(progress, cardFrom, cardTo, config.display.reduceMotion);
   // La caméra suit le milieu du corps du personnage.
   const v = stage.view;
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
@@ -414,7 +499,13 @@ function frame(now) {
     const n = stepper.advance(dt / 1000);
     for (let i = 0; i < n; i++) {
       input.read(intent);
+      if (scan.active) {
+        // Pendant un scan, le personnage ne bouge pas.
+        intent.moveX = 0;
+        intent.moveZ = 0;
+      }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
+      onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
     render();
@@ -451,8 +542,14 @@ async function start() {
     // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
     ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
     { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
+    // Produits de l'étagère (préparés à leur taille d'affichage).
+    ...[...new Set(place.shelfProducts.items.map((it) => it.product))].map((id) => {
+      const def = catalog.products[id];
+      return { id: def.image, url: BASE + def.image, w: def.size[0], h: def.size[1], scale: rasterScale };
+    }),
   ];
   const images = await loadImages(entries);
+  loadedImages = images;
 
   stage = createStage(gameEl, place, images, getValue);
   proj = createProjection(place.projection, config.scene);
@@ -460,6 +557,8 @@ async function start() {
   walker = createWalker(place.spawn[0], place.spawn[1]);
   ghost = createWalker(place.diagnostic.a[0], place.diagnostic.a[1]);
   marker = createTargetMarker(stage.layers.acteurs);
+  shelf = createShelfProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display);
+  shelfState = shelf.items.map((it) => ({ x: it.x, scanned: false }));
   props = createProps(place, images, stage.layers.acteurs, proj);
   depthRefs = props.map((p) => p.depthRef);
   dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
@@ -501,6 +600,9 @@ async function start() {
     version: VERSION,
     state: () => sm.get(),
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
+    // Scanner : produit à portée, scan en cours, cartes du Panier.
+    scanState: () => ({ reach: highlighted, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name) }),
+    shelf: () => shelf.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
     worldToClient(x, z) {

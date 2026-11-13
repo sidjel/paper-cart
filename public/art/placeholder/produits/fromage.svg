@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : fromage. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><path d="M8 140 l100 -8 l0 -46 l-100 30 z" fill="#ecc94b"/><path d="M8 116 l100 -30 l-30 -18 z" fill="#f4d96a"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="40" cy="124" r="6" fill="#c9a12e"/><circle cx="72" cy="112" r="8" fill="#c9a12e"/><circle cx="92" cy="122" r="5" fill="#c9a12e"/><circle cx="60" cy="96" r="4" fill="#c9a12e"/>
+  </g>
+</svg>

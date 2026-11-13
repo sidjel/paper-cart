@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : céréales. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><path d="M18 26 h84 v120 h-84 z" fill="#d9a441"/><path d="M18 26 l10 -10 h84 l-10 10 z" fill="#b98a5a"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="60" cy="96" r="22" fill="#f3ecd8"/><text x="60" y="56" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="15" font-weight="700" fill="#4a3424">CROUSTI</text><circle cx="54" cy="92" r="5" fill="#b98a5a"/><circle cx="66" cy="100" r="5" fill="#b98a5a"/><circle cx="62" cy="88" r="4" fill="#b98a5a"/>
+  </g>
+</svg>

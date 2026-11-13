@@ -32,6 +32,15 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  scan: {
+    range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
+    minDepth: 150, // il faut être assez près de l'étagère du fond (profondeur minimale)
+    raise: 0.15, // durée : lever la douchette (s)
+    laser: 0.22, // durée : le laser part vers le produit (s)
+    dissolve: 0.55, // durée : le produit se dissout et est aspiré (s)
+    card: 1.0, // durée : la carte apparaît puis file dans le Panier (s)
+    particles: 14, // nombre de confettis
+  },
   camera: {
     zoom: 1, // 1 = toute la hauteur du décor visible ; plus grand = plus près (le haut et le bas sont coupés)
     follow: 5, // vitesse à laquelle la caméra rattrape le personnage
@@ -51,6 +60,7 @@ export const config = {
     master: 0.8, // volume général
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
+    scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
@@ -125,6 +135,14 @@ export const TUNABLES = [
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
+  { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
+  { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
+  { group: 'Scanner', key: 'scan.raise', label: 'Lever la douchette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
+  { group: 'Scanner', key: 'scan.laser', label: 'Laser', min: 0.05, max: 0.8, step: 0.01, unit: 's' },
+  { group: 'Scanner', key: 'scan.dissolve', label: 'Dissolution du produit', min: 0.1, max: 1.5, step: 0.05, unit: 's' },
+  { group: 'Scanner', key: 'scan.card', label: 'Apparition de la carte', min: 0.3, max: 2.5, step: 0.05, unit: 's' },
+  { group: 'Scanner', key: 'scan.particles', label: 'Nombre de confettis', min: 0, max: 24, step: 1, reload: true },
+  { group: 'Son', key: 'audio.scanVolume', label: 'Sons du scanner', min: 0, max: 1, step: 0.05 },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },

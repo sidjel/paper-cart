@@ -108,7 +108,7 @@ html, body {
   font-size: 15px;
 }
 #ui > * { pointer-events: auto; }
-#ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner { pointer-events: none; }
+#ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner, #ui > .flying-card, #ui > .scan-button { pointer-events: none; }
 
 button, select {
   font: inherit;
@@ -349,3 +349,136 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   pointer-events: none;
 }
 .bench-banner[hidden] { display: none; }
+
+/* ---------- Scanner : produits, repère, laser, confettis ---------- */
+.shelf-product { position: absolute; left: 0; top: 0; display: block; pointer-events: none; transform-origin: 50% 100%; }
+.shelf-product[hidden] { display: none; }
+.scan-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  z-index: 900;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.scan-marker.visible { opacity: 1; will-change: transform; }
+.scan-laser {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  height: 12px;
+  transform-origin: 0 50%;
+  z-index: 901;
+  display: none;
+  pointer-events: none;
+}
+.scan-laser.visible { display: block; will-change: transform, opacity; }
+.scan-laser-halo { position: absolute; left: 0; right: 0; top: 2px; height: 8px; border-radius: 4px; background: rgb(255 70 60 / 0.35); }
+.scan-laser-core { position: absolute; left: 0; right: 0; top: 4.5px; height: 3px; border-radius: 2px; background: #ff3b30; }
+.scan-bit {
+  position: absolute;
+  left: -6px;
+  top: -4px;
+  width: 12px;
+  height: 8px;
+  border: 1.5px solid #4a4236;
+  border-radius: 2px;
+  z-index: 902;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.scan-bit[hidden] { display: none; }
+
+/* ---------- Cartes ---------- */
+.card {
+  --stage: #6f8f6a;
+  width: 132px;
+  padding: 7px 8px 9px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 rgb(61 53 42 / 0.35), inset 0 0 0 4px var(--stage);
+  font-size: 13px;
+  text-align: center;
+  user-select: none;
+}
+.card.stage-mur { --stage: #d9a441; }
+.card.stage-pourri { --stage: #7a6a3a; }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.card-power {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 16px;
+}
+.card-stage { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--ink); font-size: 12px; }
+.card-stage svg { fill: var(--stage); stroke: var(--ink); stroke-width: 1.5; }
+.card-img { display: block; width: 72px; height: 90px; margin: 4px auto 2px; object-fit: contain; }
+.card-name { font-weight: 700; font-size: 15px; }
+.card-props { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 4px; }
+.card-props span { padding: 1px 6px; border-radius: 999px; border: 1px solid var(--ink); background: var(--card); font-size: 11px; }
+
+/* Carte qui apparaît puis file dans le Panier. */
+.flying-card { position: absolute; left: 0; top: 0; z-index: 50; pointer-events: none; will-change: transform, opacity; }
+.flying-card[hidden] { display: none; }
+
+/* ---------- Panier ---------- */
+.panier-button {
+  position: absolute;
+  left: var(--safe-left);
+  bottom: calc(var(--safe-bottom) + 4px);
+  font-size: 16px;
+}
+.panier-count {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+}
+.panier-button.bump { animation: bump 0.35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.panier {
+  top: var(--safe-top);
+  bottom: var(--safe-bottom);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, calc(100vw - 24px));
+  padding: 10px 16px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.panier h2 { margin: 0 0 8px; font-size: 20px; }
+.panier-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 4px 0 8px; }
+
+/* ---------- Bouton Scanner ---------- */
+.scan-button {
+  position: absolute;
+  right: calc(var(--safe-right) + 6px);
+  bottom: calc(var(--safe-bottom) + 30px);
+  min-width: 112px;
+  min-height: 56px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 3px 3px 0 rgb(61 53 42 / 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.scan-button small { display: block; font-size: 11px; font-weight: 400; }
+#ui > .scan-button.visible { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) { .panier-button.bump { animation: none; } }

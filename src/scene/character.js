@@ -74,6 +74,8 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const dosIdle = anims['dos.idle'] ?? faceIdle;
   const faceWalk = anims['face.walk'] ?? faceIdle;
   const dosWalk = anims['dos.walk'] ?? dosIdle;
+  const faceScan = anims['face.scan'] ?? faceIdle;
+  const dosScan = anims['dos.scan'] ?? dosIdle;
 
   // État de l'affichage (distinct de la logique : la feuille met un instant à se retourner).
   let shownFacing = 1;
@@ -129,11 +131,14 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   }
 
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
-  function render(sx, sy, scale, facing, away, moving, time, distance) {
+  // scanning : douchette levée (animation « scan » des données, si elle existe).
+  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false) {
     const width = flipScale(time, facing, away);
     stats.flipping = flipStart >= 0;
 
-    const anim = shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
+    const anim = scanning
+      ? (shownAway ? dosScan : faceScan)
+      : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
     if (anim !== current) {
       current = anim;
       animStartTime = time;

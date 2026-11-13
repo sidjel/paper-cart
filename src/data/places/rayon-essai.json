@@ -46,6 +46,11 @@
       "hiddenBy": "en partie par les objets et le personnage (petites surfaces)"
     },
     {
+      "id": "produits",
+      "contains": "produits à scanner, posés sur l'étagère du fond",
+      "hiddenBy": "en partie par les objets et le personnage"
+    },
+    {
       "id": "acteurs",
       "contains": "personnage, ombre, poussière, présentoirs, caddie, repère du point visé — triés par profondeur",
       "hiddenBy": "rien"
@@ -156,5 +161,50 @@
     "a": [1300, 40],
     "b": [2300, 40],
     "idle": [1800, 40]
+  },
+  "shelfProducts": {
+    "comment": "Produits à scanner : at = [x, y] sur la scène, y = dessus de la tablette (282, 394 ou 506). On les scanne depuis le pied de l'étagère.",
+    "items": [
+      {
+        "product": "banane",
+        "at": [320, 282]
+      },
+      {
+        "product": "lait",
+        "at": [560, 394]
+      },
+      {
+        "product": "cereales",
+        "at": [1000, 506]
+      },
+      {
+        "product": "baguette",
+        "at": [1180, 282]
+      },
+      {
+        "product": "steak",
+        "at": [1440, 394]
+      },
+      {
+        "product": "pile",
+        "at": [1720, 506]
+      },
+      {
+        "product": "glace",
+        "at": [1940, 282]
+      },
+      {
+        "product": "biere",
+        "at": [2440, 394]
+      },
+      {
+        "product": "plante",
+        "at": [2900, 282]
+      },
+      {
+        "product": "fromage",
+        "at": [3380, 394]
+      }
+    ]
   }
 }

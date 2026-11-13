@@ -51,10 +51,21 @@ export function createHud(root, { version, onAction, touch, muted }) {
   const help = document.createElement('p');
   help.className = 'help';
   help.innerHTML = touch
-    ? 'Touche le sol pour marcher, garde le doigt pour guider.<br>Option « joystick virtuel » dans ⚙.'
-    : 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Manette : stick gauche, Start pour la pause.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche';
+    ? 'Touche le sol pour marcher, garde le doigt pour guider.<br>Près d’un produit, touche « Scanner ». Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.'
+    : 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit · I : Panier.<br>Manette : stick gauche, A scanner, Y Panier, B retour, Start pause.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche';
   card.append(h, resume, help);
   pause.appendChild(card);
+
+  // Bouton « Scanner » : visible seulement quand un produit est à portée (utile surtout au doigt).
+  const scanBtn = document.createElement('button');
+  scanBtn.className = 'scan-button';
+  scanBtn.innerHTML = touch ? 'Scanner' : 'Scanner <small>Entrée</small>';
+  scanBtn.setAttribute('aria-label', 'Scanner le produit (Entrée, Espace, bouton A)');
+  scanBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scanBtn.blur();
+    onAction('action');
+  });
 
   const hint = document.createElement('div');
   hint.className = 'hint';
@@ -68,7 +79,7 @@ export function createHud(root, { version, onAction, touch, muted }) {
   error.className = 'overlay error';
   error.hidden = true;
 
-  root.append(bar, ver, hint, pause, loading, rotate, error);
+  root.append(bar, ver, scanBtn, hint, pause, loading, rotate, error);
 
   let hintGone = false;
   return {
@@ -84,6 +95,9 @@ export function createHud(root, { version, onAction, touch, muted }) {
       if (hintGone) return;
       hintGone = true;
       hint.classList.add('gone');
+    },
+    setScanAvailable(on) {
+      scanBtn.classList.toggle('visible', on);
     },
     setMuted(m) {
       soundBtn.classList.toggle('off', m);

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : lait. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><path d="M24 46 l18 -18 h36 l18 18 v100 h-72 z" fill="#f4f1e8"/><path d="M42 28 h36 v-12 h-36 z" fill="#e6e1d2"/><rect x="24" y="96" width="72" height="50" fill="#5f7a96"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <text x="60" y="80" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="18" font-weight="700" fill="#4a4236">LAIT</text><ellipse cx="40" cy="60" rx="8" ry="5" fill="#3d352a"/><ellipse cx="80" cy="66" rx="6" ry="4" fill="#3d352a"/><text x="60" y="128" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="14" font-weight="700" fill="#fbf8ee">1 L</text>
+  </g>
+</svg>

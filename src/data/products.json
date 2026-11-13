@@ -1,0 +1,15 @@
+{
+  "comment": "Catalogue des produits. Noms provisoires ([TEMP], affichés sans le préfixe). size : taille d'affichage sur l'étagère (pixels de scène). stage : stade de la carte obtenue (frais, mur, pourri). colors : teintes des confettis quand le produit se dissout.",
+  "products": {
+    "banane": { "name": "[TEMP] Banane", "image": "art/placeholder/produits/banane.svg", "size": [84, 105], "power": 3, "stage": "mur", "properties": ["organique", "sucré"], "colors": ["#e8c341", "#c9a12e", "#5b4433"] },
+    "lait": { "name": "[TEMP] Lait", "image": "art/placeholder/produits/lait.svg", "size": [76, 95], "power": 2, "stage": "frais", "properties": ["liquide", "froid"], "colors": ["#f4f1e8", "#5f7a96", "#3d352a"] },
+    "steak": { "name": "[TEMP] Steak", "image": "art/placeholder/produits/steak.svg", "size": [84, 105], "power": 5, "stage": "frais", "properties": ["gras", "organique"], "colors": ["#b8473a", "#f3dccd", "#efe9dc"] },
+    "baguette": { "name": "[TEMP] Baguette", "image": "art/placeholder/produits/baguette.svg", "size": [80, 100], "power": 3, "stage": "frais", "properties": ["croustillant"], "colors": ["#d6a15a", "#9c6b34"] },
+    "glace": { "name": "[TEMP] Glace", "image": "art/placeholder/produits/glace.svg", "size": [80, 100], "power": 4, "stage": "frais", "properties": ["froid", "sucré"], "colors": ["#e7a6b3", "#f4f1e8", "#cfe3ef"] },
+    "pile": { "name": "[TEMP] Pile", "image": "art/placeholder/produits/pile.svg", "size": [64, 80], "power": 4, "stage": "frais", "properties": ["électrique"], "colors": ["#3f4a5a", "#c8913c", "#a9a497"] },
+    "cereales": { "name": "[TEMP] Céréales", "image": "art/placeholder/produits/cereales.svg", "size": [80, 100], "power": 2, "stage": "frais", "properties": ["poudre", "croustillant", "sucré"], "colors": ["#d9a441", "#b98a5a", "#f3ecd8"] },
+    "biere": { "name": "[TEMP] Bière", "image": "art/placeholder/produits/biere.svg", "size": [72, 90], "power": 3, "stage": "frais", "properties": ["liquide", "pétillant"], "colors": ["#8a5a2b", "#efe3c2", "#d9a441"] },
+    "plante": { "name": "[TEMP] Plante", "image": "art/placeholder/produits/plante.svg", "size": [80, 100], "power": 2, "stage": "frais", "properties": ["végétal"], "colors": ["#6f8f6a", "#c0714b"] },
+    "fromage": { "name": "[TEMP] Fromage", "image": "art/placeholder/produits/fromage.svg", "size": [84, 105], "power": 4, "stage": "mur", "properties": ["gras", "odorant"], "colors": ["#ecc94b", "#c9a12e"] }
+  }
+}

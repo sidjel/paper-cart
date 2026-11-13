@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : pile. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><rect x="36" y="26" width="48" height="120" rx="8" fill="#3f4a5a"/><rect x="36" y="26" width="48" height="36" rx="8" fill="#c8913c"/><rect x="50" y="16" width="20" height="12" rx="3" fill="#a9a497"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <text x="60" y="104" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="30" font-weight="700" fill="#fbf8ee">+</text><text x="60" y="136" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="12" font-weight="700" fill="#fbf8ee">1,5 V</text>
+  </g>
+</svg>

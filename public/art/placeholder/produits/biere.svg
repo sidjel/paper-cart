@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : bière. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><path d="M44 146 v-62 q0 -16 10 -24 v-36 h12 v36 q10 8 10 24 v62 z" fill="#8a5a2b"/><rect x="52" y="18" width="16" height="10" rx="2" fill="#d9a441"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="46" y="94" width="28" height="30" fill="#efe3c2"/><text x="60" y="114" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="9" font-weight="700" fill="#4a4236">BIÈRE</text>
+  </g>
+</svg>

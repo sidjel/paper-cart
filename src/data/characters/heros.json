@@ -57,6 +57,11 @@
           },
           "art/placeholder/heros-face-marche-4.svg"
         ]
+      },
+      "scan": {
+        "frames": [
+          "art/placeholder/heros-face-scan.svg"
+        ]
       }
     },
     "dos": {
@@ -81,6 +86,11 @@
           },
           "art/placeholder/heros-dos-marche-4.svg"
         ]
+      },
+      "scan": {
+        "frames": [
+          "art/placeholder/heros-dos-scan.svg"
+        ]
       }
     }
   },
@@ -88,5 +98,16 @@
     "comment": "Ombre au sol, séparée du dessin : ellipse sous les pieds (taille avant échelle).",
     "width": 150,
     "height": 34
+  },
+  "scanTip": {
+    "comment": "Bout de la douchette (dans l'image, vue tournée vers la droite) pendant le scan : départ du laser, arrivée des confettis.",
+    "face": [
+      209,
+      162
+    ],
+    "dos": [
+      204,
+      166
+    ]
   }
 }

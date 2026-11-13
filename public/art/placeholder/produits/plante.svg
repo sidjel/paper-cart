@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="150" viewBox="0 0 120 150">
+  <!-- [TEMP] Produit provisoire : plante. Posé sur le bas de l'image. Généré. -->
+  <defs>
+    <filter id="crayon" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <g id="s"><path d="M30 104 h60 l-8 42 h-44 z" fill="#c0714b"/><path d="M60 104 q-30 -20 -32 -62 q24 14 32 62 z M60 104 q4 -50 28 -80 q8 40 -28 80 z M60 104 q-10 -40 4 -70 q12 36 -4 70 z" fill="#6f8f6a"/></g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#s" xlink:href="#s" stroke="#fbf8ee" stroke-width="8" stroke-linejoin="round"/>
+    <use href="#s" xlink:href="#s" stroke="#4a4236" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="26" y="98" width="68" height="10" rx="3" fill="#a85f3c"/>
+  </g>
+</svg>

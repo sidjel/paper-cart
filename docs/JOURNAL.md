@@ -11,6 +11,35 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 26 — 13/11/2026 — Étape A3 : le scanner, les cartes et le Panier
+
+**Décisions de l'auteur** : rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état et passage à A3 (choix C). **A2 validée : 6be7130.**
+
+**Jouable maintenant**
+- **10 produits** sur l'étagère du fond, le long du rayon : banane, lait, céréales, baguette, steak, pile, glace, bière, plante, fromage (dessins provisoires).
+- Au pied de l'étagère, le **produit le plus proche est mis en évidence** par un repère en papier qui flotte au-dessus. Un bouton « Scanner » apparaît.
+- **Scanner** (Entrée, Espace, bouton A de la manette, ou bouton « Scanner » au doigt) : le personnage s'arrête et se tourne vers l'étagère, lève sa douchette (nouvelle pose, face et dos). Puis viennent le **laser** et le ***bip***, la **dissolution du produit en confettis** aspirés par la douchette (avec un son d'aspiration), et une **carte** qui apparaît avec un petit rebond, reste un instant, puis **file dans le Panier**. Le compteur du Panier sautille.
+- **Panier** (bouton en bas à gauche, touche I, bouton Y de la manette) : les cartes, avec nom, puissance, stade et propriétés. Le stade se lit à la **couleur et à la forme** de son icône : Frais = cercle vert, Mûr = triangle doré, Pourri = carré brun. Fermer : Échap, bouton B ou « Fermer ».
+- Pendant un scan, le personnage ne bouge pas. La pause fige tout le scan (délais liés à la boucle de jeu, sans minuterie).
+- Un produit scanné quitte l'étagère.
+
+**Vérifié, et comment**
+- 79 tests de logique, dont : produit à portée, déroulé du scan (bip → aspiration → carte → fin), scan figé sans temps qui passe, cartes et Panier, chaque produit du rayon scannable depuis le sol, Panier dans la machine à états.
+- 39 tests navigateur, sans erreur console : scan au clavier (repère, bouton, immobilité, carte dans le Panier, produit retiré, Panier ouvert et fermé) ; scan au doigt en téléphone simulé ; pause qui fige un scan.
+- Captures PC et téléphone simulé regardées (repère, laser et confettis, carte, Panier).
+- **Test des comptages** : 72 éléments (contre 39), 5 calques déclarés (le nouveau « produits »), 17 images visibles (contre 10), 29 images chargées (contre 17). Surface affichée presque inchangée (1,87 contre 1,85) ; rien n'est créé pendant le jeu. **Limites relevées en conséquence (80, 5, 20, 32) : à valider par l'auteur.**
+- **Non vérifiable ici** : les sons (pas de haut-parleur), la manette, la fluidité sur le téléphone.
+
+**Décisions prises seul (détails mineurs)**
+- Les noms provisoires sont préfixés [TEMP] dans les données, mais affichés sans le préfixe sur les cartes.
+- Stades de départ : la plupart des produits donnent une carte Fraîche, la banane et le fromage une carte Mûre (pour voir les deux icônes). Le vieillissement des cartes viendra avec le combat (prototype B).
+- Le personnage se met de dos pour scanner (l'étagère est au fond).
+- Les produits sont limités en hauteur par l'écart entre deux tablettes : ils sont un peu petits. Les dessins de l'auteur les rendront plus lisibles.
+
+**Proposition pour la séance suivante** : après tes retours, étape A4 : le narrateur (bande « haut-parleur », effet machine à écrire, une dizaine de répliques [TEMP]), des finitions et une vérification de la fluidité avec le test rapide.
+
+---
+
 ## Séance 25 — 13/11/2026 — Campagne « rayon de devant » n° 2 : bilan de l'optimisation DOM
 
 **Conditions** : 00fd429 ; batterie 57 → 55 %, débranché, plein écran, mode normal, écran maintenu allumé ; indice de vitesse 4,1 → 4,3 ms. Le téléphone est donc « en bon état » selon la règle de la séance 24.

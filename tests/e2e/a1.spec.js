@@ -351,3 +351,78 @@ test('campagne « rayon de devant » n° 2 (version courte) : chaque variante es
   expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(2);
   expect(await state()).toEqual({ opacite: '0.55', hauteur: '', coupe: '' }); // le jeu est rendu tel qu'avant
 });
+
+// ---------- Étape A3 : le scanner ----------
+
+test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, la carte rejoint le Panier', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  // Au départ, rien à portée.
+  expect((await page.evaluate(() => window.paperCart.scanState())).reach).toBe(-1);
+  await expect(page.locator('.scan-button')).not.toHaveClass(/visible/);
+  // Monter au pied de l'étagère, sous la banane.
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
+  await page.keyboard.up('ArrowUp');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(0);
+  await expect(page.locator('.scan-marker')).toHaveClass(/visible/);
+  await expect(page.locator('.scan-button')).toHaveClass(/visible/);
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active).toBe(true);
+  // Pendant le scan, le personnage ne bouge pas.
+  const x0 = (await hero(page)).x;
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(200);
+  await page.keyboard.up('ArrowRight');
+  expect((await hero(page)).x).toBe(x0);
+  await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-scan.png` });
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
+  await expect(page.locator('.panier-count')).toHaveText('1');
+  // Le produit a disparu de l'étagère et n'est plus à portée.
+  expect((await page.evaluate(() => window.paperCart.shelf()))[0].scanned).toBe(true);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(-1);
+  // Le Panier s'ouvre (I) et montre la carte, avec son stade.
+  await page.keyboard.press('KeyI');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('panier');
+  const card = page.locator('.panier .card');
+  await expect(card).toHaveCount(1);
+  await expect(card).toContainText('Banane');
+  await expect(card).toContainText('Mûr');
+  await expect(card).toHaveClass(/stage-mur/);
+  await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-panier.png` });
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+});
+
+test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  // Toucher l'étagère au-dessus du lait : le personnage va au pied de l'étagère.
+  const p = await page.evaluate(() => window.paperCart.worldToClient(560, 500));
+  await page.touchscreen.tap(p.x, p.y);
+  await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 6000 }).toBe(false);
+  await expect(page.locator('.scan-button')).toHaveClass(/visible/);
+  await page.locator('.scan-button').tap();
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Lait']);
+  await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-scan.png` });
+  await page.locator('.panier-button').tap();
+  await expect(page.locator('.panier .card')).toHaveCount(1);
+  await page.locator('.panier button', { hasText: 'Fermer' }).tap();
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+});
+
+test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
+  await page.keyboard.up('ArrowUp');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(0);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(150);
+  await page.keyboard.press('Escape');
+  const s1 = await page.evaluate(() => window.paperCart.scanState());
+  await page.waitForTimeout(2500);
+  const s2 = await page.evaluate(() => window.paperCart.scanState());
+  expect(s2).toEqual(s1); // rien n'a avancé pendant la pause
+  expect(s2.active).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
+});

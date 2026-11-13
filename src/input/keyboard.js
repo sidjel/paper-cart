@@ -15,6 +15,10 @@ const ACTIONS = {
   F2: 'settings',
   F3: 'diagnostic',
   F4: 'debugMask',
+  Enter: 'action',
+  NumpadEnter: 'action',
+  Space: 'action',
+  KeyI: 'panier',
 };
 
 export function createKeyboard(onAction) {
@@ -27,6 +31,8 @@ export function createKeyboard(onAction) {
 
   window.addEventListener('keydown', (e) => {
     const action = ACTIONS[e.code];
+    // Sur un bouton ou un réglage, Entrée et Espace gardent leur rôle habituel (cliquer, cocher).
+    if (action === 'action' && e.target && /^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (action) {
       e.preventDefault();
       if (!e.repeat) onAction(action);
