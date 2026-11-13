@@ -61,10 +61,20 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Le personnage est redessiné pixel par pixel à chaque image, même immobile (respiration, rebond, retournement appliqués à un élément sans calque propre) | Comptages du navigateur de test (organisation du rendu) | 👀 Séance 14 : **réfuté comme cause sur le téléphone**. « Réduire les animations » n'améliore rien en marche (caméra fixe ×1,50, marge 0,91–2,46 ; caméra mobile ×1,30, marge 1,06–1,60). Pas prioritaire. Effet à l'arrêt non mesuré. |
 | La poussière est redessinée à chaque image tant qu'elle est visible | Comptages du navigateur de test | 👀 Même conclusion (testée avec les animations dans T1) |
 | Rayon de premier plan transparent : très coûteux quand la caméra bouge | **Téléphone**, test rapide 11f9d39 | ✅ Démontré : l'enlever divise par 2,2 les images lentes en caméra mobile (×0,45, marge 0,34–0,59 ; images > 33 ms : 11 → 2). Décision de l'auteur attendue (aspect visuel). |
-| Rayons lointains dessinés sur toute une bande (3600×470) alors qu'on ne les voit que par deux ouvertures | Lecture du code + surface d'image mesurée | 🔧 Séance 15 : **correction n° 1 faite** (validée par l'auteur) : rayons lointains limités aux deux ouvertures, ancien rendu gardé pour comparer (réglage « Rayons lointains limités aux ouvertures »). Image identique à l'œil. Surface réellement dessinée par image (navigateur de test) : 3,38 → 2,73 écrans. **En attente du test T3 sur le téléphone.** |
+| Rayons lointains dessinés sur toute une bande (3600×470) alors qu'on ne les voit que par deux ouvertures | Lecture du code + surface dessinée dans le navigateur de test | ❌ Séance 16 : **optimisation rejetée**. T3 sur le téléphone : caméra mobile ×1,30 d'images lentes (marge 1,05–1,59, blocs sans chevauchement), images > 33 ms 10 → 20. Code revenu à 1543360 (commit 859e158). |
 | Observation (non traitée) : fond de page et calque de l'interface comptent pour environ 1,36 écran de surface dessinée par image (navigateur de test) | Journal du moteur | ❓ À étudier plus tard, seulement avec l'accord de l'auteur |
 | Pics rares de calcul du jeu (14 à 22 ms, objectif ≤ 8 ms) | Téléphone | 🔧 Cause inconnue, à étudier séparément |
 | Le rapport affiche toujours « écran maintenu allumé : non » : le maintien est relâché avant d'écrire le rapport (erreur du rapport, pas forcément du maintien) | Lecture du code | 🔧 Petite correction du rapport, à faire avec l'accord de l'auteur |
+
+## Investigation de la caméra (séance 16, sans modification)
+| Piste | Confiance | Test proposé |
+|---|---|---|
+| La caméra oblige à recomposer tout l'écran à chaque image | Démontré (×5,7 à ×6,3) | — |
+| Le rayon de devant (opacité 0,55, parallaxe 1,25, boîte de 4300×1080 pour une image de 300 px de haut) | Démontré qu'il pèse ; quelle propriété : inconnu | Variantes : opaque / 0,55 / invisible ; boîte ajustée à l'image |
+| Effet non linéaire (fréquence de la carte graphique, rythme du pipeline) : T1 et T3 retirent du travail et dégradent tous deux d'environ ×1,3 | Faible à moyenne | Traçage sur le téléphone |
+| Nombre de calques qui bougent | Faible | Variante « parallaxe coupée » |
+| Surface cachée (fond de page, bande lointaine sous le décor) | Faible (T3 ne l'a pas confirmée, mais T3 ajoutait aussi deux calques) | Variante « sans rayons lointains » |
+| Calcul, mise en page, redessin, ménage mémoire | Écarté (mesures) | — |
 
 ## Étapes
 | Étape | État | Notes |

@@ -10,6 +10,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 16 — 13/11/2026 — T3 rejeté, retour à l'ancien rendu, investigation de la caméra
+
+**Rapport T3 (bdc02db, plein écran, débranché 66 → 64 %, écran maintenu allumé)**, images > 20 ms par minute (blocs min–max) :
+- A-ancien 23,4 (13–40) ; A-nouveau 22,5 (17–27) ;
+- B-ancien 132,6 (113–153), > 33 ms : 10 ;
+- B-nouveau 171,8 (154–197), > 33 ms : 20, > 50 ms : 4.
+
+Comparaisons : nouveau/ancien en caméra mobile ×1,30 (marge 1,05–1,59) → **dégradation démontrée** (les 4 blocs du nouveau sont tous plus mauvais que les 4 de l'ancien) ; caméra fixe ×0,96 (pas de différence, contrôle cohérent) ; caméra mobile/fixe ×5,7.
+
+**Décision** : optimisation rejetée. Code rétabli à l'identique de 1543360 (commit 859e158) ; tests repassés (67 + 35) ; comptages revenus aux valeurs d'avant.
+
+**Leçons**
+1. Pour la deuxième fois, les comptages du navigateur de test annonçaient un gain (surface dessinée −19 %) que le téléphone n'a pas confirmé. Le moteur de test ne modélise pas le coût réel de la carte graphique du téléphone.
+2. La mesure elle-même est fiable : B-ancien (132,6) reproduit B-T0 de la séance 14 (137,6).
+3. Deux changements qui retirent du travail (T1, T3) dégradent tous deux la caméra mobile d'environ ×1,3. Possible effet non linéaire (fréquence de la carte graphique, rythme d'affichage), non démontré.
+4. T3 n'a pas seulement réduit la surface : il a aussi ajouté deux calques découpés qui bougent. Il ne prouve donc pas, à lui seul, que la surface cachée est sans effet.
+
+**Investigation de la caméra (lecture du code + comptages déjà relevés ; aucune modification)** : voir le tableau « Investigation de la caméra » dans docs/SUIVI.md. Prochaine étape proposée : un traçage pris sur le téléphone, puis des variantes isolées dans le test rapide. Rien n'est construit avant validation.
+
+---
+
 ## Séance 15 — 13/11/2026 — Correction n° 1 : rayons lointains limités aux ouvertures, et test T3
 
 **Décision de l'auteur** : proposition A validée. Ne modifier que le rendu des rayons lointains ; garder l'ancien pour comparer ; même protocole ; vérifier la surface réellement rendue ; ne pas tenir le mécanisme GPU pour acquis ; ne toucher ni au rayon de devant, ni aux animations, ni à la poussière.
