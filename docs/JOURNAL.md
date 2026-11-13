@@ -10,6 +10,35 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 23 — 13/11/2026 — Résultats de la campagne « rayon de devant »
+
+**Conditions** : 18874a6 (bonne version), mode normal, plein écran, débranché, **batterie basse (25 → 22 %)**, écran maintenu allumé. Vitesse du téléphone : 4,3 ms au début comme à la fin (premier relevé : servira de repère).
+
+**Mesuré** — images > 20 ms par minute (blocs min–max) / > 33 ms / calcul pire :
+- T0 85,1 (63–100) / 3 / 17,8 ms ;
+- T2 31,7 (23–40) / 1 / 12,1 ms ;
+- G1 92,9 (57–137) / 3 / 12,2 ms ;
+- G4 63,4 (43–83) / 4 / 15,5 ms ;
+- G2 93,4 (70–120) / 2 / 14,1 ms.
+
+**Démontré**
+- Rayon de devant invisible : ×0,37 (marge 0,27–0,50), pour la troisième fois.
+- **Moitié de hauteur contre calque réduit (G4/G1) : ×0,68 (0,54–0,87).** La surface dessinée du rayon de devant compte. Par rapport à T0 : ×0,75.
+- G1 ne récupère pas le gain de T2 (×2,93).
+
+**Non démontré (pas d'effet visible à cette précision)**
+- Calque réduit à la taille de l'image (G1) : ×1,09 (0,88–1,36). La zone transparente inutile ne coûte pas.
+- Rayon opaque (G2) : ×1,10 (0,88–1,37). La transparence n'est pas ce qui coûte, comme prévu.
+
+**Hypothèses (non démontrées)**
+- Le coût du rayon de devant semble à peu près proportionnel à sa surface dessinée (rien : ×0,37 ; moitié : ×0,75 ; entier : ×1).
+- Par pixel d'écran, il coûte bien plus que la bande des rayons lointains : environ 0,3 écran pour un effet de ×0,37, contre environ 0,7 écran pour ×0,77. Pistes : il glisse plus vite que le reste (×1,25), donc de nouveaux morceaux doivent être dessinés plus vite quand la caméra bouge ; il est dessiné en dernier, par-dessus le personnage. **Ma prévision de la séance 21 (« une parallaxe moins forte ne changera rien ») est donc remise en question.**
+- Les pics de calcul (12 à 18 ms) sont présents dans toutes les variantes : ils ne viennent pas du rendu graphique.
+
+**Remarques** : la batterie était basse (25 %), contrairement au conseil. La référence (85,1) est plus basse que lors de la passe précédente (122,9), à batterie pourtant plus basse : l'état du téléphone varie sans lien simple avec la batterie. L'indice de vitesse permettra de mieux le suivre.
+
+---
+
 ## Séance 22 — 13/11/2026 — Répétition involontaire de la campagne F0–F3 (version en cache)
 
 Le téléphone a lancé l'ancienne version (ea49561, code identique à aa84366) au lieu de 18874a6 : c'est donc **une deuxième passe de la campagne de vérification**, dans les mêmes conditions (mode normal, plein écran, débranché 32 → 28 %, écran maintenu allumé).

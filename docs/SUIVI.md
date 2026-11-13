@@ -122,7 +122,12 @@ Choix de l'auteur : variantes A (T0, T2, G1, G4, G2) ; retrait du code des varia
 | G1 | calque réduit à la taille de l'image | **non** (même image vérifiée) | calque 4300×300, 3,37 écrans |
 | G4 | comme G1, moitié de hauteur | oui (un peu) | calque 4300×150, 3,23 écrans |
 | G2 | rayon de devant opaque | oui | 3,38 écrans |
-Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écartées) ; parallaxe moins forte sans effet (G3 retirée) ; intégrer le rayon au décor impossible (il passe devant le personnage). État : 🔧 en attente du rapport de l'auteur.
+Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écartées) ; parallaxe moins forte sans effet (G3 retirée) ; intégrer le rayon au décor impossible (il passe devant le personnage).
+**Résultats (séance 23, 18874a6, batterie 25 → 22 %, vitesse du téléphone 4,3 ms au début comme à la fin)** — images > 20 ms par minute : T0 85,1 · T2 31,7 · G1 92,9 · G4 63,4 · G2 93,4.
+- Démontré : T2 ×0,37 (troisième fois) ; **G4 (moitié de hauteur) contre G1 ×0,68** : la surface dessinée du rayon de devant compte.
+- Non démontré : G1 ×1,09 (réduire la boîte du calque n'aide pas) ; G2 ×1,10 (la transparence n'est pas ce qui coûte).
+- Constat : par pixel d'écran, le rayon de devant coûte bien plus cher que la bande des rayons lointains. Cause inconnue ; pistes : il glisse plus vite (×1,25) et doit faire dessiner plus vite les morceaux qui apparaissent ; il est dessiné en dernier, par-dessus le personnage.
+- Ma prévision « parallaxe sans effet » est donc remise en question.
 
 ## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
 Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
