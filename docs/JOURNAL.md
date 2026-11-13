@@ -10,6 +10,33 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 22 — 13/11/2026 — Répétition involontaire de la campagne F0–F3 (version en cache)
+
+Le téléphone a lancé l'ancienne version (ea49561, code identique à aa84366) au lieu de 18874a6 : c'est donc **une deuxième passe de la campagne de vérification**, dans les mêmes conditions (mode normal, plein écran, débranché 32 → 28 %, écran maintenu allumé).
+
+**Mesuré (passe 2)** — images > 20 ms par minute / > 33 ms / > 50 ms : T0 122,9 / 4 / 1 · T1 149,0 / 12 / 0 · T2 46,1 / 1 / 0 · F0 107,2 / 8 / 4 · F1 160,7 / 21 / 4 · F2 180,2 / 27 / 8 · F3 166,3 / 43 / 23.
+
+**Les deux passes réunies** (216 s par variante ; marge à 95 %) :
+
+| Comparaison | Passe 1 | Passe 2 | Les deux |
+|---|---|---|---|
+| T1 (animations réduites) / T0 | ×1,18 | ×1,21 | ×1,20 [1,05–1,37] |
+| T2 (rayon de devant invisible) / T0 | ×0,32 | ×0,38 | ×0,35 [0,29–0,42] |
+| F0 (sans rayons lointains) / T0 | ×0,65 | ×0,87 | ×0,77 [0,67–0,89] |
+| F2 (deux calques ajoutés) / T0 | ×1,34 | ×1,47 | ×1,41 [1,24–1,60] |
+| F1 / F2 (bande retirée, calques gardés) | ×1,05 | ×0,89 | ×0,96 [0,85–1,08] |
+| F1 (ancien T3) / T0 | ×1,41 | ×1,31 | ×1,35 [1,19–1,54] |
+| F3 (fenêtres dans le décor) / T0 | ×1,23 | ×1,35 | ×1,30 [1,14–1,48] |
+
+**Démontré et reproduit** : rayon de devant (×0,35) ; coût des deux calques ajoutés (×1,41) ; ancien T3 (×1,35) ; F3 (×1,30, avec beaucoup d'images > 33 et > 50 ms dans les deux passes) ; aucun gain à retirer la bande quand les fenêtres existent.
+**Nouveau** : réduire les animations dégrade légèrement (×1,20, démontré une fois les deux passes réunies). On garde les animations.
+**À nuancer** : sans rayons lointains (F0) aide, mais moins que ne le laissait croire la passe 1 (×0,77 au total, ×0,87 seule dans la passe 2).
+**État du téléphone** : référence encore plus haute (122,9 contre 101,8), batterie plus basse (32 % contre 42 %).
+
+La campagne « rayon de devant » (18874a6) reste à lancer.
+
+---
+
 ## Séance 21 — 13/11/2026 — Campagne « rayon de devant », nettoyage, indice de vitesse
 
 **Avis sur les suggestions de ChatGPT (transmises par l'auteur)** : réduire la surface réelle sans changer l'apparence = G1, retenue. Plusieurs opacités (0,35, 0,20) : coût prévu identique à 0,55, seule l'opacité 1 ou 0 change la nature du travail, donc écartées. Intégrer le rayon au décor : impossible avec la technique actuelle, puisqu'il passe devant le personnage, qui a son propre calque. Une parallaxe moins forte : coût prévu identique, car le calque bouge à l'écran de toute façon ; ma propre variante G3 est retirée pour la même raison.
