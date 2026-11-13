@@ -63,25 +63,20 @@ describe('test rapide T0 / T1 / T2', () => {
 
 import { QUICK_SUITES, quickConditionDef } from '../../src/core/quicktest.js';
 
-describe('campagne « rayon de devant » (caméra mobile)', () => {
-  const C = QUICK_SUITES.DEVANT;
-  it('5 variantes, toutes en caméra mobile, 6 tours, ≈ 11 min avec le protocole habituel', () => {
-    expect(C.conditions.map((c) => c.id)).toEqual(['T0', 'T2', 'G1', 'G4', 'G2']);
+describe('campagne « rayon de devant » n° 2 (caméra mobile)', () => {
+  const C = QUICK_SUITES.DEVANT2;
+  it('3 variantes, toutes en caméra mobile, 8 tours, ≈ 8 min 30 avec le protocole habituel', () => {
+    expect(C.conditions.map((c) => c.id)).toEqual(['T0', 'G4', 'G3']);
     expect(C.conditions.every((c) => c.camera === 'hero')).toBe(true);
-    const q = createQuickTest(place.diagnostic, { warmup: 30, block: 20, settle: 2, rounds: C.rounds }, 'DEVANT');
-    expect(quickTotalSeconds(q)).toBe(30 + 6 * 5 * 20); // 630 s ; 108 s mesurées par variante
+    const q = createQuickTest(place.diagnostic, { warmup: 30, block: 20, settle: 2, rounds: C.rounds }, 'DEVANT2');
+    expect(quickTotalSeconds(q)).toBe(30 + 8 * 3 * 20); // 510 s ; 144 s mesurées par variante
   });
-  it('chaque comparaison porte sur des variantes existantes, une seule différence à la fois', () => {
-    const ids = C.conditions.map((c) => c.id);
-    for (const [, a, b] of C.comparisons) {
-      expect(ids).toContain(a);
-      expect(ids).toContain(b);
-    }
-    expect(C.comparisons.map(([, a, b]) => `${a}/${b}`)).toEqual(['T2/T0', 'G1/T0', 'G4/G1', 'G2/T0', 'G1/T2']);
+  it('comparaisons : une seule différence avec la référence', () => {
+    expect(C.comparisons.map(([, a, b]) => `${a}/${b}`)).toEqual(['G4/T0', 'G3/T0']);
   });
   it('enchaîne les variantes en alternance, en marchant', () => {
     const hero = createWalker(0, 0), ghost = createWalker(0, 0);
-    const q = createQuickTest(place.diagnostic, { warmup: 1, block: 1, settle: 0.2, rounds: 2 }, 'DEVANT');
+    const q = createQuickTest(place.diagnostic, { warmup: 1, block: 1, settle: 0.2, rounds: 2 }, 'DEVANT2');
     startQuickTest(q, hero, ghost);
     const seen = [];
     while (q.phase !== 'done') {
@@ -95,6 +90,6 @@ describe('campagne « rayon de devant » (caméra mobile)', () => {
         }
       }
     }
-    expect([...seen]).toEqual(['T0', 'T2', 'G1', 'G4', 'G2', 'G2', 'G4', 'G1', 'T2', 'T0']);
+    expect([...seen]).toEqual(['T0', 'G4', 'G3', 'G3', 'G4', 'T0']);
   });
 });

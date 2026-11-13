@@ -129,6 +129,10 @@ Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écart
 - Constat : par pixel d'écran, le rayon de devant coûte bien plus cher que la bande des rayons lointains. Cause inconnue ; pistes : il glisse plus vite (×1,25) et doit faire dessiner plus vite les morceaux qui apparaissent ; il est dessiné en dernier, par-dessus le personnage.
 - Ma prévision « parallaxe sans effet » est donc remise en question.
 
+**Campagne n° 2 (séance 24)** : choix de l'auteur A. Variantes T0, G4 (moitié haute), G3 (glisse à la vitesse du sol) ; 8 tours (≈ 8 min 30, 144 s par variante). G5 (« image directe ») abandonnée avant mesure : le navigateur de test montre que l'image reste redessinée par morceaux (≈ 14/s, contre ≈ 15/s en T0), donc elle ne testerait rien. Constat du navigateur de test : le rayon de devant est redessiné par morceaux pendant que la caméra bouge (≈ 15/s ; ≈ 4/s pour la moitié haute). État : 🔧 en attente du rapport.
+
+**Décision de l'auteur sur l'objectif « aucune image > 33 ms »** : le garder, mais le juger avec le téléphone en bon état (batterie > 50 %, indice de vitesse comparable). Inscrit dans CLAUDE.md.
+
 ## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
 Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
 - décrire dans les données de chaque lieu les plans de profondeur et ce qui cache quoi (déjà en partie : pile de calques, points de référence) ;

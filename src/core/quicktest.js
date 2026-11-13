@@ -27,28 +27,23 @@ export const QUICK_SUITES = {
       ['Caméra mobile contre fixe (T0)', 'B-T0', 'A-T0'],
     ],
   },
-  // Campagne « rayon de devant » (séance 21) : tout en caméra mobile, une seule modification par comparaison.
-  DEVANT: {
-    title: 'campagne « rayon de devant » (caméra mobile)',
-    rounds: 6, // assez d'images lentes pour conclure
+  // Campagne « rayon de devant » n° 2 (séance 24) : sa surface et sa vitesse de glissement.
+  // (La campagne n° 1, séance 21 : T0, T2, G1, G4, G2 ; résultats dans le journal.)
+  DEVANT2: {
+    title: 'campagne « rayon de devant » n° 2 (caméra mobile)',
+    rounds: 8, // trois variantes seulement : plus de tours pour plus de précision
     variants:
-      'T0 = référence · T2 = rayon de devant invisible (gain maximal possible) · ' +
-      'G1 = calque réduit à la taille de son image (rien ne change à l’écran) · ' +
-      'G4 = comme G1, moitié de hauteur seulement · G2 = rayon de devant opaque',
+      'T0 = référence · G4 = rayon de devant réduit à sa moitié haute · ' +
+      'G3 = rayon de devant entier, mais qui glisse à la vitesse du sol (sans effet de profondeur propre)',
     conditions: [
       { id: 'T0', variant: 'T0', camera: 'hero' },
-      { id: 'T2', variant: 'T2', camera: 'hero' },
-      { id: 'G1', variant: 'fg-box', camera: 'hero' },
       { id: 'G4', variant: 'fg-half', camera: 'hero' },
-      { id: 'G2', variant: 'fg-opaque', camera: 'hero' },
+      { id: 'G3', variant: 'fg-parallax1', camera: 'hero' },
     ],
     warmup: 0, // chauffe en T0
     comparisons: [
-      ['T2 (rayon de devant invisible) contre T0', 'T2', 'T0'],
-      ['G1 (calque réduit à l’image, invisible à l’œil) contre T0', 'G1', 'T0'],
-      ['G4 (moitié de hauteur) contre G1', 'G4', 'G1'],
-      ['G2 (opaque) contre T0', 'G2', 'T0'],
-      ['G1 contre T2 (G1 récupère-t-il tout le gain ?)', 'G1', 'T2'],
+      ['G4 (moitié de hauteur) contre T0 : confirmation', 'G4', 'T0'],
+      ['G3 (glisse à la vitesse du sol) contre T0', 'G3', 'T0'],
     ],
   },
 };

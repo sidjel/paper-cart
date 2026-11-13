@@ -37,7 +37,7 @@ export function createStage(container, place, images, getValue) {
     const f = def.parallax ?? 1;
     if (f !== 1) {
       layer.classList.add('layer-parallax');
-      parallax.push({ el: layer, f, last: NaN });
+      parallax.push({ el: layer, f, f0: f, id: def.id, last: NaN });
     }
     el.appendChild(layer);
     layers[def.id] = layer;
@@ -109,24 +109,29 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  // DIAGNOSTIC (campagne « rayon de devant ») :
-  // 'normal' : comme dans le jeu ; 'box' : calque réduit à la taille de son image (rien ne change à l'écran) ;
-  // 'half' : calque réduit à la moitié haute de l'image ; 'opaque' : comme 'normal' mais sans transparence.
+  // DIAGNOSTIC (campagne « rayon de devant ») : façon de dessiner un calque pendant une mesure.
+  // 'normal' : comme dans le jeu ; 'half' : seulement la moitié haute de l'image ;
+  // 'parallax1' : le calque glisse à la vitesse du sol (sans effet de profondeur propre).
   function setLayerVariant(id, variant) {
     const info = layerInfo[id];
     if (!info) return;
     const layer = layers[id];
     const { def, img } = info;
     const [x, y] = def.position ?? [0, 0];
-    const trim = variant === 'box' || variant === 'half';
-    layer.style.left = trim ? `${x}px` : '';
-    layer.style.top = trim ? `${y}px` : '';
-    layer.style.width = trim ? `${img.w}px` : '';
-    layer.style.height = trim ? `${variant === 'half' ? img.h / 2 : img.h}px` : '';
-    layer.style.overflow = variant === 'half' ? 'hidden' : '';
-    img.el.style.transform = trim ? 'none' : `translate(${x}px, ${y}px)`;
+    const half = variant === 'half';
+    layer.style.left = half ? `${x}px` : '';
+    layer.style.top = half ? `${y}px` : '';
+    layer.style.width = half ? `${img.w}px` : '';
+    layer.style.height = half ? `${img.h / 2}px` : '';
+    layer.style.overflow = half ? 'hidden' : '';
+    img.el.style.transform = half ? 'none' : `translate(${x}px, ${y}px)`;
+    const p = parallax.find((q) => q.id === id);
+    if (p) {
+      p.f = variant === 'parallax1' ? 1 : p.f0;
+      p.last = NaN;
+    }
+    apply();
     applyOpacity();
-    if (variant === 'opaque') layer.style.opacity = 1;
   }
 
   return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity, setLayerVariant };

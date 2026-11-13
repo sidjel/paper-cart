@@ -113,7 +113,7 @@ let quickSavedReduce = false;
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
   // Rayon de devant : façon de le dessiner pendant la campagne (sinon, comme dans le jeu).
-  const fg = { 'fg-box': 'box', 'fg-half': 'half', 'fg-opaque': 'opaque' }[variant] ?? 'normal';
+  const fg = { 'fg-half': 'half', 'fg-parallax1': 'parallax1' }[variant] ?? 'normal';
   stage.setLayerVariant('premier-plan', fg);
   if (variant === 'T2') stage.layers['premier-plan'].style.opacity = 0;
 }

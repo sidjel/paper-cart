@@ -10,6 +10,18 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 24 — 13/11/2026 — Campagne « rayon de devant » n° 2 (G4, G3)
+
+**Décisions de l'auteur** : chemin A (campagne courte, puis aspect et validation de A2) ; l'objectif « aucune image > 33 ms » est gardé, mais jugé sur un téléphone en bon état (batterie > 50 %, indice de vitesse comparable). Règle ajoutée à CLAUDE.md.
+
+**G5 abandonnée avant mesure** : l'idée était de faire envoyer l'image du rayon de devant telle quelle à la carte graphique, au lieu de la redessiner par morceaux. Le navigateur de test montre que ça ne marche pas (redessin par morceaux ≈ 14/s, contre ≈ 15/s en T0). La mesurer n'aurait rien appris. Une vraie « définition réduite » demanderait une autre technique de dessin pour ce rayon.
+
+**Campagne n° 2** (⚙ → Diagnostic, premier bouton) : T0, G4 (moitié haute, pour confirmer), G3 (rayon entier, glisse à la vitesse du sol) ; caméra mobile ; 8 tours ; 144 s par variante ; ≈ 8 min 30. Comparaisons G4/T0, G3/T0. Variantes appliquées seulement pendant la mesure ; code des variantes G1, G2 et « image » retiré.
+
+**Vérifié** : 70 tests de logique, 36 tests navigateur (chaque variante appliquée puis jeu rétabli ; en G3 le rayon de devant ne se décale plus par rapport au sol). Comptages du jeu inchangés.
+
+---
+
 ## Séance 23 — 13/11/2026 — Résultats de la campagne « rayon de devant »
 
 **Conditions** : 18874a6 (bonne version), mode normal, plein écran, débranché, **batterie basse (25 → 22 %)**, écran maintenu allumé. Vitesse du téléphone : 4,3 ms au début comme à la fin (premier relevé : servira de repère).
