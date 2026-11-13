@@ -38,6 +38,27 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
   await page.goto('./');
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
 
+  // Objets du décor qui changent de calque pendant le parcours (cause de clignotements sur
+  // téléphone : l'objet est redessiné à chaque bascule). Lu dans l'organisation des calques du moteur.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  const { root } = await cdp.send('DOM.getDocument');
+  const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: '.prop' });
+  const propIds = new Set();
+  for (const nodeId of nodeIds) propIds.add((await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId);
+  let propLayerSig = null;
+  let propLayerSwitches = 0;
+  let tracking = false; // le premier relevé du moteur peut être incomplet : on part d'un état établi
+  cdp.on('LayerTree.layerTreeDidChange', (e) => {
+    if (!e.layers) return;
+    const sig = e.layers.filter((l) => propIds.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
+    if (tracking && sig !== propLayerSig) propLayerSwitches++;
+    propLayerSig = sig;
+  });
+  await cdp.send('LayerTree.enable');
+  await page.waitForTimeout(1000);
+  tracking = true;
+
   // Éléments ajoutés à la scène pendant le jeu (doivent rester à zéro).
   await page.evaluate(() => {
     const c = window.__comptages;
@@ -89,6 +110,7 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
     canvasesInPlay: c.canvases,
     domNodesAddedInPlay: c.added,
     pixelReads: c.pixelReads,
+    propLayerSwitches,
   };
   console.log('Comptages mesurés :', JSON.stringify(mesures));
   test.info().annotations.push({ type: 'comptages', description: JSON.stringify(mesures) });

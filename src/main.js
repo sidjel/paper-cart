@@ -7,7 +7,7 @@ import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceShelf } from './core/movement.js';
-import { nearestProduct, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
+import { nearestProduct, productNear, inReach, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -75,10 +75,15 @@ const tip = { x: 0, y: 0 }; // bout de la douchette sur la scène
 const cardFrom = { x: 0, y: 0 };
 const cardTo = { x: 0, y: 0 };
 let highlighted = -1;
+let pendingScan = -1; // double toucher : produit à scanner à l'arrivée du personnage
 
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
-  const i = nearestProduct(shelfState, walker, config.scan);
+  scanProduct(nearestProduct(shelfState, walker, config.scan));
+}
+
+function scanProduct(i) {
+  pendingScan = -1;
   if (i < 0) return;
   faceShelf(walker, shelfState[i].x); // fonction de core/ : s'arrêter et se tourner vers l'étagère
   marker.hide();
@@ -413,15 +418,48 @@ sm.onChange((now, before) => {
 // Un point de l'écran touché ou cliqué → un point du sol à atteindre (fonction de core/).
 function onTarget(cx, cy) {
   if (!sm.is('play')) return;
+  pendingScan = -1;
   stage.clientToStage(cx, cy, tmpStage);
   tmpWorld.x = stageToWorldX(proj, tmpStage.x);
   tmpWorld.z = stageToWorldZ(proj, tmpStage.y);
-  clampToBounds(mask, tmpWorld);
+  walkTo(tmpWorld);
+}
+
+function walkTo(target) {
+  clampToBounds(mask, target);
   // Chemin qui contourne les objets si la ligne droite est bloquée.
-  const path = findPath(mask, walker.x, walker.z, tmpWorld.x, tmpWorld.z);
+  const path = findPath(mask, walker.x, walker.z, target.x, target.z);
   setPath(walker, path);
   const [gx, gz] = path[path.length - 1];
   marker.showAt(worldToStageX(proj, gx), worldToStageY(proj, gz));
+}
+
+// Double toucher (ou double clic) près d'un produit : le personnage va au pied de l'étagère,
+// devant ce produit, et le scanne à l'arrivée. Ailleurs : rien de plus que « aller là ».
+function onDoubleTap(cx, cy) {
+  if (!sm.is('play') || scan.active) return;
+  stage.clientToStage(cx, cy, tmpStage);
+  const i = productNear(shelfState, stageToWorldX(proj, tmpStage.x), config.scan.range);
+  if (i < 0) return;
+  if (inReach(shelfState, i, walker, config.scan)) {
+    scanProduct(i);
+    return;
+  }
+  tmpWorld.x = shelfState[i].x;
+  // Garder sa profondeur s'il est déjà au pied de l'étagère, sinon y aller (bord haut de la zone).
+  tmpWorld.z = walker.z >= config.scan.minDepth ? walker.z : 1e6;
+  walkTo(tmpWorld);
+  pendingScan = i;
+}
+
+// Pendant l'approche d'un double toucher : scanner à l'arrivée, annuler si le joueur reprend la main.
+function stepPendingScan() {
+  if (pendingScan < 0) return;
+  if (intent.moveX !== 0 || intent.moveZ !== 0) pendingScan = -1;
+  else if (!walker.hasTarget) {
+    if (inReach(shelfState, pendingScan, walker, config.scan)) scanProduct(pendingScan);
+    else pendingScan = -1;
+  }
 }
 
 function layout() {
@@ -505,6 +543,7 @@ function frame(now) {
         intent.moveZ = 0;
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
+      stepPendingScan();
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
@@ -560,18 +599,20 @@ async function start() {
   shelf = createShelfProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display);
   shelfState = shelf.items.map((it) => ({ x: it.x, scanned: false }));
   props = createProps(place, images, stage.layers.acteurs, proj);
+  stage.el.classList.toggle('props-layered', config.display.propLayers);
   depthRefs = props.map((p) => p.depthRef);
   dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);
   debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
-  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget });
+  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
     if (key === 'debug.showWalkMask') debugMask.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity') stage.applyOpacity();
+    if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
   });

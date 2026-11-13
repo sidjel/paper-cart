@@ -54,6 +54,10 @@ export const config = {
     reduceMotion: false, // réduire les animations (retournement instantané)
     foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
+    // Objets du décor (caddie, présentoirs) sur leur propre calque, en permanence. Sans cela, le
+    // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
+    // à chaque bascule l'objet est redessiné et peut disparaître un instant (clignotement).
+    propLayers: true,
   },
   audio: {
     muted: false, // couper tout le son
@@ -70,6 +74,8 @@ export const config = {
     virtualJoystick: false, // téléphone : joystick virtuel à gauche de l'écran
     joystickRadius: 60, // rayon du joystick virtuel (px d'écran)
     stickDeadZone: 0.2, // manette : zone morte du stick (0 à 1)
+    doubleTapTime: 0.35, // double toucher : délai maximal entre les deux touchers (s)
+    doubleTapDistance: 50, // double toucher : écart maximal entre les deux touchers (px d'écran)
   },
   bench: {
     passes: 3, // nombre de tours mesurés
@@ -124,6 +130,8 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.walkAnimSpeed', label: 'Vitesse des pas (images)', min: 0.4, max: 2.5, step: 0.05, unit: '×' },
   { group: 'Contrôles', key: 'input.virtualJoystick', label: 'Joystick virtuel (téléphone)', type: 'bool' },
   { group: 'Contrôles', key: 'input.joystickRadius', label: 'Taille du joystick', min: 30, max: 120, step: 5, unit: 'px' },
+  { group: 'Contrôles', key: 'input.doubleTapTime', label: 'Double toucher : délai max', min: 0.15, max: 0.7, step: 0.05, unit: 's' },
+  { group: 'Contrôles', key: 'input.doubleTapDistance', label: 'Double toucher : écart max', min: 10, max: 150, step: 5, unit: 'px' },
   { group: 'Contrôles', key: 'input.stickDeadZone', label: 'Zone morte du stick', min: 0, max: 0.6, step: 0.02 },
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
@@ -148,6 +156,7 @@ export const TUNABLES = [
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
   { group: 'Caméra', key: 'camera.deadZone', label: 'Zone sans mouvement', min: 0, max: 0.4, step: 0.01 },
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
+  { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
   { group: 'Diagnostic', key: 'bench.passes', label: 'Banc : nombre de tours', min: 1, max: 10, step: 1 },

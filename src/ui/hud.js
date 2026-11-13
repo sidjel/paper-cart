@@ -51,8 +51,8 @@ export function createHud(root, { version, onAction, touch, muted }) {
   const help = document.createElement('p');
   help.className = 'help';
   help.innerHTML = touch
-    ? 'Touche le sol pour marcher, garde le doigt pour guider.<br>Près d’un produit, touche « Scanner ». Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.'
-    : 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit · I : Panier.<br>Manette : stick gauche, A scanner, Y Panier, B retour, Start pause.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche';
+    ? 'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.'
+    : 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>Manette : stick gauche, A scanner, Y Panier, B retour, Start pause.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche';
   card.append(h, resume, help);
   pause.appendChild(card);
 

@@ -67,6 +67,8 @@ html, body {
 .dust { position: absolute; left: 0; top: 0; display: block; pointer-events: none; will-change: transform, opacity; }
 .dust[hidden] { display: none; }
 .prop { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
+/* Calque fixe : l'objet ne change pas de calque quand le personnage passe derrière lui. */
+.props-layered .prop { will-change: transform; }
 .layer-image { display: block; pointer-events: none; }
 
 .actor {

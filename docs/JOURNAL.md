@@ -11,6 +11,40 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 27 — 13/11/2026 — Clignotement du caddie corrigé, scan par double toucher
+
+**Retours de l'auteur** : rapport du diagnostic sur e5efbc8 : 61 images/s, aucune image au-delà de 33 ms sur les 600 dernières (30 depuis la remise à zéro, sur 7047 images), calcul moyen 0,67 ms. Deux demandes : le caddie et le carton « -30 % » clignotent ou disparaissent par moments ; pouvoir scanner au doigt par un double toucher.
+
+**Le clignotement : cause trouvée par la mesure**
+- J'ai lu l'organisation des calques du moteur du navigateur pendant le banc d'essai. Chaque fois que le personnage passe **derrière** un objet, le navigateur crée un calque séparé pour cet objet : il doit être dessiné par-dessus le personnage, qui a son propre calque. Quand le personnage ressort, ce calque est supprimé et l'objet est remis dans le décor. Mesuré : une bascule à l'entrée et une à la sortie, pour chaque objet.
+- À chaque bascule, l'objet doit être redessiné. Sur le téléphone, ce nouveau dessin peut ne pas être prêt pour l'image suivante : l'objet disparaît un instant.
+- **Correction** : les objets du décor ont maintenant leur propre calque en permanence. Mesuré après correction : plus aucune bascule pendant le parcours. Interrupteur ⚙ → Affichage → « Objets sur calque fixe (anti-clignotement) » (activé par défaut), pour comparer.
+- **Règle posée une fois** : le test des comptages vérifie maintenant qu'aucun objet du décor ne change de calque pendant le parcours (limite : 0).
+- Effet possible sur la fluidité : 3 petits calques de plus, dessinés une seule fois et ensuite seulement déplacés. Il faut le vérifier sur le téléphone : un test rapide, si tu le souhaites.
+
+**Double toucher pour scanner**
+- Touche **deux fois** un produit (ou l'étagère juste à côté) : le personnage va au pied de l'étagère, devant ce produit, et le scanne à l'arrivée. S'il est déjà devant, il scanne tout de suite.
+- Fonctionne aussi au **double clic** à la souris.
+- Un simple toucher ne scanne pas : il fait seulement marcher. Si le joueur reprend la main pendant l'approche (clavier, manette, nouveau toucher), le scan est annulé.
+- Réglages ⚙ → Contrôles : délai maximal entre les deux touchers (0,35 s) et écart maximal entre eux (50 px).
+
+**Vérifié, et comment**
+- 81 tests de logique (dont produit visé par un double toucher, produit à portée).
+- 42 tests navigateur, sans erreur console :
+  - double toucher sur un produit lointain (le personnage y va et le scanne) ;
+  - simple toucher sans scan ;
+  - double clic à la souris ;
+  - approche annulée au clavier.
+- Test des comptages avec la nouvelle règle : 0 changement de calque avec la correction (8 passages de suite), 6 quand on la coupe. La règle détecte donc bien le problème. Les autres comptages sont inchangés (72 éléments, 17 images visibles, rien créé en jeu).
+- Captures PC et téléphone simulé regardées.
+- **Non vérifiable ici** : le clignotement lui-même. Le navigateur de test dessine chaque image entièrement avant de l'afficher, donc il ne clignote jamais. J'ai vérifié la cause (les bascules), pas le symptôme. À confirmer sur le téléphone.
+
+**Décisions prises seul (détails mineurs)**
+- Le double toucher vise le produit le plus proche du doigt (à la portée du scanner près). S'il n'y a aucun produit près du doigt, il fait seulement marcher.
+- Après un double toucher, le point visé ne suit plus le doigt (pour qu'un léger glissé n'annule pas le scan).
+
+---
+
 ## Séance 26 — 13/11/2026 — Étape A3 : le scanner, les cartes et le Panier
 
 **Décisions de l'auteur** : rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état et passage à A3 (choix C). **A2 validée : 6be7130.**

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { nearestProduct, createScan, startScan, stepScan, scanProgress } from '../../src/core/scan.js';
+import { nearestProduct, productNear, inReach, createScan, startScan, stepScan, scanProgress } from '../../src/core/scan.js';
 import { createBasket, addToBasket, STAGES } from '../../src/core/cards.js';
 import { createWalker, faceShelf } from '../../src/core/movement.js';
 import { createStateMachine } from '../../src/core/state.js';
@@ -19,6 +19,21 @@ describe('produit à portée', () => {
     expect(nearestProduct(shelf, { x: 1000, z: 200 }, P)).toBe(-1);
     expect(nearestProduct(shelf, { x: 300, z: 50 }, P)).toBe(-1);
     expect(nearestProduct([{ x: 300, scanned: true }], { x: 300, z: 200 }, P)).toBe(-1);
+  });
+});
+
+describe('double toucher : produit visé', () => {
+  const shelf = [{ x: 300, scanned: false }, { x: 600, scanned: false }, { x: 650, scanned: true }];
+  it('le produit non scanné le plus proche du toucher, à tolérance près', () => {
+    expect(productNear(shelf, 330, 150)).toBe(0);
+    expect(productNear(shelf, 640, 150)).toBe(1); // le 650 est déjà scanné
+    expect(productNear(shelf, 1000, 150)).toBe(-1);
+  });
+  it('à portée : ce produit précis, au pied de l’étagère', () => {
+    expect(inReach(shelf, 1, { x: 560, z: 200 }, P)).toBe(true);
+    expect(inReach(shelf, 0, { x: 560, z: 200 }, P)).toBe(false); // trop loin
+    expect(inReach(shelf, 1, { x: 560, z: 50 }, P)).toBe(false); // pas au pied de l'étagère
+    expect(inReach(shelf, 2, { x: 650, z: 200 }, P)).toBe(false); // déjà scanné
   });
 });
 

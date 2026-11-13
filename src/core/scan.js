@@ -20,6 +20,27 @@ export function nearestProduct(shelf, hero, p) {
   return best;
 }
 
+// Produit visé par un double toucher : le non scanné le plus proche de x (à tolerance près), ou -1.
+export function productNear(shelf, x, tolerance) {
+  let best = -1;
+  let bestD = Infinity;
+  for (let i = 0; i < shelf.length; i++) {
+    if (shelf[i].scanned) continue;
+    const d = Math.abs(shelf[i].x - x);
+    if (d <= tolerance && d < bestD) {
+      best = i;
+      bestD = d;
+    }
+  }
+  return best;
+}
+
+// Ce produit précis est-il à portée du personnage ?
+export function inReach(shelf, index, hero, p) {
+  const it = shelf[index];
+  return !!it && !it.scanned && hero.z >= p.minDepth && Math.abs(it.x - hero.x) <= p.range;
+}
+
 const PHASES = ['raise', 'laser', 'dissolve', 'card'];
 // Événement émis à l'entrée de chaque phase (et à la fin).
 const ENTER = { laser: 'bip', dissolve: 'aspire', card: 'carte' };

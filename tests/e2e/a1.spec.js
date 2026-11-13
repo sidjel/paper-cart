@@ -409,6 +409,52 @@ test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne',
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
 });
 
+// Centre d'un produit de l'étagère à l'écran.
+async function productCenter(page, index) {
+  const r = await page.locator('.shelf-product').nth(index).boundingBox();
+  return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+}
+
+test('A3 au doigt : un double toucher sur un produit lointain y emmène le personnage et le scanne', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  // Céréales (3e produit), à droite du départ : visible à l'écran.
+  const c = await productCenter(page, 2);
+  await page.touchscreen.tap(c.x, c.y);
+  await page.touchscreen.tap(c.x, c.y);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 8000 }).toBe(true);
+  const h = await hero(page);
+  expect(Math.abs(h.x - 1000)).toBeLessThanOrEqual(150);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards.length, { timeout: 5000 }).toBe(1);
+  expect((await page.evaluate(() => window.paperCart.shelf()))[2].scanned).toBe(true);
+});
+
+test('A3 au doigt : un simple toucher sur un produit ne le scanne pas', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  const c = await productCenter(page, 2);
+  await page.touchscreen.tap(c.x, c.y);
+  await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 8000 }).toBe(false);
+  await page.waitForTimeout(300);
+  expect((await page.evaluate(() => window.paperCart.scanState())).active).toBe(false);
+  expect((await page.evaluate(() => window.paperCart.scanState())).cards).toEqual([]);
+});
+
+test('A3 à la souris : double clic sur un produit, puis le clavier annule une approche', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  const c = await productCenter(page, 2);
+  await page.mouse.dblclick(c.x, c.y);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards.length, { timeout: 10000 }).toBe(1);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 5000 }).toBe(false);
+  // Nouvelle approche (pile, 6e produit), interrompue au clavier : pas de scan.
+  const p = await productCenter(page, 5);
+  await page.mouse.dblclick(p.x, p.y);
+  await page.waitForTimeout(150);
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('ArrowLeft');
+  await page.waitForTimeout(2500);
+  expect((await page.evaluate(() => window.paperCart.scanState())).cards.length).toBe(1);
+});
+
 test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
   await page.keyboard.down('ArrowUp');

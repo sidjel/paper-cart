@@ -24,11 +24,13 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Toucher ou joystick virtuel sur téléphone | 4 | ✅ | Séance 8 : toucher par défaut, **joystick désactivé par défaut** (option gardée dans ⚙ → Contrôles). Vérifié par un test automatique. |
 | Contourner seul les objets quand on touche derrière | 4 | ✅ | Choix A, validé en séance 5. |
 | Difficile de viser le bord de la zone au doigt | 7 | ✅ | Toucher hors du sol (étagère, rayon de devant) envoie jusqu'au bord de la zone. Testé automatiquement. Validé (séance 8). |
+| Scanner naturellement au doigt par un double toucher | 27 | 👀 | Double toucher (ou double clic) sur un produit : le personnage va devant et le scanne. Délai et écart réglables (⚙ → Contrôles). À tester par l'auteur. |
 
 ## Décor
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Passer derrière le caddie et le présentoir « -30 % » | 2 | ✅ | |
+| Caddie et carton « -30 % » qui clignotent ou disparaissent par moments | 27 | 👀 | Cause trouvée (séance 27) : le navigateur leur créait un calque à chaque passage du personnage derrière eux, puis le retirait. Corrigé : calque fixe. Interrupteur ⚙ → Affichage. À confirmer sur le téléphone. |
 | Zone de marche jusqu'en bas de l'écran | 3 | ✅ | Séance 7 : agrandie encore, du pied de l'étagère du fond (z 264) au bord bas de l'écran (z -195). |
 | Rayon en bas, en transparence (personnage entouré de rayons) | 3 | ✅ | Opacité 0,55 : « oui pour le moment ». |
 | Le plein écran cachait une partie du décor (écran 20:9) | 6 | ✅ | Réglé avec la caméra : toute la hauteur est toujours visible, un écran allongé montre plus de largeur. Le personnage paraît un peu plus petit sur téléphone : réglage « Zoom ». |
