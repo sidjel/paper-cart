@@ -321,24 +321,22 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
 });
 
-test('campagne (version courte) : chaque variante des rayons lointains est appliquée puis le jeu est rétabli', async ({ page }, info) => {
+test('campagne « rayon de devant » (version courte) : chaque variante est appliquée puis le jeu est rétabli', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'une fois suffit');
   test.setTimeout(90_000);
-  const state = () => page.evaluate(() => ({
-    bande: document.querySelector('.layer-lointain').style.display !== 'none',
-    fenetres: document.querySelector('.layer-lointain-fenetres').style.display !== 'none',
-    decor: document.querySelector('.layer-lointain-fenetres').classList.contains('far-painted'),
-    devant: document.querySelector('.layer-premier-plan').style.opacity,
+  const state = () => page.locator('.layer-premier-plan').evaluate((el) => ({
+    opacite: el.style.opacity,
+    hauteur: el.style.height,
+    coupe: el.style.overflow,
   }));
   const at = (id) => page.waitForFunction((x) => [...document.querySelectorAll('.bench-banner')].some((e) => !e.hidden && e.textContent.includes(`· ${x} ·`)), id, { timeout: 40_000 });
-  await page.evaluate(() => window.paperCart.startQuick(1, 2, 0.5, 1, 'CAMPAGNE'));
+  await page.evaluate(() => window.paperCart.startQuick(1, 2, 0.5, 1, 'DEVANT'));
   const expected = {
-    T0: { bande: true, fenetres: false, decor: false, devant: '0.55' },
-    T2: { bande: true, fenetres: false, decor: false, devant: '0' },
-    F0: { bande: false, fenetres: false, decor: false, devant: '0.55' },
-    F1: { bande: false, fenetres: true, decor: false, devant: '0.55' },
-    F2: { bande: true, fenetres: true, decor: false, devant: '0.55' },
-    F3: { bande: false, fenetres: true, decor: true, devant: '0.55' },
+    T0: { opacite: '0.55', hauteur: '', coupe: '' },
+    T2: { opacite: '0', hauteur: '', coupe: '' },
+    G1: { opacite: '0.55', hauteur: '300px', coupe: '' },
+    G4: { opacite: '0.55', hauteur: '150px', coupe: 'hidden' },
+    G2: { opacite: '1', hauteur: '', coupe: '' },
   };
   for (const [id, exp] of Object.entries(expected)) {
     await at(id);
@@ -347,17 +345,17 @@ test('campagne (version courte) : chaque variante des rayons lointains est appli
   }
   await page.waitForFunction(() => window.paperCart.quickReport(), null, { timeout: 40_000 });
   const r = await page.evaluate(() => window.paperCart.quickReport());
-  expect(r).toContain('campagne de vérification');
-  expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(7);
-  expect(r.length).toBeLessThan(5000);
+  expect(r).toContain('rayon de devant');
+  expect(r).toMatch(/Vitesse du téléphone .* début \d/);
+  expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(5);
   expect(await state()).toEqual(expected.T0); // le jeu est rendu tel qu'avant
 });
 
-test('variantes F1, F2, F3 : même image que le rendu du jeu', async ({ page }, info) => {
+test('variante G1 (calque réduit à l’image) : même image que le rendu du jeu', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'une fois suffit');
   test.setTimeout(60_000);
   await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => window.paperCart.hero().x > 2200, null, { timeout: 20_000 });
+  await page.waitForFunction(() => window.paperCart.hero().x > 1500, null, { timeout: 20_000 });
   await page.keyboard.up('ArrowRight');
   await page.waitForFunction(() => {
     const c = window.paperCart.camera();
@@ -367,32 +365,30 @@ test('variantes F1, F2, F3 : même image que le rendu du jeu', async ({ page }, 
   }, null, { polling: 500, timeout: 15_000 });
   const actor = await page.locator('.actor').boundingBox();
   const clip = { x: 0, y: 0, width: Math.max(1, Math.floor(actor.x) - 20), height: 900 };
-  const shot = async (mode) => {
-    await page.evaluate((m) => window.paperCart.diagFarMode(m), mode);
+  const shot = async (v) => {
+    await page.evaluate((x) => window.paperCart.diagForeground(x), v);
     await page.waitForTimeout(200);
     return (await page.screenshot({ clip })).toString('base64');
   };
-  const ref = await shot('band');
-  for (const mode of ['windows-layers', 'band+windows', 'windows-painted']) {
-    const img = await shot(mode);
-    const res = await page.evaluate(async ([a, b]) => {
-      const load = (s) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = 'data:image/png;base64,' + s; });
-      const [ia, ib] = await Promise.all([load(a), load(b)]);
-      const c = document.createElement('canvas');
-      c.width = ia.width; c.height = ia.height;
-      const x = c.getContext('2d', { willReadFrequently: true });
-      x.drawImage(ia, 0, 0); const da = x.getImageData(0, 0, c.width, c.height).data;
-      x.drawImage(ib, 0, 0); const db = x.getImageData(0, 0, c.width, c.height).data;
-      let diff = 0, big = 0;
-      for (let i = 0; i < da.length; i += 4) {
-        const d = Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2]));
-        if (d > 0) diff++;
-        if (d > 40) big++;
-      }
-      return { total: da.length / 4, diff, big };
-    }, [ref, img]);
-    expect(res.diff / res.total, mode).toBeLessThan(0.01);
-    expect(res.big, mode).toBe(0);
-  }
-  await page.evaluate(() => window.paperCart.diagFarMode('band'));
+  const ref = await shot('normal');
+  const img = await shot('box');
+  await page.evaluate(() => window.paperCart.diagForeground('normal'));
+  const res = await page.evaluate(async ([a, b]) => {
+    const load = (s) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = 'data:image/png;base64,' + s; });
+    const [ia, ib] = await Promise.all([load(a), load(b)]);
+    const c = document.createElement('canvas');
+    c.width = ia.width; c.height = ia.height;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(ia, 0, 0); const da = x.getImageData(0, 0, c.width, c.height).data;
+    x.drawImage(ib, 0, 0); const db = x.getImageData(0, 0, c.width, c.height).data;
+    let diff = 0, big = 0;
+    for (let i = 0; i < da.length; i += 4) {
+      const d = Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2]));
+      if (d > 0) diff++;
+      if (d > 40) big++;
+    }
+    return { total: da.length / 4, diff, big };
+  }, [ref, img]);
+  expect(res.diff / res.total).toBeLessThan(0.01);
+  expect(res.big).toBe(0);
 });

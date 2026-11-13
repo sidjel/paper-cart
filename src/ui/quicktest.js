@@ -4,6 +4,7 @@
 // sur le nombre d'images lentes : une différence n'est dite « démontrée » que si la marge l'exclut.
 
 import { QUICK_SUITES } from '../core/quicktest.js';
+import { speedIndex } from './speedindex.js';
 
 const MAX = 15 * 60 * 125; // jusqu'à 15 min à 125 images/s
 const fmt = (n, d = 1) => (Number.isFinite(n) ? n.toFixed(d).replace('.', ',') : '—');
@@ -34,7 +35,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
   let status = '';
   let params = {};
   let suite = QUICK_SUITES.T012;
-  let start = { battery: '?', wakeLock: 'non' };
+  let start = { battery: '?', wakeLock: 'non', speed: NaN };
   let wakeLock = null;
 
   async function batteryText() {
@@ -58,14 +59,14 @@ export function createQuickTestUi(root, { onStart, getContext }) {
     'Compare, dans un seul essai et en alternance, la référence (T0), « réduire les animations » (T1) et le rayon de devant invisible (T2). Téléphone débranché, plein écran, ne touche à rien.';
   const btnC = document.createElement('button');
   btnC.className = 'primary';
-  btnC.textContent = 'Lancer la campagne de vérification (7 variantes, ≈ 15 min)';
+  btnC.textContent = 'Lancer la campagne « rayon de devant » (5 variantes, ≈ 11 min)';
   const helpC = document.createElement('p');
   helpC.className = 'settings-note';
   helpC.textContent =
-    'Caméra mobile, même trajet. Compare à la référence T0 : animations réduites (T1), rayon de devant invisible (T2) et quatre façons de dessiner les rayons lointains (F0 à F3). Variantes alternées, 6 tours. Téléphone débranché, plein écran, ne touche à rien.';
+    'Caméra mobile, même trajet. Compare à la référence T0 : rayon de devant invisible (T2), calque réduit à la taille de l’image (G1), moitié de hauteur (G4), opaque (G2). Variantes alternées, 6 tours. Téléphone débranché, plein écran, ne touche à rien.';
   btn.className = '';
   launcher.append(btnC, helpC, btn, help);
-  btnC.addEventListener('click', () => onStart('CAMPAGNE'));
+  btnC.addEventListener('click', () => onStart('DEVANT'));
   btn.addEventListener('click', () => onStart('T012'));
 
   const panel = document.createElement('div');
@@ -144,7 +145,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
     };
   }
 
-  function report(endBattery) {
+  function report(endBattery, endSpeed) {
     const c = getContext();
     const conds = suite.conditions;
     const s = conds.map((_, i) => stats(i));
@@ -162,6 +163,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
       `Écran : ${screen.width}×${screen.height} · densité ${window.devicePixelRatio} · plein écran ${document.fullscreenElement ? 'oui' : 'non'}`,
       `Rendu : ${c.renderLine}`,
       `Batterie : début ${start.battery} · fin ${endBattery} · écran maintenu allumé : ${start.wakeLock}`,
+      `Vitesse du téléphone (calcul fixe, plus petit = plus rapide) : début ${fmt(start.speed)} ms · fin ${fmt(endSpeed)} ms`,
       `Réglages modifiés : ${JSON.stringify(c.overrides)}`,
       `Protocole : chauffe ${params.warmup} s · ${params.rounds} tours × ${conds.length} conditions × ${params.block} s (${params.settle} s ignorées après chaque changement) · ordre inversé un tour sur deux · même aller-retour en ligne droite`,
       conds.every((q) => q.camera === 'hero') ? 'Situation : marche, caméra mobile (toutes les variantes)' : 'Situations : A = marche, caméra fixe · B = marche, caméra mobile',
@@ -189,6 +191,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
     launcher,
     async begin(p, suiteId = 'T012') {
       params = p;
+      start.speed = speedIndex();
       suite = QUICK_SUITES[suiteId];
       title.textContent = suite.title.charAt(0).toUpperCase() + suite.title.slice(1);
       n = 0;
@@ -226,7 +229,8 @@ export function createQuickTestUi(root, { onStart, getContext }) {
       } catch {
         /* rien */
       }
-      lastReport = report(await batteryText());
+      const endSpeed = speedIndex();
+      lastReport = report(await batteryText(), endSpeed);
       text.textContent = lastReport;
       copyBtn.textContent = 'Copier le rapport';
       panel.hidden = false;

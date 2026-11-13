@@ -1,6 +1,7 @@
 // Tests rapides : plusieurs variantes mesurées dans un seul essai, en ALTERNANCE par blocs courts
 // (ordre inversé un tour sur deux) : la chaleur et l'état du téléphone pèsent pareil sur toutes.
 // Les variantes ne s'appliquent que pendant le test. Logique pure.
+// (Les variantes F1 à F3 des rayons lointains, rejetées par les mesures de la séance 20, ont été retirées.)
 //
 // Situations : A = personnage en marche, caméra fixe ; B = personnage en marche, caméra mobile.
 
@@ -26,32 +27,28 @@ export const QUICK_SUITES = {
       ['Caméra mobile contre fixe (T0)', 'B-T0', 'A-T0'],
     ],
   },
-  // Campagne de vérification (séance 19) : tout en caméra mobile, une seule modification par comparaison.
-  CAMPAGNE: {
-    title: 'campagne de vérification (caméra mobile)',
-    rounds: 6, // plus de tours : les images lentes sont devenues rares, il en faut assez pour conclure
+  // Campagne « rayon de devant » (séance 21) : tout en caméra mobile, une seule modification par comparaison.
+  DEVANT: {
+    title: 'campagne « rayon de devant » (caméra mobile)',
+    rounds: 6, // assez d'images lentes pour conclure
     variants:
-      'T0 = référence (rayons lointains en bande entière) · T1 = réduire les animations · T2 = rayon de devant invisible · ' +
-      'F0 = sans rayons lointains (diagnostic) · F1 = rayons lointains dans deux fenêtres en calques à part (ancien T3) · ' +
-      'F2 = bande entière + les deux fenêtres en calques à part · F3 = deux fenêtres dessinées dans le décor, sans calque ajouté',
+      'T0 = référence · T2 = rayon de devant invisible (gain maximal possible) · ' +
+      'G1 = calque réduit à la taille de son image (rien ne change à l’écran) · ' +
+      'G4 = comme G1, moitié de hauteur seulement · G2 = rayon de devant opaque',
     conditions: [
       { id: 'T0', variant: 'T0', camera: 'hero' },
-      { id: 'T1', variant: 'T1', camera: 'hero' },
       { id: 'T2', variant: 'T2', camera: 'hero' },
-      { id: 'F0', variant: 'far-none', camera: 'hero' },
-      { id: 'F1', variant: 'far-windows-layers', camera: 'hero' },
-      { id: 'F2', variant: 'far-band+windows', camera: 'hero' },
-      { id: 'F3', variant: 'far-windows-painted', camera: 'hero' },
+      { id: 'G1', variant: 'fg-box', camera: 'hero' },
+      { id: 'G4', variant: 'fg-half', camera: 'hero' },
+      { id: 'G2', variant: 'fg-opaque', camera: 'hero' },
     ],
     warmup: 0, // chauffe en T0
     comparisons: [
-      ['T1 (animations réduites) contre T0', 'T1', 'T0'],
       ['T2 (rayon de devant invisible) contre T0', 'T2', 'T0'],
-      ['F0 (surface en moins, sans calque ajouté) contre T0', 'F0', 'T0'],
-      ['F2 (deux calques ajoutés, surface inchangée) contre T0', 'F2', 'T0'],
-      ['F1 (bande retirée, fenêtres en calques gardées) contre F2', 'F1', 'F2'],
-      ['F1 (ancien T3) contre T0', 'F1', 'T0'],
-      ['F3 (fenêtres dans le décor, sans calque ajouté) contre T0', 'F3', 'T0'],
+      ['G1 (calque réduit à l’image, invisible à l’œil) contre T0', 'G1', 'T0'],
+      ['G4 (moitié de hauteur) contre G1', 'G4', 'G1'],
+      ['G2 (opaque) contre T0', 'G2', 'T0'],
+      ['G1 contre T2 (G1 récupère-t-il tout le gain ?)', 'G1', 'T2'],
     ],
   },
 };

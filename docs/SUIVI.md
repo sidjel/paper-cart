@@ -113,6 +113,17 @@ T0 101,8 (70–143) / 3 / 0 · T1 120,1 / 4 / 0 · **T2 32,2 (20–43) / 0 / 0**
 - **La dégradation de l'ancien T3 venait des deux calques ajoutés, pas de la réduction de surface.**
 - **L'état du téléphone est revenu dégradé** (T0 ≈ 100/min contre 10/min 1 h 30 plus tôt) : le redémarrage n'est pas une solution durable.
 
+## Campagne « rayon de devant » (séance 21)
+Choix de l'auteur : variantes A (T0, T2, G1, G4, G2) ; retrait du code des variantes F1 à F3 ; indice de vitesse du téléphone ajouté aux rapports.
+| Variante | Ce qui change | Visible ? | Navigateur de test (organisation) |
+|---|---|---|---|
+| T0 | rien | — | calque 4300×1080, 3,39 écrans dessinés/image |
+| T2 | rayon de devant invisible | oui (test) | — |
+| G1 | calque réduit à la taille de l'image | **non** (même image vérifiée) | calque 4300×300, 3,37 écrans |
+| G4 | comme G1, moitié de hauteur | oui (un peu) | calque 4300×150, 3,23 écrans |
+| G2 | rayon de devant opaque | oui | 3,38 écrans |
+Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écartées) ; parallaxe moins forte sans effet (G3 retirée) ; intégrer le rayon au décor impossible (il passe devant le personnage). État : 🔧 en attente du rapport de l'auteur.
+
 ## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
 Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
 - décrire dans les données de chaque lieu les plans de profondeur et ce qui cache quoi (déjà en partie : pile de calques, points de référence) ;

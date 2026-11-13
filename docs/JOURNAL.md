@@ -10,6 +10,21 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 21 — 13/11/2026 — Campagne « rayon de devant », nettoyage, indice de vitesse
+
+**Avis sur les suggestions de ChatGPT (transmises par l'auteur)** : réduire la surface réelle sans changer l'apparence = G1, retenue. Plusieurs opacités (0,35, 0,20) : coût prévu identique à 0,55, seule l'opacité 1 ou 0 change la nature du travail, donc écartées. Intégrer le rayon au décor : impossible avec la technique actuelle, puisqu'il passe devant le personnage, qui a son propre calque. Une parallaxe moins forte : coût prévu identique, car le calque bouge à l'écran de toute façon ; ma propre variante G3 est retirée pour la même raison.
+
+**Décision de l'auteur** : variantes T0, T2, G1, G4, G2 ; retrait du code F1 à F3 ; indice de vitesse.
+
+**Fait (diagnostic seulement, le jeu ne change pas)**
+- Code des variantes F1 à F3 retiré : les fichiers stage.js, style.css et les données du lieu sont revenus exactement à leur état d'avant la campagne de la séance 19.
+- Nouvelle campagne ⚙ → Diagnostic → « Lancer la campagne « rayon de devant » » : 5 variantes, caméra mobile, 6 tours, ≈ 11 min. Comparaisons : T2/T0, G1/T0, G4/G1, G2/T0, G1/T2.
+- **Indice de vitesse du téléphone** dans les rapports des tests rapides : un calcul fixe chronométré au début et à la fin (plus petit = plus rapide), pour comparer l'état du téléphone d'un essai à l'autre.
+
+**Vérifié** : 70 tests de logique, 37 tests navigateur (variantes appliquées puis jeu rétabli ; G1 donne la même image ; rapport avec indice de vitesse). Comptages du jeu revenus à leurs valeurs d'origine. Navigateur de test : G1 réduit le calque (4300×1080 → 4300×300) mais presque pas la surface dessinée (3,39 → 3,37), car ce navigateur ignore déjà les zones transparentes ; G4 la réduit (3,23). À vérifier sur le téléphone.
+
+---
+
 ## Séance 20 — 13/11/2026 — Résultats de la campagne de vérification
 
 **Conditions** : aa84366, mode normal, débranché (42 → 37 %), plein écran, écran maintenu allumé. Campagne de 23 min (de 10 h 11 à 10 h 34), 6 tours, 108 s mesurées par variante, en alternance.

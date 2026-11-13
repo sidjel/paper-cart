@@ -112,9 +112,10 @@ let quickSavedReduce = false;
 
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
-  stage.layers['premier-plan'].style.opacity = variant === 'T2' ? 0 : config.display.foregroundOpacity;
-  // Rayons lointains : seulement pendant la campagne (F0 à F3) ; sinon, le rendu du jeu (bande entière).
-  stage.setFarMode(variant.startsWith('far-') ? variant.slice(4) : 'band');
+  // Rayon de devant : façon de le dessiner pendant la campagne (sinon, comme dans le jeu).
+  const fg = { 'fg-box': 'box', 'fg-half': 'half', 'fg-opaque': 'opaque' }[variant] ?? 'normal';
+  stage.setLayerVariant('premier-plan', fg);
+  if (variant === 'T2') stage.layers['premier-plan'].style.opacity = 0;
 }
 
 async function startQuick(params, suite = 'T012') {
@@ -135,8 +136,7 @@ function endQuick(status) {
   if (!quick) return;
   quick = null;
   config.display.reduceMotion = quickSavedReduce;
-  stage.applyOpacity();
-  stage.setFarMode('band');
+  stage.setLayerVariant('premier-plan', 'normal');
   sm.go('play');
   quickUi.finish(status);
 }
@@ -524,8 +524,8 @@ async function start() {
       startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => quickUi.lastReport,
-    // Tests automatiques seulement : façon de dessiner les rayons lointains (voir stage.setFarMode).
-    diagFarMode: (mode) => stage.setFarMode(mode),
+    // Tests automatiques seulement : façon de dessiner le rayon de devant (voir stage.setLayerVariant).
+    diagForeground: (variant) => stage.setLayerVariant('premier-plan', variant),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
   };
