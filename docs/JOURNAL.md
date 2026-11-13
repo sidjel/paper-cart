@@ -10,6 +10,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 18 — 13/11/2026 — Test de confirmation en mode normal : surprise
+
+**Conditions** : mode haute performance désactivé, sans redémarrer ; extension de RAM toujours active ; plein écran, débranché (52 → 50 %), écran maintenu allumé.
+
+**Résultats (images > 20 ms par minute)** : A-T0 1,7 ; A-T1 4,2 ; B-T0 10,0 ; B-T1 24,2 ; B-T2 5,8. Aucune image > 33 ms ; 60,6 à 61,0 i/s ; calcul du jeu 0,3–0,4 ms en moyenne, 7,2 ms au pire.
+
+**Démontré**
+- En mode normal, dans l'état actuel du téléphone, le jeu atteint les trois objectifs.
+- Le mode haute performance n'était pas la cause principale de l'amélioration : en mode normal, la caméra mobile passe à 10 images lentes par minute, contre environ 130 lors des tests précédents en mode normal. Il apporte un gain supplémentaire, de 10 à 0,8.
+- « Réduire les animations » dégrade la caméra mobile (×2,42, marge 1,23–4,74).
+
+**Correction de mon analyse de la séance 17** : j'avais présenté la gestion d'énergie comme cause probable des saccades. Elle n'en explique qu'une petite partie. L'essentiel vient d'un autre changement, survenu entre la séance 16 et la séance 17.
+
+**Probable** : l'état du téléphone avant le redémarrage (longue durée sans redémarrage, applications en arrière-plan, mémoire, ou un Chrome en mode dégradé). Le calcul du jeu s'est amélioré lui aussi (pire 13–22 ms → 6–7 ms), ce qui va dans le sens d'un téléphone globalement plus disponible.
+
+**Inconnu** : quel changement compte (redémarrage, extension de RAM) ; si les saccades reviennent avec le temps.
+
+**Propositions** (sans rien modifier dans le jeu) : vérifier chrome://gpu sur le téléphone ; refaire le test rapide après quelques jours sans redémarrer, ou dès qu'une saccade se fait sentir ; décider de la validation de A2.
+
+---
+
 ## Séance 17 — 13/11/2026 — Mode haute performance : objectifs atteints
 
 **Conditions** : l'auteur a activé le mode haute performance et l'extension de RAM (8 Go + 3 Go), puis redémarré le téléphone. Plein écran, débranché (56 → 53 %), écran maintenu allumé. Le réglage « Essai caméra immobile » restait coché (sans effet sur ce test).

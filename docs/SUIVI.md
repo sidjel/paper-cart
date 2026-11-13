@@ -80,12 +80,18 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 - OPPO Reno2 (CPH1907), Qualcomm SDM730G (Snapdragon 730G), Android 11, ColorOS 11.1, 8 Go de RAM. Le navigateur annonce « Android 10 » : c'est normal, Chrome fige cette information.
 - Séance 17 : l'auteur active le **mode haute performance** et l'**extension de RAM** (8 Go + 3 Go pris sur le stockage), puis redémarre. Les tests suivants sont donc faits dans des conditions différentes des précédents (séances 10 à 16, mode normal).
 
-## Résultat clé (séance 17)
-Test rapide T0/T1/T2 (f041aaa), **mode haute performance** + extension de RAM + redémarrage, plein écran, débranché :
-- caméra mobile (B-T0) : **0,8** image > 20 ms par minute, contre 132,6 à 137,6 en mode normal ; caméra fixe : 0,8 contre 21,7 à 23,4 ;
-- aucune image > 33 ms ; 61 i/s ; calcul du jeu au pire 4,3 ms (contre 13 à 22 ms).
+## Résultat clé (séances 17 et 18)
+| Test rapide, caméra mobile (B-T0) | Images > 20 ms/min | > 33 ms | Calcul pire |
+|---|---|---|---|
+| Mode normal, avant redémarrage (séances 14, 16) | 137,6 et 132,6 | 11 et 10 | 17,5 et 13,9 ms |
+| Haute performance, après redémarrage + extension de RAM (séance 17) | 0,8 | 0 | 4,3 ms |
+| **Mode normal, après redémarrage + extension de RAM (séance 18)** | **10,0** | **0** | **5,8 ms** |
 
-**Les trois objectifs de fluidité sont atteints dans ce mode.** Cause probable : la gestion d'énergie du téléphone (fréquences et cœurs utilisés), et non la quantité de travail du jeu. À confirmer par le même test en mode normal, sans autre changement. **PixiJS non justifié par les mesures actuelles.**
+- **En mode normal, après le redémarrage, les trois objectifs sont atteints** (60,8 i/s, aucune image > 33 ms, calcul ≤ 8 ms). Il reste environ 10 images ratées par minute quand la caméra bouge (0,3 % des images).
+- Le mode haute performance n'explique qu'une petite partie (10 → 0,8). L'essentiel du gain (≈ 130 → 10) vient d'un autre changement : redémarrage (le plus probable), extension de RAM, ou état du téléphone avant redémarrage. Non démontré.
+- « Réduire les animations » dégrade la caméra mobile en mode normal (×2,42, démontré ; ×1,30 en séance 14), mais pas en haute performance. Cela va dans le sens d'un effet de la gestion d'énergie : moins de travail, fréquence plus basse.
+- Les mesures des séances 10 à 16 ont probablement été prises dans un état dégradé du téléphone : leurs valeurs absolues sont à relativiser.
+- **PixiJS non justifié. Aucune optimisation nécessaire pour atteindre les objectifs dans l'état actuel.**
 
 ## Étapes
 | Étape | État | Notes |
