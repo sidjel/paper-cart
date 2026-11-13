@@ -37,9 +37,7 @@
       "position": [0, 150],
       "parallax": 0.55,
       "contains": "rayons qui se perdent au loin (magasin sans fin)",
-      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)",
-      "windows": [[2024, 150, 292, 470], [3004, 150, 292, 470]],
-      "windowsComment": "Fenêtres [x, y, largeur, hauteur] en coordonnées du décor du fond : les deux ouvertures de l'étagère (montants compris, avec une marge). Le calque n'est dessiné que là."
+      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
     },
     {
       "id": "fond",

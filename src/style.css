@@ -48,8 +48,6 @@ html, body {
   will-change: transform;
 }
 .layer-parallax { will-change: transform; }
-.far-window { position: absolute; overflow: hidden; }
-.far-window-image { position: absolute; left: 0; top: 0; display: block; will-change: transform; pointer-events: none; }
 
 .layer, .layer-image, .debug-mask {
   position: absolute;

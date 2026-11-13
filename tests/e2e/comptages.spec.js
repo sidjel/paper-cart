@@ -58,24 +58,15 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
         if (img.hidden || img.closest('[hidden]') || getComputedStyle(img).display === 'none') continue;
         const layer = img.closest('.layer');
         if (layer && getComputedStyle(layer).display === 'none') continue;
-        // Surface réellement affichée : l'image, coupée par l'écran et par les éléments qui la découpent
-        // (overflow : par exemple les fenêtres des rayons lointains).
         const r = img.getBoundingClientRect();
-        let L = Math.max(0, r.left), T = Math.max(0, r.top), R = Math.min(vw, r.right), B = Math.min(vh, r.bottom);
-        for (let a = img.parentElement; a && a !== stage; a = a.parentElement) {
-          if (getComputedStyle(a).overflow === 'visible') continue;
-          const c = a.getBoundingClientRect();
-          L = Math.max(L, c.left); T = Math.max(T, c.top); R = Math.min(R, c.right); B = Math.min(B, c.bottom);
-        }
-        const w = Math.max(0, R - L);
-        const h = Math.max(0, B - T);
+        const w = Math.max(0, Math.min(vw, r.right) - Math.max(0, r.left));
+        const h = Math.max(0, Math.min(vh, r.bottom) - Math.max(0, r.top));
         if (w * h > 0) visibleImages++;
         area += w * h;
       }
       return {
         stageElements: stage.querySelectorAll('*').length,
-        // Calques affichés (un rendu de remplacement masqué ne compte pas).
-        layers: [...stage.querySelectorAll('.layer')].filter((l) => getComputedStyle(l).display !== 'none').length,
+        layers: stage.querySelectorAll('.layer').length,
         visibleImages,
         overdraw: area / (vw * vh),
       };

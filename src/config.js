@@ -40,7 +40,6 @@ export const config = {
   },
   scene: {
     depthScale: 1, // force de l'effet « plus petit au fond » (0 = aucun, 1 = normal)
-    farWindows: true, // rayons lointains dessinés seulement dans les ouvertures (false = bande entière, ancienne façon)
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
@@ -140,7 +139,6 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'bench.noDust', label: 'Essai sans poussière', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noShadow', label: 'Essai sans ombre', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.fixedCamera', label: 'Essai caméra immobile', type: 'bool' },
-  { group: 'Diagnostic', key: 'scene.farWindows', label: 'Rayons lointains limités aux ouvertures', type: 'bool' },
   { group: 'Diagnostic', key: 'quick.warmup', label: 'Test rapide : chauffe', min: 0, max: 120, step: 5, unit: 's' },
   { group: 'Diagnostic', key: 'quick.block', label: 'Test rapide : durée d’un bloc', min: 5, max: 60, step: 5, unit: 's' },
   { group: 'Diagnostic', key: 'quick.settle', label: 'Test rapide : début de bloc ignoré', min: 0, max: 5, step: 0.5, unit: 's' },
