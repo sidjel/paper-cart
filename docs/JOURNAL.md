@@ -10,6 +10,40 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 20 — 13/11/2026 — Résultats de la campagne de vérification
+
+**Conditions** : aa84366, mode normal, débranché (42 → 37 %), plein écran, écran maintenu allumé. Campagne de 23 min (de 10 h 11 à 10 h 34), 6 tours, 108 s mesurées par variante, en alternance.
+
+**Mesuré (téléphone)** — images > 20 ms par minute (blocs min–max), images > 33 ms, images > 50 ms, calcul pire :
+- T0 101,8 (70–143) · 3 · 0 · 18,3 ms ;
+- T1 120,1 (100–153) · 4 · 0 · 26,3 ms ;
+- T2 32,2 (20–43) · 0 · 0 · 13,6 ms ;
+- F0 66,2 (53–93) · 3 · 0 · 12,8 ms ;
+- F1 143,4 (117–173) · 18 · 6 · 13,9 ms ;
+- F2 136,8 (110–167) · 16 · 6 · 11,0 ms ;
+- F3 125,6 (103–134) · 41 · 21 · 12,7 ms.
+
+**Démontré (téléphone, comparaisons dans le même essai)**
+- Rayon de devant invisible : ×0,32 (marge 0,24–0,43) ; les blocs ne se chevauchent pas. C'est le levier le plus fort, retrouvé à chaque test (×0,45 en séance 14).
+- Sans rayons lointains : ×0,65 (0,52–0,82).
+- Deux calques ajoutés, surface inchangée (F2) : ×1,34 (1,11–1,63).
+- Ancien T3 (F1) : ×1,41 (1,17–1,70). **Le résultat de T3 est confirmé** dans l'état actuel.
+- Fenêtres dessinées dans le décor (F3) : ×1,23 (1,02–1,50), et surtout **41 images > 33 ms et 21 > 50 ms** (contre 3 et 0 pour T0).
+- **La dégradation de T3 venait des deux calques ajoutés, pas de la réduction de surface** : F2 montre leur coût ; F1 contre F2 (bande retirée, calques gardés) ne montre aucun gain (×1,05, marge 0,88–1,25).
+
+**Non démontré** : effet des animations (×1,18, marge 0,97–1,44). Aucun bénéfice à les réduire.
+
+**Constat sur l'état du téléphone** : la référence est revenue à environ 100 images lentes par minute (contre 10 lors de la séance 18, 1 h 30 plus tôt), et les pics de calcul aussi (18 à 26 ms). Le redémarrage n'a donc donné qu'une amélioration temporaire. Causes possibles, non démontrées : chaleur après une heure de tests, niveau de batterie, temps écoulé depuis le redémarrage. Les comparaisons à l'intérieur d'un même essai restent valables ; les niveaux absolus varient d'un moment à l'autre.
+
+**Hypothèses techniques (navigateur de test : organisation du rendu)**
+- Un calque mobile placé sous le décor du fond (la bande ou les fenêtres) oblige le navigateur à donner au décor son propre grand calque. Sans rien dessous (F0, F3), le décor rejoint le calque de la scène. Nombre de grands calques : T0 5, F0 4, F1 6, F2 7, F3 4.
+- Sur le téléphone, la fluidité suit à peu près ce nombre (F0 < T0 < F2), sauf F3, où redessiner le décor à chaque mouvement provoque de longues saccades.
+- Les fenêtres en calques provoquent aussi plus d'images > 33 et > 50 ms (18/6 et 16/6 contre 3/0) : peut-être le dessin à la volée des parties de l'image qui entrent dans la fenêtre en glissant. Non démontré.
+
+**Conséquences proposées** : abandonner les variantes F1, F2, F3 (code de diagnostic à retirer) ; garder les animations ; travailler en priorité le rayon de devant, avec des variantes qui respectent la direction artistique, mesurées par la même campagne ; ajouter aux rapports un indice de vitesse du téléphone pour suivre son état d'un essai à l'autre.
+
+---
+
 ## Séance 19 — 13/11/2026 — Campagne de vérification dans l'état actuel du téléphone
 
 **Vérification de l'auteur** : chrome://gpu → « Compositing : Hardware accelerated ».

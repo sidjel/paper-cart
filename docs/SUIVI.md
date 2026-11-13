@@ -104,7 +104,14 @@ Demandée par l'auteur : refaire T1, T2, T3 dans l'état actuel (après redémar
 | F1 | 2 fenêtres en calques à part | ancien T3 |
 | F2 | bande + 2 fenêtres en calques à part | coût de 2 calques ajoutés, surface inchangée |
 | F3 | 2 fenêtres dessinées dans le décor | surface en moins sans calque ajouté, mais décor redessiné aux ouvertures à chaque mouvement |
-État : 🔧 en attente du rapport de l'auteur. A2 sera validée après.
+État : ✅ faite (séance 20). Résultats ci-dessous ; A2 pas encore validée.
+
+**Résultats (aa84366, mode normal, débranché 42 → 37 %, plein écran)** — images > 20 ms par minute (blocs min–max) / > 33 ms / > 50 ms :
+T0 101,8 (70–143) / 3 / 0 · T1 120,1 / 4 / 0 · **T2 32,2 (20–43) / 0 / 0** · **F0 66,2 (53–93) / 3 / 0** · F1 143,4 / 18 / 6 · F2 136,8 / 16 / 6 · F3 125,6 / 41 / 21.
+- Démontré : rayon de devant invisible ×0,32 ; sans rayons lointains ×0,65 ; deux calques ajoutés ×1,34 ; ancien T3 ×1,41 (confirmé) ; fenêtres dessinées dans le décor ×1,23, avec beaucoup d'images > 33 et > 50 ms.
+- Non démontré : animations (×1,18, marge 0,97–1,44) ; retirer la bande quand les fenêtres existent (×1,05).
+- **La dégradation de l'ancien T3 venait des deux calques ajoutés, pas de la réduction de surface.**
+- **L'état du téléphone est revenu dégradé** (T0 ≈ 100/min contre 10/min 1 h 30 plus tôt) : le redémarrage n'est pas une solution durable.
 
 ## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
 Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
