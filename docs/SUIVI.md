@@ -129,7 +129,10 @@ Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écart
 - Constat : par pixel d'écran, le rayon de devant coûte bien plus cher que la bande des rayons lointains. Cause inconnue ; pistes : il glisse plus vite (×1,25) et doit faire dessiner plus vite les morceaux qui apparaissent ; il est dessiné en dernier, par-dessus le personnage.
 - Ma prévision « parallaxe sans effet » est donc remise en question.
 
-**Campagne n° 2 (séance 24)** : choix de l'auteur A. Variantes T0, G4 (moitié haute), G3 (glisse à la vitesse du sol) ; 8 tours (≈ 8 min 30, 144 s par variante). G5 (« image directe ») abandonnée avant mesure : le navigateur de test montre que l'image reste redessinée par morceaux (≈ 14/s, contre ≈ 15/s en T0), donc elle ne testerait rien. Constat du navigateur de test : le rayon de devant est redessiné par morceaux pendant que la caméra bouge (≈ 15/s ; ≈ 4/s pour la moitié haute). État : 🔧 en attente du rapport.
+**Campagne n° 2 (séance 24)** : choix de l'auteur A. Variantes T0, G4 (moitié haute), G3 (glisse à la vitesse du sol) ; 8 tours (≈ 8 min 30, 144 s par variante). G5 (« image directe ») abandonnée avant mesure : le navigateur de test montre que l'image reste redessinée par morceaux (≈ 14/s, contre ≈ 15/s en T0), donc elle ne testerait rien. Constat du navigateur de test : le rayon de devant est redessiné par morceaux pendant que la caméra bouge (≈ 15/s ; ≈ 4/s pour la moitié haute). **Résultats (séance 25, 00fd429, batterie 57 → 55 %, indice de vitesse 4,1 → 4,3 ms : téléphone « en bon état » selon la règle)** — images > 20 ms/min : T0 98,0 (87–110), > 33 ms : 7 · G4 68,8 (57–83), > 33 ms : 3, > 50 ms : 1 · G3 128,9 (103–157), > 33 ms : 15.
+- Démontré et reproduit : moitié haute ×0,70 (0,58–0,86) ; deuxième fois après ×0,68.
+- Démontré : glisser à la vitesse du sol **dégrade** (×1,31, 1,11–1,56). L'hypothèse « il coûte parce qu'il glisse plus vite » est réfutée.
+- Objectifs, téléphone en bon état : **non atteints**, ni en T0 (59,3 i/s, 7 images > 33 ms, calcul pire 13,8 ms) ni en G4.
 
 **Décision de l'auteur sur l'objectif « aucune image > 33 ms »** : le garder, mais le juger avec le téléphone en bon état (batterie > 50 %, indice de vitesse comparable). Inscrit dans CLAUDE.md.
 

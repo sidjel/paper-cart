@@ -10,6 +10,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 25 — 13/11/2026 — Campagne « rayon de devant » n° 2 : bilan de l'optimisation DOM
+
+**Conditions** : 00fd429 ; batterie 57 → 55 %, débranché, plein écran, mode normal, écran maintenu allumé ; indice de vitesse 4,1 → 4,3 ms. Le téléphone est donc « en bon état » selon la règle de la séance 24.
+
+**Mesuré** — images > 20 ms par minute (blocs min–max) / > 33 / > 50 / calcul pire :
+- T0 98,0 (87–110) / 7 / 0 / 13,8 ms ;
+- G4 68,8 (57–83) / 3 / 1 / 14,8 ms ;
+- G3 128,9 (103–157) / 15 / 0 / 14,5 ms.
+
+**Démontré**
+- Moitié haute du rayon de devant : ×0,70 (0,58–0,86), reproduit (×0,68 en séance 23).
+- Rayon de devant qui glisse à la vitesse du sol : **×1,31 (1,11–1,56), dégradation**. Mon hypothèse « il coûte parce qu'il glisse plus vite » est réfutée.
+- **Objectifs non atteints sur un téléphone en bon état**, ni en T0 ni en G4.
+
+**Bilan des campagnes DOM (séances 14 à 25)**
+- Leviers démontrés et reproduits : rayon de devant (entier ×0,35 s'il est retiré, ×0,70 en moitié haute ; le coût suit sa surface). Les calques ajoutés coûtent (×1,41).
+- Sans effet : réduire la boîte du calque, l'opacité.
+- Contre-intuitif, plusieurs fois : réduire les animations (×1,20), faire glisser le rayon à la vitesse du sol (×1,31), réduire la surface des rayons lointains avec des fenêtres. Retirer du travail peut dégrader : cause inconnue (gestion d'énergie du téléphone ? façon dont le navigateur organise ses calques ?).
+- Pics de calcul de 12 à 18 ms dans toutes les variantes : ils ne viennent pas de l'affichage.
+- L'indice de vitesse (calcul pur) est resté autour de 4,1–4,3 ms aussi bien dans un état « 85 images lentes/min » que dans celui-ci (98) : il ne suffit pas, seul, à repérer l'état du téléphone qui compte pour l'affichage.
+
+**Conclusion** : avec la technique actuelle (DOM/CSS), les leviers qui restent touchent à l'aspect du rayon de devant, et aucun ne suffit à atteindre l'objectif. C'est le moment prévu par le cahier des charges pour proposer un essai comparatif PixiJS, chiffres à l'appui. Décisions demandées à l'auteur.
+
+---
+
 ## Séance 24 — 13/11/2026 — Campagne « rayon de devant » n° 2 (G4, G3)
 
 **Décisions de l'auteur** : chemin A (campagne courte, puis aspect et validation de A2) ; l'objectif « aucune image > 33 ms » est gardé, mais jugé sur un téléphone en bon état (batterie > 50 %, indice de vitesse comparable). Règle ajoutée à CLAUDE.md.
