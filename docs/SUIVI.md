@@ -147,7 +147,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Étape | État | Notes |
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
-| A2 — le personnage semble évoluer dans un décor profond | ❓ | Tout est construit (séance 8). Reste : rapport du banc d'essai sur le téléphone, puis validation finale de A2 par l'auteur. |
+| A2 — le personnage semble évoluer dans un décor profond | ✅ | **A2 validée : 6be7130** (séance 26). Rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état (choix C) ; essai PixiJS non retenu pour l'instant. |
+| A3 — scanner un produit est satisfaisant | 🔧 | En cours (séance 26). |
 
 ## Interface
 | Demande | Séance | État | Notes |

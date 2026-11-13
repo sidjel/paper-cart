@@ -7,6 +7,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 | Étape | Commit | Date |
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | `1445d25` (« A1 validée : 1445d25 ») | 12/11/2026 |
+| A2 — le personnage semble évoluer dans un décor profond | `6be7130` (« A2 validée : 6be7130 ») — rayon de devant gardé entier, fluidité acceptée en l'état (choix C de l'auteur) | 13/11/2026 |
 
 ---
 
