@@ -12,7 +12,7 @@ import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
 import { createProtocol, stepProtocol, placeForConfig, protocolConfig, totalSeconds } from './core/protocol.js';
 import { createProtocolUi, F_CAMERA, F_FRAME, F_FLIP, F_DUST } from './ui/protocol.js';
-import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickElapsed, quickTotalSeconds, QUICK_CONDITIONS } from './core/quicktest.js';
+import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds, QUICK_SUITES } from './core/quicktest.js';
 import { createQuickTestUi } from './ui/quicktest.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createStage } from './scene/stage.js';
@@ -97,7 +97,8 @@ const protocolUi = createProtocolUi(uiEl, {
   }),
 });
 const quickUi = createQuickTestUi(uiEl, {
-  onStart: () => startQuick({ ...config.quick }),
+  // La campagne fixe son propre nombre de tours ; le reste du protocole vient des réglages.
+  onStart: (suite) => startQuick({ ...config.quick, rounds: QUICK_SUITES[suite].rounds ?? config.quick.rounds }, suite),
   getContext: () => ({ version: VERSION, renderLine, overrides: overrides() }),
 });
 const diagTools = document.createElement('div');
@@ -112,20 +113,22 @@ let quickSavedReduce = false;
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
   stage.layers['premier-plan'].style.opacity = variant === 'T2' ? 0 : config.display.foregroundOpacity;
+  // Rayons lointains : seulement pendant la campagne (F0 à F3) ; sinon, le rendu du jeu (bande entière).
+  stage.setFarMode(variant.startsWith('far-') ? variant.slice(4) : 'band');
 }
 
-async function startQuick(params) {
+async function startQuick(params, suite = 'T012') {
   if (!sm.is('menu')) return;
-  quick = createQuickTest(place.diagnostic, params);
+  quick = createQuickTest(place.diagnostic, params, suite);
   startQuickTest(quick, walker, ghost);
   quickSavedReduce = config.display.reduceMotion;
-  applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+  applyVariant(quickConditionDef(quick).variant);
   camera.ready = false;
   lastCamTime = -1;
   marker.hide();
   hud.playerMoved();
   sm.go('bench');
-  await quickUi.begin(params);
+  await quickUi.begin(params, suite);
 }
 
 function endQuick(status) {
@@ -133,6 +136,7 @@ function endQuick(status) {
   quick = null;
   config.display.reduceMotion = quickSavedReduce;
   stage.applyOpacity();
+  stage.setFarMode('band');
   sm.go('play');
   quickUi.finish(status);
 }
@@ -143,7 +147,7 @@ function quickStep(dt, t0) {
     stepQuickTest(quick, walker, stepper.step);
     if (quick.changed && quick.phase === 'block') {
       quickUi.nextBlock();
-      applyVariant(QUICK_CONDITIONS[quickCondition(quick)].variant);
+      applyVariant(quickConditionDef(quick).variant);
     }
     stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
   }
@@ -153,7 +157,7 @@ function quickStep(dt, t0) {
   }
   render();
   if (quick.measuring) quickUi.record(dt, performance.now() - t0, quickCondition(quick));
-  const c = QUICK_CONDITIONS[quickCondition(quick)];
+  const c = quickConditionDef(quick);
   const left = Math.ceil((quickTotalSeconds(quick) - quickElapsed(quick)) / 60);
   const what = quick.phase === 'warmup' ? 'chauffe' : `tour ${quick.round + 1}/${quick.rounds} · ${c.id}`;
   quickUi.progress(`Test rapide : ${what} · reste ≈ ${left} min`);
@@ -380,7 +384,7 @@ function render() {
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
   const camFrozen = bench && config.bench.fixedCamera && camera.ready;
-  const pc = protocol ? protocolConfig(protocol) : quick ? QUICK_CONDITIONS[quickCondition(quick)] : null;
+  const pc = protocol ? protocolConfig(protocol) : quick ? quickConditionDef(quick) : null;
   if (pc && pc.camera === 'fixed') {
     // Diagnostic : caméra fixe, centrée sur l'aller-retour.
     const mid = (place.diagnostic.a[0] + place.diagnostic.b[0]) / 2;
@@ -515,11 +519,13 @@ async function start() {
       startProtocol(warmup, measure, repeats);
     },
     protocolReport: () => protocolUi.lastReport,
-    startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1) {
+    startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1, suite = 'T012') {
       if (sm.is('play')) sm.go('menu');
-      startQuick({ warmup, block, settle, rounds });
+      startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => quickUi.lastReport,
+    // Tests automatiques seulement : façon de dessiner les rayons lointains (voir stage.setFarMode).
+    diagFarMode: (mode) => stage.setFarMode(mode),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
   };

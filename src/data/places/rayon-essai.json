@@ -37,7 +37,9 @@
       "position": [0, 150],
       "parallax": 0.55,
       "contains": "rayons qui se perdent au loin (magasin sans fin)",
-      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
+      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)",
+      "diagnosticWindows": [[2024, 150, 292, 470], [3004, 150, 292, 470]],
+      "diagnosticComment": "Diagnostic seulement : fenêtres [x, y, largeur, hauteur] posées sur les deux ouvertures de l'étagère (montants compris, avec une marge). Utilisées par la campagne de tests pour comparer d'autres façons de dessiner ce calque ; le jeu dessine toujours la bande entière."
     },
     {
       "id": "fond",

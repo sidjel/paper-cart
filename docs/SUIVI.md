@@ -93,6 +93,26 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 - Les mesures des séances 10 à 16 ont probablement été prises dans un état dégradé du téléphone : leurs valeurs absolues sont à relativiser.
 - **PixiJS non justifié. Aucune optimisation nécessaire pour atteindre les objectifs dans l'état actuel.**
 
+## Campagne de vérification (séance 19, téléphone dans son état actuel)
+Demandée par l'auteur : refaire T1, T2, T3 dans l'état actuel (après redémarrage), et séparer les deux effets de l'ancien T3. Tout en caméra mobile, variantes alternées, 6 tours (≈ 15 min), rien de changé dans le jeu.
+| Variante | Rayons lointains | Isole |
+|---|---|---|
+| T0 | bande entière (jeu) | référence |
+| T1 | — | animations réduites |
+| T2 | — | rayon de devant invisible |
+| F0 | aucun (diagnostic) | surface en moins (et un calque en moins), sans calque ajouté |
+| F1 | 2 fenêtres en calques à part | ancien T3 |
+| F2 | bande + 2 fenêtres en calques à part | coût de 2 calques ajoutés, surface inchangée |
+| F3 | 2 fenêtres dessinées dans le décor | surface en moins sans calque ajouté, mais décor redessiné aux ouvertures à chaque mouvement |
+État : 🔧 en attente du rapport de l'auteur. A2 sera validée après.
+
+## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
+Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
+- décrire dans les données de chaque lieu les plans de profondeur et ce qui cache quoi (déjà en partie : pile de calques, points de référence) ;
+- ne rien dessiner qui soit toujours caché ; mais **mesurer** chaque façon de l'éviter (T3 a montré qu'une solution logique peut coûter plus cher) ;
+- éviter de multiplier les calques qui bougent ; préférer peu de calques bien choisis ;
+- le changement de plan du personnage passe par l'ordre d'affichage (déjà en place), pas par de nouveaux calques.
+
 ## Étapes
 | Étape | État | Notes |
 |---|---|---|

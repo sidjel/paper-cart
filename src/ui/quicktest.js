@@ -3,7 +3,7 @@
 // Le rapport compare les variantes avec une marge d'incertitude (intervalle de confiance à 95 %)
 // sur le nombre d'images lentes : une différence n'est dite « démontrée » que si la marge l'exclut.
 
-import { QUICK_CONDITIONS } from '../core/quicktest.js';
+import { QUICK_SUITES } from '../core/quicktest.js';
 
 const MAX = 15 * 60 * 125; // jusqu'à 15 min à 125 images/s
 const fmt = (n, d = 1) => (Number.isFinite(n) ? n.toFixed(d).replace('.', ',') : '—');
@@ -33,6 +33,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
   let lastReport = '';
   let status = '';
   let params = {};
+  let suite = QUICK_SUITES.T012;
   let start = { battery: '?', wakeLock: 'non' };
   let wakeLock = null;
 
@@ -55,8 +56,17 @@ export function createQuickTestUi(root, { onStart, getContext }) {
   help.className = 'settings-note';
   help.textContent =
     'Compare, dans un seul essai et en alternance, la référence (T0), « réduire les animations » (T1) et le rayon de devant invisible (T2). Téléphone débranché, plein écran, ne touche à rien.';
-  launcher.append(btn, help);
-  btn.addEventListener('click', () => onStart());
+  const btnC = document.createElement('button');
+  btnC.className = 'primary';
+  btnC.textContent = 'Lancer la campagne de vérification (7 variantes, ≈ 15 min)';
+  const helpC = document.createElement('p');
+  helpC.className = 'settings-note';
+  helpC.textContent =
+    'Caméra mobile, même trajet. Compare à la référence T0 : animations réduites (T1), rayon de devant invisible (T2) et quatre façons de dessiner les rayons lointains (F0 à F3). Variantes alternées, 6 tours. Téléphone débranché, plein écran, ne touche à rien.';
+  btn.className = '';
+  launcher.append(btnC, helpC, btn, help);
+  btnC.addEventListener('click', () => onStart('CAMPAGNE'));
+  btn.addEventListener('click', () => onStart('T012'));
 
   const panel = document.createElement('div');
   panel.className = 'bench-result panel';
@@ -136,15 +146,16 @@ export function createQuickTestUi(root, { onStart, getContext }) {
 
   function report(endBattery) {
     const c = getContext();
-    const s = QUICK_CONDITIONS.map((_, i) => stats(i));
-    const by = (id) => s[QUICK_CONDITIONS.findIndex((q) => q.id === id)];
+    const conds = suite.conditions;
+    const s = conds.map((_, i) => stats(i));
+    const by = (id) => s[conds.findIndex((q) => q.id === id)];
     const cmp = (label, a, b) => {
       const x = by(a), y = by(b);
       const rr = rateRatio(x.o20, x.secs, y.o20, y.secs);
       return `  ${label} : ×${fmt(rr.r, 2)} [marge ${fmt(rr.lo, 2)} – ${fmt(rr.hi, 2)}] → ${verdict(rr)}`;
     };
     const lines = [
-      'Paper Cart — test rapide T0 / T1 / T2',
+      `Paper Cart — ${suite.title}`,
       `Résultat : ${status}`,
       `Version : ${c.version} · ${new Date().toLocaleString('fr-FR')}`,
       `Appareil : ${navigator.userAgent.replace(/^Mozilla\/5\.0 /, '')}`,
@@ -152,13 +163,13 @@ export function createQuickTestUi(root, { onStart, getContext }) {
       `Rendu : ${c.renderLine}`,
       `Batterie : début ${start.battery} · fin ${endBattery} · écran maintenu allumé : ${start.wakeLock}`,
       `Réglages modifiés : ${JSON.stringify(c.overrides)}`,
-      `Protocole : chauffe ${params.warmup} s · ${params.rounds} tours × 5 conditions × ${params.block} s (${params.settle} s ignorées après chaque changement) · ordre inversé un tour sur deux · même aller-retour en ligne droite`,
-      'Situations : A = marche, caméra fixe · B = marche, caméra mobile',
-      'Variantes : T0 = référence · T1 = réduire les animations (rebond, respiration, écrasements, retournement, poussière) · T2 = rayon de devant invisible',
+      `Protocole : chauffe ${params.warmup} s · ${params.rounds} tours × ${conds.length} conditions × ${params.block} s (${params.settle} s ignorées après chaque changement) · ordre inversé un tour sur deux · même aller-retour en ligne droite`,
+      conds.every((q) => q.camera === 'hero') ? 'Situation : marche, caméra mobile (toutes les variantes)' : 'Situations : A = marche, caméra fixe · B = marche, caméra mobile',
+      `Variantes : ${suite.variants}`,
       '',
       'Condition | images (s) | i/s | >20 ms par min (blocs min–max) | >33 | >50 | p95 | calcul moy/pire',
     ];
-    QUICK_CONDITIONS.forEach((q, i) => {
+    conds.forEach((q, i) => {
       const x = s[i];
       lines.push(
         `  ${q.id} | ${x.n} (${fmt(x.secs, 0)}) | ${fmt(x.fps)} | ${fmt(x.perMin)} (${fmt(x.blockMin, 0)}–${fmt(x.blockMax, 0)}) | ${x.o33} | ${x.o50} | ${fmt(x.p95)} | ${fmt(x.jsAvg, 2)}/${fmt(x.jsWorst, 1)}`,
@@ -167,10 +178,7 @@ export function createQuickTestUi(root, { onStart, getContext }) {
     lines.push(
       '',
       'Comparaisons (images > 20 ms ; ×1 = pareil, ×0,5 = deux fois moins ; « marge » = intervalle de confiance à 95 %) :',
-      cmp('T1 contre T0, caméra fixe (A)', 'A-T1', 'A-T0'),
-      cmp('T1 contre T0, caméra mobile (B)', 'B-T1', 'B-T0'),
-      cmp('T2 contre T0, caméra mobile (B)', 'B-T2', 'B-T0'),
-      cmp('Caméra mobile contre fixe (T0)', 'B-T0', 'A-T0'),
+      ...suite.comparisons.map(([label, a, b]) => cmp(label, a, b)),
       '',
       'Prudence : la marge suppose des images lentes indépendantes ; si les blocs d’une même condition varient beaucoup (colonne min–max), un effet « démontré » mais faible reste à confirmer.',
     );
@@ -179,8 +187,10 @@ export function createQuickTestUi(root, { onStart, getContext }) {
 
   return {
     launcher,
-    async begin(p) {
+    async begin(p, suiteId = 'T012') {
       params = p;
+      suite = QUICK_SUITES[suiteId];
+      title.textContent = suite.title.charAt(0).toUpperCase() + suite.title.slice(1);
       n = 0;
       blockNo = 0;
       status = 'en cours';

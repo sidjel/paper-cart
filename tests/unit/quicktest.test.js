@@ -60,3 +60,44 @@ describe('test rapide T0 / T1 / T2', () => {
     expect(rateRatio(0, 80, 10, 80).hi).toBeLessThan(1); // zéro image lente : traité sans division par zéro
   });
 });
+
+import { QUICK_SUITES, quickConditionDef } from '../../src/core/quicktest.js';
+
+describe('campagne de vérification (caméra mobile)', () => {
+  const C = QUICK_SUITES.CAMPAGNE;
+  it('7 variantes, toutes en caméra mobile, 6 tours, ≈ 15 min avec le protocole habituel', () => {
+    expect(C.conditions.map((c) => c.id)).toEqual(['T0', 'T1', 'T2', 'F0', 'F1', 'F2', 'F3']);
+    expect(C.conditions.every((c) => c.camera === 'hero')).toBe(true);
+    const q = createQuickTest(place.diagnostic, { warmup: 30, block: 20, settle: 2, rounds: C.rounds }, 'CAMPAGNE');
+    expect(quickTotalSeconds(q)).toBe(30 + 6 * 7 * 20); // 870 s ; 6 × 18 s = 108 s mesurées par variante
+  });
+  it('chaque comparaison porte sur des variantes existantes', () => {
+    const ids = C.conditions.map((c) => c.id);
+    for (const [, a, b] of C.comparisons) {
+      expect(ids).toContain(a);
+      expect(ids).toContain(b);
+    }
+  });
+  it('enchaîne les variantes en alternance, en marchant', () => {
+    const hero = createWalker(0, 0), ghost = createWalker(0, 0);
+    const q = createQuickTest(place.diagnostic, { warmup: 1, block: 1, settle: 0.2, rounds: 2 }, 'CAMPAGNE');
+    startQuickTest(q, hero, ghost);
+    const seen = [];
+    let moving = 0, total = 0;
+    while (q.phase !== 'done') {
+      stepQuickTest(q, hero, DT);
+      stepWalker(hero, { moveX: 0, moveZ: 0 }, mask, P, DT);
+      if (q.measuring) {
+        total++;
+        if (hero.moving) moving++;
+        const key = `${q.round}.${q.slot}`;
+        if (seen.lastKey !== key) {
+          seen.push(quickConditionDef(q).id);
+          seen.lastKey = key;
+        }
+      }
+    }
+    expect([...seen]).toEqual(['T0', 'T1', 'T2', 'F0', 'F1', 'F2', 'F3', 'F3', 'F2', 'F1', 'F0', 'T2', 'T1', 'T0']);
+    expect(moving / total).toBeGreaterThan(0.9);
+  });
+});

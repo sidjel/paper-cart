@@ -3,7 +3,10 @@
 //   un écran plus allongé (20:9) montre simplement plus de largeur, sans rien couper ;
 // - la caméra fait glisser la scène ; les calques avec une parallaxe (rayons lointains,
 //   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
-// - les calques sont créés d'après la pile déclarée dans les données du lieu.
+// - les calques sont créés d'après la pile déclarée dans les données du lieu ;
+// - DIAGNOSTIC SEULEMENT : un calque peut déclarer des « fenêtres de diagnostic » (zones où on le voit,
+//   par exemple les ouvertures de l'étagère). Elles servent à comparer d'autres façons de dessiner
+//   ce calque pendant les tests de fluidité (setFarMode). En jeu normal, rien ne change (mode « band »).
 
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
 export function createStage(container, place, images, getValue) {
@@ -15,6 +18,8 @@ export function createStage(container, place, images, getValue) {
 
   const layers = {};
   const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
+  const windowImgs = []; // diagnostic : images dans les fenêtres { el, f, ox, oy, last }
+  const far = { band: null, box: null, mode: 'band', painted: false };
   for (const def of place.layers) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
@@ -37,6 +42,34 @@ export function createStage(container, place, images, getValue) {
     }
     el.appendChild(layer);
     layers[def.id] = layer;
+    if (def.diagnosticWindows && def.image) {
+      // Diagnostic : même image, découpée par des fenêtres fixes posées sur les ouvertures.
+      const src = images.get(def.image);
+      const box = document.createElement('div');
+      box.className = `far-box layer-${def.id}-fenetres`; // pas un calque de la pile : un outil de diagnostic
+      box.style.display = 'none';
+      for (const [x, y, w, h] of def.diagnosticWindows) {
+        const win = document.createElement('div');
+        win.className = 'far-window';
+        win.style.left = `${x}px`;
+        win.style.top = `${y}px`;
+        win.style.width = `${w}px`;
+        win.style.height = `${h}px`;
+        const im = new Image();
+        im.src = src.url;
+        im.className = 'far-window-image';
+        im.width = src.w;
+        im.height = src.h;
+        im.alt = '';
+        im.draggable = false;
+        win.appendChild(im);
+        box.appendChild(win);
+        windowImgs.push({ el: im, f, ox: pos[0] - x, oy: pos[1] - y, last: NaN });
+      }
+      el.appendChild(box);
+      far.band = layer;
+      far.box = box;
+    }
   }
   container.appendChild(el);
 
@@ -64,6 +97,28 @@ export function createStage(container, place, images, getValue) {
         p.last = dx;
       }
     }
+    if (far.mode === 'band' || far.mode === 'none') return; // fenêtres de diagnostic masquées : rien à faire
+    for (const w of windowImgs) {
+      const dx = view.camX * (1 - w.f);
+      if (dx === w.last) continue;
+      // Calque à part : translate3d. Dessinées dans le décor : translate (2D), pour ne pas créer de calque.
+      w.el.style.transform = far.painted ? `translate(${w.ox + dx}px, ${w.oy}px)` : `translate3d(${w.ox + dx}px, ${w.oy}px, 0)`;
+      w.last = dx;
+    }
+  }
+
+  // DIAGNOSTIC : façon de dessiner le calque lointain pendant les tests de fluidité.
+  // 'band' : bande entière (rendu du jeu) ; 'none' : aucun ; 'windows-layers' : fenêtres en calques à part ;
+  // 'band+windows' : bande entière + fenêtres en calques à part ; 'windows-painted' : fenêtres dessinées dans le décor.
+  function setFarMode(mode) {
+    if (!far.band) return;
+    far.mode = mode;
+    far.painted = mode === 'windows-painted';
+    far.band.style.display = mode === 'band' || mode === 'band+windows' ? '' : 'none';
+    far.box.style.display = mode === 'windows-layers' || mode === 'band+windows' || mode === 'windows-painted' ? '' : 'none';
+    far.box.classList.toggle('far-painted', far.painted);
+    for (const w of windowImgs) w.last = NaN;
+    apply();
   }
 
   function layout(zoom) {
@@ -105,5 +160,5 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity };
+  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity, setFarMode };
 }

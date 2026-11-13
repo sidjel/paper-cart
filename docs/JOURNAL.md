@@ -10,6 +10,34 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 19 — 13/11/2026 — Campagne de vérification dans l'état actuel du téléphone
+
+**Vérification de l'auteur** : chrome://gpu → « Compositing : Hardware accelerated ».
+
+**Demande de l'auteur** : les anciens T1 et T3 ont été mesurés sur un téléphone en état dégradé. Il veut les refaire dans l'état actuel (mode normal, même mémoire, débranché, refroidi, plein écran, caméra mobile, même trajet, variantes alternées, une seule modification par comparaison), et comprendre si la dégradation de T3 venait de la réduction de surface ou des deux calques ajoutés. Il demande aussi une variante qui réduise la surface sans calque ajouté. Pas d'A3 avant la validation définitive de A2.
+
+**Construit (diagnostic seulement ; le jeu dessine toujours la bande entière)** : ⚙ → Diagnostic → « Lancer la campagne de vérification » (7 variantes, 6 tours, ≈ 15 min) : T0, T1, T2, F0 (sans rayons lointains), F1 (fenêtres en calques, ancien T3), F2 (bande + fenêtres en calques), F3 (fenêtres dessinées dans le décor). Comparaisons : T1/T0, T2/T0, F0/T0, F2/T0, F1/F2, F1/T0, F3/T0.
+
+**Vérifications (navigateur de test ; organisation du rendu, pas performances)**
+- Image : F1, F2, F3 identiques à T0 à 0,1 % de pixels près (écart maximal 14/255, lissage). F0 retire les rayons lointains, volontairement. Test automatique ajouté.
+- Caractérisation pendant les mouvements de caméra :
+
+  | Variante | Calques qui dessinent | Surface par image | Rendus de pixels/s |
+  |---|---|---|---|
+  | T0 | 10 | 3,39 | 182 |
+  | F0 | 9 | 2,68 | 147 |
+  | F1 | 11 | 2,76 | 153 |
+  | F2 | 12 | 3,47 | 181 |
+  | F3 | 9 | 2,68 | 292 |
+
+  F0 retire aussi un calque (celui de la bande), en plus de la surface. F3 évite les calques ajoutés mais fait redessiner le décor aux ouvertures à chaque mouvement de caméra.
+- Comptages du jeu inchangés (5 éléments masqués de plus pour le diagnostic : 44, pour une limite de 45).
+- 70 tests de logique, 37 tests navigateur.
+
+**À faire par l'auteur** : lancer la campagne et coller le rapport.
+
+---
+
 ## Séance 18 — 13/11/2026 — Test de confirmation en mode normal : surprise
 
 **Conditions** : mode haute performance désactivé, sans redémarrer ; extension de RAM toujours active ; plein écran, débranché (52 → 50 %), écran maintenu allumé.
