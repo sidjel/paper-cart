@@ -30,7 +30,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Passer derrière le caddie et le présentoir « -30 % » | 2 | ✅ | |
-| Caddie et carton « -30 % » qui clignotent ou disparaissent par moments | 27 | 👀 | Cause trouvée (séance 27) : le navigateur leur créait un calque à chaque passage du personnage derrière eux, puis le retirait. Corrigé : calque fixe. Interrupteur ⚙ → Affichage. À confirmer sur le téléphone. |
+| Caddie et carton « -30 % » qui clignotent ou disparaissent par moments | 27 | ✅ | Cause trouvée (séance 27) : le navigateur leur créait un calque à chaque passage du personnage derrière eux, puis le retirait. Corrigé : calque fixe. Interrupteur ⚙ → Affichage. Confirmé par l'auteur (séance 28). La bascule existait déjà en A1 et A2 (mesuré) : seule sa visibilité a changé. |
 | Zone de marche jusqu'en bas de l'écran | 3 | ✅ | Séance 7 : agrandie encore, du pied de l'étagère du fond (z 264) au bord bas de l'écran (z -195). |
 | Rayon en bas, en transparence (personnage entouré de rayons) | 3 | ✅ | Opacité 0,55 : « oui pour le moment ». |
 | Le plein écran cachait une partie du décor (écran 20:9) | 6 | ✅ | Réglé avec la caméra : toute la hauteur est toujours visible, un écran allongé montre plus de largeur. Le personnage paraît un peu plus petit sur téléphone : réglage « Zoom ». |
@@ -150,7 +150,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|
 | A1 — le personnage est agréable à déplacer | ✅ | **A1 validée : 1445d25** (séance 6). |
 | A2 — le personnage semble évoluer dans un décor profond | ✅ | **A2 validée : 6be7130** (séance 26). Rayon de devant gardé entier (« on verra plus tard ») ; fluidité acceptée en l'état (choix C) ; essai PixiJS non retenu pour l'instant. |
-| A3 — scanner un produit est satisfaisant | 👀 | Construite (séance 26) : 10 produits, repère, scan (laser, bip, confettis, carte), Panier. **À tester par l'auteur**, puis validation. Limites du test des comptages relevées à cause du nouveau contenu : **à valider par l'auteur**. |
+| A3 — scanner un produit est satisfaisant | ✅ | **Validée : 630fec0** (séance 28). Limites du test des comptages relevées (80/5/20/32) : validées par l'auteur. |
 
 ## Interface
 | Demande | Séance | État | Notes |

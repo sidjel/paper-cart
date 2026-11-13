@@ -1,6 +1,6 @@
 {
   "rayon-essai": {
-    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900). Séance 8 (A2) : 39 éléments, 4 calques, 10 images visibles, surface 1,85 écran, 17 images, 5,49 Mpx. Séance 26 (A3, contenu demandé : 10 produits, repère, laser, 14 confettis, calque « produits », 2 poses de scan) : limites relevées en conséquence, À VALIDER PAR L'AUTEUR. La surface affichée et le « rien créé pendant le jeu » ne changent pas. Séance 27 : propLayerSwitches = nombre de fois où un objet du décor change de calque pendant le parcours (doit rester à 0 : sinon il clignote sur téléphone). On ne relève une limite qu'après accord de l'auteur, en expliquant pourquoi.",
+    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900). Séance 8 (A2) : 39 éléments, 4 calques, 10 images visibles, surface 1,85 écran, 17 images, 5,49 Mpx. Séance 26 (A3, contenu demandé : 10 produits, repère, laser, 14 confettis, calque « produits », 2 poses de scan) : limites relevées en conséquence, validées par l'auteur (séance 28). La surface affichée et le « rien créé pendant le jeu » ne changent pas. Séance 27 : propLayerSwitches = nombre de fois où un objet du décor change de calque pendant le parcours (doit rester à 0 : sinon il clignote sur téléphone). On ne relève une limite qu'après accord de l'auteur, en expliquant pourquoi.",
     "stageElements": 80,
     "layers": 5,
     "visibleImages": 20,
