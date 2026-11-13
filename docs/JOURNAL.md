@@ -10,6 +10,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 17 — 13/11/2026 — Mode haute performance : objectifs atteints
+
+**Conditions** : l'auteur a activé le mode haute performance et l'extension de RAM (8 Go + 3 Go), puis redémarré le téléphone. Plein écran, débranché (56 → 53 %), écran maintenu allumé. Le réglage « Essai caméra immobile » restait coché (sans effet sur ce test).
+
+**Résultats (images > 20 ms par minute)** : A-T0 0,8 ; A-T1 1,7 ; B-T0 0,8 ; B-T1 0,0 ; B-T2 2,5. Aucune image > 33 ms, 61 i/s partout, calcul du jeu 0,3 ms en moyenne, 4,3 ms au pire.
+
+**Comparaison avec les séances précédentes (mode normal)** :
+
+| | Mode normal (séances 14 et 16) | Mode haute performance |
+|---|---|---|
+| Caméra mobile, images lentes/min | 137,6 et 132,6 | **0,8** |
+| Caméra fixe, images lentes/min | 21,7 et 23,4 | **0,8** |
+| Images > 33 ms (caméra mobile) | 11 et 10 | **0** |
+| Calcul du jeu, pire | 17,5 et 13,9 ms | **4,3 ms** |
+
+**Démontré** (sur ce test) : dans ces conditions, le jeu atteint les trois objectifs du cahier des charges, caméra mobile comprise.
+
+**Probable** : les saccades viennent de la gestion d'énergie du téléphone. En mode normal, il fait tourner le navigateur à des fréquences basses (ou sur ses petits cœurs), parce que le jeu est peu exigeant. Cela expliquerait aussi le paradoxe de T1 et T3 : retirer du travail dégradait.
+
+**Pas encore démontré** : laquelle des trois modifications compte (mode haute performance, extension de RAM, redémarrage). L'extension de RAM est très peu probable, le redémarrage possible, le mode haute performance le plus probable.
+
+**Test de confirmation proposé** : le même test, mode haute performance désactivé, sans redémarrer ni rien changer d'autre.
+
+---
+
 ## Séance 16 — 13/11/2026 — T3 rejeté, retour à l'ancien rendu, investigation de la caméra
 
 **Rapport T3 (bdc02db, plein écran, débranché 66 → 64 %, écran maintenu allumé)**, images > 20 ms par minute (blocs min–max) :

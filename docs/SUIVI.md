@@ -80,6 +80,13 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 - OPPO Reno2 (CPH1907), Qualcomm SDM730G (Snapdragon 730G), Android 11, ColorOS 11.1, 8 Go de RAM. Le navigateur annonce « Android 10 » : c'est normal, Chrome fige cette information.
 - Séance 17 : l'auteur active le **mode haute performance** et l'**extension de RAM** (8 Go + 3 Go pris sur le stockage), puis redémarre. Les tests suivants sont donc faits dans des conditions différentes des précédents (séances 10 à 16, mode normal).
 
+## Résultat clé (séance 17)
+Test rapide T0/T1/T2 (f041aaa), **mode haute performance** + extension de RAM + redémarrage, plein écran, débranché :
+- caméra mobile (B-T0) : **0,8** image > 20 ms par minute, contre 132,6 à 137,6 en mode normal ; caméra fixe : 0,8 contre 21,7 à 23,4 ;
+- aucune image > 33 ms ; 61 i/s ; calcul du jeu au pire 4,3 ms (contre 13 à 22 ms).
+
+**Les trois objectifs de fluidité sont atteints dans ce mode.** Cause probable : la gestion d'énergie du téléphone (fréquences et cœurs utilisés), et non la quantité de travail du jeu. À confirmer par le même test en mode normal, sans autre changement. **PixiJS non justifié par les mesures actuelles.**
+
 ## Étapes
 | Étape | État | Notes |
 |---|---|---|
