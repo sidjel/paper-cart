@@ -1,11 +1,11 @@
 {
   "rayon-essai": {
-    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900). Séance 8 (A2) : 39 éléments, 4 calques, 10 images visibles, surface 1,85 écran, 17 images, 5,49 Mpx. Séance 26 (A3, contenu demandé : 10 produits, repère, laser, 14 confettis, calque « produits », 2 poses de scan) : limites relevées en conséquence, validées par l'auteur (séance 28). La surface affichée et le « rien créé pendant le jeu » ne changent pas. Séance 27 : propLayerSwitches = nombre de fois où un objet du décor change de calque pendant le parcours (doit rester à 0 : sinon il clignote sur téléphone). Séance 36 (A5a, contenu demandé : objets tenus en main — Scanette de face, de dos, panier — 3 éléments et 3 images de plus ; accueil dessiné dans le décor, sans élément) : 81 éléments, 35 images ; limites relevées à 88 et 36, À VALIDER PAR L'AUTEUR. On ne relève une limite qu'après accord de l'auteur, en expliquant pourquoi.",
+    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900). Séance 8 (A2) : 39 éléments, 4 calques, 10 images visibles, surface 1,85 écran, 17 images, 5,49 Mpx. Séance 26 (A3, contenu demandé : 10 produits, repère, laser, 14 confettis, calque « produits », 2 poses de scan) : limites relevées en conséquence, validées par l'auteur (séance 28). La surface affichée et le « rien créé pendant le jeu » ne changent pas. Séance 27 : propLayerSwitches = nombre de fois où un objet du décor change de calque pendant le parcours (doit rester à 0 : sinon il clignote sur téléphone). Séance 36 (A5a, contenu demandé : objets tenus en main — Scanette de face, de dos, panier — 3 éléments et 3 images de plus ; accueil dessiné dans le décor, sans élément) : 81 éléments, 35 images ; limites relevées à 88 et 36. Séance 37 (aparté refait : 3 têtes de face, 3 éléments et 3 images) : 84 éléments, 38 images. Séance 38 : limites 88 éléments et 40 images VALIDÉES PAR L'AUTEUR (priorité au PC ; adaptation au téléphone plus tard si besoin). On ne relève une limite qu'après accord de l'auteur, en expliquant pourquoi.",
     "stageElements": 88,
     "layers": 5,
     "visibleImages": 20,
     "overdraw": 2.2,
-    "images": 36,
+    "images": 40,
     "megapixels": 6.5,
     "elementsCreatedInPlay": 0,
     "canvasesInPlay": 0,
