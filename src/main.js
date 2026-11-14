@@ -9,6 +9,7 @@ import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
+import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
 import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker } from './core/narrator.js';
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
@@ -73,17 +74,51 @@ const scan = createScan();
 const basket = createBasket();
 const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back') });
 const flyingCard = createFlyingCard(uiEl);
-const tip = { x: 0, y: 0 }; // bout de la douchette sur la scène
+const tip = { x: 0, y: 0 }; // bout de la Scanette sur la scène
 const cardFrom = { x: 0, y: 0 };
 const cardTo = { x: 0, y: 0 };
 let highlighted = -1;
-let pendingScan = -1; // double toucher : produit à scanner à l'arrivée du personnage
+let pendingScan = -1; // double toucher : produit (ou objet à prendre) visé, à l'arrivée du personnage
+let pendingList = null; // productState ou pickupState
+// Ce que le héros porte (A5a) : Scanette et panier, pris au présentoir de l'accueil (core/gear.js).
+const gear = createGear();
+let pickupState = null; // objets à prendre, visés comme les produits posés ailleurs
+let pickupReach = -1;
+const BLOCKED_LINE = { sans_scanette: 'sans_scanette', sans_panier: 'sans_panier', plein: 'panier_plein' };
 
+// Action (Entrée, Espace, A, bouton) : prendre ce qui est à portée au présentoir, sinon scanner.
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
+  const k = nearestProduct(pickupState, walker, config.scan);
+  if (k >= 0) {
+    takePickup(k);
+    return;
+  }
   const i = nearestProduct(productState, walker, config.scan);
   if (i < 0) say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
-  scanProduct(i);
+  else tryScanProduct(i);
+}
+
+// Scanner seulement avec une Scanette et de la place dans le panier (sinon, le haut-parleur explique).
+function tryScanProduct(i) {
+  pendingScan = -1;
+  const why = scanBlocked(gear, basket.cards.length, config.carry);
+  if (why) say(BLOCKED_LINE[why]);
+  else scanProduct(i);
+}
+
+// Prendre une Scanette ou un panier au présentoir.
+function takePickup(k) {
+  pendingScan = -1;
+  const it = pickupState[k];
+  faceProduct(walker, it.x, it.z, config.scan.awayDepth);
+  if (!takeItem(gear, pickupState, k)) return;
+  sprite.setHeld(it.id, true);
+  if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
+  audio.play('prise');
+  say(`prise_${it.id}`);
+  marker.hide();
+  hud.playerMoved();
 }
 
 // ---------- Voix : haut-parleur et apartés du héros ----------
@@ -98,6 +133,7 @@ const narrator = createNarrator();
 const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator) });
 let arrived = false;
 let endOfAisleX = Infinity;
+const CONSIGNE_X = 900; // s'éloigner de l'accueil sans Scanette : le haut-parleur le rappelle
 let voiceLine = null; // réplique affichée
 let speakerWaves = null; // ondes sous le haut-parleur qui parle
 let speaker = null; // [x, y] du haut-parleur d'où sort l'annonce en cours
@@ -165,11 +201,11 @@ function watchNarrator(dt) {
   playerActed = false;
   if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite') || say('aparte_inactivite');
   if (walker.x >= endOfAisleX) say('bout_du_rayon');
+  if (!gear.scanette && walker.x > CONSIGNE_X) say('consigne_scanette');
 }
 
 function scanProduct(i) {
   pendingScan = -1;
-  if (i < 0) return;
   const target = productState[i];
   faceProduct(walker, target.x, target.loose ? target.z : undefined, config.scan.awayDepth); // s'arrêter, se tourner vers le produit
   marker.hide();
@@ -215,7 +251,7 @@ function onScanEvent(ev) {
   }
 }
 
-// Bout de la douchette (dans l'image du personnage) → scène.
+// Bout de la Scanette (dans l'image du personnage) → scène.
 function updateTip() {
   const s = shown.scale * heroData.scale;
   const [tx, ty] = heroData.scanTip[walker.away ? 'dos' : 'face'];
@@ -401,7 +437,7 @@ function handleAction(action) {
       break;
     case 'panier':
       if (sm.is('panier')) sm.go('play');
-      else if (sm.is('play') && !scan.active) sm.go('panier');
+      else if (sm.is('play') && !scan.active && gear.panier) sm.go('panier');
       break;
   }
 }
@@ -463,22 +499,37 @@ function walkTo(target) {
 function onDoubleTap(cx, cy) {
   if (!sm.is('play') || scan.active) return;
   stage.clientToStage(cx, cy, tmpStage);
-  const i = pickTapped(productState, tmpStage.x, tmpStage.y, stageToWorldX(proj, tmpStage.x), config.input.doubleTapMargin, config.scan);
+  const wx = stageToWorldX(proj, tmpStage.x);
+  const margin = config.input.doubleTapMargin;
+  // D'abord le présentoir de l'accueil (si l'on touche une Scanette ou un panier pas encore pris).
+  let list = pickupState;
+  let i = pickTapped(pickupState, tmpStage.x, tmpStage.y, wx, margin, config.scan);
+  if (i < 0) {
+    list = productState;
+    i = pickTapped(productState, tmpStage.x, tmpStage.y, wx, margin, config.scan);
+  }
   if (i < 0) return;
-  if (inReach(productState, i, walker, config.scan)) {
-    scanProduct(i);
+  if (inReach(list, i, walker, config.scan)) {
+    arrive(list, i);
     return;
   }
-  walkTo(approachPoint(productState[i], walker, config.scan, tmpWorld));
+  walkTo(approachPoint(list[i], walker, config.scan, tmpWorld));
   pendingScan = i;
+  pendingList = list;
 }
 
 // Pendant l'approche d'un double toucher : scanner à l'arrivée, annuler si le joueur reprend la main.
 function stepPendingScan() {
   if (pendingScan < 0) return;
-  const r = approachStep(productState, pendingScan, walker, intent.moveX !== 0 || intent.moveZ !== 0, config.scan);
-  if (r === 'scan') scanProduct(pendingScan);
+  const r = approachStep(pendingList, pendingScan, walker, intent.moveX !== 0 || intent.moveZ !== 0, config.scan);
+  if (r === 'scan') arrive(pendingList, pendingScan);
   else if (r === 'cancel') pendingScan = -1;
+}
+
+// Arrivé devant ce qu'on visait : le prendre (présentoir) ou le scanner (produit).
+function arrive(list, i) {
+  if (list === pickupState) takePickup(i);
+  else tryScanProduct(i);
 }
 
 function layout() {
@@ -511,11 +562,16 @@ function render() {
   sprite.setLevel(shown.level);
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
-  const reach = sm.is('play') && !scan.active ? nearestProduct(productState, walker, config.scan) : -1;
-  products.setMarker(reach, time);
-  if (reach !== highlighted) {
-    hud.setScanAvailable(reach >= 0);
+  // Au présentoir, ce qu'on peut prendre passe avant les produits.
+  const free = sm.is('play') && !scan.active;
+  const pk = free ? nearestProduct(pickupState, walker, config.scan) : -1;
+  const reach = free && pk < 0 ? nearestProduct(productState, walker, config.scan) : -1;
+  if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, time);
+  else products.setMarker(reach, time);
+  if (reach !== highlighted || pk !== pickupReach) {
+    hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : '');
     highlighted = reach;
+    pickupReach = pk;
   }
   updateTip();
   const progress = scanProgress(scan, config.scan);
@@ -622,6 +678,11 @@ async function start() {
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
   productState = products.items.map((it) => ({ x: it.x, scanned: false, loose: !!it.loose, z: it.wz, standAt: it.standAt, y: it.y, w: it.w, h: it.h }));
+  // Présentoir de l'accueil : au fond, contre l'étagère ; on s'y présente de face.
+  const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
+  pickupState = (place.accueil?.items ?? []).map((it) => ({
+    id: it.id, x: it.at[0], z: back, loose: true, scanned: false, standAt: [[it.at[0], back - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
+  }));
   depthRefs = props.map((p) => p.depthRef);
   dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);
@@ -637,6 +698,7 @@ async function start() {
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
+    if (key === 'carry.panier') basketUi.setCapacity(capacity(gear, config.carry));
     if (key === 'narrator.enabled' && !value) silenceNarrator(narrator);
     if (key === 'narrator.asides' && !value && narrator.voice === 'heros') silenceNarrator(narrator);
   });
@@ -665,7 +727,14 @@ async function start() {
     state: () => sm.get(),
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
-    scanState: () => ({ reach: highlighted, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name) }),
+    scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),
+    // Tests automatiques : le héros prend tout au présentoir (Scanette et panier), sans s'y rendre.
+    equip() {
+      pickupState.forEach((it, k) => {
+        if (takeItem(gear, pickupState, k)) sprite.setHeld(it.id, true);
+      });
+      basketUi.setCapacity(capacity(gear, config.carry));
+    },
     narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
     products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).

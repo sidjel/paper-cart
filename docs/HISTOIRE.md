@@ -27,6 +27,7 @@
 
 ## Le 4ᵉ mur 🧪 À TESTER (séance 33)
 - **Seul le héros brise le 4ᵉ mur**, rarement : il se tourne vers l'écran et **tutoie** le joueur (« mon Épaisseur », « toi, là-haut »), complice, inquiet ou blasé.
+- ✅ VALIDÉ (séance 36) : un aparté est un **moment rare et marquant**, une prise de conscience entre eux : le héros se tourne **face caméra** (nouveau dessin de face, émotion visible selon ce qu'il dit), la caméra **zoome** sur lui, effet visuel et sonore dramatique.
 - **Le narrateur ne sait pas qu'il y a un joueur** : l'ordinateur central, au haut-parleur, **vouvoie** le « client » avec une politesse commerciale hypocrite et odieuse. Quand le héros parle à l'écran, il croit voir un client qui parle au mur.
 
 ## Pourquoi le héros est en papier 🧪 À TESTER
@@ -38,10 +39,15 @@
 - Fil rouge : le Narrateur appelle d'abord le héros « Client », puis « Article non référencé », jusqu'à vouloir lui attribuer un code-barres et le mettre en promotion.
 - ✅ VALIDÉ (séance 32) : essayé dès A4, discrètement, dans une ou deux répliques.
 
-## La douchette et la stase des rayons ✅ VALIDÉ
-- Technologie **propre au magasin** : elle extrait l'**essence** d'un produit en carte.
-- Sur l'étagère, le produit est **figé hors du temps** ; une fois scanné dans le Panier, **son évolution commence**.
-- ❓ À DÉFINIR : peut-on scanner des êtres vivants conscients ? des êtres neutralisés ?
+## La Scanette et la stase des rayons ✅ VALIDÉ
+- On ne dit plus « douchette » : c'est **la Scanette**, le scanner en libre-service des supermarchés. Technologie **propre au magasin** : elle extrait l'**essence** d'un produit en carte.
+- Sur l'étagère, le produit est **figé hors du temps** ; une fois scanné, dans *son* panier, **son évolution commence**.
+- **L'accueil** : plein de Scanettes et de paniers à main en libre-service, côte à côte. Le héros doit prendre une Scanette (**obligatoire**) et un panier. Ni pièce ni jeton : pas de caddie au début.
+- **Elle peut casser** (usure, combat, chute dans un rayon) et devient l'**Extracteur** (« Scanette modifiée ») : réparée, bricolée, plus puissante, elle n'obéit plus tout à fait au magasin. Elle évolue ensuite comme une arme de *Final Fantasy* (Scanette → Extracteur → …).
+- ❓ À DÉFINIR : l'événement qui la casse et quand (Acte I ? avant la Révélation ?) ; qui la modifie (le héros avec du Scotch ? Kévin ? un employé oublié de l'Acte II ?) ; ce que l'Extracteur permet de plus (avec B et C) ; les versions suivantes et leurs noms.
+- ❓ À DÉFINIR : peut-on scanner des êtres vivants ? (piste : les humains donnent leur **carte de fidélité**, qui contient leur essence).
+- ❓ À DÉFINIR : qui donne le **jeton de caddie** (pistes : le Vieux Monsieur juste avant sa mort ; ou à la Caisse Finale on rend son caddie et on récupère sa pièce, comme celle du passeur des morts).
+- Le magasin garde son nom, **Maxi-Gouffre** ✅ (❓ vérifier plus tard la marque « Maxi », chaîne québécoise).
 
 ## Progression en 3 actes
 Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
@@ -57,12 +63,10 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - La scène de l'aplatissement est révélée plus tard (pendant la Révélation ?), en quelques dessins : le héros a d'abord du volume, puis il est plaqué à plat.
 
 ## Gags d'intro 🧪 À TESTER
-- Bouton « Jouer » qui fuit 3 fois.
-- Formulaire absurde d'entrée, **sans aucune donnée personnelle réelle** : nom de produit, catégorie commerciale, date de péremption estimée, valeur marchande.
+- Bouton « Jouer » qui fuit 3 fois ; formulaire absurde d'entrée **sans donnée personnelle réelle** (nom de produit, catégorie commerciale, date de péremption estimée, valeur marchande).
 
 ## Questions ouvertes ❓ À DÉFINIR (pistes notées, rien de codé)
 - **La Révélation** : le système détecte enfin l'Épaisseur du héros et s'adresse pour la première fois directement au joueur.
 - **La Caisse Finale** : retrouver son Épaisseur et redevenir entier, ou se faire « encaisser » (scanner, étiqueter, vendre) ? Double sens de *checkout* : passer en caisse, partir, mourir.
-- **Le Panier** : la douchette est un scanner en libre-service ; tout ce qu'on scanne va dans *son* panier… qu'il faudra peut-être payer à la Caisse Finale.
-- **Les êtres vivants** : on ne scanne pas une personne consciente ; les humains (Kévin, la Grand-Mère…) donnent leur **carte de fidélité**, qui contient leur essence.
+- **Le panier** : tout ce qu'on scanne va dans *son* panier… qu'il faudra peut-être payer à la Caisse Finale.
 - Raison de l'entrée du héros (voir `PERSONNAGES.md`).

@@ -20,8 +20,8 @@
 
 | Dossier | Rôle |
 |---|---|
-| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `narrator` (les deux voix — haut-parleur et apartés du héros : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`. |
-| `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images), `targetMarker`, `debugMask` |
+| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `gear` (Scanette, panier, capacité ; A5a), `narrator` (les deux voix — haut-parleur et apartés du héros : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`. |
+| `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage, objets tenus en main dessinés à part : données `held` et `hands`), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images), `targetMarker`, `debugMask` |
 | `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |

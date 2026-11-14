@@ -82,6 +82,7 @@ export function createHud(root, { version, onAction, touch, muted }) {
   root.append(bar, ver, scanBtn, hint, pause, loading, rotate, error);
 
   let hintGone = false;
+  let shownAction = 'scanner';
   return {
     bar, // boutons du haut (la bande du narrateur ne passe pas dessous)
     ready() {
@@ -97,8 +98,14 @@ export function createHud(root, { version, onAction, touch, muted }) {
       hintGone = true;
       hint.classList.add('gone');
     },
-    setScanAvailable(on) {
-      scanBtn.classList.toggle('visible', on);
+    // Bouton d'action au doigt : 'scanner', 'prendre' ou '' (caché).
+    setAction(kind) {
+      scanBtn.classList.toggle('visible', kind !== '');
+      if (!kind || kind === shownAction) return;
+      shownAction = kind;
+      const label = kind === 'prendre' ? 'Prendre' : 'Scanner';
+      scanBtn.innerHTML = touch ? label : `${label} <small>Entrée</small>`;
+      scanBtn.setAttribute('aria-label', `${label} (Entrée, Espace, bouton A)`);
     },
     setMuted(m) {
       soundBtn.classList.toggle('off', m);

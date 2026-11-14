@@ -34,6 +34,9 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  carry: {
+    panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
+  },
   narrator: {
     enabled: true, // le narrateur parle
     speed: 38, // lettres par seconde (effet machine à écrire)
@@ -56,7 +59,7 @@ export const config = {
     looseRange: 170, // écart maximal le long du rayon (px)
     looseDepth: 90, // écart maximal en profondeur
     awayDepth: 30, // produit plus loin que ça en profondeur : le personnage se met de dos pour le scanner
-    raise: 0.15, // durée : lever la douchette (s)
+    raise: 0.15, // durée : lever la Scanette (s)
     laser: 0.22, // durée : le laser part vers le produit (s)
     dissolve: 0.55, // durée : le produit se dissout et est aspiré (s)
     card: 1.0, // durée : la carte apparaît puis file dans le Panier (s)
@@ -165,11 +168,12 @@ export const TUNABLES = [
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
+  { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
   { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou caddie : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.looseDepth', label: 'Produit sur table ou caddie : portée en profondeur', min: 30, max: 200, step: 5 },
-  { group: 'Scanner', key: 'scan.raise', label: 'Lever la douchette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
+  { group: 'Scanner', key: 'scan.raise', label: 'Lever la Scanette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.laser', label: 'Laser', min: 0.05, max: 0.8, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.dissolve', label: 'Dissolution du produit', min: 0.1, max: 1.5, step: 0.05, unit: 's' },
   { group: 'Scanner', key: 'scan.card', label: 'Apparition de la carte', min: 0.3, max: 2.5, step: 0.05, unit: 's' },

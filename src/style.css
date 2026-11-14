@@ -83,6 +83,8 @@ html, body {
 }
 .actor-flip { position: relative; }
 .actor-frame { position: absolute; left: 0; top: 0; display: block; }
+/* Objets tenus (Scanette, panier) : derrière le dessin du héros, sa main passe devant. */
+.actor-held { position: absolute; left: 0; top: 0; display: block; z-index: -1; }
 .actor-frame[hidden] { display: none; }
 
 .target-marker {

@@ -4,7 +4,9 @@
 //   l'autre orientation la remplace, puis elle se rouvre (scaleX, jamais rotateY) ;
 // - animations décrites dans les données (voir animation.js) ; illustrations entières ;
 // - corps vivant : rebond en marchant, respiration à l'arrêt, petit écrasement en s'arrêtant ;
-// - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève.
+// - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève ;
+// - objets tenus en main (Scanette, panier) dessinés à part, derrière le dessin (la main passe devant),
+//   qui suivent le bras image par image (données : held, hands) et se retournent avec la feuille.
 
 import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
 
@@ -17,6 +19,10 @@ export function characterImageEntries(data, rasterScale) {
         entries.push({ id: url, url, w: data.size[0], h: data.size[1], scale: rasterScale * data.scale });
       }
     }
+  }
+  for (const [name, item] of Object.entries(data.held ?? {})) {
+    if (name === 'comment') continue;
+    for (const v of ['face', 'dos']) entries.push({ id: item[v].src, url: item[v].src, w: data.size[0], h: data.size[1], scale: rasterScale * data.scale });
   }
   return entries;
 }
@@ -62,10 +68,62 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     return elements.get(url);
   }
+  // Objets tenus : un élément par image distincte, derrière les images du héros.
+  const held = [];
+  const heldEls = new Map();
+  for (const [name, item] of Object.entries(data.held ?? {})) {
+    if (name === 'comment') continue;
+    const views = {};
+    for (const v of ['face', 'dos']) {
+      const src = item[v].src;
+      if (!heldEls.has(src)) {
+        const img = images.get(src).el;
+        img.className = 'actor-held';
+        img.width = w;
+        img.height = h;
+        img.alt = '';
+        img.draggable = false;
+        img.hidden = true;
+        flip.appendChild(img);
+        heldEls.set(src, img);
+      }
+      views[v] = { ...item[v], el: heldEls.get(src) };
+    }
+    held.push({ name, hand: item.hand, views, on: false, shownEl: null, src: '', away: null });
+  }
+  const NO_HANDS = { right: [0, 0, 0], left: [0, 0, 0] };
+
+  // Montrer ou cacher un objet tenu (au début, le héros a les mains vides).
+  function setHeld(name, on) {
+    const it = held.find((x) => x.name === name);
+    if (it) it.on = on;
+  }
+
+  // Place les objets tenus pour l'image affichée (seulement quand l'image ou la vue change).
+  function placeHeld(src, away) {
+    for (const it of held) {
+      const view = it.views[away ? 'dos' : 'face'];
+      const el = it.on ? view.el : null;
+      if (el !== it.shownEl) {
+        if (it.shownEl) it.shownEl.hidden = true;
+        if (el) el.hidden = false;
+        it.shownEl = el;
+        it.src = '';
+      }
+      if (!el || (src === it.src && away === it.away)) continue;
+      it.src = src;
+      it.away = away;
+      const [dx, dy, rot] = (data.hands?.[src] ?? NO_HANDS)[it.hand];
+      const [px, py] = view.pivot;
+      const [ox, oy] = view.offset;
+      el.style.transform = `translate(${dx + ox}px, ${dy + oy}px) translate(${px}px, ${py}px) rotate(${rot}deg) translate(${-px}px, ${-py}px)`;
+    }
+  }
+
   const anims = {};
   for (const [viewName, view] of Object.entries(data.views)) {
     for (const [animName, def] of Object.entries(view)) {
-      anims[`${viewName}.${animName}`] = { ...compileAnimation(def), els: def.frames.map((f) => imageEl(frameSrc(f))) };
+      anims[`${viewName}.${animName}`] = { ...compileAnimation(def), els: def.frames.map((f) => imageEl(frameSrc(f))), srcs: def.frames.map(frameSrc), away: viewName === 'dos' };
     }
   }
 
@@ -133,7 +191,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   }
 
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
-  // scanning : douchette levée (animation « scan » des données, si elle existe).
+  // scanning : Scanette levée (animation « scan » des données, si elle existe).
   function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false) {
     const width = flipScale(time, facing, away);
     stats.flipping = flipStart >= 0;
@@ -159,6 +217,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       frame.hidden = false;
       shown = frame;
     }
+    placeHeld(anim.srcs[i], anim.away);
 
     // Corps vivant (rebond, respiration, écrasement), sauf si l'on réduit les animations.
     if (moving !== wasMoving) {
@@ -213,5 +272,5 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     lastLevel = level;
   }
 
-  return { el: root, shadowEl: shadow, render, setLevel, stats };
+  return { el: root, shadowEl: shadow, render, setLevel, setHeld, stats };
 }

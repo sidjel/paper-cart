@@ -11,8 +11,8 @@
 | A1 | ✅ validée : `1445d25` |
 | A2 | ✅ validée : `6be7130` |
 | A3 | ✅ validée : `630fec0` (avec double toucher ; essai de scan sur une table et dans le caddie en cours) |
-| A4 | construite (séances 32-33) : haut-parleur et apartés du héros (le joueur est son « Épaisseur ») ; **validation proposée** |
-| **A5 — Caddie** | **Étape ajoutée par l'auteur (séance 29), après A4 et avant le combat B.** Contenu ✅ décidé en séance 31 : voir `docs/GAME_DESIGN.md` (Panier physique qui suit le personnage, garé et repris, visuel selon le remplissage). |
+| A4 | construite (séances 32-35) ; **pas encore validée** (séance 36) : l'aparté doit devenir un moment rare et marquant (héros face caméra avec un dessin d'émotion, zoom de la caméra, effet visuel et sonore) |
+| **A5 — Accueil et caddie** | Étape ajoutée par l'auteur (séance 29), en deux temps (séance 36, `docs/GAME_DESIGN.md`) : **A5a** accueil en libre-service, Scanette et panier à main (construite séance 36, à tester) ; **A5b** jeton dans le rayon, échange du panier contre le caddie (qui suit, se gare, se reprend, change d'aspect). |
 | B, C, D | à faire |
 
 Décision de l'auteur (séance 6) : **saut libre** avec un bouton, après le prototype A (voir docs/SUIVI.md).
@@ -38,7 +38,7 @@ Un prototype peut prendre plusieurs séances : on avance **étape par étape**. 
   - manette : stick gauche pour marcher, A pour agir ;
   - téléphone en paysage : toucher l'endroit où aller (et option joystick virtuel), bouton d'action.
 - Une dizaine de **produits** sur les étagères (points d'intérêt) : banane, lait, steak, baguette, glace, pile, céréales, bière, plante… Quand le personnage s'approche, le produit le plus proche est mis en évidence.
-- **Scanner** : action près d'un produit. Le personnage lève sa douchette, laser, *bip* (son provisoire synthétique), le produit se dissout en particules aspirées par la douchette, puis une **carte** apparaît avec une petite animation satisfaisante et rejoint le Panier.
+- **Scanner** : action près d'un produit. Le personnage lève sa Scanette *(ex-« douchette », vocabulaire mis à jour en séance 36)*, laser, *bip* (son provisoire synthétique), le produit se dissout en particules aspirées par la douchette, puis une **carte** apparaît avec une petite animation satisfaisante et rejoint le Panier.
 - Une carte affiche au moins : nom, puissance, stade (Frais, Mûr, Pourri) et ses propriétés (liquide, froid…). Les 3 stades se distinguent par **une icône de forme différente en plus de la couleur**.
 - Un écran **Panier** simple pour voir ses cartes.
 - Le **narrateur** : une bande de texte façon annonce au haut-parleur, effet machine à écrire, une dizaine de répliques `[TEMP]` (arrivée dans le rayon, premier scan, inactivité, produit déjà scanné…).

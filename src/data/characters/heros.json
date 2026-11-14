@@ -94,13 +94,225 @@
       }
     }
   },
+  "held": {
+    "comment": "Objets tenus en main, dessinés à part et posés derrière le dessin du héros (sa main passe devant). Chaque image a les mêmes coordonnées que le héros. pivot : épaule du bras qui tient l'objet ; offset : décalage pour cette vue. Le mouvement de chaque bras, image par image, est dans hands.",
+    "scanette": {
+      "hand": "right",
+      "face": {
+        "src": "art/placeholder/tenu-scanette-face.svg",
+        "pivot": [
+          146,
+          172
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      },
+      "dos": {
+        "src": "art/placeholder/tenu-scanette-dos.svg",
+        "pivot": [
+          144,
+          172
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    },
+    "panier": {
+      "hand": "left",
+      "face": {
+        "src": "art/placeholder/tenu-panier.svg",
+        "pivot": [
+          72,
+          172
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      },
+      "dos": {
+        "src": "art/placeholder/tenu-panier.svg",
+        "pivot": [
+          72,
+          172
+        ],
+        "offset": [
+          -2,
+          0
+        ]
+      }
+    }
+  },
+  "hands": {
+    "comment": "Pour chaque image du héros : [décalage x, décalage y, rotation en degrés] de chaque bras (droit : Scanette ; gauche : panier), autour de son épaule.",
+    "art/placeholder/heros-dos-marche-1.svg": {
+      "right": [
+        0,
+        2,
+        0
+      ],
+      "left": [
+        0,
+        2,
+        10
+      ]
+    },
+    "art/placeholder/heros-dos-marche-2.svg": {
+      "right": [
+        0,
+        -4,
+        0
+      ],
+      "left": [
+        0,
+        -4,
+        0
+      ]
+    },
+    "art/placeholder/heros-dos-marche-3.svg": {
+      "right": [
+        0,
+        2,
+        0
+      ],
+      "left": [
+        0,
+        2,
+        -12
+      ]
+    },
+    "art/placeholder/heros-dos-marche-4.svg": {
+      "right": [
+        0,
+        -4,
+        0
+      ],
+      "left": [
+        0,
+        -4,
+        0
+      ]
+    },
+    "art/placeholder/heros-dos-scan.svg": {
+      "right": [
+        0,
+        0,
+        -50
+      ],
+      "left": [
+        0,
+        0,
+        0
+      ]
+    },
+    "art/placeholder/heros-dos.svg": {
+      "right": [
+        0,
+        0,
+        0
+      ],
+      "left": [
+        0,
+        0,
+        0
+      ]
+    },
+    "art/placeholder/heros-face-cligne.svg": {
+      "right": [
+        0,
+        0,
+        0
+      ],
+      "left": [
+        0,
+        0,
+        0
+      ]
+    },
+    "art/placeholder/heros-face-marche-1.svg": {
+      "right": [
+        0,
+        2,
+        0
+      ],
+      "left": [
+        0,
+        2,
+        10
+      ]
+    },
+    "art/placeholder/heros-face-marche-2.svg": {
+      "right": [
+        0,
+        -4,
+        0
+      ],
+      "left": [
+        0,
+        -4,
+        0
+      ]
+    },
+    "art/placeholder/heros-face-marche-3.svg": {
+      "right": [
+        0,
+        2,
+        0
+      ],
+      "left": [
+        0,
+        2,
+        -12
+      ]
+    },
+    "art/placeholder/heros-face-marche-4.svg": {
+      "right": [
+        0,
+        -4,
+        0
+      ],
+      "left": [
+        0,
+        -4,
+        0
+      ]
+    },
+    "art/placeholder/heros-face-scan.svg": {
+      "right": [
+        0,
+        0,
+        -50
+      ],
+      "left": [
+        0,
+        0,
+        0
+      ]
+    },
+    "art/placeholder/heros-face.svg": {
+      "right": [
+        0,
+        0,
+        0
+      ],
+      "left": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
   "shadow": {
     "comment": "Ombre au sol, séparée du dessin : ellipse sous les pieds (taille avant échelle).",
     "width": 150,
     "height": 34
   },
   "scanTip": {
-    "comment": "Bout de la douchette (dans l'image, vue tournée vers la droite) pendant le scan : départ du laser, arrivée des confettis.",
+    "comment": "Bout de la Scanette (dans l'image, vue tournée vers la droite) pendant le scan : départ du laser, arrivée des confettis.",
     "face": [
       209,
       162

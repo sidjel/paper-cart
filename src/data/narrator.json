@@ -58,6 +58,28 @@
       "follows": "@heros",
       "every": 2,
       "comment": "le haut-parleur réagit au « client qui parle au mur », une fois sur deux"
+    },
+    "prise_scanette": {
+      "once": true,
+      "strong": true,
+      "comment": "le héros prend une Scanette à l'accueil"
+    },
+    "prise_panier": {
+      "once": true,
+      "comment": "le héros prend un panier à main"
+    },
+    "sans_scanette": {
+      "comment": "essai de scan sans Scanette"
+    },
+    "sans_panier": {
+      "comment": "essai de scan sans panier"
+    },
+    "panier_plein": {
+      "comment": "essai de scan, panier plein (règle provisoire : le scan est refusé)"
+    },
+    "consigne_scanette": {
+      "once": true,
+      "comment": "le héros s'éloigne de l'accueil sans Scanette"
     }
   },
   "lines": [
@@ -155,6 +177,36 @@
       "id": "parle_seul_2",
       "trigger": "parle_seul",
       "text": "[TEMP] Rappel : les conversations avec le plafond ne donnent droit à aucune réduction."
+    },
+    {
+      "id": "prise_scanette_1",
+      "trigger": "prise_scanette",
+      "text": "[TEMP] Scanette activée. Bienvenue dans l'expérience libre-service : vous travaillez, nous encaissons."
+    },
+    {
+      "id": "prise_panier_1",
+      "trigger": "prise_panier",
+      "text": "[TEMP] Panier attribué. Contenance limitée : choisissez bien. Ou mal. Nous ne jugeons pas. Si."
+    },
+    {
+      "id": "sans_scanette_1",
+      "trigger": "sans_scanette",
+      "text": "[TEMP] Cher Client, le scan à mains nues n'est pas autorisé. Des Scanettes vous attendent à l'accueil."
+    },
+    {
+      "id": "sans_panier_1",
+      "trigger": "sans_panier",
+      "text": "[TEMP] Une Scanette sans panier ? Et vous comptiez ranger vos achats où, cher Client ? Dans vos poches en papier ?"
+    },
+    {
+      "id": "panier_plein_1",
+      "trigger": "panier_plein",
+      "text": "[TEMP] Votre panier est plein, cher Client. Le Maxi-Gouffre vous recommande un caddie. Les caddies fonctionnent avec une pièce. Vous n'avez pas de pièce."
+    },
+    {
+      "id": "consigne_1",
+      "trigger": "consigne_scanette",
+      "text": "[TEMP] Cher Client, vous oubliez votre Scanette. Elles sont à l'accueil, au début du rayon. Gratuites. Pour l'instant."
     }
   ]
 }

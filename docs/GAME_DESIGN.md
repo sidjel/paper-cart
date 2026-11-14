@@ -6,7 +6,18 @@
 ## Exploration ✅ VALIDÉ
 - Marche 2.5D (A1, A2), scan en rayon et Panier (A3), Narrateur (A4).
 
-## Le Caddie jouable — étape A5 ✅ VALIDÉ
+## Accueil, panier et deck ✅ VALIDÉ (séance 36)
+- **L'accueil** propose en libre-service des **Scanettes** et des **paniers à main**, côte à côte. Le héros prend une Scanette (obligatoire pour scanner) et un panier. Ni pièce ni jeton : pas de caddie au début.
+- Scanner un produit le transforme en carte, qui va dans le panier. Les cartes portées forment le **deck** du joueur, ses « **courses** » (nom provisoire ; ❓ nom définitif à choisir, puis la collection ne s'appellera plus « le Panier » dans le jeu).
+- **Le contenant fixe le nombre de cartes portées** : peu dans le panier, plus dans le caddie. On ne peut pas tout garder : il faut choisir.
+- Avec une **pièce ou un jeton de caddie**, on retourne à l'accueil échanger son panier contre un **caddie**, plus grand, qui le remplace. Le jeton est un **objet d'histoire unique**, pas une monnaie (le troc reste en Papier Toilette).
+- ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ pour les essais ; [TEMP] panier = 6) ; que se passe-t-il quand le panier est plein ([TEMP] en attendant : le scan est refusé et le haut-parleur le dit) ; qui donne le jeton (voir `HISTOIRE.md`).
+
+## Étape A5 en deux temps ✅ VALIDÉ
+- **A5a** : l'accueil au début du rayon (présentoir de Scanettes et de paniers) ; le héros prend les deux ; le panier se porte à la main, capacité limitée.
+- **A5b** : un jeton posé dans le rayon pour l'essai ; retour à l'accueil pour échanger le panier contre le caddie.
+
+## Le Caddie jouable (A5b) ✅ VALIDÉ
 - **Panier physique** qui suit le personnage.
 - Ne le bloque pas ; pas de physique complexe.
 - Peut être **garé** et **repris**.

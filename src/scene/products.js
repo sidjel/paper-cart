@@ -3,7 +3,7 @@
 //   ou ailleurs (sur une table, dans le caddie : « loose ») ; ces derniers sont dessinés juste
 //   au-dessus de l'objet qui les porte, sur leur propre calque comme lui (pas de clignotement) ;
 // - un repère en papier flotte au-dessus du produit à portée ;
-// - pendant un scan : laser, dissolution du produit, confettis aspirés par la douchette.
+// - pendant un scan : laser, dissolution du produit, confettis aspirés par la Scanette.
 // Tout est créé au chargement et réutilisé ; animé par le temps de jeu (figé en pause),
 // seulement en transform et opacity. Les éléments qui bougent ont leur propre calque pendant
 // l'effet seulement (will-change posé au début, retiré à la fin).
@@ -54,7 +54,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
   effectsParent.appendChild(marker);
   let markerOn = -1;
 
-  // Laser : un trait rouge (et son halo) qui part de la douchette.
+  // Laser : un trait rouge (et son halo) qui part de la Scanette.
   const laser = document.createElement('div');
   laser.className = 'scan-laser';
   laser.innerHTML = '<div class="scan-laser-halo"></div><div class="scan-laser-core"></div>';
@@ -74,14 +74,19 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
   let dissolving = -1;
 
   function setMarker(index, time) {
-    if (index !== markerOn) {
-      marker.classList.toggle('visible', index >= 0);
-      markerOn = index;
+    if (index < 0) markAt(-1, 0, 0, time);
+    else markAt(index, items[index].x, items[index].y - items[index].h, time);
+  }
+
+  // Repère au-dessus d'un point (x, haut du dessin) de la scène ; key : ce qui est visé (-1 : rien).
+  function markAt(key, x, top, time) {
+    if (key !== markerOn) {
+      marker.classList.toggle('visible', key !== -1);
+      markerOn = key;
     }
-    if (index < 0) return;
-    const it = items[index];
+    if (key === -1) return;
     const bob = display.reduceMotion ? 0 : Math.sin(time * 5) * 6;
-    marker.style.transform = `translate3d(${it.x - 20}px, ${it.y - it.h - 46 + bob}px, 0)`;
+    marker.style.transform = `translate3d(${x - 20}px, ${top - 46 + bob}px, 0)`;
   }
 
   function hideEffects() {
@@ -93,7 +98,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
   }
 
   // Appelé à chaque image affichée. scan : état du scan (core) ; progress : avancement de la phase ;
-  // tip : bout de la douchette sur la scène { x, y }.
+  // tip : bout de la Scanette sur la scène { x, y }.
   function update(scan, progress, tip) {
     if (!scan.active) {
       hideEffects();
@@ -118,7 +123,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
       laser.classList.remove('visible');
     }
 
-    // Dissolution du produit et confettis aspirés vers la douchette.
+    // Dissolution du produit et confettis aspirés vers la Scanette.
     if (scan.phase === 'dissolve') {
       if (dissolving !== scan.index) {
         dissolving = scan.index;
@@ -135,7 +140,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
       it.el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px) scale(${1 - 0.5 * p})`;
       const n = bits.length;
       for (let i = 0; i < n; i++) {
-        // Chaque confetti part d'un point du produit, avec un petit retard, et file en courbe vers la douchette.
+        // Chaque confetti part d'un point du produit, avec un petit retard, et file en courbe vers la Scanette.
         const start = noise(i, 1) * 0.45;
         const q = Math.max(0, Math.min(1, (p - start) / (1 - start)));
         const e = q * q;
@@ -164,5 +169,5 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
     dissolving = -1;
   }
 
-  return { items, setMarker, update, remove };
+  return { items, setMarker, markAt, update, remove };
 }

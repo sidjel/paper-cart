@@ -1,7 +1,7 @@
 // Le scanner : quel produit est à portée, et le déroulé d'un scan dans le temps de jeu.
 // Logique pure. Les délais avancent avec la boucle de jeu (pas de setTimeout) : en pause, tout se fige.
 //
-// Déroulé : lever la douchette → laser (bip) → le produit se dissout (aspiration) → la carte apparaît.
+// Déroulé : lever la Scanette → laser (bip) → le produit se dissout (aspiration) → la carte apparaît.
 
 // Produits scannables (logique) : [{ x, scanned, loose, z, standAt, y, w, h }].
 //  x, z : place au sol (z seulement pour les produits posés ailleurs) ; y, w, h : leur dessin sur la scène

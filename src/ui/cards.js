@@ -38,6 +38,7 @@ export function createBasketUi(root, { onOpen, onClose }) {
   button.setAttribute('aria-label', 'Panier (I)');
   button.title = 'Panier (I)';
   button.innerHTML = 'Panier <span class="panier-count">0</span>';
+  button.hidden = true; // pas de panier au début : on le prend à l'accueil
   button.addEventListener('click', (e) => {
     e.stopPropagation();
     button.blur();
@@ -55,7 +56,7 @@ export function createBasketUi(root, { onOpen, onClose }) {
   grid.className = 'panier-grid';
   const empty = document.createElement('p');
   empty.className = 'settings-note';
-  empty.textContent = "Le Panier est vide. Approche-toi d'un produit sur l'étagère et scanne-le.";
+  empty.textContent = "Le panier est vide. Approche-toi d'un produit sur l'étagère et scanne-le avec la Scanette.";
   const close = document.createElement('button');
   close.className = 'primary';
   close.textContent = 'Fermer (Échap)';
@@ -67,21 +68,28 @@ export function createBasketUi(root, { onOpen, onClose }) {
   root.append(button, panel);
 
   let shown = 0;
+  let cap = 0;
   return {
     button,
+    // Le héros a un contenant : le bouton apparaît, avec la capacité.
+    setCapacity(c) {
+      cap = c;
+      button.hidden = c <= 0;
+      count.textContent = `${shown}/${cap}`;
+    },
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {
       grid.appendChild(buildCard(card, imageUrl));
       shown++;
     },
     setCount(n) {
-      count.textContent = n;
+      count.textContent = `${n}/${cap}`;
       button.classList.remove('bump');
       void button.offsetWidth; // relance la petite animation
       button.classList.add('bump');
     },
     open() {
-      title.textContent = `Panier — ${shown} carte${shown > 1 ? 's' : ''}`;
+      title.textContent = `Panier — ${shown} carte${shown > 1 ? 's' : ''} sur ${cap}`;
       empty.hidden = shown > 0;
       panel.hidden = false;
       close.focus({ preventScroll: true });

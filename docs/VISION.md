@@ -8,7 +8,7 @@ Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le mag
 
 - Chaque lieu est un **grand décor dessiné à la main** (par l'auteur, puis amélioré par IA ; en attendant, formes provisoires), vu à la troisième personne.
 - On y fait marcher un **personnage en papier façon Paper Mario**.
-- Le personnage tient une **douchette de scanner** : il vise un produit dans le rayon et en extrait l'**essence**, qui devient une **carte**.
+- Le personnage tient une **Scanette** (le scanner en libre-service des supermarchés, prise à l'accueil ; *vocabulaire de l'auteur, séance 36*) : il vise un produit dans le rayon et en extrait l'**essence**, qui devient une **carte**.
 - On combat avec ces cartes en **tour par tour sans chrono**, le personnage et l'ennemi face à face dans le décor, les cartes en bas de l'écran.
 - Les cartes **pourrissent** avec le temps et **changent de rôle** : fraîches, elles soignent ou protègent ; mûres, elles ont leur meilleur effet ; pourries, elles deviennent des armes ou des poisons à lancer. *(Précision de l'auteur, séance 32 : toutes les cartes ne pourrissent pas ; il y a 4 familles d'évolution — stables, périssables, évolutives, à potentiel de fusion — détaillées dans `docs/REGLES_CARTES_COMBAT.md`.)*
 - On **découvre** des combos et des évolutions **inconnus à l'avance**, par hasard ou par logique d'après la nature des cartes.

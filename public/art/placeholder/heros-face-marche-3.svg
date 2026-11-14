@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="220" height="320" viewBox="0 0 220 320">
-  <!-- [TEMP] Héros, trois quarts face, marche 3/4. Pieds en (110, 312). Généré, provisoire. -->
+  <!-- [TEMP] Héros, trois quarts face, marche 3/4. Pieds en (110, 312). Mains vides : objets tenus dessinés à part (tenu-*.svg). Généré, provisoire. -->
   <defs>
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="5"/>
@@ -16,9 +16,9 @@
 <path d="M96 196 h34 v20 h-34 z" fill="#5a7ea2"/>
 <g transform="rotate(-12 72 172)"><path d="M70 172 q-16 26 -10 58 q2 8 10 6 q6 -2 4 -10 q-4 -24 6 -44 z" fill="#5f84a8"/><circle cx="68" cy="236" r="9" fill="#f0d2b0"/></g>
 <path d="M146 170 q22 10 26 40 q0 8 -8 8 q-6 0 -8 -6 q-4 -18 -18 -26 z" fill="#6a8fb3"/>
-<path d="M150 204 h40 q8 0 8 8 v6 q0 6 -8 6 h-22 l-4 24 q-1 5 -6 5 h-6 q-5 0 -4 -6 l4 -23 h-2 q-6 0 -6 -6 v-6 q0 -8 6 -8 z" fill="#8f8a7e"/>
-<path d="M190 206 h8 v16 h-8 z" fill="#c0614b"/>
-<path d="M150 204 h22 v6 h-22 z" fill="#d9a441"/>
+
+
+
 <circle cx="162" cy="222" r="9" fill="#f0d2b0"/>
 <path d="M84 160 q28 -16 56 0 q-6 14 -28 16 q-22 -2 -28 -16 z" fill="#5a7ea2"/>
 <circle cx="114" cy="92" r="62" fill="#f0d2b0"/>

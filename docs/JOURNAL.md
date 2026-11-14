@@ -12,6 +12,39 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 36 — 15/11/2026 — La Scanette ; A5a : l'accueil en libre-service
+
+**Décisions de l'auteur** :
+- la « douchette » devient la **Scanette**, qui pourra casser et devenir l'**Extracteur** ;
+- l'accueil en libre-service (choix A), à construire maintenant (A5a) ;
+- A4 **pas encore validée** : l'aparté doit devenir un moment rare et marquant (face caméra, zoom, effet visuel et sonore) ;
+- panier, deck (« courses »), jeton et caddie : voir `GAME_DESIGN.md`.
+
+**Jouable maintenant (A5a)**
+- Le héros commence **les mains vides**. Au début du rayon, un **présentoir « Accueil · libre-service »** (dessiné dans le décor) avec des Scanettes et une pile de paniers à main.
+- Devant le présentoir, le bouton devient **« Prendre »** (Entrée, Espace, A, ou double toucher sur le présentoir). Le héros prend la Scanette puis le panier, avec un petit son. Il les **tient en main** : Scanette à droite, panier rouge à gauche, qui suivent les bras en marchant et pendant le scan.
+- Sans Scanette ou sans panier, **le scan est refusé** et le haut-parleur explique. S'il s'éloigne sans Scanette, il le rappelle.
+- Le bouton du Panier apparaît avec le panier, et affiche la capacité (**0/6**, provisoire). Panier plein : scan refusé (règle provisoire).
+- 6 nouvelles répliques [TEMP] du haut-parleur.
+
+**Technique** :
+- La Scanette a été retirée des 13 dessins du héros. Elle est dessinée à part (vues de face et de dos), comme le panier : objets tenus, posés derrière le dessin, la main passant devant.
+- Nouveau `core/gear.js` (ce que porte le héros), testé.
+- Les anciens tests de scan commencent équipés.
+
+**Vérifié** :
+- 110 tests de logique, 50 tests navigateur sans erreur console, dont : accueil au clavier, double toucher sur le présentoir, scan refusé sans Scanette, panier plein.
+- Captures PC et téléphone simulé.
+- **Comptages : 81 éléments, 35 images**, à cause des 3 objets tenus. Limites relevées à 88 et 36 : **à valider par l'auteur**.
+
+**Décisions prises seul (provisoires)** :
+- Capacité du panier : 6 (réglable).
+- Panier plein : scan refusé, en attendant le choix de l'auteur.
+- Présentoir dessiné dans le décor, contre l'étagère, au début du rayon.
+- On prend chaque objet séparément.
+
+---
+
 ## Séance 35 — 15/11/2026 — Haut-parleurs visibles, personnage mieux posé au sol
 
 **Demandes de l'auteur** : voir les haut-parleurs d'où sort la voix ; comment arrêter un essai de diagnostic ; qui donne la douchette ; le personnage semble flotter.

@@ -123,6 +123,13 @@
       "depthRef": 56
     }
   ],
+  "accueil": {
+    "comment": "Accueil en libre-service (A5a), dessiné dans le décor du fond (rayon-fond.svg) au début du rayon : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). On les prend depuis le pied de l'étagère.",
+    "items": [
+      { "id": "scanette", "at": [205, 470], "w": 150, "h": 150 },
+      { "id": "panier", "at": [395, 500], "w": 130, "h": 120 }
+    ]
+  },
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
     "items": [[600, 68], [1300, 68], [1980, 68], [2470, 68], [3340, 68]]

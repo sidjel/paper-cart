@@ -117,6 +117,13 @@ export function createAudio(settings, song) {
     tone('triangle', 1318, 1318, t + 0.1, 0.3, 0.12);
   }
 
+  // [TEMP] Prendre un objet (Scanette, panier) : petit déclic puis note qui monte.
+  function prise() {
+    const t = ctx.currentTime;
+    tone('square', 900, 900, t, 0.03, 0.08);
+    tone('sine', 600, 1200, t + 0.03, 0.12, 0.18);
+  }
+
   // [TEMP] Annonce au haut-parleur : « ding-dong » de magasin, deux notes douces.
   function annonce() {
     const t = ctx.currentTime;
@@ -181,7 +188,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, annonce, blip, froissement, blipHeros };
+  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros };
 
   return {
     // Appelé au premier geste du joueur.

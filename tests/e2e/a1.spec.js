@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 
 const errors = [];
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, info) => {
   errors.length = 0;
   page.on('console', (m) => {
     if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
@@ -13,6 +13,8 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   await page.goto('./');
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  // Les tests du scanner commencent équipés (Scanette et panier) ; ceux de l'accueil (A5a), mains vides.
+  if (!info.title.startsWith('A5a')) await page.evaluate(() => window.paperCart.equip());
 });
 
 test.afterEach(async () => {
@@ -362,7 +364,7 @@ test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, 
   expect((await hero(page)).x).toBe(x0);
   await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-scan.png` });
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
-  await expect(page.locator('.panier-count')).toHaveText('1');
+  await expect(page.locator('.panier-count')).toHaveText('1/6');
   // Le produit a disparu de l'étagère et n'est plus à portée.
   expect((await page.evaluate(() => window.paperCart.products()))[0].scanned).toBe(true);
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(-1);
@@ -556,3 +558,70 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
   await expect(page.locator('.narrator')).toBeHidden();
 });
 
+
+// ---------- Étape A5a : l'accueil en libre-service (Scanette et panier) ----------
+const state = (page) => page.evaluate(() => window.paperCart.scanState());
+
+test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le panier', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  let s = await state(page);
+  expect(s.gear).toEqual({ scanette: false, panier: false });
+  await expect(page.locator('.panier-button')).toBeHidden();
+  await expect(page.locator('.actor-held:not([hidden])')).toHaveCount(0);
+  // Monter vers le présentoir (début du rayon, contre l'étagère).
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(async () => (await state(page)).pickup, { timeout: 6000 }).toBeGreaterThanOrEqual(0);
+  await page.keyboard.up('ArrowUp');
+  await expect(page.locator('.scan-button')).toContainText('Prendre');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await state(page)).gear).toEqual({ scanette: true, panier: true });
+  await expect(page.locator('.panier-button')).toBeVisible();
+  await expect(page.locator('.panier-count')).toHaveText('0/6');
+  await expect(page.locator('.actor-held:not([hidden])')).toHaveCount(2);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-accueil.png` });
+});
+
+test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  const p = await page.evaluate(() => window.paperCart.worldToClient(395, 300)); // pile de paniers
+  await page.touchscreen.tap(p.x, p.y);
+  await page.touchscreen.tap(p.x, p.y);
+  await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
+  expect((await state(page)).gear.scanette).toBe(false);
+  // Un produit à portée, mais pas de Scanette : rien n'est scanné.
+  const c = await page.locator('.product').nth(0).boundingBox();
+  await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
+  await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
+  await page.waitForTimeout(2500);
+  const s = await state(page);
+  expect(s.active).toBe(false);
+  expect(s.cards).toEqual([]);
+  await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-panier.png` });
+});
+
+test('A5a : panier plein, le scan est refusé (règle provisoire)', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await page.evaluate(() => {
+    window.paperCart.equip();
+    window.paperCart.set('carry.panier', 1);
+  });
+  await expect(page.locator('.panier-count')).toHaveText('0/1');
+  // Scanner la banane (au fond, au-dessus du départ)…
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(0);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await state(page)).cards.length, { timeout: 5000 }).toBe(1);
+  await expect.poll(async () => (await state(page)).active).toBe(false);
+  // … puis le lait : refusé, le panier est plein.
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(1);
+  await page.keyboard.up('ArrowRight');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  expect((await state(page)).active).toBe(false);
+  expect((await state(page)).cards.length).toBe(1);
+  await expect(page.locator('.panier-count')).toHaveText('1/1');
+});
