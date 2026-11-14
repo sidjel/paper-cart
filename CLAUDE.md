@@ -6,6 +6,8 @@
 
 ## Une séance
 1. Relire ce fichier, docs/VISION.md, **seulement le dernier rapport** en tête de docs/JOURNAL.md et les points ouverts de docs/SUIVI.md. Selon la tâche, et seulement la partie utile : docs/PROTOTYPES.md (l'étape en cours), docs/ARCHITECTURE.md (avant de toucher au code : le résumé, puis la section concernée). Ne pas relire les gros documents en entier sans raison.
+   - **Documents de conception : JAMAIS en début de séance, seulement celui de l'étape en cours** : `docs/HISTOIRE.md` et `docs/PERSONNAGES.md` → A4 (narrateur) et dialogues ; `docs/GAME_DESIGN.md` → A5 (caddie) et systèmes hors combat ; `docs/REGLES_CARTES_COMBAT.md` → B et C (combat, vieillissement, combos) ; `docs/DIRECTION_ARTISTIQUE.md` → D (dessins, style).
+   - Ces fichiers restent **courts** (50 à 80 lignes au plus, listes à puces) et marquent chaque point : `✅ VALIDÉ` (décision de l'auteur), `🧪 À TESTER` (piste à essayer en prototype), `❓ À DÉFINIR` (question ouverte : ne jamais trancher à la place de l'auteur), `[TEMP]` (provisoire). `docs/archive/` : réserve d'idées, jamais appliquée d'office.
 2. Annoncer en 3 à 5 lignes : **ce que le joueur va pouvoir ressentir de nouveau** (pas seulement ce qui sera codé), et ce qui va être construit. Puis enchaîner sans attendre, sauf question bloquante.
 3. Chaque séance produit une **amélioration perceptible par le joueur**, pas seulement une amélioration du code. Le travail technique sert une expérience que l'auteur peut observer.
 4. Finir avec une version JOUABLE, vérifiée (tests verts, aucune erreur console, captures en taille PC et en taille téléphone simulée), poussée sur `main` et publiée.

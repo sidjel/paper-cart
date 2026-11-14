@@ -77,13 +77,15 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 ## Histoire et sens du jeu (séance 28)
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | ❓ | 3 pistes proposées (carte de fidélité, date de péremption, stagiaire de l'inventaire). Séance 30 : **pas de choix pour le moment**. |
-| Documents sur l'histoire, le game design, le style | 30 | ❓ | Il n'en existe pas (seulement docs/VISION.md, à grands traits). Quand et comment les créer : proposition faite en séance 30. |
-| Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Réponse comprise dans chaque piste. |
+| Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | 👀 | Séance 31 : ✅ douchette = technologie du magasin qui extrait l'essence ; produits figés hors du temps sur l'étagère, évolution dès le scan (docs/HISTOIRE.md). Reste ❓ : scanner des êtres vivants ? |
+| Documents sur l'histoire, le game design, le style | 30 | ✅ | Séance 31 : 5 fichiers courts créés (HISTOIRE, PERSONNAGES, GAME_DESIGN, REGLES_CARTES_COMBAT, DIRECTION_ARTISTIQUE), lus seulement à l'étape concernée. |
+| Archiver l'ancien GAME_DESIGN.md de Maxi-Gouffre | 31 | 🔧 | **Fichier non reçu** en séance 31 : à joindre de nouveau. Nécessaire pour lister les 20 familles et 6 recettes (REGLES_CARTES_COMBAT.md). |
+| Narrateur A4 | 31 | 🔧 | Choix B (séance 31) : bases écrites d'abord, A4 codé à la séance suivante avec des répliques dans le bon ton. |
+| Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Caddie jouable (A5) en sera la forme physique. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
 | Interaction avec les cartes dans le Panier | 28 | 👀 | Normal pour l'instant : le prototype A vérifie seulement « scanner est agréable ». Les cartes serviront au combat (prototype B). |
-| Utilité du caddie, pouvoir le pousser | 28 | ❓ | **Séance 29 : le caddie devient une étape à part, après A4 et avant le combat** (docs/PROTOTYPES.md). Son contenu reste à choisir (pistes de la séance 28 : le pousser, ou le caddie qui devient le Panier). |
-| Style des décors | 29 | ❓ | L'auteur pense au **crayon de couleur**, comme le personnage principal. À confirmer et à tester (prototype D). |
+| Utilité du caddie, pouvoir le pousser | 28 | ✅ | **Séance 29 : le caddie devient une étape à part, après A4 et avant le combat** (docs/PROTOTYPES.md). Séance 31 : **A5 — Caddie jouable** = Panier physique qui suit le personnage, garé et repris, visuel selon le remplissage (docs/GAME_DESIGN.md). |
+| Style des décors | 29 | 🧪 | Crayon de couleur pour personnages, produits et décors : à tester au prototype D (docs/DIRECTION_ARTISTIQUE.md). |
 
 ## Documentation et architecture (séance 29)
 | Demande | Séance | État | Notes |
@@ -102,6 +104,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 - Noter tous les changements et modifications pour ne pas se perdre : ce fichier (séance 4).
 - Garder toutes les options dans le menu des réglages, même validées (séances 5 et 7).
 - Économiser la lecture : ne pas relire à chaque fois de gros documents ; documentation courte et à jour avec le code (séance 29).
+- Documents de conception courts (50 à 80 lignes), balisés ✅ 🧪 ❓ [TEMP], lus seulement à l'étape concernée, jamais en début de séance (séance 31).
 
 ## Questions de l'auteur (réponses données)
 - Faut-il dessiner les personnages avant l'étape suivante ? Non : les dessins arrivent au prototype D, préparé une séance à l'avance avec docs/IMAGES.md (séance 5).

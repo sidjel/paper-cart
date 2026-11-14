@@ -1,7 +1,7 @@
 # Architecture technique
 
 > Comment le jeu est construit **aujourd'hui**, et les règles techniques à respecter.
-> Les règles du jeu sont dans `docs/VISION.md` ; le plan dans `docs/PROTOTYPES.md` ; les règles de travail dans `CLAUDE.md`.
+> Les règles du jeu sont dans `docs/VISION.md` et les documents de conception (liste et quand les lire : `CLAUDE.md`) ; le plan dans `docs/PROTOTYPES.md` ; les règles de travail dans `CLAUDE.md`.
 > **Économie de lecture** : lire le résumé (§1) et seulement la section utile à la tâche.
 > État vérifié dans le code le 14/11/2026 (séance 29). Repères : ✅ décision de l'auteur · 🔎 constaté dans le code · ⏳ prévu, pas construit.
 

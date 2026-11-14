@@ -12,6 +12,19 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 31 — 14/11/2026 — Documents de conception courts, lecture à la demande
+
+**Décisions de l'auteur** : A4 codé à la séance suivante (bases écrites d'abord) ; 5 documents de conception courts, lus seulement à l'étape concernée ; **A5 — Caddie jouable** défini (Panier physique qui suit le personnage) ; univers, douchette et stase des rayons, structure en 3 actes, combat face à face et 4 familles de cartes ✅.
+
+**Fait (documentation seulement, aucun fichier de code touché)**
+- Créés dans `docs/` : `HISTOIRE.md` (43 lignes), `PERSONNAGES.md` (32), `GAME_DESIGN.md` (26), `REGLES_CARTES_COMBAT.md` (31), `DIRECTION_ARTISTIQUE.md` (22), avec les balises ✅ 🧪 ❓ [TEMP]. Contenu repris du texte de l'auteur, sans ajout de règle.
+- `CLAUDE.md` : règle de lecture à la demande (quel fichier pour quelle étape, jamais en début de séance), longueur maximale, balises.
+- `README.md`, `PROTOTYPES.md` (étape A5), `ARCHITECTURE.md` (renvoi), `SUIVI.md` à jour.
+
+**Non fait** : archivage de l'ancien `GAME_DESIGN.md` de Maxi-Gouffre : **fichier non reçu**. La liste des 20 familles et 6 recettes attend ce fichier.
+
+---
+
 ## Séance 30 — 14/11/2026 — Diagnostic en 4 configurations retiré, documents de conception
 
 **Décisions de l'auteur** : outils de mesure, choix B (retirer le diagnostic en 4 configurations, garder la campagne DEVANT2 jusqu'à ce qu'on revoie le rayon de devant) ; histoire du scanner : pas de choix pour le moment ; suite : A4, le narrateur.

@@ -45,6 +45,7 @@ npm run preview      # sert la version construite
 | `public/art/` | Images du jeu |
 | `tests/` | Tests de la logique (`unit/`) et dans le navigateur (`e2e/`) |
 | `docs/` | `VISION.md` (le jeu), `PROTOTYPES.md` (le plan), `ARCHITECTURE.md` (la technique), `JOURNAL.md` (les séances), `SUIVI.md` (les demandes de l'auteur), `archive/` (ancien projet, réserve d'idées) |
+| `docs/` (conception, à lire selon l'étape) | `HISTOIRE.md` et `PERSONNAGES.md` (narrateur, dialogues), `GAME_DESIGN.md` (caddie, hors combat), `REGLES_CARTES_COMBAT.md` (combat, cartes), `DIRECTION_ARTISTIQUE.md` (style) |
 
 ## Licence
 
