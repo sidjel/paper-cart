@@ -6,7 +6,7 @@ import { createMusic } from './music.js';
 
 export function createAudio(settings, song) {
   let ctx = null;
-  let master, musicBus, sfxBus, scanBus, noise, music;
+  let master, musicBus, sfxBus, scanBus, voiceBus, noise, music;
   let paused = false;
   let hidden = false;
   let foot = 0;
@@ -43,6 +43,8 @@ export function createAudio(settings, song) {
     sfxBus.connect(master);
     scanBus = ctx.createGain(); // sons du scanner (bip, aspiration, carte)
     scanBus.connect(master);
+    voiceBus = ctx.createGain(); // narrateur (annonce, petits bips du texte)
+    voiceBus.connect(master);
     // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et le shaker.
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const data = noise.getChannelData(0);
@@ -62,10 +64,11 @@ export function createAudio(settings, song) {
     musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1), t, 0.15);
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
     scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
+    voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
   }
 
   // Petite note : forme d'onde, fréquence de départ et d'arrivée, début, durée, volume.
-  function tone(type, f0, f1, t, dur, vol) {
+  function tone(type, f0, f1, t, dur, vol, bus = scanBus) {
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = type;
@@ -74,7 +77,7 @@ export function createAudio(settings, song) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(scanBus);
+    o.connect(g).connect(bus);
     o.start(t);
     o.stop(t + dur + 0.02);
   }
@@ -111,6 +114,20 @@ export function createAudio(settings, song) {
     tone('triangle', 1318, 1318, t + 0.1, 0.3, 0.12);
   }
 
+  // [TEMP] Annonce au haut-parleur : « ding-dong » de magasin, deux notes douces.
+  function annonce() {
+    const t = ctx.currentTime;
+    tone('sine', 784, 784, t, 0.5, 0.2, voiceBus);
+    tone('sine', 659, 659, t + 0.28, 0.7, 0.18, voiceBus);
+  }
+
+  // [TEMP] Petit bip de lettre (machine à écrire), légèrement varié.
+  let blipN = 0;
+  function blip() {
+    blipN = (blipN + 1) % 3;
+    tone('square', 620 + blipN * 40, 620 + blipN * 40, ctx.currentTime, 0.03, 0.05, voiceBus);
+  }
+
   function running() {
     return ctx && ctx.state === 'running' && !hidden;
   }
@@ -134,7 +151,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte };
+  const SOUNDS = { pas: step, bip, aspire, carte, annonce, blip };
 
   return {
     // Appelé au premier geste du joueur.

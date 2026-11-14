@@ -12,6 +12,39 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 32 — 14/11/2026 — A4 (1/2) : le narrateur prend la parole
+
+**Décisions de l'auteur** : ancien GAME_DESIGN.md fourni (archivé) ; VISION.md complété (4 familles de cartes, néons de magasin en zone 2) ; fil « Client » → « Article non référencé » essayé dès A4 (choix A).
+
+**Jouable maintenant**
+- Une **bande « haut-parleur »** en haut à gauche : petit « ding-dong » d'annonce, puis le texte s'écrit lettre par lettre avec de petits bips.
+- **8 moments** le font parler :
+  - l'arrivée ;
+  - le premier scan ;
+  - un scan sur trois ensuite ;
+  - « scanner » sans rien à portée ;
+  - 30 s sans rien faire ;
+  - la première ouverture du Panier ;
+  - le bout du rayon ;
+  - un retour de pause sur trois.
+- **12 répliques [TEMP]**, sans le préfixe à l'écran.
+- **Il reste rare** : 20 s au moins entre deux prises de parole, aucune réplique répétée avant 10 min. Les moments forts (l'arrivée, le premier scan) passent toujours et coupent la réplique en cours.
+- **Toucher ou cliquer la bande** : le texte s'affiche en entier, puis la bande disparaît.
+- La pause fige le narrateur. Il continue de parler dans le Panier. Il se tait pendant les mesures.
+
+**Vérifié** :
+- 99 tests de logique : règles de prise de parole, machine à écrire, inactivité, données des répliques.
+- 47 tests navigateur sans erreur console, comptages inchangés : accueil, bande qui ne recouvre pas les boutons, toucher qui complète puis ferme, premier scan commenté même pendant l'accueil, « rien à scanner », inactivité, désactivation.
+- Captures PC et téléphone simulé.
+- **Non vérifiable ici** : les sons (annonce, bips) et la fluidité sur le téléphone.
+
+**Décisions prises seul** :
+- Le narrateur vouvoie, comme une annonce de magasin. C'est un contenu [TEMP], que l'auteur peut faire passer au tutoiement.
+- Le choix des répliques est sans hasard : il prend celle qui n'a pas été dite depuis le plus longtemps.
+- La bande est en haut à gauche, dans la zone sûre.
+
+---
+
 ## Séance 31 — 14/11/2026 — Documents de conception courts, lecture à la demande
 
 **Décisions de l'auteur** : A4 codé à la séance suivante (bases écrites d'abord) ; 5 documents de conception courts, lus seulement à l'étape concernée ; **A5 — Caddie jouable** défini (Panier physique qui suit le personnage) ; univers, douchette et stase des rayons, structure en 3 actes, combat face à face et 4 familles de cartes ✅.

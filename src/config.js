@@ -32,6 +32,16 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  narrator: {
+    enabled: true, // le narrateur parle
+    speed: 38, // lettres par seconde (effet machine à écrire)
+    hold: 1.8, // temps affiché une fois le texte complet (s)…
+    holdPerChar: 0.035, // … plus ce temps par lettre (les longues répliques restent plus longtemps)
+    minGap: 20, // écart minimal entre deux prises de parole (s), sauf moments forts
+    lineCooldown: 600, // une même réplique ne revient pas avant (s)
+    inactivity: 30, // délai d'inactivité avant une remarque (s)
+    blipEvery: 2, // un petit bip toutes les N lettres (0 = aucun)
+  },
   scan: {
     range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
     minDepth: 150, // il faut être assez près de l'étagère du fond (profondeur minimale)
@@ -69,6 +79,7 @@ export const config = {
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
     scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
+    voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
@@ -154,6 +165,15 @@ export const TUNABLES = [
   { group: 'Scanner', key: 'scan.card', label: 'Apparition de la carte', min: 0.3, max: 2.5, step: 0.05, unit: 's' },
   { group: 'Scanner', key: 'scan.particles', label: 'Nombre de confettis', min: 0, max: 24, step: 1, reload: true },
   { group: 'Son', key: 'audio.scanVolume', label: 'Sons du scanner', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
+  { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
+  { group: 'Narrateur', key: 'narrator.speed', label: 'Vitesse d’écriture', min: 10, max: 120, step: 2, unit: 'lettres/s' },
+  { group: 'Narrateur', key: 'narrator.hold', label: 'Temps affiché après le texte', min: 0.5, max: 6, step: 0.1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.holdPerChar', label: '… plus, par lettre', min: 0, max: 0.1, step: 0.005, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.minGap', label: 'Écart minimal entre deux répliques', min: 0, max: 120, step: 5, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.lineCooldown', label: 'Une même réplique revient après', min: 0, max: 1800, step: 30, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.inactivity', label: 'Remarque d’inactivité après', min: 5, max: 180, step: 5, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },

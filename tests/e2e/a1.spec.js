@@ -479,3 +479,62 @@ test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
   await page.keyboard.press('Escape');
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
 });
+
+// ---------- Étape A4 : le narrateur ----------
+const narr = (page) => page.evaluate(() => window.paperCart.narrator());
+
+test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la bande la complète puis la ferme', async ({ page }, info) => {
+  const band = page.locator('.narrator');
+  await expect(band).toBeVisible({ timeout: 4000 });
+  const n1 = await narr(page);
+  expect(n1.text).toContain('Client');
+  expect(n1.text).not.toContain('[TEMP]');
+  // La bande ne recouvre pas les boutons du haut.
+  const b = await band.boundingBox();
+  const h = await page.locator('.hud-bar').boundingBox();
+  expect(b.x + b.width).toBeLessThanOrEqual(h.x);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-narrateur.png` });
+  if (info.project.name === 'telephone') await band.tap();
+  else await band.click();
+  const n2 = await narr(page);
+  expect(n2.shown).toBe(n2.text.length);
+  await expect(band).toContainText(n2.text);
+  if (info.project.name === 'telephone') await band.tap();
+  else await band.click();
+  await expect(band).toBeHidden();
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+});
+
+test('A4 : le premier scan est commenté, même si l’accueil n’est pas fini', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
+  // Marcher jusqu'au pied de l'étagère, sous la banane, et scanner.
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach, { timeout: 6000 }).toBe(0);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await narr(page)).text, { timeout: 5000 }).toContain('essence');
+});
+
+test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await page.evaluate(() => {
+    window.paperCart.set('narrator.inactivity', 5);
+    window.paperCart.set('narrator.minGap', 0);
+  });
+  await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
+  await page.locator('.narrator').click();
+  await page.locator('.narrator').click();
+  // Rien à portée : Entrée fait réagir le narrateur.
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await narr(page)).text, { timeout: 3000 }).toMatch(/vide|rien/i);
+  await page.locator('.narrator').click();
+  await page.locator('.narrator').click();
+  // Sans rien faire pendant 5 s (temps de jeu) : remarque d'inactivité.
+  await expect.poll(async () => (await narr(page)).text, { timeout: 9000 }).toMatch(/immobile|dormez/);
+  // Désactivé : la bande disparaît.
+  await page.evaluate(() => window.paperCart.set('narrator.enabled', false));
+  await expect(page.locator('.narrator')).toBeHidden();
+});
+

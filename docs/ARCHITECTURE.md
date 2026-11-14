@@ -20,12 +20,12 @@
 
 | Dossier | Rôle |
 |---|---|
-| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier). **Diagnostic seulement** : `bench`, `quicktest`. |
+| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `narrator` (quand parler, quoi dire, machine à écrire, inactivité). **Diagnostic seulement** : `bench`, `quicktest`. |
 | `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `assets` (préparation des images), `targetMarker`, `debugMask` |
-| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
+| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande au haut-parleur). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |
-| `src/data/` | `places/rayon-essai.json` (lieu : images, calques, zone de marche, objets, produits, parcours de mesure), `characters/heros.json`, `products.json`, `music/` |
+| `src/data/` | `places/rayon-essai.json` (lieu : images, calques, zone de marche, objets, produits, parcours de mesure), `characters/heros.json`, `products.json`, `narrator.json` (moments et répliques), `music/` |
 | `src/config.js` | Valeurs réglables, liste des réglages du panneau, profils de marche |
 | `public/art/placeholder/` | Dessins provisoires (SVG), à remplacer sans changer le code |
 | `tests/unit/` · `tests/e2e/` | Vitest (logique, données) · Playwright (PC et téléphone simulé, comptages) |
@@ -84,7 +84,7 @@ Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'au
 
 ## 9. Prévu, pas encore construit ⏳
 
-Narrateur (A4) · étape caddie · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅) · lieux chargés à la demande (dès le deuxième lieu ✅).
+Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidité) · étape caddie (A5) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅) · lieux chargés à la demande (dès le deuxième lieu ✅).
 
 ## 10. Héritage de Maxi-Gouffre
 

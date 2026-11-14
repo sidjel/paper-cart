@@ -81,7 +81,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Documents sur l'histoire, le game design, le style | 30 | ✅ | Séance 31 : 5 fichiers courts créés (HISTOIRE, PERSONNAGES, GAME_DESIGN, REGLES_CARTES_COMBAT, DIRECTION_ARTISTIQUE), lus seulement à l'étape concernée. |
 | Archiver l'ancien GAME_DESIGN.md de Maxi-Gouffre | 31 | ✅ | Séance 32 : `docs/archive/maxi-gouffre-GAME_DESIGN.md` ; 20 familles et 6 recettes listées dans REGLES_CARTES_COMBAT.md. |
 | VISION.md : 4 familles de cartes, néons de magasin en zone 2 | 32 | ✅ | Choix A : deux précisions ajoutées à VISION.md à la demande de l'auteur. |
-| Narrateur A4 | 31 | 🔧 | Choix B (séance 31) : bases écrites d'abord, A4 codé à la séance suivante avec des répliques dans le bon ton. |
+| Narrateur A4 | 31 | 👀 | Séance 32 : bande au haut-parleur, machine à écrire, annonce et petits bips, 12 répliques [TEMP] sur 8 moments, rare et sans répétition, fil « Client » → « Article non référencé » (choix A). **À tester par l'auteur.** Reste pour finir A4 : finitions, réglages complets, test rapide de fluidité. |
 | Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Caddie jouable (A5) en sera la forme physique. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
 | Interaction avec les cartes dans le Panier | 28 | 👀 | Normal pour l'instant : le prototype A vérifie seulement « scanner est agréable ». Les cartes serviront au combat (prototype B). |

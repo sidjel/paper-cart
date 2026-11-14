@@ -9,6 +9,9 @@ import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceProduct } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle } from './core/narrator.js';
+import { createNarratorUi } from './ui/narrator.js';
+import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -77,7 +80,51 @@ let pendingScan = -1; // double toucher : produit à scanner à l'arrivée du pe
 
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
-  scanProduct(nearestProduct(productState, walker, config.scan));
+  const i = nearestProduct(productState, walker, config.scan);
+  if (i < 0) say('rien_a_scanner');
+  scanProduct(i);
+}
+
+// ---------- Narrateur (logique dans core/narrator.js, répliques dans data/narrator.json) ----------
+// Les répliques [TEMP] s'affichent sans leur préfixe.
+const narratorData = {
+  triggers: narratorFile.triggers,
+  lines: narratorFile.lines.map((l) => ({ ...l, text: l.text.replace(/^\[TEMP\]\s*/, '') })),
+};
+const narrator = createNarrator();
+const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, config.narrator) });
+let arrived = false;
+let endOfAisleX = Infinity;
+
+function say(trigger) {
+  const line = narrate(narrator, narratorData, trigger, config.narrator);
+  if (!line) return;
+  narratorUi.show(line.text, config.display.reduceMotion);
+  audio.play('annonce');
+}
+
+// À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
+function updateNarrator(dt) {
+  const letters = stepNarrator(narrator, dt, config.narrator);
+  if (!narrator.line) {
+    narratorUi.hide();
+    return;
+  }
+  const n = Math.floor(narrator.shown);
+  narratorUi.setShown(n);
+  const every = config.narrator.blipEvery;
+  if (letters > 0 && every > 0 && n % every === 0) audio.play('blip');
+}
+
+// Moments surveillés en jeu : arrivée, inactivité, bout du rayon.
+function watchNarrator(dt) {
+  if (!arrived && narrator.t > 1) {
+    arrived = true;
+    say('arrivee');
+  }
+  const active = walker.moving || scan.active || pendingScan >= 0;
+  if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite');
+  if (walker.x >= endOfAisleX) say('bout_du_rayon');
 }
 
 function scanProduct(i) {
@@ -115,6 +162,7 @@ function onScanEvent(ev) {
     const url = imageUrlOf(it.def);
     basketUi.add(card, url);
     flyingCard.show(card, url);
+    say(basket.cards.length === 1 ? 'premier_scan' : 'scan');
     // Points de départ et d'arrivée de la carte, calculés une fois.
     stage.stageToClient(shown.x, shown.y - 330 * shown.scale * heroData.scale, cardFrom);
     const r = basketUi.button.getBoundingClientRect();
@@ -333,7 +381,15 @@ sm.onChange((now, before) => {
   audio.setState(now);
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
-  if (now === 'panier') basketUi.open();
+  if (now === 'panier') {
+    basketUi.open();
+    say('panier');
+  }
+  if (now === 'play' && before === 'pause') say('reprise');
+  if (now === 'bench') {
+    narrator.line = null; // les mesures se font sans narrateur
+    narratorUi.hide();
+  }
   if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
   if (now === 'play' || now === 'bench') stepper.reset();
@@ -461,7 +517,12 @@ function frame(now) {
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
+    const sec = Math.min(dt / 1000, 0.1);
+    watchNarrator(sec);
+    updateNarrator(sec);
     render();
+  } else if (sm.is('panier')) {
+    updateNarrator(Math.min(dt / 1000, 0.1));
   } else if (quick) {
     quickStep(dt, t0);
   } else if (sm.is('bench')) {
@@ -506,6 +567,7 @@ async function start() {
   proj = createProjection(place.projection, config.scene);
   mask = compileMask(place.walkMask);
   walker = createWalker(place.spawn[0], place.spawn[1]);
+  endOfAisleX = Math.max(...place.walkMask.area.map((pt) => pt[0])) - 150; // le narrateur remarque le bout du rayon
   marker = createTargetMarker(stage.layers.acteurs);
   props = createProps(place, images, stage.layers.acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
@@ -530,6 +592,7 @@ async function start() {
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
+    if (key === 'narrator.enabled' && !value) narrator.line = null;
   });
   window.addEventListener('resize', layout);
   window.visualViewport?.addEventListener('resize', layout);
@@ -557,6 +620,7 @@ async function start() {
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name) }),
+    narrator: () => ({ text: narrator.line?.text ?? '', shown: Math.floor(narrator.shown), visible: narratorUi.visible, t: narrator.t }),
     products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
@@ -580,6 +644,8 @@ async function start() {
     diagForeground: (variant) => stage.setLayerVariant('premier-plan', variant),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
+    // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).
+    set: (key, value) => setValue(key, value),
   };
 }
 

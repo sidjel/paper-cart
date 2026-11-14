@@ -1,0 +1,27 @@
+{
+  "comment": "Narrateur (A4). triggers : moments du jeu qui peuvent le faire parler. once = une seule fois ; every = une fois toutes les N occurrences ; strong = passe même s'il a parlé il y a peu. lines : répliques [TEMP], à réécrire par l'auteur (ton : docs/PERSONNAGES.md). Fil « Client » → « Article non référencé » : docs/HISTOIRE.md.",
+  "triggers": {
+    "arrivee": { "once": true, "strong": true, "comment": "le jeu commence" },
+    "premier_scan": { "once": true, "strong": true, "comment": "première carte" },
+    "scan": { "every": 3, "comment": "les cartes suivantes, une fois sur trois" },
+    "rien_a_scanner": { "every": 2, "comment": "action « scanner » sans produit à portée" },
+    "inactivite": { "comment": "aucune action pendant le délai réglé" },
+    "panier": { "once": true, "comment": "première ouverture du Panier" },
+    "bout_du_rayon": { "once": true, "comment": "le personnage atteint le bout du rayon" },
+    "reprise": { "every": 3, "comment": "retour de pause" }
+  },
+  "lines": [
+    { "id": "arrivee_1", "trigger": "arrivee", "text": "[TEMP] Bienvenue au Maxi-Gouffre, cher Client. La sortie se trouve à la Caisse Finale. La Caisse Finale se trouve… plus loin." },
+    { "id": "premier_scan_1", "trigger": "premier_scan", "text": "[TEMP] Félicitations, cher Client : vous venez d'extraire l'essence d'un produit. Le produit, lui, ne vous félicite pas." },
+    { "id": "scan_1", "trigger": "scan", "text": "[TEMP] Sur l'étagère, il était éternel. Dans votre Panier, il commence à pourrir. Joli travail." },
+    { "id": "scan_2", "trigger": "scan", "text": "[TEMP] Bip. Encore un. Vous savez qu'il faudra payer tout ça, un jour ?" },
+    { "id": "scan_3", "trigger": "scan", "text": "[TEMP] Votre enthousiasme pour les codes-barres est noté. Il sera utilisé contre vous." },
+    { "id": "rien_1", "trigger": "rien_a_scanner", "text": "[TEMP] Vous scannez le vide. Le vide n'est pas en rayon." },
+    { "id": "rien_2", "trigger": "rien_a_scanner", "text": "[TEMP] Il n'y a rien ici. Rapprochez-vous de l'étagère, ou de la raison." },
+    { "id": "inactif_1", "trigger": "inactivite", "text": "[TEMP] Client immobile détecté. Le magasin n'aime pas les clients immobiles. Il les range." },
+    { "id": "inactif_2", "trigger": "inactivite", "text": "[TEMP] Vous dormez ? Ici, ceux qui dorment se réveillent en promotion." },
+    { "id": "panier_1", "trigger": "panier", "text": "[TEMP] Votre Panier. Tout ce que vous avez pris. Rien de ce que vous avez payé." },
+    { "id": "bout_1", "trigger": "bout_du_rayon", "text": "[TEMP] Fin du rayon 7. Début du rayon 7 bis. Note pour l'inventaire : « Article non référencé » aperçu en train de chercher une sortie." },
+    { "id": "reprise_1", "trigger": "reprise", "text": "[TEMP] Ah, vous revoilà. Le magasin, lui, n'a pas fait de pause." }
+  ]
+}
