@@ -64,7 +64,7 @@ export function clearTarget(w) {
 // S'arrêter net et se tourner vers un produit pour le scanner.
 // Sans z (étagère du fond) : de dos. Avec z (produit posé ailleurs) : de dos s'il est plus loin
 // que awayDepth en profondeur, sinon de face, tourné vers lui (de profil s'il est à côté).
-export function faceShelf(w, x, z, awayDepth = 30) {
+export function faceProduct(w, x, z, awayDepth = 30) {
   w.hasTarget = false;
   w.vx = 0;
   w.vz = 0;

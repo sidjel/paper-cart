@@ -19,13 +19,13 @@ function noise(i, k) {
 }
 
 // loose : { parent, proj, levelOf(idObjet) } pour les produits posés ailleurs que sur l'étagère.
-export function createShelfProducts(place, catalog, images, parent, effectsParent, settings, display, loose) {
+export function createProducts(place, catalog, images, parent, effectsParent, settings, display, loose) {
   function make(it, x, y, scale, into) {
     const def = catalog.products[it.product];
     const img = images.get(def.image);
     const el = new Image();
     el.src = img.url;
-    el.className = 'shelf-product';
+    el.className = 'product';
     el.alt = '';
     el.draggable = false;
     const w = Math.round(def.size[0] * scale);

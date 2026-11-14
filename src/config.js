@@ -80,6 +80,7 @@ export const config = {
     stickDeadZone: 0.2, // manette : zone morte du stick (0 à 1)
     doubleTapTime: 0.35, // double toucher : délai maximal entre les deux touchers (s)
     doubleTapDistance: 50, // double toucher : écart maximal entre les deux touchers (px d'écran)
+    doubleTapMargin: 50, // double toucher : marge autour du dessin d'un produit posé ailleurs (px de scène)
   },
   bench: {
     passes: 3, // nombre de tours mesurés
@@ -136,6 +137,7 @@ export const TUNABLES = [
   { group: 'Contrôles', key: 'input.joystickRadius', label: 'Taille du joystick', min: 30, max: 120, step: 5, unit: 'px' },
   { group: 'Contrôles', key: 'input.doubleTapTime', label: 'Double toucher : délai max', min: 0.15, max: 0.7, step: 0.05, unit: 's' },
   { group: 'Contrôles', key: 'input.doubleTapDistance', label: 'Double toucher : écart max', min: 10, max: 150, step: 5, unit: 'px' },
+  { group: 'Contrôles', key: 'input.doubleTapMargin', label: 'Double toucher : marge autour d’un produit', min: 0, max: 150, step: 5, unit: 'px' },
   { group: 'Contrôles', key: 'input.stickDeadZone', label: 'Zone morte du stick', min: 0, max: 0.6, step: 0.02 },
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },

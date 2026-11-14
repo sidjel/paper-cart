@@ -36,13 +36,15 @@ npm run preview      # sert la version construite
 | Dossier | Rôle |
 |---|---|
 | `src/core/` | Logique de jeu pure (sans affichage), testée |
-| `src/scene/` | Décor, zone de marche, personnage, projection à l'écran |
-| `src/ui/` | Interface : réglages, diagnostic, menus |
+| `src/scene/` | Décor, calques, caméra, personnage, objets, produits, projection à l'écran |
+| `src/ui/` | Interface : HUD, réglages, Panier et cartes, diagnostic |
 | `src/input/` | Clavier, souris, manette, tactile → actions |
-| `src/data/` | Contenu en JSON (lieux, personnages…) |
+| `src/audio/` | Sons et musique (synthétisés) |
+| `src/data/` | Contenu en JSON (lieu, personnage, produits, musique) |
 | `src/config.js` | Toutes les valeurs réglables |
 | `public/art/` | Images du jeu |
-| `docs/` | Vision, journal des séances |
+| `tests/` | Tests de la logique (`unit/`) et dans le navigateur (`e2e/`) |
+| `docs/` | `VISION.md` (le jeu), `PROTOTYPES.md` (le plan), `ARCHITECTURE.md` (la technique), `JOURNAL.md` (les séances), `SUIVI.md` (les demandes de l'auteur), `archive/` (ancien projet, réserve d'idées) |
 
 ## Licence
 

@@ -58,86 +58,7 @@ Mis à jour à chaque séance. États : ✅ fait · 🔧 à faire · 👀 fait, 
 | Chargement du lieu : 8,2 s sur le téléphone | 5 | 👀 | Séance 6 : 1,4 s au rechargement (le décor du fond prend 0,44 s). Les 8 s venaient sans doute du premier téléchargement. À surveiller quand les vrais dessins arriveront. |
 | Son : latence de sortie 176 ms sur le téléphone | 6 | 👀 | Les pas peuvent sonner un peu en retard. À vérifier au ressenti. |
 
-## Points techniques à corriger (en attente des tests T0–T2)
-| Constat | Source | État |
-|---|---|---|
-| Le personnage est redessiné pixel par pixel à chaque image, même immobile (respiration, rebond, retournement appliqués à un élément sans calque propre) | Comptages du navigateur de test (organisation du rendu) | 👀 Séance 14 : **réfuté comme cause sur le téléphone**. « Réduire les animations » n'améliore rien en marche (caméra fixe ×1,50, marge 0,91–2,46 ; caméra mobile ×1,30, marge 1,06–1,60). Pas prioritaire. Effet à l'arrêt non mesuré. |
-| La poussière est redessinée à chaque image tant qu'elle est visible | Comptages du navigateur de test | 👀 Même conclusion (testée avec les animations dans T1) |
-| Rayon de premier plan transparent : très coûteux quand la caméra bouge | **Téléphone**, test rapide 11f9d39 | ✅ Démontré : l'enlever divise par 2,2 les images lentes en caméra mobile (×0,45, marge 0,34–0,59 ; images > 33 ms : 11 → 2). Décision de l'auteur attendue (aspect visuel). |
-| Rayons lointains dessinés sur toute une bande (3600×470) alors qu'on ne les voit que par deux ouvertures | Lecture du code + surface dessinée dans le navigateur de test | ❌ Séance 16 : **optimisation rejetée**. T3 sur le téléphone : caméra mobile ×1,30 d'images lentes (marge 1,05–1,59, blocs sans chevauchement), images > 33 ms 10 → 20. Code revenu à 1543360 (commit 859e158). |
-| Observation (non traitée) : fond de page et calque de l'interface comptent pour environ 1,36 écran de surface dessinée par image (navigateur de test) | Journal du moteur | ❓ À étudier plus tard, seulement avec l'accord de l'auteur |
-| Pics rares de calcul du jeu (14 à 22 ms, objectif ≤ 8 ms) | Téléphone | 🔧 Cause inconnue, à étudier séparément |
-| Le rapport affiche toujours « écran maintenu allumé : non » : le maintien est relâché avant d'écrire le rapport (erreur du rapport, pas forcément du maintien) | Lecture du code | 🔧 Petite correction du rapport, à faire avec l'accord de l'auteur |
-
-## Investigation de la caméra (séance 16, sans modification)
-| Piste | Confiance | Test proposé |
-|---|---|---|
-| La caméra oblige à recomposer tout l'écran à chaque image | Démontré (×5,7 à ×6,3) | — |
-| Le rayon de devant (opacité 0,55, parallaxe 1,25, boîte de 4300×1080 pour une image de 300 px de haut) | Démontré qu'il pèse ; quelle propriété : inconnu | Variantes : opaque / 0,55 / invisible ; boîte ajustée à l'image |
-| Effet non linéaire (fréquence de la carte graphique, rythme du pipeline) : T1 et T3 retirent du travail et dégradent tous deux d'environ ×1,3 | Faible à moyenne | Traçage sur le téléphone |
-| Nombre de calques qui bougent | Faible | Variante « parallaxe coupée » |
-| Surface cachée (fond de page, bande lointaine sous le décor) | Faible (T3 ne l'a pas confirmée, mais T3 ajoutait aussi deux calques) | Variante « sans rayons lointains » |
-| Calcul, mise en page, redessin, ménage mémoire | Écarté (mesures) | — |
-
-## Appareil de référence et conditions de test
-- OPPO Reno2 (CPH1907), Qualcomm SDM730G (Snapdragon 730G), Android 11, ColorOS 11.1, 8 Go de RAM. Le navigateur annonce « Android 10 » : c'est normal, Chrome fige cette information.
-- Séance 17 : l'auteur active le **mode haute performance** et l'**extension de RAM** (8 Go + 3 Go pris sur le stockage), puis redémarre. Les tests suivants sont donc faits dans des conditions différentes des précédents (séances 10 à 16, mode normal).
-
-## Résultat clé (séances 17 et 18)
-| Test rapide, caméra mobile (B-T0) | Images > 20 ms/min | > 33 ms | Calcul pire |
-|---|---|---|---|
-| Mode normal, avant redémarrage (séances 14, 16) | 137,6 et 132,6 | 11 et 10 | 17,5 et 13,9 ms |
-| Haute performance, après redémarrage + extension de RAM (séance 17) | 0,8 | 0 | 4,3 ms |
-| **Mode normal, après redémarrage + extension de RAM (séance 18)** | **10,0** | **0** | **5,8 ms** |
-
-- **En mode normal, après le redémarrage, les trois objectifs sont atteints** (60,8 i/s, aucune image > 33 ms, calcul ≤ 8 ms). Il reste environ 10 images ratées par minute quand la caméra bouge (0,3 % des images).
-- Le mode haute performance n'explique qu'une petite partie (10 → 0,8). L'essentiel du gain (≈ 130 → 10) vient d'un autre changement : redémarrage (le plus probable), extension de RAM, ou état du téléphone avant redémarrage. Non démontré.
-- « Réduire les animations » dégrade la caméra mobile en mode normal (×2,42, démontré ; ×1,30 en séance 14), mais pas en haute performance. Cela va dans le sens d'un effet de la gestion d'énergie : moins de travail, fréquence plus basse.
-- Les mesures des séances 10 à 16 ont probablement été prises dans un état dégradé du téléphone : leurs valeurs absolues sont à relativiser.
-- **PixiJS non justifié. Aucune optimisation nécessaire pour atteindre les objectifs dans l'état actuel.**
-
-## Campagne de vérification (séance 19, téléphone dans son état actuel)
-Demandée par l'auteur : refaire T1, T2, T3 dans l'état actuel (après redémarrage), et séparer les deux effets de l'ancien T3. Tout en caméra mobile, variantes alternées, 6 tours (≈ 15 min), rien de changé dans le jeu.
-| Variante | Rayons lointains | Isole |
-|---|---|---|
-| T0 | bande entière (jeu) | référence |
-| T1 | — | animations réduites |
-| T2 | — | rayon de devant invisible |
-| F0 | aucun (diagnostic) | surface en moins (et un calque en moins), sans calque ajouté |
-| F1 | 2 fenêtres en calques à part | ancien T3 |
-| F2 | bande + 2 fenêtres en calques à part | coût de 2 calques ajoutés, surface inchangée |
-| F3 | 2 fenêtres dessinées dans le décor | surface en moins sans calque ajouté, mais décor redessiné aux ouvertures à chaque mouvement |
-État : ✅ faite (séance 20). Résultats ci-dessous ; A2 pas encore validée.
-
-**Résultats (aa84366, mode normal, débranché 42 → 37 %, plein écran)** — images > 20 ms par minute (blocs min–max) / > 33 ms / > 50 ms :
-T0 101,8 (70–143) / 3 / 0 · T1 120,1 / 4 / 0 · **T2 32,2 (20–43) / 0 / 0** · **F0 66,2 (53–93) / 3 / 0** · F1 143,4 / 18 / 6 · F2 136,8 / 16 / 6 · F3 125,6 / 41 / 21.
-- Démontré : rayon de devant invisible ×0,32 ; sans rayons lointains ×0,65 ; deux calques ajoutés ×1,34 ; ancien T3 ×1,41 (confirmé) ; fenêtres dessinées dans le décor ×1,23, avec beaucoup d'images > 33 et > 50 ms.
-- Non démontré : animations (×1,18, marge 0,97–1,44) ; retirer la bande quand les fenêtres existent (×1,05).
-- **La dégradation de l'ancien T3 venait des deux calques ajoutés, pas de la réduction de surface.**
-- **L'état du téléphone est revenu dégradé** (T0 ≈ 100/min contre 10/min 1 h 30 plus tôt) : le redémarrage n'est pas une solution durable.
-
-## Campagne « rayon de devant » (séance 21)
-Choix de l'auteur : variantes A (T0, T2, G1, G4, G2) ; retrait du code des variantes F1 à F3 ; indice de vitesse du téléphone ajouté aux rapports.
-| Variante | Ce qui change | Visible ? | Navigateur de test (organisation) |
-|---|---|---|---|
-| T0 | rien | — | calque 4300×1080, 3,39 écrans dessinés/image |
-| T2 | rayon de devant invisible | oui (test) | — |
-| G1 | calque réduit à la taille de l'image | **non** (même image vérifiée) | calque 4300×300, 3,37 écrans |
-| G4 | comme G1, moitié de hauteur | oui (un peu) | calque 4300×150, 3,23 écrans |
-| G2 | rayon de devant opaque | oui | 3,38 écrans |
-Prévisions (non démontrées) : opacité 0,35 ou 0,20 ≈ 0,55 en coût (écartées) ; parallaxe moins forte sans effet (G3 retirée) ; intégrer le rayon au décor impossible (il passe devant le personnage).
-**Résultats (séance 23, 18874a6, batterie 25 → 22 %, vitesse du téléphone 4,3 ms au début comme à la fin)** — images > 20 ms par minute : T0 85,1 · T2 31,7 · G1 92,9 · G4 63,4 · G2 93,4.
-- Démontré : T2 ×0,37 (troisième fois) ; **G4 (moitié de hauteur) contre G1 ×0,68** : la surface dessinée du rayon de devant compte.
-- Non démontré : G1 ×1,09 (réduire la boîte du calque n'aide pas) ; G2 ×1,10 (la transparence n'est pas ce qui coûte).
-- Constat : par pixel d'écran, le rayon de devant coûte bien plus cher que la bande des rayons lointains. Cause inconnue ; pistes : il glisse plus vite (×1,25) et doit faire dessiner plus vite les morceaux qui apparaissent ; il est dessiné en dernier, par-dessus le personnage.
-- Ma prévision « parallaxe sans effet » est donc remise en question.
-
-**Campagne n° 2 (séance 24)** : choix de l'auteur A. Variantes T0, G4 (moitié haute), G3 (glisse à la vitesse du sol) ; 8 tours (≈ 8 min 30, 144 s par variante). G5 (« image directe ») abandonnée avant mesure : le navigateur de test montre que l'image reste redessinée par morceaux (≈ 14/s, contre ≈ 15/s en T0), donc elle ne testerait rien. Constat du navigateur de test : le rayon de devant est redessiné par morceaux pendant que la caméra bouge (≈ 15/s ; ≈ 4/s pour la moitié haute). **Résultats (séance 25, 00fd429, batterie 57 → 55 %, indice de vitesse 4,1 → 4,3 ms : téléphone « en bon état » selon la règle)** — images > 20 ms/min : T0 98,0 (87–110), > 33 ms : 7 · G4 68,8 (57–83), > 33 ms : 3, > 50 ms : 1 · G3 128,9 (103–157), > 33 ms : 15.
-- Démontré et reproduit : moitié haute ×0,70 (0,58–0,86) ; deuxième fois après ×0,68.
-- Démontré : glisser à la vitesse du sol **dégrade** (×1,31, 1,11–1,56). L'hypothèse « il coûte parce qu'il glisse plus vite » est réfutée.
-- Objectifs, téléphone en bon état : **non atteints**, ni en T0 (59,3 i/s, 7 images > 33 ms, calcul pire 13,8 ms) ni en G4.
-
-**Décision de l'auteur sur l'objectif « aucune image > 33 ms »** : le garder, mais le juger avec le téléphone en bon état (batterie > 50 %, indice de vitesse comparable). Inscrit dans CLAUDE.md.
+Historique détaillé de l'enquête sur la fluidité (séances 11 à 26 : appareil, conditions, campagnes, résultats) : **annexe en bas de docs/JOURNAL.md**.
 
 ## Réflexion pour plus tard : un rendu « intelligent » de la profondeur
 Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert la profondeur et la direction artistique sans calculer les surfaces invisibles. Principes, à confirmer par les mesures avant toute construction :
@@ -160,7 +81,15 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Réponse comprise dans chaque piste. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
 | Interaction avec les cartes dans le Panier | 28 | 👀 | Normal pour l'instant : le prototype A vérifie seulement « scanner est agréable ». Les cartes serviront au combat (prototype B). |
-| Utilité du caddie, pouvoir le pousser | 28 | ❓ | 3 pistes proposées (décor seulement, le pousser, le caddie devient le Panier). Mécanique à construire après le prototype A au plus tôt. |
+| Utilité du caddie, pouvoir le pousser | 28 | ❓ | **Séance 29 : le caddie devient une étape à part, après A4 et avant le combat** (docs/PROTOTYPES.md). Son contenu reste à choisir (pistes de la séance 28 : le pousser, ou le caddie qui devient le Panier). |
+| Style des décors | 29 | ❓ | L'auteur pense au **crayon de couleur**, comme le personnage principal. À confirmer et à tester (prototype D). |
+
+## Documentation et architecture (séance 29)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Audit de l'architecture, comparaison avec l'ancien ARCHITECTURE.md de Maxi-Gouffre | 29 | ✅ | Organisation validée : docs/ARCHITECTURE.md (créé), docs/PROTOTYPES.md (plan recopié tel quel), ancien document en archive, SUIVI allégé. |
+| Outils de mesure peut-être obsolètes (diagnostic en 4 configurations, campagne DEVANT2) | 29 | ❓ | Gardés pour l'instant. Garder ou retirer : décision de l'auteur (docs/ARCHITECTURE.md §7). |
+| Découper src/main.js (≈ 700 lignes) | 29 | 🔧 | À la prochaine séance qui le touche beaucoup (A4 probablement). |
 
 ## Interface
 | Demande | Séance | État | Notes |
@@ -171,6 +100,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).
 - Noter tous les changements et modifications pour ne pas se perdre : ce fichier (séance 4).
 - Garder toutes les options dans le menu des réglages, même validées (séances 5 et 7).
+- Économiser la lecture : ne pas relire à chaque fois de gros documents ; documentation courte et à jour avec le code (séance 29).
 
 ## Questions de l'auteur (réponses données)
 - Faut-il dessiner les personnages avant l'étape suivante ? Non : les dessins arrivent au prototype D, préparé une séance à l'avance avec docs/IMAGES.md (séance 5).

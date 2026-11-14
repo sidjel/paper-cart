@@ -3,7 +3,9 @@
 //
 // Déroulé : lever la douchette → laser (bip) → le produit se dissout (aspiration) → la carte apparaît.
 
-// Produits scannables : [{ x, scanned, loose?, z? }].
+// Produits scannables (logique) : [{ x, scanned, loose, z, standAt, y, w, h }].
+//  x, z : place au sol (z seulement pour les produits posés ailleurs) ; y, w, h : leur dessin sur la scène
+//  (bas, largeur, hauteur), pour savoir si un toucher tombe dessus ; standAt : où se placer pour le scanner.
 //  - sur l'étagère du fond (loose absent) : on les scanne depuis le pied de l'étagère (z ≥ minDepth),
 //    à moins de `range` le long du rayon ;
 //  - posés ailleurs (loose : table, caddie…, à la profondeur z) : à moins de looseRange le long du
@@ -36,7 +38,7 @@ export function nearestProduct(shelf, hero, p) {
 
 // Produit de l'étagère du fond visé par un double toucher : le non scanné le plus proche de x
 // (à tolérance près), ou -1. (Les produits posés ailleurs se visent en touchant leur dessin.)
-export function productNear(shelf, x, tolerance) {
+export function shelfProductNear(shelf, x, tolerance) {
   let best = -1;
   let bestD = Infinity;
   for (let i = 0; i < shelf.length; i++) {
@@ -67,6 +69,45 @@ export function standSpot(item, hero) {
     }
   }
   return best;
+}
+
+// ---------- Double toucher : viser un produit, s'en approcher, le scanner à l'arrivée ----------
+
+// Produit visé par un double toucher au point (sx, sy) de la scène (wx : le même point dans le monde).
+// D'abord un produit posé ailleurs dont on touche le dessin (avec une marge pour le doigt),
+// sinon le produit de l'étagère le plus proche le long du rayon. Renvoie -1 si aucun.
+export function pickTapped(items, sx, sy, wx, margin, p) {
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (!it.loose || it.scanned) continue;
+    if (Math.abs(sx - it.x) <= it.w / 2 + margin && sy <= it.y + margin && sy >= it.y - it.h - margin) return i;
+  }
+  return shelfProductNear(items, wx, p.range);
+}
+
+const FAR = 1e6; // « tout au fond » : ramené ensuite au bord de la zone de marche
+
+// Où aller pour scanner ce produit. Posé ailleurs : l'endroit prévu le plus proche (à côté : de profil ;
+// derrière : de face). Sur l'étagère : devant lui, en gardant sa profondeur si l'on est déjà au pied de
+// l'étagère, sinon tout au fond de la zone. Écrit le point dans out { x, z }.
+export function approachPoint(item, hero, p, out) {
+  if (item.loose) {
+    const [x, z] = standSpot(item, hero);
+    out.x = x;
+    out.z = z;
+  } else {
+    out.x = item.x;
+    out.z = hero.z >= p.minDepth ? hero.z : FAR;
+  }
+  return out;
+}
+
+// Pendant l'approche : 'scan' à l'arrivée si le produit est à portée, 'cancel' si le joueur reprend
+// la main (moved) ou si l'on arrive hors de portée, '' sinon.
+export function approachStep(items, index, hero, moved, p) {
+  if (moved) return 'cancel';
+  if (hero.hasTarget) return '';
+  return inReach(items, index, hero, p) ? 'scan' : 'cancel';
 }
 
 const PHASES = ['raise', 'laser', 'dissolve', 'card'];

@@ -5,7 +5,7 @@
 - Claude code, teste, propose. Il ne décide jamais seul d'une règle qui change l'expérience de jeu.
 
 ## Une séance
-1. Relire docs/VISION.md, ce fichier, le dernier rapport dans docs/JOURNAL.md et docs/SUIVI.md.
+1. Relire ce fichier, docs/VISION.md, **seulement le dernier rapport** en tête de docs/JOURNAL.md et les points ouverts de docs/SUIVI.md. Selon la tâche, et seulement la partie utile : docs/PROTOTYPES.md (l'étape en cours), docs/ARCHITECTURE.md (avant de toucher au code : le résumé, puis la section concernée). Ne pas relire les gros documents en entier sans raison.
 2. Annoncer en 3 à 5 lignes : **ce que le joueur va pouvoir ressentir de nouveau** (pas seulement ce qui sera codé), et ce qui va être construit. Puis enchaîner sans attendre, sauf question bloquante.
 3. Chaque séance produit une **amélioration perceptible par le joueur**, pas seulement une amélioration du code. Le travail technique sert une expérience que l'auteur peut observer.
 4. Finir avec une version JOUABLE, vérifiée (tests verts, aucune erreur console, captures en taille PC et en taille téléphone simulée), poussée sur `main` et publiée.
@@ -56,19 +56,20 @@
 - Le **diagnostic intégré** (touche F3 ou bouton « DBG ») affiche images/s, pire image, temps de calcul, mémoire, et propose un bouton « Copier le rapport » : un **résumé court** (quelques milliers de caractères au plus), facile à coller dans la conversation.
 - Le navigateur de test tourne sans carte graphique : ses **temps sont faux** et ne servent **jamais** à décider d'un correctif. Il sert à vérifier que le jeu marche, et à compter (voir plus bas). Seuls les chiffres du vrai téléphone comptent.
 - **Banc d'essai** (Options → Diagnostic) : le personnage parcourt tout seul chaque lieu, toujours de la même façon (même trajet, même vitesse, même caméra, mêmes actions, graine fixe). Il commence par une courte chauffe et répète le parcours plusieurs fois. À la fin, le résumé s'affiche, prêt à copier : images/s moyennes, **95e percentile** des temps d'image, **nombre d'images au-delà de 33 ms**, et temps de calcul JavaScript séparé du temps d'image total. Une moyenne seule ne prouve jamais que le jeu est fluide. Des **interrupteurs d'essai** prévus d'avance permettent de rejouer le même parcours avec ou sans une option (effet, calque, résolution…). Deux rapports se comparent alors vraiment : seule la version du jeu change.
-- **Test automatique des comptages** (Playwright), avec une limite par lieu, qui échoue si une modification la dépasse. On compte ce qui ne dépend pas de la machine : éléments affichés et calques, surface d'image affichée (pixels qui se recouvrent pour rien), canevas créés en jeu, objets créés à chaque image, images décodées en même temps, lectures de pixels.
+- **Test automatique des comptages** (Playwright), avec une limite par lieu, qui échoue si une modification la dépasse. On compte ce qui ne dépend pas de la machine : éléments affichés et calques, images visibles et chargées (et leur surface en mémoire), surface d'image affichée (pixels qui se recouvrent pour rien), éléments et canevas créés pendant le jeu, lectures de pixels, objets du décor qui changent de calque (liste exacte : docs/ARCHITECTURE.md §6). Les objets JavaScript créés à chaque image ne sont pas comptés : on les évite à la relecture du code.
 - Pour une saccade sans cause visible après banc d'essai et comptages : traçage système d'Android (Options pour les développeurs → Traçage système, fichier envoyé à Claude) ou débogage à distance de Chrome par USB depuis le PC. Seulement dans ce cas.
 - **Mesurer avant de supposer** : pour un problème de fluidité, d'abord une mesure qui prouve la cause, ensuite la correction, après accord, une chose à la fois. Comparer avant/après sur le téléphone.
 - Préférer des règles posées une fois (« pas de canevas créé en jeu », « travail lourd découpé ») aux correctifs au cas par cas.
 
 ## Images
-- Les images de l'auteur suivent le **cahier des charges des images** (docs/IMAGES.md). On adapte les images au jeu, pas le jeu à chaque image.
+- Les images de l'auteur suivent le **cahier des charges des images** (docs/IMAGES.md, **à rédiger et faire valider avant le prototype D** ; méthode de l'auteur dans docs/PROTOTYPES.md). On adapte les images au jeu, pas le jeu à chaque image.
 - Toute police, image ou son intégré est inscrit dans `CREDITS.md` (auteur, source, licence), car le jeu est destiné à la vente.
-- Un **seul outil de conversion** (tools/) transforme les dessins fournis au format du jeu (détourage, rognage, taille, WebP). Pas un script par image.
+- Un **seul outil de conversion** (tools/, **à créer avant le prototype D**) transforme les dessins fournis au format du jeu (détourage, rognage, taille, WebP). Pas un script par image.
 - Pas de production de contenu (plusieurs lieux, beaucoup de cartes) avant que le style soit validé sur un lieu d'essai.
 
 ## Règles
-- Code mort retiré dès qu'une idée est abandonnée.
+- Code mort retiré dès qu'une idée est abandonnée (pour les outils de mesure : avec l'accord de l'auteur, voir docs/ARCHITECTURE.md §7).
+- Organisation technique et règles de code : docs/ARCHITECTURE.md. Une logique de jeu, même petite, va dans `src/core/` avec ses tests.
 - Décisions de jeu (nouvelle règle, effet, équilibrage, contenu narratif) : proposer 2 ou 3 options courtes, l'auteur choisit.
 - Détails mineurs (interface, technique) : choisir l'option la plus simple et le noter dans le rapport.
 - Toutes les valeurs réglables dans src/config.js et exposées dans le panneau de réglages en jeu.

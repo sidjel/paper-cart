@@ -353,8 +353,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .bench-banner[hidden] { display: none; }
 
 /* ---------- Scanner : produits, repère, laser, confettis ---------- */
-.shelf-product { position: absolute; left: 0; top: 0; display: block; pointer-events: none; transform-origin: 50% 100%; }
-.shelf-product[hidden] { display: none; }
+.product { position: absolute; left: 0; top: 0; display: block; pointer-events: none; transform-origin: 50% 100%; }
+.product[hidden] { display: none; }
 .scan-marker {
   position: absolute;
   left: 0;

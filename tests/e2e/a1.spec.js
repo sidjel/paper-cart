@@ -378,7 +378,7 @@ test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, 
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
   await expect(page.locator('.panier-count')).toHaveText('1');
   // Le produit a disparu de l'étagère et n'est plus à portée.
-  expect((await page.evaluate(() => window.paperCart.shelf()))[0].scanned).toBe(true);
+  expect((await page.evaluate(() => window.paperCart.products()))[0].scanned).toBe(true);
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(-1);
   // Le Panier s'ouvre (I) et montre la carte, avec son stade.
   await page.keyboard.press('KeyI');
@@ -411,7 +411,7 @@ test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne',
 
 // Centre d'un produit de l'étagère à l'écran.
 async function productCenter(page, index) {
-  const r = await page.locator('.shelf-product').nth(index).boundingBox();
+  const r = await page.locator('.product').nth(index).boundingBox();
   return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
 }
 
@@ -425,7 +425,7 @@ test('A3 au doigt : un double toucher sur un produit lointain y emmène le perso
   const h = await hero(page);
   expect(Math.abs(h.x - 1000)).toBeLessThanOrEqual(150);
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards.length, { timeout: 5000 }).toBe(1);
-  expect((await page.evaluate(() => window.paperCart.shelf()))[2].scanned).toBe(true);
+  expect((await page.evaluate(() => window.paperCart.products()))[2].scanned).toBe(true);
 });
 
 test('A3 au doigt : un simple toucher sur un produit ne le scanne pas', async ({ page }, info) => {
@@ -456,8 +456,8 @@ test('A3 à la souris : double clic sur un produit, puis le clavier annule une a
 });
 
 test('Essai : scanner la boîte d’œufs dans le caddie, de profil (double toucher ou double clic)', async ({ page }, info) => {
-  const n = await page.locator('.shelf-product').count();
-  const eggs = page.locator('.shelf-product').nth(n - 1); // le dernier produit : les œufs du caddie
+  const n = await page.locator('.product').count();
+  const eggs = page.locator('.product').nth(n - 1); // le dernier produit : les œufs du caddie
   const r = await eggs.boundingBox();
   const c = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
   if (info.project.name === 'telephone') {
