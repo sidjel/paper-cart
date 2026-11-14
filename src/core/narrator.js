@@ -34,6 +34,7 @@ export function createNarrator() {
     shown: 0, // nombre de lettres visibles
     hold: 0, // temps restant affiché une fois le texte complet
     idle: 0, // inactivité
+    asideOk: true, // le héros peut faire un aparté (à l'arrêt, sans scanner) : fixé par le jeu à chaque image
   };
 }
 
@@ -46,7 +47,7 @@ export function narrate(n, data, trigger, p) {
   const tr = data.triggers[trigger];
   if (!tr || !p.enabled) return null;
   const voice = voiceOf(tr);
-  if (voice === HERO && !p.asides) return null;
+  if (voice === HERO && (!p.asides || !n.asideOk)) return null; // aparté : seulement si le héros est disponible
   const count = (n.seen[trigger] = (n.seen[trigger] ?? 0) + 1);
   if (tr.once && n.done[trigger]) return null;
   const from = tr.from ?? 1;

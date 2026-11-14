@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), sinon le haut-parleur (il vouvoie le « client »). once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md).",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), sinon le haut-parleur (il vouvoie le « client »). once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face.",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -52,7 +52,7 @@
     },
     "aparte_panier": {
       "voice": "heros",
-      "comment": "ouverture du Panier, après la première"
+      "comment": "fermeture du Panier, après la première ouverture"
     },
     "parle_seul": {
       "follows": "@heros",
@@ -146,27 +146,32 @@
     {
       "id": "aparte_accueil_1",
       "trigger": "aparte_accueil",
-      "text": "[TEMP] Psst… mon Épaisseur ? Tu es là, là-haut ? Ne me laisse pas tout seul ici."
+      "text": "[TEMP] Psst… mon Épaisseur ? Tu es là, là-haut ? Ne me laisse pas tout seul ici.",
+      "emotion": "inquiet"
     },
     {
       "id": "aparte_vide_1",
       "trigger": "aparte_vide",
-      "text": "[TEMP] Toi qui vois d'en haut… pourquoi tu me fais scanner le vide ?"
+      "text": "[TEMP] Toi qui vois d'en haut… pourquoi tu me fais scanner le vide ?",
+      "emotion": "blase"
     },
     {
       "id": "aparte_inactif_1",
       "trigger": "aparte_inactivite",
-      "text": "[TEMP] Hé, mon Épaisseur… tu es toujours là ? Je n'aime pas rester planté au milieu du rayon."
+      "text": "[TEMP] Hé, mon Épaisseur… tu es toujours là ? Je n'aime pas rester planté au milieu du rayon.",
+      "emotion": "inquiet"
     },
     {
       "id": "aparte_inactif_2",
       "trigger": "aparte_inactivite",
-      "text": "[TEMP] Toi, là-haut : c'est par où, la sortie ? Tu vois mieux que moi."
+      "text": "[TEMP] Toi, là-haut : c'est par où, la sortie ? Tu vois mieux que moi.",
+      "emotion": "complice"
     },
     {
       "id": "aparte_panier_1",
       "trigger": "aparte_panier",
-      "text": "[TEMP] Tout ça, c'est nous qui l'avons pris, hein, toi et moi. Pas moi tout seul. Je dis ça pour la Caisse."
+      "text": "[TEMP] Tout ça, c'est nous qui l'avons pris, hein, toi et moi. Pas moi tout seul. Je dis ça pour la Caisse.",
+      "emotion": "complice"
     },
     {
       "id": "parle_seul_1",

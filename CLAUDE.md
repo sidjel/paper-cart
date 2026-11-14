@@ -13,7 +13,7 @@
 4. Finir avec une version JOUABLE, vérifiée (tests verts, aucune erreur console, captures en taille PC et en taille téléphone simulée), poussée sur `main` et publiée.
 5. Écrire le rapport (voir plus bas), copié en tête de docs/JOURNAL.md.
 6. Mettre à jour **docs/SUIVI.md** : chaque demande ou remarque de l'auteur y est notée avec son état (fait, à faire, à revoir, décision en attente), pour ne rien perdre.
-7. **Terminer chaque réponse de fin de séance (et chaque fin de conversation) par le lien pour jouer** : https://sidjel.github.io/paper-cart/
+7. **Terminer chaque réponse de fin de séance (et chaque fin de conversation) par le lien pour jouer, avec la version** : `https://sidjel.github.io/paper-cart/?v=<identifiant court du commit publié>` (exemple : `?v=f11feb1`), pour être sûr de jouer à la bonne version (décision de l'auteur, séance 37).
 
 ## Git
 - On travaille directement sur `main` : chaque push publie le jeu, que l'auteur teste aussitôt sur son téléphone.
@@ -39,7 +39,7 @@
 - Décisions prises seul (détails mineurs uniquement) et pourquoi.
 - Ce que l'auteur doit préparer pour la suite (dessins, sons, textes), seulement si c'est utile maintenant, avec le format exact.
 - Proposition pour la séance suivante (une seule).
-- Le lien pour jouer : https://sidjel.github.io/paper-cart/
+- Le lien pour jouer, avec la version : https://sidjel.github.io/paper-cart/?v=<commit>
 
 ## Progression par étapes
 - Chaque prototype se construit en petites étapes, chacune jouable et commitée avant la suivante.

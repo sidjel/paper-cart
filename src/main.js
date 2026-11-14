@@ -8,11 +8,13 @@ import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
-import { createBasket, addToBasket } from './core/cards.js';
+import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
+import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
 import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker } from './core/narrator.js';
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
+import { createAsideFx } from './ui/aside.js';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -72,7 +74,7 @@ let loadedImages = null;
 let productState = null; // produits à scanner (logique, voir core/scan.js)
 const scan = createScan();
 const basket = createBasket();
-const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back') });
+const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects });
 const flyingCard = createFlyingCard(uiEl);
 const tip = { x: 0, y: 0 }; // bout de la Scanette sur la scène
 const cardFrom = { x: 0, y: 0 };
@@ -103,8 +105,27 @@ function tryScan() {
 function tryScanProduct(i) {
   pendingScan = -1;
   const why = scanBlocked(gear, basket.cards.length, config.carry);
-  if (why) say(BLOCKED_LINE[why]);
+  if (why === 'plein') chooseCardToDrop(i);
+  else if (why) say(BLOCKED_LINE[why]);
   else scanProduct(i);
+}
+
+// Panier plein (choix B de l'auteur) : on repose une carte pour faire de la place, puis on scanne ;
+// ou on annule. [TEMP] La carte reposée est abandonnée.
+let dropFor = -1;
+function chooseCardToDrop(i) {
+  dropFor = i;
+  say('panier_plein');
+  sm.go('panier');
+  basketUi.open((uid) => {
+    removeFromBasket(basket, uid);
+    basketUi.remove(uid);
+    basketUi.setCount(basket.cards.length);
+    const target = dropFor;
+    dropFor = -1;
+    sm.go('play');
+    scanProduct(target);
+  });
 }
 
 // Prendre une Scanette ou un panier au présentoir.
@@ -115,6 +136,7 @@ function takePickup(k) {
   if (!takeItem(gear, pickupState, k)) return;
   sprite.setHeld(it.id, true);
   if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
+  basketUi.addObject(it.id);
   audio.play('prise');
   say(`prise_${it.id}`);
   marker.hide();
@@ -139,7 +161,12 @@ let speakerWaves = null; // ondes sous le haut-parleur qui parle
 let speaker = null; // [x, y] du haut-parleur d'où sort l'annonce en cours
 let hudLeft = Infinity; // bord gauche des boutons du haut (la bande ne passe pas dessous)
 const mouth = { x: 0, y: 0 };
-let playerActed = false; // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
+let playerActed = false;
+// Aparté : un moment rare et marquant (tête de face, zoom, bandes « cinéma », musique baissée).
+const asideFx = createAsideFx(uiEl);
+let asideP = 0; // avancement de la mise en scène (0 à 1), en temps de jeu
+const heroAside = () => narrator.line !== null && narrator.voice === 'heros';
+const ease = (p) => p * p * (3 - 2 * p); // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
 const head = { x: 0, y: 0 };
 const HEAD_HEIGHT = 330; // hauteur de la tête du héros au-dessus de ses pieds (px du dessin)
 
@@ -153,7 +180,7 @@ function say(trigger) {
 function voiceStarted() {
   const hero = narrator.voice === 'heros';
   narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion);
-  audio.play(hero ? 'froissement' : 'annonce');
+  audio.play(hero ? 'aparte' : 'annonce');
   // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
   const sp = place.speakers?.items ?? [];
   speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
@@ -161,6 +188,17 @@ function voiceStarted() {
   else speakerWaves.hide();
   hudLeft = hud.bar.getBoundingClientRect().left; // lu une fois par réplique
   if (hero && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
+}
+
+// Mise en scène de l'aparté : avance vers 1 pendant l'aparté, revient à 0 après (temps de jeu).
+function updateAside(dt) {
+  const goal = heroAside() ? 1 : 0;
+  const step = dt / Math.max(0.05, config.narrator.asideZoomTime);
+  asideP = goal > asideP ? Math.min(1, asideP + step) : Math.max(0, asideP - step);
+  const still = config.display.reduceMotion;
+  asideFx.set(asideP, config.narrator.asideDim, still);
+  stage.setZoom(still ? 1 : 1 + (config.narrator.asideZoom - 1) * ease(asideP));
+  audio.setDucked(asideP > 0);
 }
 
 // À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
@@ -197,6 +235,8 @@ function watchNarrator(dt) {
     arrived = true;
     say('arrivee');
   }
+  // Un aparté seulement si le héros est disponible : à l'arrêt, sans scanner ni se diriger quelque part.
+  narrator.asideOk = !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0;
   const active = walker.moving || scan.active || pendingScan >= 0 || playerActed;
   playerActed = false;
   if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite') || say('aparte_inactivite');
@@ -433,7 +473,8 @@ function handleAction(action) {
       setValue('audio.muted', !config.audio.muted);
       break;
     case 'action':
-      tryScan();
+      if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
+      else tryScan();
       break;
     case 'panier':
       if (sm.is('panier')) sm.go('play');
@@ -460,14 +501,19 @@ sm.onChange((now, before) => {
   if (before === 'menu') settings.close();
   if (now === 'panier') {
     basketUi.open();
-    say('panier') || say('aparte_panier');
+    say('panier');
   }
   if (now === 'play' && before === 'pause') say('reprise');
+  if (now === 'play' && before === 'panier') say('aparte_panier');
   if (now === 'bench') {
     silenceNarrator(narrator); // les mesures se font sans voix
     voiceLine = null;
     narratorUi.hide();
     speakerWaves.hide();
+    asideP = 0;
+    asideFx.set(0, 0, true);
+    stage.setZoom(1);
+    audio.setDucked(false);
   }
   if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
@@ -478,6 +524,10 @@ sm.onChange((now, before) => {
 function onTarget(cx, cy) {
   if (!sm.is('play')) return;
   playerActed = true;
+  if (heroAside()) {
+    skipNarrator(narrator, narratorData, config.narrator); // toucher : la réplique passe
+    return;
+  }
   pendingScan = -1;
   stage.clientToStage(cx, cy, tmpStage);
   tmpWorld.x = stageToWorldX(proj, tmpStage.x);
@@ -558,7 +608,8 @@ function render() {
   shown.scale = scaleAt(proj, z);
   shown.level = actorLevel(depthRefs, z);
   shown.time = time;
-  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active);
+  const emotion = heroAside() ? narrator.line.emotion ?? '' : '';
+  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
@@ -589,6 +640,13 @@ function render() {
     camera.x = Math.min(Math.max(0, place.size[0] - v.viewW), Math.max(0, mid - v.viewW / 2));
     camera.y = 0;
     camera.ready = true;
+  } else if (asideP > 0) {
+    // Aparté : la caméra se centre sur le héros (le zoom resserre l'image autour de lui).
+    const k = 1 - Math.exp(-12 * camDt);
+    const gx = Math.min(Math.max(0, place.size[0] - v.viewW), Math.max(0, shown.x - v.viewW / 2));
+    const gy = Math.min(Math.max(0, place.size[1] - v.viewH), Math.max(0, shown.y - 170 * shown.scale - v.viewH * 0.5));
+    camera.x += (gx - camera.x) * k;
+    camera.y += (gy - camera.y) * k;
   } else if (!camFrozen) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   stage.setCamera(camera.x, camera.y);
   if (!walker.hasTarget) marker.hide();
@@ -607,8 +665,8 @@ function frame(now) {
     const n = stepper.advance(dt / 1000);
     for (let i = 0; i < n; i++) {
       input.read(intent);
-      if (scan.active) {
-        // Pendant un scan, le personnage ne bouge pas.
+      if (scan.active || heroAside()) {
+        // Pendant un scan ou un aparté, le personnage ne bouge pas.
         intent.moveX = 0;
         intent.moveZ = 0;
       }
@@ -620,6 +678,7 @@ function frame(now) {
     const sec = Math.min(dt / 1000, 0.1);
     watchNarrator(sec);
     updateNarrator(sec);
+    updateAside(sec);
     render();
   } else if (sm.is('panier')) {
     updateNarrator(Math.min(dt / 1000, 0.1));
@@ -731,7 +790,10 @@ async function start() {
     // Tests automatiques : le héros prend tout au présentoir (Scanette et panier), sans s'y rendre.
     equip() {
       pickupState.forEach((it, k) => {
-        if (takeItem(gear, pickupState, k)) sprite.setHeld(it.id, true);
+        if (takeItem(gear, pickupState, k)) {
+          sprite.setHeld(it.id, true);
+          basketUi.addObject(it.id);
+        }
       });
       basketUi.setCapacity(capacity(gear, config.carry));
     },

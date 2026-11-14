@@ -487,6 +487,7 @@ const narr = (page) => page.evaluate(() => window.paperCart.narrator());
 
 test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la bande la complète puis la ferme', async ({ page }, info) => {
   const band = page.locator('.narrator');
+  const viewW0 = (await page.evaluate(() => window.paperCart.camera())).viewW;
   await expect(band).toBeVisible({ timeout: 4000 });
   const n1 = await narr(page);
   expect(n1.text).toContain('Client');
@@ -513,7 +514,11 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   expect(n3.voice).toBe('heros');
   expect(n3.text).toMatch(/Épaisseur/);
   expect((await hero(page)).away).toBe(false);
-  await page.waitForTimeout(1500);
+  // Mise en scène : bandes « cinéma », tête de face, la caméra zoome sur le héros.
+  await expect(page.locator('.aside-bar-top')).toBeVisible();
+  await expect(page.locator('.actor-frame:visible')).toHaveAttribute('src', /blob:/);
+  await page.waitForTimeout(1000);
+  expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeLessThan(viewW0 * 0.9);
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-aparte.png` });
   // Puis le haut-parleur croit qu'un client parle au mur.
   await expect.poll(async () => (await narr(page)).voice, { timeout: 12000 }).toBe('narrateur');
@@ -567,7 +572,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   let s = await state(page);
   expect(s.gear).toEqual({ scanette: false, panier: false });
   await expect(page.locator('.panier-button')).toBeHidden();
-  await expect(page.locator('.actor-held:not([hidden])')).toHaveCount(0);
+  await expect(page.locator('.actor-held:visible')).toHaveCount(0); // vraiment invisibles à l'écran
   // Monter vers le présentoir (début du rayon, contre l'étagère).
   await page.keyboard.down('ArrowUp');
   await expect.poll(async () => (await state(page)).pickup, { timeout: 6000 }).toBeGreaterThanOrEqual(0);
@@ -578,7 +583,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   await expect.poll(async () => (await state(page)).gear).toEqual({ scanette: true, panier: true });
   await expect(page.locator('.panier-button')).toBeVisible();
   await expect(page.locator('.panier-count')).toHaveText('0/6');
-  await expect(page.locator('.actor-held:not([hidden])')).toHaveCount(2);
+  await expect(page.locator('.actor-held:visible')).toHaveCount(2);
   await page.waitForTimeout(400);
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-accueil.png` });
 });
@@ -601,7 +606,7 @@ test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan 
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-panier.png` });
 });
 
-test('A5a : panier plein, le scan est refusé (règle provisoire)', async ({ page }, info) => {
+test('A5a : panier plein, on repose une carte pour faire de la place (choix B)', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'PC');
   await page.evaluate(() => {
     window.paperCart.equip();
@@ -613,15 +618,35 @@ test('A5a : panier plein, le scan est refusé (règle provisoire)', async ({ pag
   await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(0);
   await page.keyboard.up('ArrowUp');
   await page.keyboard.press('Enter');
-  await expect.poll(async () => (await state(page)).cards.length, { timeout: 5000 }).toBe(1);
+  await expect.poll(async () => (await state(page)).cards, { timeout: 5000 }).toEqual(['Banane']);
   await expect.poll(async () => (await state(page)).active).toBe(false);
-  // … puis le lait : refusé, le panier est plein.
+  // … puis le lait : le panier est plein, l'écran propose de reposer une carte.
   await page.keyboard.down('ArrowRight');
   await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(1);
   await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(500);
-  expect((await state(page)).active).toBe(false);
-  expect((await state(page)).cards.length).toBe(1);
+  await expect(page.locator('.panier h2')).toHaveText('Panier plein');
+  await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-plein.png` });
+  await page.locator('.panier .card').first().click();
+  await expect(page.locator('.panier')).toBeHidden();
+  await expect.poll(async () => (await state(page)).cards, { timeout: 5000 }).toEqual(['Lait']);
   await expect(page.locator('.panier-count')).toHaveText('1/1');
+});
+
+test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await page.evaluate(() => window.paperCart.equip());
+  await page.keyboard.press('KeyI');
+  const panel = page.locator('.panier');
+  await expect(panel).toBeVisible();
+  await panel.locator('.settings-tab', { hasText: 'Objets' }).click();
+  await expect(panel.locator('.panier-objects li')).toHaveCount(2);
+  await expect(panel.locator('.panier-objects')).toContainText('Scanette');
+  await expect(panel.locator('.panier-objects')).toContainText('Panier à main');
+  await expect(panel.locator('.panier-grid')).toBeHidden();
+  await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-objets.png` });
+  await panel.locator('.settings-tab', { hasText: 'Cartes' }).click();
+  await expect(panel.locator('.panier-objects')).toBeHidden();
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
 });

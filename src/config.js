@@ -48,7 +48,10 @@ export const config = {
     blipEvery: 2, // un petit bip toutes les N lettres (0 = aucun)
     // Apartés du héros (il se tourne vers l'écran et parle au joueur)
     asides: true, // le héros fait des apartés
-    asideGap: 90, // écart minimal entre deux apartés (s)
+    asideGap: 150, // écart minimal entre deux apartés (s) : un moment rare
+    asideZoom: 1.35, // zoom de la caméra sur le héros pendant un aparté (× ; 1 = aucun)
+    asideZoomTime: 0.6, // durée du zoom (entrée et sortie) (s)
+    asideDim: 0.5, // assombrissement des bords de l'écran pendant un aparté (0 à 1)
     breath: 4, // silence minimal avant un aparté (s), sauf enchaîné à une réplique
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
@@ -190,6 +193,9 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.inactivity', label: 'Remarque d’inactivité après', min: 5, max: 180, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.asides', label: 'Apartés du héros', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.asideGap', label: 'Écart minimal entre deux apartés', min: 10, max: 600, step: 10, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.asideZoom', label: 'Aparté : zoom sur le héros', min: 1, max: 2, step: 0.05, unit: '×' },
+  { group: 'Narrateur', key: 'narrator.asideZoomTime', label: 'Aparté : durée du zoom', min: 0.1, max: 2, step: 0.05, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.asideDim', label: 'Aparté : assombrissement des bords', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },

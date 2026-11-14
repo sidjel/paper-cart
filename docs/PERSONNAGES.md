@@ -19,6 +19,10 @@
 - 🧪 À TESTER : **pas omniprésent**. Garder l'effet de surprise : délais anti-répétition, répliques rares et liées au contexte.
 - 🧪 À TESTER : il nomme le héros « Client », puis « Article non référencé »… (voir `HISTOIRE.md`).
 
+## Accueil
+- **L'agent de sécurité** ✅ VALIDÉ : à l'accueil, près du portique ; rencontré banal et gentil.
+- 🧪 À TESTER : c'est le même personnage que **le Vigile Syndiqué** de l'Acte II, retrouvé plus tard en adversaire.
+
 ## Acte I
 - **Kévin, le caissier** : allié ; donne sa carte et un Mixeur.
 - **Le Vieux Monsieur** : allié ; donne Grand-Mère Perdue, puis meurt sur une flaque d'huile.

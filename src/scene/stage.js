@@ -70,18 +70,32 @@ export function createStage(container, place, images, getValue) {
     }
   }
 
-  function layout(zoom) {
-    const vw = container.clientWidth;
-    const vh = container.clientHeight;
-    const s = (vh / H) * zoom;
+  // Zoom supplémentaire (aparté) : multiplie l'échelle, sans relire la taille de la page.
+  let extra = 1;
+  let vw = 0;
+  let vh = 0;
+  let baseScale = 1;
+  function scaleTo() {
+    const s = baseScale * extra;
     view.scale = s;
     view.viewW = vw / s;
     view.viewH = vh / s;
-    // Écran plus large que tout le lieu : on centre.
     view.offX = view.viewW > W ? (vw - W * s) / 2 : 0;
     view.offY = 0;
     lastCamX = NaN;
     apply();
+  }
+  function setZoom(k) {
+    if (k === extra) return;
+    extra = k;
+    scaleTo();
+  }
+
+  function layout(zoom) {
+    vw = container.clientWidth;
+    vh = container.clientHeight;
+    baseScale = (vh / H) * zoom;
+    scaleTo();
   }
 
   // Position de la caméra (coin haut-gauche de la partie visible, en pixels de scène).
@@ -134,5 +148,5 @@ export function createStage(container, place, images, getValue) {
     applyOpacity();
   }
 
-  return { el, layers, view, layout, setCamera, clientToStage, stageToClient, applyOpacity, setLayerVariant };
+  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity, setLayerVariant };
 }

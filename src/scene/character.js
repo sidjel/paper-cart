@@ -134,6 +134,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const dosWalk = anims['dos.walk'] ?? dosIdle;
   const faceScan = anims['face.scan'] ?? faceIdle;
   const dosScan = anims['dos.scan'] ?? dosIdle;
+  // Apartés : tête de face, une image par émotion (face.aparte_<émotion>).
+  const asides = {};
+  for (const [key, a] of Object.entries(anims)) if (key.startsWith('face.aparte_')) asides[key.slice(12)] = a;
 
   // État de l'affichage (distinct de la logique : la feuille met un instant à se retourner).
   let shownFacing = 1;
@@ -191,14 +194,17 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   }
 
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
-  // scanning : Scanette levée (animation « scan » des données, si elle existe).
-  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false) {
+  // scanning : Scanette levée (animation « scan » des données, si elle existe) ;
+  // aside : émotion d'un aparté en cours ('' sinon) : il regarde le joueur, tête de face.
+  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false, aside = '') {
     const width = flipScale(time, facing, away);
     stats.flipping = flipStart >= 0;
 
-    const anim = scanning
-      ? (shownAway ? dosScan : faceScan)
-      : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
+    const anim = aside && !shownAway && asides[aside]
+      ? asides[aside]
+      : scanning
+        ? (shownAway ? dosScan : faceScan)
+        : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
     if (anim !== current) {
       current = anim;
       animStartTime = time;

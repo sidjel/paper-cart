@@ -13,6 +13,7 @@
 | A3 | ✅ validée : `630fec0` (avec double toucher ; essai de scan sur une table et dans le caddie en cours) |
 | A4 | construite (séances 32-35) ; **pas encore validée** (séance 36) : l'aparté doit devenir un moment rare et marquant (héros face caméra avec un dessin d'émotion, zoom de la caméra, effet visuel et sonore) |
 | **A5 — Accueil et caddie** | Étape ajoutée par l'auteur (séance 29), en deux temps (séance 36, `docs/GAME_DESIGN.md`) : **A5a** accueil en libre-service, Scanette et panier à main (construite séance 36, à tester) ; **A5b** jeton dans le rayon, échange du panier contre le caddie (qui suit, se gare, se reprend, change d'aspect). |
+| **Accueil — premier vrai deuxième lieu** | Étape ajoutée par l'auteur (séance 37), **après A5** : passage d'un lieu à l'autre (chargement, transition, mesures de fluidité) ; le présentoir provisoire quitte le rayon pour l'accueil (hall, portes automatiques, portique, agent de sécurité, comptoir panier → caddie). **À proposer seulement après la validation de A5.** Avant ou après le combat B : l'auteur choisira. |
 | B, C, D | à faire |
 
 Décision de l'auteur (séance 6) : **saut libre** avec un bouton, après le prototype A (voir docs/SUIVI.md).

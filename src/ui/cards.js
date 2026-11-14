@@ -31,8 +31,13 @@ export function buildCard(card, imageUrl) {
   return el;
 }
 
-// Panier : bouton dans l'interface (avec le nombre de cartes) et écran qui les montre.
-export function createBasketUi(root, { onOpen, onClose }) {
+// Panier : bouton dans l'interface (nombre de cartes / capacité) et écran à deux onglets :
+//  - « Cartes » (la liste de courses, nom provisoire) ;
+//  - « Objets » : les vrais objets portés (Scanette, panier…), pas des cartes.
+// Mode « reposer » (panier plein) : toucher une carte la repose pour faire de la place, ou annuler.
+const TEMP = /^\[TEMP\]\s*/;
+
+export function createBasketUi(root, { onOpen, onClose, objects }) {
   const button = document.createElement('button');
   button.className = 'hud-button panier-button';
   button.setAttribute('aria-label', 'Panier (I)');
@@ -52,11 +57,28 @@ export function createBasketUi(root, { onOpen, onClose }) {
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', 'Panier');
   const title = document.createElement('h2');
+  const tabs = document.createElement('div');
+  tabs.className = 'settings-tabs panier-tabs';
+  tabs.setAttribute('role', 'tablist');
+  const tabCards = document.createElement('button');
+  const tabObjects = document.createElement('button');
+  for (const [t, label] of [[tabCards, 'Cartes'], [tabObjects, 'Objets']]) {
+    t.className = 'settings-tab';
+    t.textContent = label;
+    t.setAttribute('role', 'tab');
+    t.addEventListener('click', () => showTab(t === tabCards ? 'cards' : 'objects'));
+    tabs.appendChild(t);
+  }
+  const hint = document.createElement('p');
+  hint.className = 'settings-note panier-hint';
+  hint.hidden = true;
   const grid = document.createElement('div');
   grid.className = 'panier-grid';
   const empty = document.createElement('p');
   empty.className = 'settings-note';
   empty.textContent = "Le panier est vide. Approche-toi d'un produit sur l'étagère et scanne-le avec la Scanette.";
+  const objList = document.createElement('ul');
+  objList.className = 'panier-objects';
   const close = document.createElement('button');
   close.className = 'primary';
   close.textContent = 'Fermer (Échap)';
@@ -64,11 +86,43 @@ export function createBasketUi(root, { onOpen, onClose }) {
   const row = document.createElement('div');
   row.className = 'panel-buttons';
   row.appendChild(close);
-  panel.append(title, empty, grid, row);
+  panel.append(title, tabs, hint, empty, grid, objList, row);
   root.append(button, panel);
 
   let shown = 0;
   let cap = 0;
+  let tab = 'cards';
+  let choose = null; // mode « reposer » : fonction appelée avec l'identifiant de la carte choisie
+  const owned = [];
+
+  function showTab(t) {
+    tab = choose ? 'cards' : t;
+    tabCards.setAttribute('aria-selected', tab === 'cards');
+    tabObjects.setAttribute('aria-selected', tab === 'objects');
+    tabCards.classList.toggle('active', tab === 'cards');
+    tabObjects.classList.toggle('active', tab === 'objects');
+    grid.hidden = tab !== 'cards';
+    empty.hidden = tab !== 'cards' || shown > 0;
+    objList.hidden = tab !== 'objects';
+    tabs.hidden = !!choose;
+  }
+
+  // En mode « reposer », chaque carte devient un bouton (doigt, souris, ou Entrée sur la carte).
+  function pickFrom(target) {
+    const el = target.closest('.card');
+    if (!choose || !el) return;
+    const pick = choose;
+    choose = null;
+    pick(Number(el.dataset.uid));
+  }
+  grid.addEventListener('click', (e) => pickFrom(e.target));
+  grid.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    e.stopPropagation();
+    pickFrom(e.target);
+  });
+
   return {
     button,
     // Le héros a un contenant : le bouton apparaît, avec la capacité.
@@ -79,8 +133,29 @@ export function createBasketUi(root, { onOpen, onClose }) {
     },
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {
-      grid.appendChild(buildCard(card, imageUrl));
+      const el = buildCard(card, imageUrl);
+      el.dataset.uid = card.uid;
+      el.tabIndex = 0;
+      grid.appendChild(el);
       shown++;
+    },
+    // Une carte reposée quitte l'écran.
+    remove(uid) {
+      grid.querySelector(`.card[data-uid="${uid}"]`)?.remove();
+      shown--;
+    },
+    // Un objet porté apparaît dans l'onglet « Objets » (id : clé dans data/objects.json).
+    addObject(id) {
+      const def = objects[id];
+      if (!def || owned.includes(id)) return;
+      owned.push(id);
+      const li = document.createElement('li');
+      const b = document.createElement('strong');
+      b.textContent = def.name.replace(TEMP, '');
+      const p = document.createElement('span');
+      p.textContent = def.text.replace(TEMP, '');
+      li.append(b, p);
+      objList.appendChild(li);
     },
     setCount(n) {
       count.textContent = `${n}/${cap}`;
@@ -88,14 +163,21 @@ export function createBasketUi(root, { onOpen, onClose }) {
       void button.offsetWidth; // relance la petite animation
       button.classList.add('bump');
     },
-    open() {
-      title.textContent = `Panier — ${shown} carte${shown > 1 ? 's' : ''} sur ${cap}`;
-      empty.hidden = shown > 0;
+    // onChoose(uid) : mode « reposer une carte » (panier plein) ; sans : consultation.
+    open(onChoose = null) {
+      choose = onChoose;
+      panel.classList.toggle('choosing', !!choose);
+      title.textContent = choose ? 'Panier plein' : `Panier — ${shown} carte${shown > 1 ? 's' : ''} sur ${cap}`;
+      hint.hidden = !choose;
+      hint.textContent = 'Touche une carte pour la reposer et faire de la place, ou ferme pour annuler.';
+      showTab(choose ? 'cards' : tab);
       panel.hidden = false;
-      close.focus({ preventScroll: true });
+      close.textContent = choose ? 'Annuler (Échap)' : 'Fermer (Échap)';
+      (choose ? grid.querySelector('.card') ?? close : close).focus({ preventScroll: true });
     },
     close() {
       panel.hidden = true;
+      choose = null;
     },
   };
 }

@@ -122,6 +122,14 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     expect(narrate(n, D, 'inactif', P)).toBe(null);
     expect(narrate(n, D, 'inactif', P).id).toBe('i');
   });
+  it('pas d’aparté si le héros n’est pas disponible (en marche, en train de scanner…)', () => {
+    const n = createNarrator();
+    n.t = 100;
+    n.asideOk = false;
+    expect(narrate(n, D, 'aparte_vide', P)).toBe(null);
+    n.asideOk = true;
+    expect(narrate(n, D, 'aparte_vide', P).id).toBe('hv');
+  });
   it('apartés désactivés : le héros se tait', () => {
     const n = createNarrator();
     n.t = 100;
@@ -182,6 +190,13 @@ describe('répliques du narrateur (données)', () => {
       else expect(/\b(tu|toi)\b/i.test(l.text), l.id).toBe(false);
     }
     expect(file.lines.filter((l) => file.triggers[l.trigger].voice === 'heros').length).toBeGreaterThanOrEqual(4);
+  });
+  it('chaque aparté a une émotion qui a son dessin (tête de face)', async () => {
+    const hero = (await import('../../src/data/characters/heros.json')).default;
+    for (const l of file.lines) {
+      if (file.triggers[l.trigger].voice !== 'heros') continue;
+      expect(hero.views.face[`aparte_${l.emotion}`], `${l.id} : ${l.emotion}`).toBeDefined();
+    }
   });
   it('le fil « Client » → « Article non référencé » est présent', () => {
     const all = file.lines.map((l) => l.text).join(' ');

@@ -24,3 +24,10 @@ export function addToBasket(basket, productId, def) {
   basket.cards.push(card);
   return card;
 }
+
+// Reposer une carte (panier plein) : elle quitte le panier. Renvoie la carte, ou null.
+export function removeFromBasket(basket, uid) {
+  const i = basket.cards.findIndex((c) => c.uid === uid);
+  if (i < 0) return null;
+  return basket.cards.splice(i, 1)[0];
+}

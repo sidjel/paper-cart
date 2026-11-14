@@ -1,0 +1,7 @@
+{
+  "comment": "Objets que le héros porte (onglet « Objets » du panier) : de vrais objets, pas des cartes. Textes [TEMP], à réécrire par l'auteur.",
+  "objects": {
+    "scanette": { "name": "[TEMP] Scanette", "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits en cartes." },
+    "panier": { "name": "[TEMP] Panier à main", "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir." }
+  }
+}

@@ -8,6 +8,7 @@ export function createAudio(settings, song) {
   let ctx = null;
   let master, musicBus, sfxBus, scanBus, voiceBus, heroBus, noise, music;
   let paused = false;
+  let ducked = false; // musique baissée pendant un aparté
   let hidden = false;
   let foot = 0;
 
@@ -63,7 +64,7 @@ export function createAudio(settings, song) {
     if (!ctx) return;
     const t = ctx.currentTime;
     master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, 0.03);
-    musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1), t, 0.15);
+    musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1) * (ducked ? 0.3 : 1), t, 0.15);
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
     scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
     voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
@@ -158,6 +159,25 @@ export function createAudio(settings, song) {
     }
   }
 
+  // [TEMP] Aparté : souffle grave qui monte (le temps s'arrête), puis une note basse tenue.
+  function aparte() {
+    const t = ctx.currentTime;
+    tone('sine', 55, 82, t, 0.9, 0.35, heroBus);
+    tone('triangle', 110, 110, t + 0.15, 1.1, 0.08, heroBus);
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(200, t);
+    lp.frequency.exponentialRampToValueAtTime(1400, t + 0.6);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 0.45);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+    src.connect(lp).connect(g).connect(heroBus);
+    src.start(t, 0.2, 0.85);
+  }
+
   // [TEMP] Petit bip de lettre du héros : plus grave et plus doux que celui du haut-parleur.
   let heroN = 0;
   function blipHeros() {
@@ -188,7 +208,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros };
+  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros, aparte };
 
   return {
     // Appelé au premier geste du joueur.
@@ -206,6 +226,12 @@ export function createAudio(settings, song) {
       return `${ctx.state} · ${ctx.sampleRate} Hz · réserve « ${settings.latency} » · latence ${ms(ctx.baseLatency)} + sortie ${ms(ctx.outputLatency)}`;
     },
     applyVolumes,
+    // Pendant un aparté, la musique baisse.
+    setDucked(d) {
+      if (d === ducked) return;
+      ducked = d;
+      applyVolumes();
+    },
     setState(state) {
       paused = state === 'pause';
       applyVolumes();

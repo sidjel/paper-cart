@@ -12,6 +12,37 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 37 — 15/11/2026 — Panier à deux onglets, reposer une carte, aparté refait (A4)
+
+**Décisions de l'auteur** :
+- menu du panier à deux onglets (Cartes, Objets) ;
+- panier plein : reposer une carte (B) ;
+- lien avec `?v=` en fin de message ;
+- panier en main seulement une fois pris ;
+- l'accueil, futur lieu à part, avec l'agent de sécurité (même personnage que le Vigile Syndiqué, à l'essai) ;
+- étape « L'accueil, premier vrai deuxième lieu » après A5 ;
+- A4 à refaire.
+
+**Construit (pas encore publié)**
+- **Défaut corrigé** : le style des objets tenus ignorait l'attribut « caché ». Le panier et la Scanette de dos étaient donc dessinés dès le départ. Ajout d'une règle générale : un élément caché n'est jamais affiché. Le test contrôle ce qui est vraiment visible.
+- **Panier à deux onglets** : « Cartes » et « Objets » (Scanette, Panier à main ; textes [TEMP] dans `data/objects.json`).
+- **Panier plein** : écran « Panier plein ». Toucher (ou Entrée sur) une carte la repose, puis le scan se fait. « Annuler » sinon. [TEMP] La carte reposée est abandonnée.
+- **Aparté refait** :
+  - le héros se tourne **tête de face**, avec 3 émotions [TEMP] (inquiet, complice, blasé) choisies par la réplique ;
+  - la **caméra zoome** sur lui (×1,35) ;
+  - **bandes « cinéma »** et bords assombris ;
+  - **son grave** et **musique baissée** ;
+  - le héros reste immobile, et un toucher fait passer la réplique ;
+  - plus rare (150 s entre deux apartés), et seulement quand il est à l'arrêt.
+- Documents : lien `?v=` (CLAUDE.md), accueil lieu à part (HISTOIRE, PERSONNAGES, PROTOTYPES), deux onglets et panier plein (GAME_DESIGN).
+
+**Vérifié** :
+- 112 tests de logique et 50 tests navigateur verts, sauf le test des comptages : **38 images pour une limite de 36** (déjà relevée de 32 à 36 en séance 36, et pas encore validée par l'auteur).
+- Le relèvement de la limite à 40 a été refusé par le garde-fou de l'environnement, faute d'accord de l'auteur, comme le veut notre règle.
+- **Rien n'a été publié** : le travail est gardé sur la branche de travail en attendant la décision de l'auteur.
+
+---
+
 ## Séance 36 — 15/11/2026 — La Scanette ; A5a : l'accueil en libre-service
 
 **Décisions de l'auteur** :

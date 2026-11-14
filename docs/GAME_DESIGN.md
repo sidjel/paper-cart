@@ -11,7 +11,9 @@
 - Scanner un produit le transforme en carte, qui va dans le panier. Les cartes portées forment le **deck** du joueur, ses « **courses** » (nom provisoire ; ❓ nom définitif à choisir, puis la collection ne s'appellera plus « le Panier » dans le jeu).
 - **Le contenant fixe le nombre de cartes portées** : peu dans le panier, plus dans le caddie. On ne peut pas tout garder : il faut choisir.
 - Avec une **pièce ou un jeton de caddie**, on retourne à l'accueil échanger son panier contre un **caddie**, plus grand, qui le remplace. Le jeton est un **objet d'histoire unique**, pas une monnaie (le troc reste en Papier Toilette).
-- ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ pour les essais ; [TEMP] panier = 6) ; que se passe-t-il quand le panier est plein ([TEMP] en attendant : le scan est refusé et le haut-parleur le dit) ; qui donne le jeton (voir `HISTOIRE.md`).
+- **Panier plein** ✅ VALIDÉ (séance 37, choix B) : un petit écran propose de **reposer une carte** pour faire de la place, ou d'annuler.
+- **Le menu du panier a deux onglets** ✅ VALIDÉ (séance 37, noms provisoires) : **les cartes** (la « liste de courses ») et **les objets** (de vrais objets, pas des cartes : Scanette, panier, plus tard le jeton…).
+- ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ ; [TEMP] panier = 6) ; où va une carte reposée ([TEMP] elle est abandonnée) ; qui donne le jeton (voir `HISTOIRE.md`).
 
 ## Étape A5 en deux temps ✅ VALIDÉ
 - **A5a** : l'accueil au début du rayon (présentoir de Scanettes et de paniers) ; le héros prend les deux ; le panier se porte à la main, capacité limitée.

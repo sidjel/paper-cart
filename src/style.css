@@ -15,6 +15,9 @@
 }
 
 * { box-sizing: border-box; }
+/* Règle posée une fois : un élément caché (attribut hidden) n'est jamais affiché, même si son style
+   lui donne un display (cause du panier visible dans la main avant d'être pris, séance 37). */
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -85,6 +88,7 @@ html, body {
 .actor-frame { position: absolute; left: 0; top: 0; display: block; }
 /* Objets tenus (Scanette, panier) : derrière le dessin du héros, sa main passe devant. */
 .actor-held { position: absolute; left: 0; top: 0; display: block; z-index: -1; }
+.actor-held[hidden] { display: none; }
 .actor-frame[hidden] { display: none; }
 
 .target-marker {
@@ -470,6 +474,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   touch-action: pan-y;
 }
 .panier h2 { margin: 0 0 8px; font-size: 20px; }
+.panier-tabs { margin: 0 0 10px; }
+.panier-objects { list-style: none; margin: 0; padding: 0 0 8px; display: grid; gap: 8px; }
+.panier-objects li { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--card); }
+.panier-hint { font-weight: 700; }
+.panier.choosing .card { cursor: pointer; }
+.panier.choosing .card:hover, .panier.choosing .card:focus-visible { outline: 3px solid #c0503f; outline-offset: 2px; }
 .panier-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 4px 0 8px; }
 
 /* ---------- Bouton Scanner ---------- */
@@ -586,3 +596,23 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .speaker-waves::before { left: 26px; width: 28px; height: 10px; }
 .speaker-waves::after { left: 13px; width: 54px; height: 20px; }
 .speaker-waves[hidden] { display: none; }
+
+/* Aparté : bandes « cinéma » et bords assombris (sous les boutons et la bulle). */
+.aside-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, rgb(20 16 10 / 0) 35%, rgb(20 16 10 / 0.85) 100%);
+  pointer-events: none;
+  will-change: opacity;
+}
+.aside-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 9vh;
+  background: #1c1813;
+  pointer-events: none;
+  will-change: transform;
+}
+.aside-bar-top { top: 0; }
+.aside-bar-bottom { bottom: 0; }
