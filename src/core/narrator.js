@@ -155,3 +155,17 @@ export function stepIdle(n, dt, active, p) {
   n.idle += dt;
   return before < p.inactivity && n.idle >= p.inactivity;
 }
+
+// Haut-parleur d'où sort la voix : le plus proche du personnage le long du rayon (items : [[x, y]]).
+export function nearestSpeaker(items, x) {
+  let best = -1;
+  let bestD = Infinity;
+  for (let i = 0; i < items.length; i++) {
+    const d = Math.abs(items[i][0] - x);
+    if (d < bestD) {
+      best = i;
+      bestD = d;
+    }
+  }
+  return best;
+}

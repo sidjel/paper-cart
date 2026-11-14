@@ -12,6 +12,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 35 — 15/11/2026 — Haut-parleurs visibles, personnage mieux posé au sol
+
+**Demandes de l'auteur** : voir les haut-parleurs d'où sort la voix ; comment arrêter un essai de diagnostic ; qui donne la douchette ; le personnage semble flotter.
+
+**Jouable maintenant**
+- **5 haut-parleurs** dessinés au plafond (décor du fond, provisoire). Quand le narrateur parle, celui **le plus proche du héros émet des ondes**, et l'annonce s'affiche **juste dessous**, avec une pointe vers lui. Elle ne passe jamais sous les boutons du haut.
+- **Personnage mieux posé au sol** :
+  - **ombre de contact** : une petite zone sombre juste sous les pieds, dans la même ombre (aucun élément de plus) ;
+  - **pieds enfoncés de 4 px** du dessin, pour que le contour blanc sous la semelle touche le sol.
+
+  Mesure qui l'explique : la semelle dessinée était 3 px (de face) à 6 px (de dos) au-dessus du point de contact. Surtout, le contour blanc et l'ombre pâle faisaient comme un vide sous les pieds.
+- **Essais de diagnostic** : la bannière rappelle comment arrêter (bouton II, Échap ou B, résultats partiels gardés). Elle est désormais en bas de l'écran, pour ne plus passer sous les boutons.
+
+**Vérifié** :
+- 105 tests de logique et 47 tests navigateur, sans erreur console.
+- Comptages : 78 éléments, dans la limite de 80. Le premier dessin des ondes en ajoutait 10, refusé par le test ; il est refait en un seul élément.
+- Captures : haut-parleur et bande en téléphone simulé ; pieds avant et après.
+- **Non vérifiable ici** : le ressenti sur le téléphone.
+
+**Décisions prises seul** :
+- La voix sort du haut-parleur **le plus proche du héros**, le même jusqu'à la fin de la réplique.
+- Les haut-parleurs sont **dessinés dans le décor** : l'auteur les dessinera avec le décor ; seules leurs positions sont dans les données.
+
+---
+
 ## Séance 33 — 14/11/2026 — A4 (2/2) : le héros parle à son « Épaisseur »
 
 **Décisions de l'auteur** : le joueur est « l'Épaisseur » du héros (✅ terme et principe) ; seul le héros brise le 4ᵉ mur, le haut-parleur ne sait pas qu'il y a un joueur (🧪) ; pistes ❓ notées (Révélation, Caisse Finale, Panier, êtres vivants) ; corrections de cohérence (Gwent retiré, « Steak Haché Premier Prix », état réel du jeu) ; deux questions de règles notées pour B.

@@ -123,6 +123,10 @@
       "depthRef": 56
     }
   ],
+  "speakers": {
+    "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
+    "items": [[600, 68], [1300, 68], [1980, 68], [2470, 68], [3340, 68]]
+  },
   "bench": {
     "comment": "Banc d'essai : parcours automatique, toujours le même. Passe derrière les objets, descend derrière le rayon de devant, fait des allers-retours (retournements) et des arrêts (respiration). Revient au départ.",
     "start": [300, 60],

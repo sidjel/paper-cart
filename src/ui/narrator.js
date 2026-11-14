@@ -1,5 +1,6 @@
 // Les deux voix à l'écran :
-//  - le haut-parleur du magasin : une bande sombre en haut à gauche, avec une icône de haut-parleur ;
+//  - le haut-parleur du magasin : une bande sombre juste sous le haut-parleur (dessiné au plafond) d'où
+//    sort la voix, avec une pointe vers lui ; elle ne passe jamais sous les boutons du haut ;
 //  - les apartés du héros : une bulle de papier au-dessus de sa tête, qui le suit.
 // Le texte s'écrit lettre par lettre (avancement calculé dans core/narrator.js). La place du texte
 // entier est réservée dès le début (le reste est invisible) : rien ne change de taille.
@@ -21,8 +22,9 @@ export function createNarratorUi(root, { onSkip }) {
   band.className = 'narrator';
   band.hidden = true;
   band.setAttribute('role', 'status');
-  band.innerHTML = `<span class="narrator-icon">${SPEAKER}</span><p class="narrator-text"></p>`;
+  band.innerHTML = `<span class="narrator-icon">${SPEAKER}</span><p class="narrator-text"></p><span class="narrator-tail"></span>`;
   const bandParts = textParts(band.querySelector('.narrator-text'));
+  const bandTail = band.querySelector('.narrator-tail');
 
   const bubble = document.createElement('div');
   bubble.className = 'hero-bubble';
@@ -65,11 +67,9 @@ export function createNarratorUi(root, { onSkip }) {
       parts[1].textContent = t; // place réservée pour le texte entier
       el.hidden = false;
       el.classList.remove('visible');
-      if (el === bubble) {
-        bw = bubble.offsetWidth; // mesuré une fois par réplique
-        bh = bubble.offsetHeight;
-        lastX = NaN;
-      } else void band.offsetWidth; // relance l'apparition
+      bw = el.offsetWidth; // mesuré une fois par réplique (relance aussi l'apparition)
+      bh = el.offsetHeight;
+      lastX = NaN;
       el.classList.add('visible');
     },
     // n : lettres visibles. Le texte n'est réécrit que si ce nombre change.
@@ -90,6 +90,17 @@ export function createNarratorUi(root, { onSkip }) {
       lastY = top;
       bubble.style.transform = `translate3d(${left}px, ${top}px, 0)`;
       tail.style.left = `${Math.max(16, Math.min(bw - 16, x - left))}px`;
+    },
+    // Bande : (x, y) = bouche du haut-parleur, en pixels d'écran ; maxRight : bord gauche des boutons du haut.
+    placeBand(x, y, maxRight) {
+      if (current !== band) return;
+      const left = Math.max(MARGIN, Math.min(maxRight - bw - MARGIN, x - bw / 2));
+      const top = Math.max(MARGIN, y + TAIL);
+      if (Math.abs(left - lastX) < 0.5 && Math.abs(top - lastY) < 0.5) return;
+      lastX = left;
+      lastY = top;
+      band.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      bandTail.style.left = `${Math.max(16, Math.min(bw - 16, x - left))}px`;
     },
     hide() {
       if (!current) return;

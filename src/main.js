@@ -9,7 +9,8 @@ import { compileMask, clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle } from './core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker } from './core/narrator.js';
+import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
@@ -98,6 +99,10 @@ const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator,
 let arrived = false;
 let endOfAisleX = Infinity;
 let voiceLine = null; // réplique affichée
+let speakerWaves = null; // ondes sous le haut-parleur qui parle
+let speaker = null; // [x, y] du haut-parleur d'où sort l'annonce en cours
+let hudLeft = Infinity; // bord gauche des boutons du haut (la bande ne passe pas dessous)
+const mouth = { x: 0, y: 0 };
 let playerActed = false; // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
 const head = { x: 0, y: 0 };
 const HEAD_HEIGHT = 330; // hauteur de la tête du héros au-dessus de ses pieds (px du dessin)
@@ -113,6 +118,12 @@ function voiceStarted() {
   const hero = narrator.voice === 'heros';
   narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion);
   audio.play(hero ? 'froissement' : 'annonce');
+  // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
+  const sp = place.speakers?.items ?? [];
+  speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
+  if (speaker) speakerWaves.show(speaker[0], speaker[1]);
+  else speakerWaves.hide();
+  hudLeft = hud.bar.getBoundingClientRect().left; // lu une fois par réplique
   if (hero && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
 }
 
@@ -122,7 +133,11 @@ function updateNarrator(dt) {
   if (narrator.line !== voiceLine) {
     voiceLine = narrator.line;
     if (voiceLine) voiceStarted();
-    else narratorUi.hide();
+    else {
+      narratorUi.hide();
+      speakerWaves.hide();
+      speaker = null;
+    }
   }
   if (!voiceLine) return;
   const n = Math.floor(narrator.shown);
@@ -133,7 +148,11 @@ function updateNarrator(dt) {
   if (hero) {
     stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, head);
     narratorUi.placeBubble(head.x, head.y);
-  }
+  } else if (speaker) {
+    stage.stageToClient(speaker[0], speaker[1], mouth);
+    narratorUi.placeBand(mouth.x, mouth.y + 18, hudLeft);
+    speakerWaves.pulse(narrator.t, config.display.reduceMotion);
+  } else narratorUi.placeBand(uiEl.clientWidth / 2, 0, hudLeft); // lieu sans haut-parleur : en haut
 }
 
 // Moments surveillés en jeu : arrivée, inactivité, bout du rayon.
@@ -201,7 +220,7 @@ function updateTip() {
   const s = shown.scale * heroData.scale;
   const [tx, ty] = heroData.scanTip[walker.away ? 'dos' : 'face'];
   tip.x = shown.x + walker.facing * (tx - heroData.anchor[0]) * s;
-  tip.y = shown.y + (ty - heroData.anchor[1]) * s;
+  tip.y = shown.y + (ty - heroData.anchor[1] + config.character.footSink) * s;
 }
 const diag = createDiagnostic(uiEl, () => ({
   version: VERSION,
@@ -412,6 +431,7 @@ sm.onChange((now, before) => {
     silenceNarrator(narrator); // les mesures se font sans voix
     voiceLine = null;
     narratorUi.hide();
+    speakerWaves.hide();
   }
   if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
@@ -595,6 +615,7 @@ async function start() {
   marker = createTargetMarker(stage.layers.acteurs);
   props = createProps(place, images, stage.layers.acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
+  speakerWaves = createSpeakerWaves(stage.layers.acteurs);
   products = createProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display, {
     parent: stage.layers.acteurs,
     proj,

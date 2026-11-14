@@ -91,6 +91,8 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let lastX = NaN;
   let lastY = NaN;
   let lastS = NaN;
+  let lastSink = NaN;
+  let lastContact = NaN;
   let lastLevel = -1;
   const stats = { frameChanges: 0, flipping: false }; // pour le diagnostic
   let lastBody = NaN;
@@ -182,11 +184,18 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       lastLift = motion.lift;
     }
     const s = scale * data.scale;
-    if (sx !== lastX || sy !== lastY || s !== lastS) {
-      root.style.transform = `translate3d(${sx - ax}px, ${sy - ay}px, 0) scale(${s})`;
+    // footSink : les pieds légèrement enfoncés dans le sol (le contour blanc sous la semelle touche le sol).
+    const sink = settings.footSink;
+    if (sx !== lastX || sy !== lastY || s !== lastS || sink !== lastSink) {
+      root.style.transform = `translate3d(${sx - ax}px, ${sy - ay + sink * s}px, 0) scale(${s})`;
       lastX = sx;
       lastY = sy;
       lastS = s;
+      lastSink = sink;
+    }
+    if (settings.contactShadow !== lastContact) {
+      lastContact = settings.contactShadow;
+      shadow.style.setProperty('--contact', lastContact);
     }
 
     // Ombre : sous les pieds, à l'échelle de la profondeur ; s'amenuise quand il s'élève.

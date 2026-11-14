@@ -83,6 +83,7 @@ export function createHud(root, { version, onAction, touch, muted }) {
 
   let hintGone = false;
   return {
+    bar, // boutons du haut (la bande du narrateur ne passe pas dessous)
     ready() {
       loading.hidden = true;
     },

@@ -60,7 +60,10 @@ html, body {
   left: 0;
   top: 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(40 32 22 / 0.9), rgb(40 32 22 / 0.55) 55%, rgb(40 32 22 / 0) 100%);
+  /* Deux ombres en une : petite ombre de contact sombre sous les pieds (--contact, réglable), puis l'ombre douce. */
+  background:
+    radial-gradient(closest-side, rgb(30 24 16 / var(--contact, 0.5)), rgb(30 24 16 / 0) 100%) center / 58% 52% no-repeat,
+    radial-gradient(closest-side, rgb(40 32 22 / 0.9), rgb(40 32 22 / 0.55) 55%, rgb(40 32 22 / 0) 100%);
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -341,10 +344,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .bench-banner {
   position: absolute;
   left: 50%;
-  top: var(--safe-top);
+  bottom: calc(var(--safe-bottom) + 18px);
   transform: translateX(-50%);
+  max-width: calc(100% - 300px);
+  text-align: center;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: 14px;
   border: 2px solid var(--ink);
   background: rgb(251 248 238 / 0.92);
   font-weight: 700;
@@ -486,10 +491,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 @media (prefers-reduced-motion: reduce) { .panier-button.bump { animation: none; } }
 
 /* ---------- Narrateur : annonce au haut-parleur ---------- */
+/* Placée par le code (transform) sous le haut-parleur qui parle ; apparition en fondu seulement. */
 .narrator {
   position: absolute;
-  top: var(--safe-top);
-  left: var(--safe-left);
+  top: 0;
+  left: 0;
   max-width: min(560px, calc(100% - 330px));
   display: flex;
   align-items: flex-start;
@@ -502,13 +508,22 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 0 0 0 2px var(--ink);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s;
   z-index: 40;
 }
 .narrator[hidden] { display: none; }
-.narrator.visible { opacity: 1; transform: none; }
-.narrator.still { transform: none; transition: opacity 0.2s; }
+.narrator.visible { opacity: 1; }
+.narrator-tail {
+  position: absolute;
+  top: -9px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  background: var(--band);
+  border-left: 2px solid var(--paper);
+  border-top: 2px solid var(--paper);
+  transform: rotate(45deg);
+}
 .narrator-icon { flex: none; color: var(--accent); margin-top: 1px; }
 .narrator-text { margin: 0; font-size: 15px; line-height: 1.35; }
 .voice-rest { visibility: hidden; }
@@ -548,3 +563,24 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   .narrator { max-width: calc(100% - 300px); padding: 7px 12px 8px 10px; }
   .narrator-text, .hero-bubble-text { font-size: 14px; }
 }
+
+/* Ondes sous le haut-parleur qui parle (dans la scène). */
+.speaker-waves, .speaker-waves::before, .speaker-waves::after {
+  border-bottom: 3px solid var(--ink);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+.speaker-waves {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80px;
+  height: 30px;
+  z-index: 899;
+  pointer-events: none;
+  transform-origin: 40px 0;
+  will-change: transform, opacity;
+}
+.speaker-waves::before, .speaker-waves::after { content: ''; position: absolute; top: 0; }
+.speaker-waves::before { left: 26px; width: 28px; height: 10px; }
+.speaker-waves::after { left: 13px; width: 54px; height: 20px; }
+.speaker-waves[hidden] { display: none; }

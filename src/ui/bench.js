@@ -12,6 +12,9 @@ function percentile(sorted, n, q) {
   return n ? sorted[Math.min(n - 1, Math.floor(n * q))] : NaN;
 }
 
+// Rappel affiché pendant l'essai : comment l'arrêter (résultats partiels gardés).
+export const STOP_HINT = '· arrêter : bouton II, Échap ou B';
+
 export function createBenchUi(root, { onStart, getContext }) {
   const frames = new Float32Array(MAX);
   const js = new Float32Array(MAX);
@@ -149,7 +152,7 @@ export function createBenchUi(root, { onStart, getContext }) {
       duration = 0;
       panel.hidden = true;
       banner.hidden = false;
-      banner.textContent = "Banc d'essai : chauffe…";
+      banner.textContent = `Banc d'essai : chauffe… ${STOP_HINT}`;
     },
     // À chaque image pendant le parcours mesuré.
     record(dt, jsMs, camMoving, pathStart, walking) {
@@ -162,7 +165,7 @@ export function createBenchUi(root, { onStart, getContext }) {
     },
     progress(b) {
       const t = b.phase === 'warmup' ? 'chauffe…' : `tour ${Math.min(b.pass + 1, b.passes)} / ${b.passes}`;
-      const txt = `Banc d'essai : ${t}`;
+      const txt = `Banc d'essai : ${t} ${STOP_HINT}`;
       if (banner.textContent !== txt) banner.textContent = txt;
     },
     finish(status, b) {

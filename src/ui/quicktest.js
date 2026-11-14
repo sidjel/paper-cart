@@ -5,6 +5,7 @@
 
 import { QUICK_SUITES } from '../core/quicktest.js';
 import { speedIndex } from './speedindex.js';
+import { STOP_HINT } from './bench.js';
 
 const MAX = 15 * 60 * 125; // jusqu'à 15 min à 125 images/s
 const fmt = (n, d = 1) => (Number.isFinite(n) ? n.toFixed(d).replace('.', ',') : '—');
@@ -218,7 +219,8 @@ export function createQuickTestUi(root, { onStart, getContext }) {
       block[n] = blockNo;
       n++;
     },
-    progress(txt) {
+    progress(msg) {
+      const txt = `${msg} ${STOP_HINT}`;
       if (banner.textContent !== txt) banner.textContent = txt;
     },
     async finish(st) {
