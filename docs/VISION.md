@@ -13,7 +13,7 @@ Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le mag
 - Les cartes **pourrissent** avec le temps et **changent de rôle** : fraîches, elles soignent ou protègent ; mûres, elles ont leur meilleur effet ; pourries, elles deviennent des armes ou des poisons à lancer. *(Précision de l'auteur, séance 32 : toutes les cartes ne pourrissent pas ; il y a 4 familles d'évolution — stables, périssables, évolutives, à potentiel de fusion — détaillées dans `docs/REGLES_CARTES_COMBAT.md`.)*
 - On **découvre** des combos et des évolutions **inconnus à l'avance**, par hasard ou par logique d'après la nature des cartes.
 - Des **moments épiques à la Final Fantasy VII, VIII et X** : une jauge, puis une attaque ultime mise en scène comme une invocation, mais avec des objets du supermarché.
-- Un **narrateur odieux** brise le 4ᵉ mur et commente tout.
+- Un **narrateur odieux** (le haut-parleur du magasin) commente tout, sans savoir qu'il y a un joueur. Le **joueur est « l'Épaisseur »** que le héros a perdue en devenant papier : c'est le héros qui, parfois, brise le 4ᵉ mur et lui parle *(précision de l'auteur, séance 33 ; le principe est validé, la façon de briser le 4ᵉ mur est à l'essai, voir `docs/HISTOIRE.md`)*.
 
 ## Ton
 

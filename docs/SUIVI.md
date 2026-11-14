@@ -88,6 +88,12 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Utilité du caddie, pouvoir le pousser | 28 | ✅ | **Séance 29 : le caddie devient une étape à part, après A4 et avant le combat** (docs/PROTOTYPES.md). Séance 31 : **A5 — Caddie jouable** = Panier physique qui suit le personnage, garé et repris, visuel selon le remplissage (docs/GAME_DESIGN.md). |
 | Style des décors | 29 | 🧪 | Crayon de couleur pour personnages, produits et décors : à tester au prototype D (docs/DIRECTION_ARTISTIQUE.md). |
 
+## Questions à poser plus tard (séance 33, sans trancher)
+| Question | Séance | État | Notes |
+|---|---|---|---|
+| Le Mixeur et le Scotch sont rangés dans « Stables » alors qu'ils changent de stade | 33 | ❓ | À voir avec la page de règles du prototype B. |
+| L'étiquette « malus » (« se pose chez l'adversaire ») vient du plateau | 33 | ❓ | À redéfinir pour le face à face (ex. « carte à lancer sur l'ennemi »), dans la page de règles du prototype B. |
+
 ## Documentation et architecture (séance 29)
 | Demande | Séance | État | Notes |
 |---|---|---|---|

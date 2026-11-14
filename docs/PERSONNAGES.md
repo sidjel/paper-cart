@@ -9,10 +9,12 @@
 
 ## Le Protagoniste
 - ❓ À DÉFINIR : raison de son entrée dans le magasin.
-- Héros en papier : voir `HISTOIRE.md` (🧪 À TESTER).
+- ✅ VALIDÉ : héros de papier privé de son **Épaisseur** (le joueur) ; il garde cœur, voix, souvenirs, émotions, réflexes (voir `HISTOIRE.md`).
+- 🧪 À TESTER : apartés rares où il se tourne vers l'écran et tutoie le joueur (« mon Épaisseur », « toi, là-haut »).
 
 ## Le Narrateur
-- ✅ VALIDÉ : haut-parleur omniscient, odieux, brise le 4ᵉ mur.
+- ✅ VALIDÉ : haut-parleur du magasin (ordinateur central), odieux.
+- 🧪 À TESTER (remplace « brise le 4ᵉ mur ») : il **ne sait pas qu'il y a un joueur** ; il vouvoie le « client » avec une politesse commerciale hypocrite ; quand le héros parle à l'écran, il croit qu'un client parle au mur.
 - 🧪 À TESTER : **pas omniprésent**. Garder l'effet de surprise : délais anti-répétition, répliques rares et liées au contexte.
 - 🧪 À TESTER : il nomme le héros « Client », puis « Article non référencé »… (voir `HISTOIRE.md`).
 

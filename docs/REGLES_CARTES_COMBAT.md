@@ -27,7 +27,7 @@
 Reprise de `docs/archive/maxi-gouffre-GAME_DESIGN.md` §7.3 et §7.4. **Effets de plateau et puissances à réécrire** pour le face à face avant de coder B (ici : noms des stades et notes seulement).
 - **20 familles** (Frais → Mûr → Pourri) :
   - banane : Banane Verte → Banane Parfaite → Bouillie Brune (malus)
-  - steak : Steak Haché Eco+ → Steak Douteux → Bactérie Mortelle
+  - steak : Steak Haché Premier Prix → Steak Douteux → Bactérie Mortelle
   - lait : Lait Entier → Lait Tourné → Fromage Vivant (fermentation)
   - baguette : Pain Baguette → Baguette Dure → Poussière de Pain
   - glace : Glace Vanille → Soupe Sucrée → Flotte Collante (surgelé, malus)
@@ -48,5 +48,7 @@ Reprise de `docs/archive/maxi-gouffre-GAME_DESIGN.md` §7.3 et §7.4. **Effets d
   - grand-mère : Grand-Mère Perdue → Grand-Mère Paniquée → Héritage (PNJ allié, fermentation)
 - **6 recettes** : Milkshake Protéiné (banane + lait) · Burger Gras (steak + baguette) · Petit-Dèj Épique (lait + céréales) · Ado Muet (enfant + console) · Plante Mutante (plante + pile pourrie) · Lance de Fortune (baguette + scotch).
 
-## Déjà en place dans le jeu (provisoire)
-- Cartes avec nom, puissance, stade, propriétés ; icône de stade (forme + couleur). Pas encore de vieillissement.
+## Déjà en place dans le jeu (provisoire, d'après le code)
+- 12 produits scannables (`src/data/products.json`) : 10 sur l'étagère, 1 sur une table, 1 dans le caddie.
+- Une carte = nom, puissance, stade de départ (Frais ou Mûr), propriétés ; icône de stade (forme + couleur).
+- Le Panier liste les cartes, sans interaction. Pas de vieillissement, pas de familles, pas de combat.
