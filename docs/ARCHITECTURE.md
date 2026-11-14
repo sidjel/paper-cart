@@ -20,9 +20,9 @@
 
 | Dossier | Rôle |
 |---|---|
-| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier). **Diagnostic seulement** : `bench`, `protocol`, `quicktest`. |
+| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier). **Diagnostic seulement** : `bench`, `quicktest`. |
 | `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `assets` (préparation des images), `targetMarker`, `debugMask` |
-| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole). **Diagnostic seulement** : `diagnostic`, `bench`, `protocol`, `quicktest`, `speedindex` |
+| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |
 | `src/data/` | `places/rayon-essai.json` (lieu : images, calques, zone de marche, objets, produits, parcours de mesure), `characters/heros.json`, `products.json`, `music/` |
@@ -64,20 +64,21 @@
 
 ## 7. Outils de mesure (diagnostic seulement) 🔎
 
-Ils ne changent rien au jeu normal. Aujourd'hui (≈ 30 % du code) :
+Ils ne changent rien au jeu normal. Aujourd'hui (≈ 20 % du code) :
 
 | Outil | Fichiers | Statut |
 |---|---|---|
 | Diagnostic DBG (F3), rapport copiable | `ui/diagnostic.js` | Exigé par CLAUDE.md |
 | Banc d'essai + interrupteurs d'essai | `core/bench.js`, `ui/bench.js` | Exigé par CLAUDE.md |
 | Test rapide (variantes alternées, verdict) | `core/quicktest.js`, `ui/quicktest.js`, `ui/speedindex.js` | Sert à comparer deux versions sur le téléphone |
-| Diagnostic en 4 configurations | `core/protocol.js`, `ui/protocol.js` | Utilisé séances 11 à 19 ; le test rapide le remplace dans les faits. **Garder ou retirer : décision de l'auteur** |
-| Campagne « rayon de devant » (`DEVANT2`), `stage.setLayerVariant` | `core/quicktest.js`, `scene/stage.js` | Enquête close (séance 26). Peut resservir si l'on revoit le rayon de devant. **Décision de l'auteur** |
+| Campagne « rayon de devant » (`DEVANT2`), `stage.setLayerVariant` | `core/quicktest.js`, `scene/stage.js` | Enquête close (séance 26). **Gardée jusqu'à ce qu'on revoie le rayon de devant** (décision de l'auteur, séance 30). |
 | Fonctions d'essai `window.paperCart` | `main.js` | Présentes aussi en ligne (utiles au diagnostic et aux tests), sans danger |
+
+Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'auteur) : le test rapide le remplace.
 
 ## 8. Points connus à reprendre (quand on y travaille)
 
-- `src/main.js` (≈ 700 lignes) mélange l'assemblage, le rendu et le branchement des outils de mesure : à découper (par exemple `src/debug/`) à la prochaine séance qui le touche beaucoup.
+- `src/main.js` (≈ 590 lignes) mélange l'assemblage, le rendu et le branchement des outils de mesure : à découper (par exemple `src/debug/`) à la prochaine séance qui le touche beaucoup.
 - Les chaînes de texte créées à chaque image pour placer les éléments sont un coût accepté du rendu en éléments de page (calcul mesuré : 0,67 ms par image en moyenne sur le téléphone).
 - Les dessins provisoires SVG ont été produits par des scripts non gardés : ils seront remplacés par ceux de l'auteur (prototype D).
 

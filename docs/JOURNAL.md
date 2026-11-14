@@ -12,6 +12,18 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 30 — 14/11/2026 — Diagnostic en 4 configurations retiré, documents de conception
+
+**Décisions de l'auteur** : outils de mesure, choix B (retirer le diagnostic en 4 configurations, garder la campagne DEVANT2 jusqu'à ce qu'on revoie le rayon de devant) ; histoire du scanner : pas de choix pour le moment ; suite : A4, le narrateur.
+
+**Fait**
+- Retiré : `core/protocol.js`, `ui/protocol.js`, leurs tests, leurs réglages (onglet Diagnostic), le « fantôme » de caméra et le point `idle` du lieu. Le test rapide garde son aller-retour (déplacé dans `core/quicktest.js`). `main.js` : 589 lignes au lieu de 704.
+- ARCHITECTURE et SUIVI mis à jour.
+
+**Vérifié** : 87 tests de logique (les tests du diagnostic retiré sont partis avec lui), 43 tests navigateur sans erreur console, comptages inchangés, vérification automatique : aucun nom orphelin.
+
+---
+
 ## Séance 29 — 14/11/2026 — Audit de l'architecture, documentation remise à jour
 
 **Décisions de l'auteur** : organisation de la documentation validée (1 : A) ; ancien ARCHITECTURE.md de Maxi-Gouffre fourni et archivé (2 : A) ; **le caddie devient une étape à part, après A4 et avant le combat** (3 : A) ; style des décors pressenti : crayon de couleur, comme le personnage (à confirmer et tester) ; documentation courte, pour économiser la lecture.

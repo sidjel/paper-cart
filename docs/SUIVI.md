@@ -77,7 +77,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 ## Histoire et sens du jeu (séance 28)
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | ❓ | 3 pistes proposées (carte de fidélité, date de péremption, stagiaire de l'inventaire). Choix de l'auteur attendu. |
+| Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | ❓ | 3 pistes proposées (carte de fidélité, date de péremption, stagiaire de l'inventaire). Séance 30 : **pas de choix pour le moment**. |
+| Documents sur l'histoire, le game design, le style | 30 | ❓ | Il n'en existe pas (seulement docs/VISION.md, à grands traits). Quand et comment les créer : proposition faite en séance 30. |
 | Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Réponse comprise dans chaque piste. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
 | Interaction avec les cartes dans le Panier | 28 | 👀 | Normal pour l'instant : le prototype A vérifie seulement « scanner est agréable ». Les cartes serviront au combat (prototype B). |
@@ -88,8 +89,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Audit de l'architecture, comparaison avec l'ancien ARCHITECTURE.md de Maxi-Gouffre | 29 | ✅ | Organisation validée : docs/ARCHITECTURE.md (créé), docs/PROTOTYPES.md (plan recopié tel quel), ancien document en archive, SUIVI allégé. |
-| Outils de mesure peut-être obsolètes (diagnostic en 4 configurations, campagne DEVANT2) | 29 | ❓ | Gardés pour l'instant. Garder ou retirer : décision de l'auteur (docs/ARCHITECTURE.md §7). |
-| Découper src/main.js (≈ 700 lignes) | 29 | 🔧 | À la prochaine séance qui le touche beaucoup (A4 probablement). |
+| Outils de mesure peut-être obsolètes (diagnostic en 4 configurations, campagne DEVANT2) | 29 | ✅ | Séance 30 (choix B) : **diagnostic en 4 configurations retiré** ; DEVANT2 gardée jusqu'à ce qu'on revoie le rayon de devant. |
+| Découper src/main.js (≈ 590 lignes depuis la séance 30) | 29 | 🔧 | À la prochaine séance qui le touche beaucoup (A4 probablement). |
 
 ## Interface
 | Demande | Séance | État | Notes |

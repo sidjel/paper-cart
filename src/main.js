@@ -12,8 +12,6 @@ import { createBasket, addToBasket } from './core/cards.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
-import { createProtocol, stepProtocol, placeForConfig, protocolConfig, totalSeconds } from './core/protocol.js';
-import { createProtocolUi, F_CAMERA, F_FRAME, F_FLIP, F_DUST } from './ui/protocol.js';
 import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds, QUICK_SUITES } from './core/quicktest.js';
 import { createQuickTestUi } from './ui/quicktest.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
@@ -163,25 +161,13 @@ const benchUi = createBenchUi(uiEl, {
     overrides: overrides(),
   }),
 });
-const protocolUi = createProtocolUi(uiEl, {
-  onStart: () => startProtocol(config.protocol.warmup, config.protocol.measure, config.protocol.repeats),
-  getContext: () => ({
-    version: VERSION,
-    renderLine,
-    overrides: overrides(),
-    warmup: config.protocol.warmup,
-    measure: config.protocol.measure,
-    repeats: config.protocol.repeats,
-    wakeLock: protocolUi.wakeLockActive ? 'oui' : 'non (pense à garder l’écran allumé)',
-  }),
-});
 const quickUi = createQuickTestUi(uiEl, {
-  // La campagne fixe son propre nombre de tours ; le reste du protocole vient des réglages.
+  // La campagne fixe son propre nombre de tours ; le reste vient des réglages.
   onStart: (suite) => startQuick({ ...config.quick, rounds: QUICK_SUITES[suite].rounds ?? config.quick.rounds }, suite),
   getContext: () => ({ version: VERSION, renderLine, overrides: overrides() }),
 });
 const diagTools = document.createElement('div');
-diagTools.append(quickUi.launcher, benchUi.launcher, protocolUi.launcher);
+diagTools.append(quickUi.launcher, benchUi.launcher);
 const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: diagTools } });
 
 // ---------- Test rapide T0 / T1 / T2 ----------
@@ -200,7 +186,7 @@ function applyVariant(variant) {
 async function startQuick(params, suite = 'T012') {
   if (!sm.is('menu')) return;
   quick = createQuickTest(place.diagnostic, params, suite);
-  startQuickTest(quick, walker, ghost);
+  startQuickTest(quick, walker);
   quickSavedReduce = config.display.reduceMotion;
   applyVariant(quickConditionDef(quick).variant);
   camera.ready = false;
@@ -240,76 +226,6 @@ function quickStep(dt, t0) {
   const left = Math.ceil((quickTotalSeconds(quick) - quickElapsed(quick)) / 60);
   const what = quick.phase === 'warmup' ? 'chauffe' : `tour ${quick.round + 1}/${quick.rounds} · ${c.id}`;
   quickUi.progress(`Test rapide : ${what} · reste ≈ ${left} min`);
-}
-
-// ---------- Diagnostic en 4 configurations ----------
-let protocol = null;
-let ghost = null; // « fantôme » invisible que la caméra suit dans la configuration 3
-const prevP = { phase: '', ci: 0, run: 0 };
-
-async function startProtocol(warmup, measure, repeats) {
-  if (!sm.is('menu')) return;
-  protocol = createProtocol(place.diagnostic, warmup, measure, repeats);
-  placeForConfig(protocol, walker, ghost);
-  camera.ready = false;
-  lastCamTime = -1;
-  marker.hide();
-  hud.playerMoved();
-  prevP.phase = protocol.phase;
-  prevP.ci = 0;
-  prevP.run = 0;
-  sm.go('bench');
-  await protocolUi.begin({ warmup, measure, repeats });
-}
-
-function endProtocol(status) {
-  if (!protocol) return;
-  if (protocol.phase === 'measure') protocolUi.endRun(protocol.ci, protocol.run); // mesure en cours : partielle
-  protocol = null;
-  sm.go('play');
-  protocolUi.finish(status);
-}
-
-// Après chaque pas : fin d'une mesure, début d'une mesure, nouvelle configuration.
-function protocolPhaseChanged() {
-  if (prevP.phase === 'measure') protocolUi.endRun(prevP.ci, prevP.run);
-  if (protocol.phase === 'measure') protocolUi.startRun();
-  if (protocol.phase === 'warmup') camera.ready = false; // nouvelle configuration : la caméra se replace
-  prevP.phase = protocol.phase;
-  prevP.ci = protocol.ci;
-  prevP.run = protocol.run;
-}
-
-function protocolStep(dt, t0) {
-  const n = stepper.advance(dt / 1000);
-  const camBefore = camera.x;
-  const framesBefore = sprite.stats.frameChanges;
-  const dustBefore = dust.counter.spawns;
-  for (let i = 0; i < n && protocol.phase !== 'done'; i++) {
-    stepProtocol(protocol, walker, ghost, stepper.step);
-    if (protocol.changed) protocolPhaseChanged();
-    stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
-    stepWalker(ghost, NO_INPUT, mask, config.walk, stepper.step);
-  }
-  if (protocol.phase === 'done') {
-    // La dernière mesure a déjà été close par protocolPhaseChanged.
-    protocol = null;
-    sm.go('play');
-    protocolUi.finish('terminé');
-    return;
-  }
-  render();
-  if (protocol.measuring) {
-    let f = 0;
-    if (Math.abs(camera.x - camBefore) > 0.05) f |= F_CAMERA;
-    if (sprite.stats.frameChanges !== framesBefore) f |= F_FRAME;
-    if (sprite.stats.flipping) f |= F_FLIP;
-    if (dust.counter.spawns !== dustBefore) f |= F_DUST;
-    protocolUi.record(dt, performance.now() - t0, f);
-  }
-  const left = Math.max(0, totalSeconds(protocol) - (protocol.ci * (protocol.warmup + protocol.measure * protocol.repeats) + (protocol.phase === 'warmup' ? protocol.t : protocol.warmup + protocol.run * protocol.measure + protocol.t)));
-  const step = protocol.phase === 'warmup' ? 'chauffe' : `mesure ${protocol.run + 1}/${protocol.repeats}`;
-  protocolUi.progress(`Diagnostic : configuration ${protocol.ci + 1}/4 · ${step} · reste ≈ ${Math.ceil(left / 60)} min`);
 }
 
 // ---------- Banc d'essai ----------
@@ -363,7 +279,6 @@ function handleAction(action) {
   switch (action) {
     case 'back':
       if (quick) endQuick('annulé par le joueur (résultats partiels)');
-      else if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
       else if (sm.is('panier')) sm.go('play');
@@ -372,7 +287,6 @@ function handleAction(action) {
       break;
     case 'pause':
       if (quick) endQuick('annulé par le joueur (résultats partiels)');
-      else if (protocol) endProtocol('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
@@ -512,18 +426,13 @@ function render() {
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
   const camFrozen = bench && config.bench.fixedCamera && camera.ready;
-  const pc = protocol ? protocolConfig(protocol) : quick ? quickConditionDef(quick) : null;
+  const pc = quick ? quickConditionDef(quick) : null;
   if (pc && pc.camera === 'fixed') {
     // Diagnostic : caméra fixe, centrée sur l'aller-retour.
     const mid = (place.diagnostic.a[0] + place.diagnostic.b[0]) / 2;
     camera.x = Math.min(Math.max(0, place.size[0] - v.viewW), Math.max(0, mid - v.viewW / 2));
     camera.y = 0;
     camera.ready = true;
-  } else if (pc && pc.camera === 'ghost') {
-    // Diagnostic : la caméra suit le fantôme (même mouvement que dans la configuration 4).
-    const gz = ghost.prevZ + (ghost.z - ghost.prevZ) * a;
-    const gx = worldToStageX(proj, ghost.prevX + (ghost.x - ghost.prevX) * a);
-    updateCamera(camera, config.camera, gx, worldToStageY(proj, gz) - 140 * scaleAt(proj, gz), ghost.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   } else if (!camFrozen) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   stage.setCamera(camera.x, camera.y);
   if (!walker.hasTarget) marker.hide();
@@ -555,8 +464,6 @@ function frame(now) {
     render();
   } else if (quick) {
     quickStep(dt, t0);
-  } else if (protocol) {
-    protocolStep(dt, t0);
   } else if (sm.is('bench')) {
     // Banc d'essai : le parcours remplace les commandes du joueur.
     const n = stepper.advance(dt / 1000);
@@ -599,7 +506,6 @@ async function start() {
   proj = createProjection(place.projection, config.scene);
   mask = compileMask(place.walkMask);
   walker = createWalker(place.spawn[0], place.spawn[1]);
-  ghost = createWalker(place.diagnostic.a[0], place.diagnostic.a[1]);
   marker = createTargetMarker(stage.layers.acteurs);
   props = createProps(place, images, stage.layers.acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
@@ -630,7 +536,6 @@ async function start() {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sm.is('play')) sm.go('pause');
     if (document.hidden && quick) endQuick('interrompu : le jeu est passé en arrière-plan (écran éteint ?)');
-    if (document.hidden && protocol) endProtocol('interrompu : le jeu est passé en arrière-plan (écran éteint ?)');
     if (document.hidden && sm.is('bench')) endBench("interrompu : le jeu est passé en arrière-plan");
     audio.setHidden(document.hidden);
   });
@@ -666,11 +571,6 @@ async function start() {
       startBench(passes, warmup);
     },
     benchReport: () => benchUi.lastReport,
-    startProtocol(warmup = 1, measure = 2, repeats = 1) {
-      if (sm.is('play')) sm.go('menu');
-      startProtocol(warmup, measure, repeats);
-    },
-    protocolReport: () => protocolUi.lastReport,
     startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1, suite = 'T012') {
       if (sm.is('play')) sm.go('menu');
       startQuick({ warmup, block, settle, rounds }, suite);

@@ -5,7 +5,7 @@
 //
 // Situations : A = personnage en marche, caméra fixe ; B = personnage en marche, caméra mobile.
 
-import { patrol, placeForConfig } from './protocol.js';
+import { setPath, clearTarget } from './movement.js';
 
 export const QUICK_SUITES = {
   // Test rapide T0 / T1 / T2 (séance 13).
@@ -80,9 +80,23 @@ export function quickElapsed(q) {
   return q.warmup + (q.round * q.suite.conditions.length + q.slot) * q.block + q.t;
 }
 
-export function startQuickTest(q, hero, ghost) {
-  // Même point de départ que le diagnostic complet (aller-retour en ligne droite).
-  placeForConfig({ def: q.def, ci: 1 }, hero, ghost);
+// def : place.diagnostic = { a: [x, z], b: [x, z] } : aller-retour en ligne droite entre a et b.
+export function startQuickTest(q, hero) {
+  const [x, z] = q.def.a;
+  hero.x = hero.prevX = x;
+  hero.z = hero.prevZ = z;
+  hero.vx = hero.vz = 0;
+  hero.facing = 1;
+  hero.away = false;
+  clearTarget(hero);
+}
+
+// Aller-retour : dès qu'un bout est atteint, repartir vers l'autre (ligne droite, sans calcul de chemin).
+export function patrol(w, def) {
+  if (w.hasTarget) return;
+  const toB = Math.abs(w.x - def.a[0]) <= Math.abs(w.x - def.b[0]);
+  const [x, z] = toB ? def.b : def.a;
+  setPath(w, [[x, z]]);
 }
 
 export function stepQuickTest(q, hero, dt) {

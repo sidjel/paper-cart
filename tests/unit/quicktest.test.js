@@ -14,9 +14,9 @@ describe('test rapide T0 / T1 / T2', () => {
     expect(quickTotalSeconds(createQuickTest(place.diagnostic, { warmup: 30, block: 20, settle: 2, rounds: 4 }))).toBe(430);
   });
   it('mesure chaque condition le même temps, en alternance, ordre inversé un tour sur deux', () => {
-    const hero = createWalker(0, 0), ghost = createWalker(0, 0);
+    const hero = createWalker(0, 0);
     const q = createQuickTest(place.diagnostic, { warmup: 1, block: 2, settle: 0.5, rounds: 4 });
-    startQuickTest(q, hero, ghost);
+    startQuickTest(q, hero);
     const measured = new Array(QUICK_CONDITIONS.length).fill(0);
     const sequence = [];
     while (q.phase !== 'done') {
@@ -38,9 +38,9 @@ describe('test rapide T0 / T1 / T2', () => {
     expect(quickOrder(1)).toEqual([4, 3, 2, 1, 0]);
   });
   it('le personnage marche pendant toutes les mesures, sur l’aller-retour prévu', () => {
-    const hero = createWalker(0, 0), ghost = createWalker(0, 0);
+    const hero = createWalker(0, 0);
     const q = createQuickTest(place.diagnostic, { warmup: 1, block: 2, settle: 0.5, rounds: 1 });
-    startQuickTest(q, hero, ghost);
+    startQuickTest(q, hero);
     let moving = 0, total = 0;
     while (q.phase !== 'done') {
       stepQuickTest(q, hero, DT);
@@ -75,9 +75,9 @@ describe('campagne « rayon de devant » n° 2 (caméra mobile)', () => {
     expect(C.comparisons.map(([, a, b]) => `${a}/${b}`)).toEqual(['G4/T0', 'G3/T0']);
   });
   it('enchaîne les variantes en alternance, en marchant', () => {
-    const hero = createWalker(0, 0), ghost = createWalker(0, 0);
+    const hero = createWalker(0, 0);
     const q = createQuickTest(place.diagnostic, { warmup: 1, block: 1, settle: 0.2, rounds: 2 }, 'DEVANT2');
-    startQuickTest(q, hero, ghost);
+    startQuickTest(q, hero);
     const seen = [];
     while (q.phase !== 'done') {
       stepQuickTest(q, hero, DT);

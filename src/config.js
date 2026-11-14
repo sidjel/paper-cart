@@ -92,11 +92,6 @@ export const config = {
     noShadow: false,
     fixedCamera: false,
   },
-  protocol: {
-    warmup: 60, // diagnostic complet : chauffe par configuration (s)
-    measure: 60, // durée d'une mesure (s)
-    repeats: 3, // nombre de mesures par configuration
-  },
   quick: {
     warmup: 30, // test rapide : chauffe (s)
     block: 20, // durée d'un bloc (s)
@@ -178,9 +173,6 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'quick.block', label: 'Test rapide : durée d’un bloc', min: 5, max: 60, step: 5, unit: 's' },
   { group: 'Diagnostic', key: 'quick.settle', label: 'Test rapide : début de bloc ignoré', min: 0, max: 5, step: 0.5, unit: 's' },
   { group: 'Diagnostic', key: 'quick.rounds', label: 'Test rapide : nombre de tours', min: 1, max: 10, step: 1 },
-  { group: 'Diagnostic', key: 'protocol.warmup', label: 'Diagnostic complet : chauffe', min: 5, max: 120, step: 5, unit: 's' },
-  { group: 'Diagnostic', key: 'protocol.measure', label: 'Diagnostic complet : durée d’une mesure', min: 5, max: 120, step: 5, unit: 's' },
-  { group: 'Diagnostic', key: 'protocol.repeats', label: 'Diagnostic complet : mesures par configuration', min: 1, max: 5, step: 1 },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
 ];
 
