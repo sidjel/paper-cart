@@ -20,6 +20,11 @@
 - Ensemble, une personne entière : le joueur décide (où aller, quoi scanner, quelle carte jouer), le héros vit et réagit. D'où ses apartés : il demande où aller, s'inquiète, conteste parfois.
 - Le **relief** explique surtout le visuel : c'est ce qui manque au héros quand il pivote et devient presque invisible de profil.
 
+## La mémoire du héros ✅ VALIDÉ (séance 34)
+- Il se souvient de tout **jusqu'aux portes automatiques** du Maxi-Gouffre.
+- Pas du **moment précis où il a été aplati** : à cet instant il perdait son Épaisseur, donc son **regard** (la partie qui voit et comprend). Il a vécu ce moment sans pouvoir le « voir ».
+- **Pas d'amnésie complète.**
+
 ## Le 4ᵉ mur 🧪 À TESTER (séance 33)
 - **Seul le héros brise le 4ᵉ mur**, rarement : il se tourne vers l'écran et **tutoie** le joueur (« mon Épaisseur », « toi, là-haut »), complice, inquiet ou blasé.
 - **Le narrateur ne sait pas qu'il y a un joueur** : l'ordinateur central, au haut-parleur, **vouvoie** le « client » avec une politesse commerciale hypocrite et odieuse. Quand le héros parle à l'écran, il croit voir un client qui parle au mur.
@@ -44,6 +49,12 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - **La Révélation** : bascule d'ambiance, panne, passage aux coulisses.
 - **Acte II — La Réalité** : réserves poisseuses, zones interdites, employés oubliés.
 - **Acte III — La Caisse Finale** : confrontation avec le Gérant ; sens réel de la sortie ❓ À DÉFINIR.
+
+## L'intro du jeu ❓ À DÉFINIR (piste notée, rien de codé)
+- Aucun personnage en 3D. Écran noir, des sons : pluie, parking, portes qui coulissent, « ding ».
+- Puis le narrateur : « Bienvenue au Maxi-Gouffre. Nous avons pris la liberté d'optimiser votre format. »
+- Le héros apparaît directement en papier.
+- La scène de l'aplatissement est révélée plus tard (pendant la Révélation ?), en quelques dessins : le héros a d'abord du volume, puis il est plaqué à plat.
 
 ## Gags d'intro 🧪 À TESTER
 - Bouton « Jouer » qui fuit 3 fois.

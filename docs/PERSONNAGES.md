@@ -10,6 +10,7 @@
 ## Le Protagoniste
 - ❓ À DÉFINIR : raison de son entrée dans le magasin.
 - ✅ VALIDÉ : héros de papier privé de son **Épaisseur** (le joueur) ; il garde cœur, voix, souvenirs, émotions, réflexes (voir `HISTOIRE.md`).
+- ✅ VALIDÉ : se souvient de tout jusqu'aux portes automatiques, mais pas du moment où il a été aplati (il perdait son regard) ; pas d'amnésie complète (voir `HISTOIRE.md`).
 - 🧪 À TESTER : apartés rares où il se tourne vers l'écran et tutoie le joueur (« mon Épaisseur », « toi, là-haut »).
 
 ## Le Narrateur
