@@ -504,6 +504,20 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   else await band.click();
   await expect(band).toBeHidden();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  // Juste après l'accueil : aparté du héros, dans une bulle, tourné vers l'écran.
+  const bubble = page.locator('.hero-bubble');
+  await expect(bubble).toBeVisible({ timeout: 3000 });
+  const n3 = await narr(page);
+  expect(n3.voice).toBe('heros');
+  expect(n3.text).toMatch(/Épaisseur/);
+  expect((await hero(page)).away).toBe(false);
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-aparte.png` });
+  // Puis le haut-parleur croit qu'un client parle au mur.
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 12000 }).toBe('narrateur');
+  expect((await narr(page)).text).toMatch(/mur|plafond/);
+  await expect(bubble).toBeHidden();
+  await expect(band).toBeVisible();
 });
 
 test('A4 : le premier scan est commenté, même si l’accueil n’est pas fini', async ({ page }, info) => {
@@ -522,6 +536,8 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
   await page.evaluate(() => {
     window.paperCart.set('narrator.inactivity', 5);
     window.paperCart.set('narrator.minGap', 0);
+    window.paperCart.set('narrator.asideGap', 0);
+    window.paperCart.set('narrator.breath', 0);
   });
   await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
   await page.locator('.narrator').click();
@@ -531,8 +547,10 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
   await expect.poll(async () => (await narr(page)).text, { timeout: 3000 }).toMatch(/vide|rien/i);
   await page.locator('.narrator').click();
   await page.locator('.narrator').click();
-  // Sans rien faire pendant 5 s (temps de jeu) : remarque d'inactivité.
-  await expect.poll(async () => (await narr(page)).text, { timeout: 9000 }).toMatch(/immobile|dormez/);
+  await page.keyboard.press('ArrowRight'); // une action : l'inactivité repart de zéro
+  // Sans rien faire pendant 5 s (temps de jeu) : la 1re fois, c'est le héros qui parle (aparté).
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 15000 }).toBe('heros');
+  expect((await narr(page)).text).toMatch(/toujours là|sortie/);
   // Désactivé : la bande disparaît.
   await page.evaluate(() => window.paperCart.set('narrator.enabled', false));
   await expect(page.locator('.narrator')).toBeHidden();

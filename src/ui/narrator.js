@@ -1,56 +1,108 @@
-// Bande du narrateur : une annonce au haut-parleur du magasin, en haut à gauche, dans la zone sûre.
+// Les deux voix à l'écran :
+//  - le haut-parleur du magasin : une bande sombre en haut à gauche, avec une icône de haut-parleur ;
+//  - les apartés du héros : une bulle de papier au-dessus de sa tête, qui le suit.
 // Le texte s'écrit lettre par lettre (avancement calculé dans core/narrator.js). La place du texte
-// entier est réservée dès le début (le reste est invisible) : la bande ne change pas de taille.
-// Toucher ou cliquer la bande : le texte s'affiche en entier, puis elle disparaît.
+// entier est réservée dès le début (le reste est invisible) : rien ne change de taille.
+// Toucher ou cliquer la réplique : le texte s'affiche en entier, puis elle disparaît.
 
 const SPEAKER =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+const MARGIN = 8; // marge au bord de l'écran (px)
+const TAIL = 14; // hauteur de la pointe de la bulle (px)
+
+function textParts(el) {
+  el.innerHTML = '<span class="voice-shown"></span><span class="voice-rest" aria-hidden="true"></span>';
+  return [el.firstChild, el.lastChild];
+}
 
 export function createNarratorUi(root, { onSkip }) {
   const band = document.createElement('div');
   band.className = 'narrator';
   band.hidden = true;
   band.setAttribute('role', 'status');
-  band.innerHTML = `<span class="narrator-icon">${SPEAKER}</span><p class="narrator-text"><span class="narrator-shown"></span><span class="narrator-rest" aria-hidden="true"></span></p>`;
-  const shownEl = band.querySelector('.narrator-shown');
-  const restEl = band.querySelector('.narrator-rest');
-  band.addEventListener('pointerdown', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    onSkip();
-  });
-  root.appendChild(band);
+  band.innerHTML = `<span class="narrator-icon">${SPEAKER}</span><p class="narrator-text"></p>`;
+  const bandParts = textParts(band.querySelector('.narrator-text'));
 
+  const bubble = document.createElement('div');
+  bubble.className = 'hero-bubble';
+  bubble.hidden = true;
+  bubble.setAttribute('role', 'status');
+  bubble.innerHTML = '<p class="hero-bubble-text"></p><span class="hero-bubble-tail"></span>';
+  const bubbleParts = textParts(bubble.querySelector('.hero-bubble-text'));
+  const tail = bubble.querySelector('.hero-bubble-tail');
+
+  for (const el of [band, bubble]) {
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      onSkip();
+    });
+    root.appendChild(el);
+  }
+
+  let current = null; // élément affiché
+  let parts = bandParts;
   let text = '';
   let count = -1;
+  let bw = 0;
+  let bh = 0;
+  let lastX = NaN;
+  let lastY = NaN;
+
   return {
-    el: band,
-    // still : « réduire les animations » (pas de glissement à l'apparition).
-    show(t, still) {
+    // voice : 'heros' (bulle) ou autre (bande) ; still : « réduire les animations ».
+    show(t, voice, still) {
+      const el = voice === 'heros' ? bubble : band;
+      if (current && current !== el) current.hidden = true;
+      current = el;
+      parts = el === bubble ? bubbleParts : bandParts;
       text = t;
-      band.classList.toggle('still', still);
       count = -1;
-      band.setAttribute('aria-label', t);
-      band.hidden = false;
-      band.classList.remove('visible');
-      void band.offsetWidth; // relance l'apparition
-      band.classList.add('visible');
+      el.classList.toggle('still', still);
+      el.setAttribute('aria-label', t);
+      parts[0].textContent = '';
+      parts[1].textContent = t; // place réservée pour le texte entier
+      el.hidden = false;
+      el.classList.remove('visible');
+      if (el === bubble) {
+        bw = bubble.offsetWidth; // mesuré une fois par réplique
+        bh = bubble.offsetHeight;
+        lastX = NaN;
+      } else void band.offsetWidth; // relance l'apparition
+      el.classList.add('visible');
     },
     // n : lettres visibles. Le texte n'est réécrit que si ce nombre change.
     setShown(n) {
       if (n === count) return;
       count = n;
-      shownEl.textContent = text.slice(0, n);
-      restEl.textContent = text.slice(n);
+      parts[0].textContent = text.slice(0, n);
+      parts[1].textContent = text.slice(n);
+    },
+    // Bulle : (x, y) = au-dessus de la tête du héros, en pixels d'écran. Reste dans l'écran.
+    placeBubble(x, y) {
+      if (current !== bubble) return;
+      const W = root.clientWidth;
+      const left = Math.max(MARGIN, Math.min(W - bw - MARGIN, x - bw / 2));
+      const top = Math.max(MARGIN, y - bh - TAIL);
+      if (Math.abs(left - lastX) < 0.5 && Math.abs(top - lastY) < 0.5) return;
+      lastX = left;
+      lastY = top;
+      bubble.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      tail.style.left = `${Math.max(16, Math.min(bw - 16, x - left))}px`;
     },
     hide() {
-      if (band.hidden) return;
-      band.hidden = true;
-      band.classList.remove('visible');
+      if (!current) return;
+      current.hidden = true;
+      current.classList.remove('visible');
+      current = null;
       count = -1;
     },
     get visible() {
-      return !band.hidden;
+      return current !== null;
+    },
+    get voice() {
+      return current === bubble ? 'heros' : current === band ? 'narrateur' : '';
     },
   };
 }

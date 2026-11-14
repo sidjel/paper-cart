@@ -12,6 +12,38 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 33 — 14/11/2026 — A4 (2/2) : le héros parle à son « Épaisseur »
+
+**Décisions de l'auteur** : le joueur est « l'Épaisseur » du héros (✅ terme et principe) ; seul le héros brise le 4ᵉ mur, le haut-parleur ne sait pas qu'il y a un joueur (🧪) ; pistes ❓ notées (Révélation, Caisse Finale, Panier, êtres vivants) ; corrections de cohérence (Gwent retiré, « Steak Haché Premier Prix », état réel du jeu) ; deux questions de règles notées pour B.
+
+**Jouable maintenant**
+- **Apartés du héros** (5 répliques [TEMP], il tutoie « mon Épaisseur », « toi, là-haut ») :
+  - juste après l'accueil ;
+  - un scan dans le vide, quand le haut-parleur se tait ;
+  - la 1re inactivité ;
+  - les ouvertures du Panier après la première.
+- **On voit qui parle** : le haut-parleur garde sa bande sombre et son « ding-dong » ; le héros a une **bulle de papier au-dessus de sa tête, qui le suit**, un **froissement de papier**, des bips plus graves, et il **se tourne vers l'écran** s'il est à l'arrêt (pivot habituel).
+- **Le haut-parleur réagit** une fois sur deux après un aparté : « l'article non référencé du rayon 7 est prié de cesser de parler au mur ».
+- **Rareté et priorités** :
+  - au moins 90 s entre deux apartés, et 4 s de silence avant ;
+  - jamais deux voix à la fois ;
+  - une annonce passe avant un aparté (et peut le couper), jamais l'inverse.
+- Typographie : espaces insécables à la française (plus de « ? » seul en début de ligne).
+- L'inactivité compte maintenant aussi les touches et les touchers, pas seulement la marche.
+
+**Vérifié** :
+- 105 tests de logique : priorités, enchaînements, délais, apartés désactivés, tutoiement du héros et vouvoiement du haut-parleur dans les données.
+- 47 tests navigateur sans erreur console, comptages inchangés : accueil → aparté en bulle, héros tourné vers l'écran → réaction du haut-parleur ; inactivité → aparté.
+- Captures PC et téléphone simulé.
+- **Non vérifiable ici** : les sons, la fluidité sur le téléphone.
+
+**Décisions prises seul** :
+- Pas de hasard : il n'est pas nécessaire, les règles « une fois sur N » et « la réplique la plus ancienne » suffisent. Le générateur à graine reste prévu pour le jour où le jeu tirera au hasard.
+- Le héros se tourne vers l'écran seulement s'il est à l'arrêt et ne scanne pas.
+- La bulle reste dans l'écran.
+
+---
+
 ## Séance 32 — 14/11/2026 — A4 (1/2) : le narrateur prend la parole
 
 **Décisions de l'auteur** : ancien GAME_DESIGN.md fourni (archivé) ; VISION.md complété (4 familles de cartes, néons de magasin en zone 2) ; fil « Client » → « Article non référencé » essayé dès A4 (choix A).

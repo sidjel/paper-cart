@@ -6,7 +6,7 @@ import { createMusic } from './music.js';
 
 export function createAudio(settings, song) {
   let ctx = null;
-  let master, musicBus, sfxBus, scanBus, voiceBus, noise, music;
+  let master, musicBus, sfxBus, scanBus, voiceBus, heroBus, noise, music;
   let paused = false;
   let hidden = false;
   let foot = 0;
@@ -45,6 +45,8 @@ export function createAudio(settings, song) {
     scanBus.connect(master);
     voiceBus = ctx.createGain(); // narrateur (annonce, petits bips du texte)
     voiceBus.connect(master);
+    heroBus = ctx.createGain(); // apartés du héros (froissement, petits bips)
+    heroBus.connect(master);
     // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et le shaker.
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const data = noise.getChannelData(0);
@@ -65,6 +67,7 @@ export function createAudio(settings, song) {
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
     scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
     voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
+    heroBus.gain.setTargetAtTime(settings.heroVolume, t, 0.03);
   }
 
   // Petite note : forme d'onde, fréquence de départ et d'arrivée, début, durée, volume.
@@ -128,6 +131,33 @@ export function createAudio(settings, song) {
     tone('square', 620 + blipN * 40, 620 + blipN * 40, ctx.currentTime, 0.03, 0.05, voiceBus);
   }
 
+  // [TEMP] Froissement de papier : trois petits crissements de bruit filtré (aparté du héros).
+  function froissement() {
+    const t = ctx.currentTime;
+    for (let k = 0; k < 3; k++) {
+      const at = t + k * 0.07;
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.Q.value = 1.2;
+      bp.frequency.value = 2600 + k * 900;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.3 - k * 0.06, at + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.06);
+      src.connect(bp).connect(g).connect(heroBus);
+      src.start(at, 0.1 + k * 0.2, 0.08);
+    }
+  }
+
+  // [TEMP] Petit bip de lettre du héros : plus grave et plus doux que celui du haut-parleur.
+  let heroN = 0;
+  function blipHeros() {
+    heroN = (heroN + 1) % 3;
+    tone('triangle', 330 + heroN * 30, 300 + heroN * 30, ctx.currentTime, 0.04, 0.09, heroBus);
+  }
+
   function running() {
     return ctx && ctx.state === 'running' && !hidden;
   }
@@ -151,7 +181,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, annonce, blip };
+  const SOUNDS = { pas: step, bip, aspire, carte, annonce, blip, froissement, blipHeros };
 
   return {
     // Appelé au premier geste du joueur.

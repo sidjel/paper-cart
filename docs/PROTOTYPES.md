@@ -11,7 +11,7 @@
 | A1 | ✅ validée : `1445d25` |
 | A2 | ✅ validée : `6be7130` |
 | A3 | ✅ validée : `630fec0` (avec double toucher ; essai de scan sur une table et dans le caddie en cours) |
-| A4 | à faire : narrateur, finitions, réglages complets, vérifications de performance |
+| A4 | construite (séances 32-33) : haut-parleur et apartés du héros (le joueur est son « Épaisseur ») ; **validation proposée** |
 | **A5 — Caddie** | **Étape ajoutée par l'auteur (séance 29), après A4 et avant le combat B.** Contenu ✅ décidé en séance 31 : voir `docs/GAME_DESIGN.md` (Panier physique qui suit le personnage, garé et repris, visuel selon le remplissage). |
 | B, C, D | à faire |
 

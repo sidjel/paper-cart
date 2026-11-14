@@ -41,6 +41,11 @@ export const config = {
     lineCooldown: 600, // une même réplique ne revient pas avant (s)
     inactivity: 30, // délai d'inactivité avant une remarque (s)
     blipEvery: 2, // un petit bip toutes les N lettres (0 = aucun)
+    // Apartés du héros (il se tourne vers l'écran et parle au joueur)
+    asides: true, // le héros fait des apartés
+    asideGap: 90, // écart minimal entre deux apartés (s)
+    breath: 4, // silence minimal avant un aparté (s), sauf enchaîné à une réplique
+    followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
   scan: {
     range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
@@ -80,6 +85,7 @@ export const config = {
     steps: 0.35, // volume des pas
     scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
+    heroVolume: 0.5, // volume des apartés du héros (froissement de papier, petits bips)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
@@ -166,6 +172,7 @@ export const TUNABLES = [
   { group: 'Scanner', key: 'scan.particles', label: 'Nombre de confettis', min: 0, max: 24, step: 1, reload: true },
   { group: 'Son', key: 'audio.scanVolume', label: 'Sons du scanner', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.heroVolume', label: 'Apartés du héros (papier, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.speed', label: 'Vitesse d’écriture', min: 10, max: 120, step: 2, unit: 'lettres/s' },
   { group: 'Narrateur', key: 'narrator.hold', label: 'Temps affiché après le texte', min: 0.5, max: 6, step: 0.1, unit: 's' },
@@ -173,6 +180,10 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.minGap', label: 'Écart minimal entre deux répliques', min: 0, max: 120, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.lineCooldown', label: 'Une même réplique revient après', min: 0, max: 1800, step: 30, unit: 's' },
   { group: 'Narrateur', key: 'narrator.inactivity', label: 'Remarque d’inactivité après', min: 5, max: 180, step: 5, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.asides', label: 'Apartés du héros', type: 'bool' },
+  { group: 'Narrateur', key: 'narrator.asideGap', label: 'Écart minimal entre deux apartés', min: 10, max: 600, step: 10, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },

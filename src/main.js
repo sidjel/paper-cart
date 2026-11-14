@@ -6,10 +6,10 @@ import { config, onConfigChange, setValue, getValue, overrides } from './config.
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
-import { createWalker, setPath, stepWalker, faceProduct } from './core/movement.js';
+import { createWalker, setPath, stepWalker, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket } from './core/cards.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle } from './core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle } from './core/narrator.js';
 import { createNarratorUi } from './ui/narrator.js';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
@@ -81,39 +81,59 @@ let pendingScan = -1; // double toucher : produit à scanner à l'arrivée du pe
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
   const i = nearestProduct(productState, walker, config.scan);
-  if (i < 0) say('rien_a_scanner');
+  if (i < 0) say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
   scanProduct(i);
 }
 
-// ---------- Narrateur (logique dans core/narrator.js, répliques dans data/narrator.json) ----------
-// Les répliques [TEMP] s'affichent sans leur préfixe.
+// ---------- Voix : haut-parleur et apartés du héros ----------
+// Logique dans core/narrator.js, répliques dans data/narrator.json. Les [TEMP] s'affichent sans préfixe,
+// avec des espaces insécables à la française (jamais un « ? » seul en début de ligne).
+const frenchSpaces = (t) => t.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
 const narratorData = {
   triggers: narratorFile.triggers,
-  lines: narratorFile.lines.map((l) => ({ ...l, text: l.text.replace(/^\[TEMP\]\s*/, '') })),
+  lines: narratorFile.lines.map((l) => ({ ...l, text: frenchSpaces(l.text.replace(/^\[TEMP\]\s*/, '')) })),
 };
 const narrator = createNarrator();
-const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, config.narrator) });
+const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator) });
 let arrived = false;
 let endOfAisleX = Infinity;
+let voiceLine = null; // réplique affichée
+let playerActed = false; // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
+const head = { x: 0, y: 0 };
+const HEAD_HEIGHT = 330; // hauteur de la tête du héros au-dessus de ses pieds (px du dessin)
 
+// Un moment du jeu : renvoie true si une voix prend la parole.
 function say(trigger) {
-  const line = narrate(narrator, narratorData, trigger, config.narrator);
-  if (!line) return;
-  narratorUi.show(line.text, config.display.reduceMotion);
-  audio.play('annonce');
+  return narrate(narrator, narratorData, trigger, config.narrator) !== null;
+}
+
+// Une réplique commence : bande ou bulle, son, et pour un aparté le héros se tourne vers l'écran
+// (s'il est à l'arrêt et ne scanne pas).
+function voiceStarted() {
+  const hero = narrator.voice === 'heros';
+  narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion);
+  audio.play(hero ? 'froissement' : 'annonce');
+  if (hero && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
 }
 
 // À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
 function updateNarrator(dt) {
-  const letters = stepNarrator(narrator, dt, config.narrator);
-  if (!narrator.line) {
-    narratorUi.hide();
-    return;
+  const letters = stepNarrator(narrator, narratorData, dt, config.narrator);
+  if (narrator.line !== voiceLine) {
+    voiceLine = narrator.line;
+    if (voiceLine) voiceStarted();
+    else narratorUi.hide();
   }
+  if (!voiceLine) return;
   const n = Math.floor(narrator.shown);
   narratorUi.setShown(n);
+  const hero = narrator.voice === 'heros';
   const every = config.narrator.blipEvery;
-  if (letters > 0 && every > 0 && n % every === 0) audio.play('blip');
+  if (letters > 0 && every > 0 && n % every === 0) audio.play(hero ? 'blipHeros' : 'blip');
+  if (hero) {
+    stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, head);
+    narratorUi.placeBubble(head.x, head.y);
+  }
 }
 
 // Moments surveillés en jeu : arrivée, inactivité, bout du rayon.
@@ -122,8 +142,9 @@ function watchNarrator(dt) {
     arrived = true;
     say('arrivee');
   }
-  const active = walker.moving || scan.active || pendingScan >= 0;
-  if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite');
+  const active = walker.moving || scan.active || pendingScan >= 0 || playerActed;
+  playerActed = false;
+  if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite') || say('aparte_inactivite');
   if (walker.x >= endOfAisleX) say('bout_du_rayon');
 }
 
@@ -164,7 +185,7 @@ function onScanEvent(ev) {
     flyingCard.show(card, url);
     say(basket.cards.length === 1 ? 'premier_scan' : 'scan');
     // Points de départ et d'arrivée de la carte, calculés une fois.
-    stage.stageToClient(shown.x, shown.y - 330 * shown.scale * heroData.scale, cardFrom);
+    stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, cardFrom);
     const r = basketUi.button.getBoundingClientRect();
     cardTo.x = r.left + r.width / 2;
     cardTo.y = r.top + r.height / 2;
@@ -324,6 +345,7 @@ function endBench(status) {
 }
 
 function handleAction(action) {
+  playerActed = true;
   switch (action) {
     case 'back':
       if (quick) endQuick('annulé par le joueur (résultats partiels)');
@@ -383,11 +405,12 @@ sm.onChange((now, before) => {
   if (before === 'menu') settings.close();
   if (now === 'panier') {
     basketUi.open();
-    say('panier');
+    say('panier') || say('aparte_panier');
   }
   if (now === 'play' && before === 'pause') say('reprise');
   if (now === 'bench') {
-    narrator.line = null; // les mesures se font sans narrateur
+    silenceNarrator(narrator); // les mesures se font sans voix
+    voiceLine = null;
     narratorUi.hide();
   }
   if (before === 'panier') basketUi.close();
@@ -398,6 +421,7 @@ sm.onChange((now, before) => {
 // Un point de l'écran touché ou cliqué → un point du sol à atteindre (fonction de core/).
 function onTarget(cx, cy) {
   if (!sm.is('play')) return;
+  playerActed = true;
   pendingScan = -1;
   stage.clientToStage(cx, cy, tmpStage);
   tmpWorld.x = stageToWorldX(proj, tmpStage.x);
@@ -592,7 +616,8 @@ async function start() {
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
-    if (key === 'narrator.enabled' && !value) narrator.line = null;
+    if (key === 'narrator.enabled' && !value) silenceNarrator(narrator);
+    if (key === 'narrator.asides' && !value && narrator.voice === 'heros') silenceNarrator(narrator);
   });
   window.addEventListener('resize', layout);
   window.visualViewport?.addEventListener('resize', layout);
@@ -620,7 +645,7 @@ async function start() {
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name) }),
-    narrator: () => ({ text: narrator.line?.text ?? '', shown: Math.floor(narrator.shown), visible: narratorUi.visible, t: narrator.t }),
+    narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
     products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),

@@ -73,6 +73,11 @@ export function faceProduct(w, x, z, awayDepth = 30) {
   w.away = z === undefined ? true : z - w.z > awayDepth;
 }
 
+// Aparté : le héros se tourne vers l'écran (vue de face, le pivot de la feuille se fait tout seul).
+export function faceScreen(w) {
+  w.away = false;
+}
+
 function face(w, dx, dz) {
   if (dx > FACE_THRESHOLD) w.facing = 1;
   else if (dx < -FACE_THRESHOLD) w.facing = -1;

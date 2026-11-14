@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
-const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30 };
+const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8 };
 const DATA = {
   triggers: { arrivee: { once: true, strong: true }, scan: { every: 3 }, idle: {} },
   lines: [
@@ -14,7 +14,7 @@ const DATA = {
 };
 // Avance le temps de jeu de `s` secondes par pas de 1/60 s.
 function run(n, s) {
-  for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, 1 / 60, P);
+  for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, DATA, 1 / 60, P);
 }
 
 describe('narrateur : quand parler', () => {
@@ -63,12 +63,78 @@ describe('narrateur : quand parler', () => {
   });
 });
 
+describe('deux voix : haut-parleur et apartés du héros', () => {
+  const D = {
+    triggers: {
+      arrivee: { once: true, strong: true },
+      aparte_accueil: { voice: 'heros', once: true, follows: 'arrivee' },
+      vide: { every: 2 },
+      aparte_vide: { voice: 'heros' },
+      inactif: { every: 2, from: 2 },
+      parle_seul: { follows: '@heros', every: 2 },
+    },
+    lines: [
+      { id: 'a', trigger: 'arrivee', text: 'Bienvenue' },
+      { id: 'h', trigger: 'aparte_accueil', text: 'Psst' },
+      { id: 'v', trigger: 'vide', text: 'Rien' },
+      { id: 'hv', trigger: 'aparte_vide', text: 'Pourquoi' },
+      { id: 'i', trigger: 'inactif', text: 'Dodo' },
+      { id: 'r', trigger: 'parle_seul', text: 'Au mur' },
+    ],
+  };
+  const go = (n, s) => {
+    for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, D, 1 / 60, P);
+  };
+  it('l’aparté suit l’accueil, puis le haut-parleur réagit au « client qui parle au mur »', () => {
+    const n = createNarrator();
+    narrate(n, D, 'arrivee', P); // ≈ 0,2 s d'écriture + 2 s affichée, puis 0,8 s d'enchaînement
+    go(n, 3.5);
+    expect(n.voice).toBe('heros');
+    expect(n.line.id).toBe('h');
+    go(n, 3.5);
+    expect(n.voice).toBe('narrateur');
+    expect(n.line.id).toBe('r');
+  });
+  it('une seule voix à la fois : l’aparté ne coupe jamais, l’annonce passe avant l’aparté', () => {
+    const n = createNarrator();
+    narrate(n, D, 'vide', P); // annonce en cours
+    expect(narrate(n, D, 'aparte_vide', P)).toBe(null);
+    const m = createNarrator();
+    m.t = 100;
+    narrate(m, D, 'aparte_vide', P); // aparté en cours…
+    expect(m.voice).toBe('heros');
+    expect(narrate(m, D, 'vide', P).id).toBe('v'); // … coupé par l'annonce
+    expect(m.voice).toBe('narrateur');
+  });
+  it('apartés rares : écart minimal entre deux, et silence avant', () => {
+    const n = createNarrator();
+    n.t = 100;
+    expect(narrate(n, D, 'aparte_vide', P).id).toBe('hv');
+    go(n, 10);
+    expect(narrate(n, D, 'aparte_vide', P)).toBe(null); // moins de 90 s
+    go(n, 85); // assez loin du dernier aparté…
+    narrate(n, D, 'vide', P); // … mais le haut-parleur vient de parler
+    go(n, 3);
+    expect(narrate(n, D, 'aparte_vide', { ...P, lineCooldown: 0 })).toBe(null); // moins de 4 s de silence
+  });
+  it('« from » : l’inactivité ne fait parler le haut-parleur qu’à partir de la 2e fois', () => {
+    const n = createNarrator();
+    expect(narrate(n, D, 'inactif', P)).toBe(null);
+    expect(narrate(n, D, 'inactif', P).id).toBe('i');
+  });
+  it('apartés désactivés : le héros se tait', () => {
+    const n = createNarrator();
+    n.t = 100;
+    expect(narrate(n, D, 'aparte_vide', { ...P, asides: false })).toBe(null);
+  });
+});
+
 describe('narrateur : machine à écrire', () => {
   it('les lettres apparaissent au rythme réglé, puis la réplique reste, puis disparaît', () => {
     const n = createNarrator();
     narrate(n, DATA, 'arrivee', P); // 7 lettres à 40 lettres/s ≈ 0,18 s
     let letters = 0;
-    for (let k = 0; k < 7; k++) letters += stepNarrator(n, 1 / 60, P); // 7/60 s × 40 ≈ 4,7 lettres
+    for (let k = 0; k < 7; k++) letters += stepNarrator(n, DATA, 1 / 60, P); // 7/60 s × 40 ≈ 4,7 lettres
     expect(Math.floor(n.shown)).toBe(4);
     expect(letters).toBe(4);
     run(n, 0.2);
@@ -80,9 +146,9 @@ describe('narrateur : machine à écrire', () => {
   it('toucher la bande : texte entier, puis disparition', () => {
     const n = createNarrator();
     narrate(n, DATA, 'arrivee', P);
-    skipNarrator(n, P);
+    skipNarrator(n, DATA, P);
     expect(n.shown).toBe(7);
-    skipNarrator(n, P);
+    skipNarrator(n, DATA, P);
     expect(n.line).toBe(null);
   });
   it('inactivité : un seul signal par période sans action', () => {
@@ -108,6 +174,14 @@ describe('répliques du narrateur (données)', () => {
   });
   it('chaque moment a au moins une réplique', () => {
     for (const tr of Object.keys(file.triggers)) expect(file.lines.some((l) => l.trigger === tr), tr).toBe(true);
+  });
+  it('les apartés du héros tutoient leur « Épaisseur » ; le haut-parleur vouvoie', () => {
+    for (const l of file.lines) {
+      const hero = file.triggers[l.trigger].voice === 'heros';
+      if (hero) expect(/\b(tu|te|toi|mon Épaisseur)\b/i.test(l.text), l.id).toBe(true);
+      else expect(/\b(tu|toi)\b/i.test(l.text), l.id).toBe(false);
+    }
+    expect(file.lines.filter((l) => file.triggers[l.trigger].voice === 'heros').length).toBeGreaterThanOrEqual(4);
   });
   it('le fil « Client » → « Article non référencé » est présent', () => {
     const all = file.lines.map((l) => l.text).join(' ');
