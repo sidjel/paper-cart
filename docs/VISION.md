@@ -10,7 +10,7 @@ Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le mag
 - On y fait marcher un **personnage en papier façon Paper Mario**.
 - Le personnage tient une **douchette de scanner** : il vise un produit dans le rayon et en extrait l'**essence**, qui devient une **carte**.
 - On combat avec ces cartes en **tour par tour sans chrono**, le personnage et l'ennemi face à face dans le décor, les cartes en bas de l'écran.
-- Les cartes **pourrissent** avec le temps et **changent de rôle** : fraîches, elles soignent ou protègent ; mûres, elles ont leur meilleur effet ; pourries, elles deviennent des armes ou des poisons à lancer.
+- Les cartes **pourrissent** avec le temps et **changent de rôle** : fraîches, elles soignent ou protègent ; mûres, elles ont leur meilleur effet ; pourries, elles deviennent des armes ou des poisons à lancer. *(Précision de l'auteur, séance 32 : toutes les cartes ne pourrissent pas ; il y a 4 familles d'évolution — stables, périssables, évolutives, à potentiel de fusion — détaillées dans `docs/REGLES_CARTES_COMBAT.md`.)*
 - On **découvre** des combos et des évolutions **inconnus à l'avance**, par hasard ou par logique d'après la nature des cartes.
 - Des **moments épiques à la Final Fantasy VII, VIII et X** : une jauge, puis une attaque ultime mise en scène comme une invocation, mais avec des objets du supermarché.
 - Un **narrateur odieux** brise le 4ᵉ mur et commente tout.
@@ -32,7 +32,7 @@ Inspirée de Paper Mario et de Baten Kaitos.
 - **Animations expressives de papier** : rebond, écrasement et étirement. Plus tard : s'aplatir en tombant, se plier en sautant, se mettre de profil pour passer dans un passage étroit.
 - **Ombre séparée du dessin**, jamais incluse dans l'image : une ellipse douce au sol, plus petite et plus diffuse quand le personnage s'élève.
 - **Texture dessinée à la main** : trait de crayon visible, grain du papier, contours légèrement irréguliers, ombrages simples.
-- **Couleurs** : franches et joyeuses dans la zone 1 (« L'Illusion »). Elles se salissent, se désaturent et verdissent dans la zone 2 (« La Réalité »). Pas d'ambiance de conte de fées générique.
+- **Couleurs** : franches et joyeuses dans la zone 1 (« L'Illusion »). Elles se salissent, se désaturent et verdissent dans la zone 2 (« La Réalité »), où les **néons du magasin** (qui bourdonnent, clignotent) sont permis, avec l'option « Réduire les clignotements » *(précision de l'auteur, séance 32 ; l'interdit ci-dessus vise les néons génériques sur fond noir)*. Pas d'ambiance de conte de fées générique.
 
 ## Piliers
 

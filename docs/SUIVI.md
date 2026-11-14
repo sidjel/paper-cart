@@ -79,7 +79,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | Justifier le scanner dans l'histoire : scanner spécial ? quels objets ? pourquoi ? | 28 | 👀 | Séance 31 : ✅ douchette = technologie du magasin qui extrait l'essence ; produits figés hors du temps sur l'étagère, évolution dès le scan (docs/HISTOIRE.md). Reste ❓ : scanner des êtres vivants ? |
 | Documents sur l'histoire, le game design, le style | 30 | ✅ | Séance 31 : 5 fichiers courts créés (HISTOIRE, PERSONNAGES, GAME_DESIGN, REGLES_CARTES_COMBAT, DIRECTION_ARTISTIQUE), lus seulement à l'étape concernée. |
-| Archiver l'ancien GAME_DESIGN.md de Maxi-Gouffre | 31 | 🔧 | **Fichier non reçu** en séance 31 : à joindre de nouveau. Nécessaire pour lister les 20 familles et 6 recettes (REGLES_CARTES_COMBAT.md). |
+| Archiver l'ancien GAME_DESIGN.md de Maxi-Gouffre | 31 | ✅ | Séance 32 : `docs/archive/maxi-gouffre-GAME_DESIGN.md` ; 20 familles et 6 recettes listées dans REGLES_CARTES_COMBAT.md. |
+| VISION.md : 4 familles de cartes, néons de magasin en zone 2 | 32 | ✅ | Choix A : deux précisions ajoutées à VISION.md à la demande de l'auteur. |
 | Narrateur A4 | 31 | 🔧 | Choix B (séance 31) : bases écrites d'abord, A4 codé à la séance suivante avec des répliques dans le bon ton. |
 | Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Caddie jouable (A5) en sera la forme physique. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |

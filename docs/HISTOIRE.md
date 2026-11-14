@@ -20,6 +20,7 @@
 ## L'assimilation et le code-barres 🧪 À TESTER
 - Le système d'inventaire tente de **classer tout ce qui reste** dans le magasin.
 - Fil rouge : le Narrateur appelle d'abord le héros « Client », puis « Article non référencé », jusqu'à vouloir lui attribuer un code-barres et le mettre en promotion.
+- ✅ VALIDÉ (séance 32) : essayé dès A4, discrètement, dans une ou deux répliques.
 
 ## La douchette et la stase des rayons ✅ VALIDÉ
 - Technologie **propre au magasin** : elle extrait l'**essence** d'un produit en carte.

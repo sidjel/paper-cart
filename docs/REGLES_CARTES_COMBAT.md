@@ -24,8 +24,29 @@
 - **C** : hybride.
 
 ## Réserve de cartes et de fusions 🧪 À TESTER
-- À lister de façon compacte : les **20 familles** et **6 recettes** de l'ancien game design (§7.3 et §7.4), effets de plateau à réécrire pour le face à face avant de coder B.
-- ❓ En attente : `docs/archive/maxi-gouffre-GAME_DESIGN.md` n'est pas encore dans le dépôt (fichier non reçu en séance 31).
+Reprise de `docs/archive/maxi-gouffre-GAME_DESIGN.md` §7.3 et §7.4. **Effets de plateau et puissances à réécrire** pour le face à face avant de coder B (ici : noms des stades et notes seulement).
+- **20 familles** (Frais → Mûr → Pourri) :
+  - banane : Banane Verte → Banane Parfaite → Bouillie Brune (malus)
+  - steak : Steak Haché Eco+ → Steak Douteux → Bactérie Mortelle
+  - lait : Lait Entier → Lait Tourné → Fromage Vivant (fermentation)
+  - baguette : Pain Baguette → Baguette Dure → Poussière de Pain
+  - glace : Glace Vanille → Soupe Sucrée → Flotte Collante (surgelé, malus)
+  - pizza : Pizza Ananas → Pizza Tiède → Scandale Culinaire (malus, ne fusionne avec rien)
+  - pile : Pile LR6 Neuve → Pile Faible → Acide de Pile (malus)
+  - céréales : Céréales Fluo → Céréales Molles → Sucre Toxique
+  - influenceur : Influenceur Fitness → Influenceur Fatigué → Influenceur Annulé (malus)
+  - enfant : Enfant Hurlant → Enfant Épuisé → Enfant Endormi
+  - console : Console Portable → Console Rayée → Console Brickée
+  - papier : Papier Toilette → Dernier Rouleau → Carton Vide (monnaie de troc)
+  - bière : Bière Fraîche → Bière Chaude → Vomi de Soirée (malus)
+  - kévin : Kévin (Caissier) → Kévin (Démissionnaire) → Kévin (Syndiqué) (fermentation)
+  - mixeur : Mixeur Bon Marché → Mixeur Surchauffé → Explosion Électrique (outil)
+  - scotch : Scotch Gris → Scotch Poussiéreux → Colle Sèche (outil joker)
+  - plante : Plante Verte → Plante Florissante → Tige Morte
+  - chat : Chat Errant → Gros Matou → Boule de Poils (mange la Bactérie Mortelle)
+  - cassette : Cassette Maudite → Bande Démagnétisée → Entité Libérée (rare, fermentation)
+  - grand-mère : Grand-Mère Perdue → Grand-Mère Paniquée → Héritage (PNJ allié, fermentation)
+- **6 recettes** : Milkshake Protéiné (banane + lait) · Burger Gras (steak + baguette) · Petit-Dèj Épique (lait + céréales) · Ado Muet (enfant + console) · Plante Mutante (plante + pile pourrie) · Lance de Fortune (baguette + scotch).
 
 ## Déjà en place dans le jeu (provisoire)
 - Cartes avec nom, puissance, stade, propriétés ; icône de stade (forme + couleur). Pas encore de vieillissement.
