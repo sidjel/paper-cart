@@ -54,6 +54,15 @@ loadSavedSettings();
 const gameEl = document.getElementById('game');
 const uiEl = document.getElementById('ui');
 const sm = createStateMachine('loading');
+// Erreurs survenues sur l'appareil (les 5 dernières), recopiées dans le rapport du diagnostic :
+// utile quand un problème n'arrive que sur le vrai téléphone.
+const errorLog = [];
+function logError(msg) {
+  errorLog.push(`${new Date().toLocaleTimeString('fr-FR')} ${msg}`.slice(0, 200));
+  if (errorLog.length > 5) errorLog.shift();
+}
+window.addEventListener('error', (e) => logError(e.message || String(e.error)));
+window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.reason?.message ?? e.reason}`));
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
 let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust;
@@ -79,6 +88,16 @@ const basket = createBasket();
 const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects, base: BASE });
 const flyingCard = createFlyingCard(uiEl);
 const confirm = createConfirm(uiEl);
+// Filtre « écran cathodique » : un calque par-dessus tout (lignes de balayage, bords sombres), sans clic.
+const crt = document.createElement('div');
+crt.className = 'crt';
+crt.hidden = true;
+uiEl.appendChild(crt);
+function applyCrt() {
+  crt.hidden = !config.display.crt;
+  crt.style.opacity = config.display.crtStrength;
+}
+applyCrt();
 // Écran titre (après le chargement) : Commencer, Options. Sur téléphone, Commencer passe en plein écran
 // paysage (le jeu ne doit pas démarrer à la verticale).
 const titleUi = createTitleScreen(uiEl, {
@@ -87,10 +106,18 @@ const titleUi = createTitleScreen(uiEl, {
   onOptions: () => sm.go('menu'),
 });
 function startGame(fromPlayer) {
+  if (sm.is('menu') && titleUi.visible) sm.back(); // les Options étaient ouvertes : on les ferme d'abord
   if (!sm.is('title')) return;
-  if (fromPlayer && touch) enterLandscape();
   titleUi.hide();
   sm.go('play');
+  // Ensuite seulement : plein écran (et paysage sur téléphone), si l'option est active.
+  if (fromPlayer && wantsFullscreen()) {
+    try {
+      enterLandscape();
+    } catch (err) {
+      logError(`plein écran : ${err.message}`);
+    }
+  }
 }
 const tip = { x: 0, y: 0 }; // bout de la Scanette sur la scène
 const cardFrom = { x: 0, y: 0 };
@@ -360,6 +387,7 @@ const diag = createDiagnostic(uiEl, () => ({
   audio: audio.describe(),
   gamepad: input?.gamepad.connected ?? false,
   overrides: overrides(),
+  errors: errorLog,
 }));
 const benchUi = createBenchUi(uiEl, {
   onStart: () => startBench(config.bench.passes, config.bench.warmup),
@@ -559,9 +587,24 @@ function handleAction(action) {
 // Plein écran et paysage (téléphone) : seulement après un geste du joueur ; le verrouillage de
 // l'orientation n'est possible qu'en plein écran (Chrome Android) ; refus ignorés sans bruit.
 function enterLandscape() {
-  const lock = () => screen.orientation?.lock?.('landscape').catch(() => {});
+  const lock = () => {
+    if (touch) screen.orientation?.lock?.('landscape')?.catch?.(() => {});
+  };
   if (document.fullscreenElement) lock();
-  else document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).then(lock).catch(() => {});
+  else {
+    const p = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
+    p?.then?.(lock)?.catch?.((err) => logError(`plein écran refusé : ${err?.message ?? err}`));
+  }
+}
+
+// Option « Plein écran » : automatique (téléphone oui, PC non), oui ou non.
+function wantsFullscreen() {
+  const m = config.display.fullscreenMode;
+  return m === 'oui' || (m === 'auto' && touch);
+}
+
+function exitFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen?.()?.catch?.(() => {});
 }
 
 function toggleFullscreen() {
@@ -842,6 +885,12 @@ async function start() {
     if (key === 'debug.showWalkMask') debugMask.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity') stage.applyOpacity();
+    if (key === 'display.fullscreenMode') {
+      // Le choix se fait d'un geste (dans le panneau) : on peut entrer en plein écran tout de suite.
+      if (value === 'oui') enterLandscape();
+      else if (value === 'non') exitFullscreen();
+    }
+    if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);

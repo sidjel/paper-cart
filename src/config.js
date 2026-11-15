@@ -87,6 +87,10 @@ export const config = {
     // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
     // à chaque bascule l'objet est redessiné et peut disparaître un instant (clignotement).
     propLayers: true,
+    // Plein écran : 'auto' (téléphone : oui, en paysage, en touchant « Commencer » ; PC : non), 'oui', 'non'.
+    fullscreenMode: 'auto',
+    crt: false, // filtre « écran cathodique » (lignes de balayage, bords sombres) ; coûte un peu sur téléphone
+    crtStrength: 0.6, // force du filtre cathodique (0 à 1)
   },
   audio: {
     muted: false, // couper tout le son
@@ -208,6 +212,12 @@ export const TUNABLES = [
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
   { group: 'Caméra', key: 'camera.deadZone', label: 'Zone sans mouvement', min: 0, max: 0.4, step: 0.01 },
   { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
+  {
+    group: 'Affichage', key: 'display.fullscreenMode', label: 'Plein écran', type: 'choice',
+    options: [['auto', 'Automatique (téléphone : oui)'], ['oui', 'Oui'], ['non', 'Non']],
+  },
+  { group: 'Affichage', key: 'display.crt', label: 'Filtre écran cathodique', type: 'bool' },
+  { group: 'Affichage', key: 'display.crtStrength', label: 'Force du filtre cathodique', min: 0.1, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },

@@ -42,3 +42,24 @@ test('écran titre : Options ouvre les réglages, Fermer revient au titre ; clav
   await page.keyboard.press('Enter'); // de retour au titre, « Commencer » est mis en avant
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
 });
+
+test('Options : plein écran (choix) et filtre écran cathodique', async ({ page }, info) => {
+  await page.locator('.title-button', { hasText: 'Options' }).click();
+  const panel = page.locator('.settings');
+  await expect(panel).toBeVisible();
+  await panel.locator('.settings-tab', { hasText: 'Affichage' }).click();
+  await expect(panel.locator('select[data-key="display.fullscreenMode"]')).toBeVisible();
+  await expect(page.locator('.crt')).toBeHidden();
+  await panel.locator('input[data-key="display.crt"]').check();
+  await expect(page.locator('.crt')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('title');
+  await page.screenshot({ path: `test-results/captures/titre-${info.project.name}-crt.png` });
+  // Le filtre ne bloque pas les clics : Commencer lance la partie.
+  const start = page.locator('.title-button', { hasText: 'Commencer' });
+  if (info.project.name === 'telephone') await start.tap();
+  else await start.click();
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `test-results/captures/jeu-${info.project.name}-crt.png` });
+});

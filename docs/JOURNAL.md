@@ -12,6 +12,29 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 40 — 15/11/2026 — « Commencer » réparé, plein écran au choix, filtre écran cathodique
+
+**Retours de l'auteur** : « Commencer » ne lance pas le jeu ; pouvoir choisir le plein écran dans les options ; un filtre écran cathodique ; d'autres idées d'options.
+
+**Cause trouvée** :
+- la fenêtre des Options s'ouvrait **derrière** l'écran titre : visible en partie, mais impossible à utiliser ;
+- le jeu restait dans l'état « Options », donc « Commencer » ne faisait rien ;
+- mon test passait parce qu'il fermait les Options au clavier.
+
+Ce que j'ai corrigé :
+- les Options passent au-dessus de l'écran titre ;
+- « Commencer » ferme les Options si elles sont ouvertes ;
+- la partie démarre **avant** la demande de plein écran, dont un éventuel refus ne bloque plus rien ;
+- les erreurs survenues sur l'appareil sont recopiées dans le rapport du diagnostic (ligne « Erreurs relevées »).
+
+**Jouable maintenant** :
+- ⚙ → Affichage → **Plein écran** : Automatique (téléphone : oui, en paysage, en touchant Commencer), Oui, Non. Le choix s'applique tout de suite.
+- **Filtre écran cathodique** (désactivé par défaut) : lignes de balayage, bords sombres et bombés, force réglable. Il est par-dessus tout, même l'écran titre, sans gêner les clics.
+
+**Vérifié** : 116 tests de logique et 56 tests navigateur PC et téléphone simulé sans erreur console, dont : Options ouvertes depuis le titre (onglet Affichage, plein écran, filtre), retour au titre, puis Commencer ; captures du filtre en jeu et sur le titre. **Non vérifiable ici** : le vrai plein écran du téléphone.
+
+---
+
 ## Séance 39 — 15/11/2026 — Écran titre, objets illustrés, échange de cartes, confiance à l'essai
 
 **Demandes de l'auteur** :

@@ -116,6 +116,7 @@ export function createDiagnostic(root, getContext) {
       `  calcul JS par image : moy ${fmt(j.avg, 2)} ms · p95 ${fmt(j.p95, 2)} · pire ${fmt(j.worst, 2)}`,
       `  mémoire JS : ${fmt(memoryMb())} Mo`,
       `Réglages modifiés : ${JSON.stringify(c.overrides)}`,
+      `Erreurs relevées : ${c.errors?.length ? c.errors.join(' | ') : 'aucune'}`,
       `Objectifs (60 i/s, aucune image > 33 ms, calcul ≤ 8 ms) : ${ok ? 'atteints sur cet historique' : 'à vérifier'}`,
     ].join('\n');
   }

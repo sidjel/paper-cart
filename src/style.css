@@ -207,6 +207,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .diag button { min-height: 36px; font-size: 13px; }
 
 .settings {
+  z-index: 75; /* au-dessus de l'écran titre (Options) */
   top: var(--safe-top);
   bottom: var(--safe-bottom);
   left: 50%;
@@ -694,3 +695,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .title-button:hover, .title-button:focus-visible { background: #f3c77a; color: #151827; border-color: #f3c77a; outline: none; }
 /* En portrait : la consigne pour tourner le téléphone propose aussi de passer en paysage. */
 .rotate-button { margin-top: 14px; min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--paper); background: transparent; color: var(--paper); font-size: 17px; }
+
+/* Filtre « écran cathodique » : lignes de balayage fines, bords assombris et légèrement bombés.
+   Par-dessus tout (même l'écran titre), sans intercepter les clics. Option : ⚙ → Affichage. */
+.crt {
+  position: absolute;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.28) 0 1px, rgb(0 0 0 / 0) 1px 3px),
+    radial-gradient(ellipse at 50% 50%, rgb(0 0 0 / 0) 60%, rgb(0 0 0 / 0.55) 100%);
+  box-shadow: inset 0 0 60px rgb(0 0 0 / 0.6), inset 0 0 6px rgb(120 160 255 / 0.25);
+  border-radius: 18px / 14px;
+}
+#ui > .crt { pointer-events: none; }

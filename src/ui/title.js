@@ -30,6 +30,9 @@ export function createTitleScreen(root, { image, onStart, onOptions }) {
     hide() {
       el.hidden = true;
     },
+    get visible() {
+      return !el.hidden;
+    },
     // Gauche/haut : bouton précédent ; droite/bas : suivant.
     move(dir) {
       focus = (focus + dir + buttons.length) % buttons.length;
