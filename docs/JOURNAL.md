@@ -30,6 +30,11 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Corrigé : pendant l'ouverture (et au moins 0,35 s), toucher à côté est ignoré.
 - Le test complété échoue sur l'ancienne version et passe sur la nouvelle.
 
+**Suite 2 (double toucher sur la carte déjà agrandie : elle grandit encore, s'approche, disparaît)** :
+- Cause : le premier toucher la retourne, et à demi retournée elle est toute fine. Le second toucher tombait à côté, donc « refermer ». En plus, la fermeture mesurait la carte toute fine et calculait un agrandissement énorme.
+- Corrigé : toucher à côté est ignoré pendant toute animation, et la carte est mesurée à sa taille réelle.
+- Nouveau test (échoue sur l'ancienne version en PC) ; 76 tests navigateur verts.
+
 ---
 
 ## Séance 49 (suite) — Le tournis

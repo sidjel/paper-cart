@@ -194,12 +194,17 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     };
   }
   // Départ (ou arrivée) de l'animation : là où est la petite carte (mesuré à l'ouverture et à la fermeture).
+  // La grande carte est mesurée à sa place et à sa taille réelles (sans l'animation en cours : à demi
+  // retournée, elle paraît toute fine, et la fermeture calculait un agrandissement énorme).
   function measureFrom(el) {
     const a = el.getBoundingClientRect();
-    const b = flipper.getBoundingClientRect();
-    flipper.style.setProperty('--fx', `${a.left + a.width / 2 - (b.left + b.width / 2)}px`);
-    flipper.style.setProperty('--fy', `${a.top + a.height / 2 - (b.top + b.height / 2)}px`);
-    flipper.style.setProperty('--fs', String(a.width / b.width));
+    const d = detail.getBoundingClientRect();
+    const bw = flipper.offsetWidth;
+    const bx = d.left + flipper.offsetLeft + bw / 2;
+    const by = d.top + flipper.offsetTop + flipper.offsetHeight / 2;
+    flipper.style.setProperty('--fx', `${a.left + a.width / 2 - bx}px`);
+    flipper.style.setProperty('--fy', `${a.top + a.height / 2 - by}px`);
+    flipper.style.setProperty('--fs', String(a.width / bw));
   }
   function openDetail(el) {
     const card = cards.get(Number(el.dataset.uid));
@@ -270,9 +275,9 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
   });
   // Toucher à côté de la carte : elle se referme.
   detail.addEventListener('click', (e) => {
-    // Pas pendant l'ouverture : le second toucher d'un double toucher tombe souvent à côté de la petite
-    // carte qui commence à grandir (elle se refermait aussitôt).
-    if (e.target === detail && !opening()) closeDetail();
+    // Pas pendant une animation : le second toucher d'un double toucher tombe souvent à côté de la carte
+    // (petite carte qui grandit, ou grande carte à demi retournée, toute fine) : il ne la referme pas.
+    if (e.target === detail && !opening() && !busy()) closeDetail();
   });
   const cards = new Map(); // uid → { card, url }
 

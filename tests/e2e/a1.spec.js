@@ -417,6 +417,7 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
   else await page.locator('.card-flip').click();
   await expect(page.locator('.card-flip')).not.toHaveClass(/show-back/);
   await expect(page.locator('.card-flip .card-front')).toContainText('Mûr');
+  await expect.poll(() => page.locator('.card-flip').getAttribute('class')).toBe('card-flip'); // retournée
   // Toucher à côté : elle se referme (le Panier reste ouvert).
   if (phone) await page.touchscreen.tap(8, vp.height / 2);
   else await page.mouse.click(8, vp.height / 2);
@@ -933,5 +934,36 @@ test('Panier : un double clic (ou double toucher) sur une carte ne casse pas l�
   await expect(page.locator('.card-detail')).toBeVisible(); // et elle reste ouverte
   expect(await page.evaluate(() => window.paperCart.flips())).toBe(1);
   expect(await page.locator('.card-detail').evaluate((e) => getComputedStyle(e).touchAction)).toBe('none');
+  expect(errors).toEqual([]);
+});
+
+test('Panier : double toucher sur la grande carte : elle se retourne une fois et reste ouverte, à sa taille', async ({ page }, info) => {
+  const phone = info.project.name === 'telephone';
+  await page.goto('./?depart=panier-plein');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  if (phone) await page.locator('.panier-button').tap();
+  else await page.keyboard.press('KeyI');
+  await page.locator('.panier .card-mini').nth(1).click();
+  const flip = page.locator('.card-flip');
+  await expect.poll(() => flip.getAttribute('class')).toBe('card-flip show-back');
+  const w0 = await flip.evaluate((e) => e.offsetWidth);
+  const box = await flip.boundingBox();
+  // Double toucher au même endroit : le second tombe à côté de la carte à demi retournée.
+  const x = box.x + box.width * 0.85;
+  const y = box.y + box.height / 2;
+  if (phone) {
+    await page.touchscreen.tap(x, y);
+    await page.waitForTimeout(80);
+    await page.touchscreen.tap(x, y);
+  } else await page.mouse.dblclick(x, y);
+  await expect.poll(() => flip.getAttribute('class')).toBe('card-flip'); // retournée une fois (recto)
+  await expect(page.locator('.card-detail')).toBeVisible(); // toujours ouverte
+  const r = await flip.boundingBox();
+  expect(Math.abs(r.width - w0)).toBeLessThan(2); // à sa taille, pas agrandie
+  // Puis toucher à côté la referme bien, et la carte revient à sa place.
+  if (phone) await page.touchscreen.tap(8, 200);
+  else await page.mouse.click(8, 200);
+  await expect(page.locator('.card-detail')).toBeHidden();
+  await expect(page.locator('.panier .card-mini').nth(1)).toHaveCSS('visibility', 'visible');
   expect(errors).toEqual([]);
 });
