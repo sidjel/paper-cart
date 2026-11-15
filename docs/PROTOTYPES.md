@@ -11,9 +11,9 @@
 | A1 | ✅ validée : `1445d25` |
 | A2 | ✅ validée : `6be7130` |
 | A3 | ✅ validée : `630fec0` (avec double toucher ; essai de scan sur une table et dans le caddie en cours) |
-| A4 | construite (séances 32-35) ; **pas encore validée** (séance 36) : l'aparté doit devenir un moment rare et marquant (héros face caméra avec un dessin d'émotion, zoom de la caméra, effet visuel et sonore) |
-| **A5 — Scanette et panier à main** | Étape ajoutée par l'auteur (séances 29 et 36, ancien « A5a ») : accueil provisoire au début du rayon, Scanette et panier pris en libre-service, capacité limitée, échange quand le panier est plein. Construite (séances 36 à 49), à valider. |
-| **A6 — L'accueil** | Ordre fixé par l'auteur (séance 50). **Un lieu séparé du rayon** : grand hall d'entrée, portes automatiques, portiques de sécurité, agent de sécurité (forme provisoire). Le présentoir de Scanettes et de paniers y est déplacé. Quand le héros s'approche d'un portique pour sortir : l'agent vient se placer devant **ce portique-là** et bloque le passage ; le narrateur interdit la sortie (« Les sorties sont réservées aux clients ayant réglé leurs achats. » [TEMP]) ; le héros se dit « Hum… étrange… » (une **pensée** dans une bulle, pas un aparté : pas d'effet dramatique, ne compte pas dans la rareté des apartés). Le héros va librement de l'accueil au rayon et revient. Règles techniques des lieux : `docs/ARCHITECTURE.md` §11. |
+| A4 | ✅ validée : `c32eedd` (narrateur, apartés, première rencontre ; séance 51) |
+| A5 — Scanette et panier à main | ✅ validée : `c32eedd` (ancien « A5a » ; séance 51) |
+| **A6 — L'accueil** | Ordre fixé par l'auteur (séance 50). **En cours** (1/3 fait, séance 51). **Un lieu séparé du rayon** : grand hall d'entrée, portes automatiques, portiques de sécurité, agent de sécurité (forme provisoire). Le présentoir de Scanettes et de paniers y est déplacé. Quand le héros s'approche d'un portique pour sortir : l'agent vient se placer devant **ce portique-là** et bloque le passage ; le narrateur interdit la sortie (« Les sorties sont réservées aux clients ayant réglé leurs achats. » [TEMP]) ; le héros se dit « Hum… étrange… » (une **pensée** dans une bulle, pas un aparté : pas d'effet dramatique, ne compte pas dans la rareté des apartés). Le héros va librement de l'accueil au rayon et revient. Règles techniques des lieux : `docs/ARCHITECTURE.md` §11. |
 | **A7 — Le deuxième rayon** | Ordre fixé par l'auteur (séance 50). Accessible par **deux entrées** du premier rayon ; chaque entrée fait arriver **du bon côté** du rayon 2. |
 | **A8 — Le caddie** | Ordre fixé par l'auteur (séance 50), ancien « A5b » : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**. Détails : `docs/GAME_DESIGN.md`. |
 | B, C, D | à faire |
@@ -54,7 +54,7 @@ Un prototype peut prendre plusieurs séances : on avance **étape par étape**. 
 | A1 | Le personnage est agréable à déplacer | Décor provisoire simple, personnage en papier, déplacement au clavier, à la souris, à la manette et au doigt, zone de marche, machine à états de base (jeu / pause), boucle à pas fixe, panneau de réglages de base (vitesse, accélération), **diagnostic intégré simple** (images/s, pire image, rapport copiable) | **Oui : fin de la première séance.** Je teste la sensation de marche. |
 | A2 | Le personnage semble vraiment évoluer dans un décor profond | Profondeur (échelle, ordre d'affichage, premier plan), caméra qui glisse, parallaxe, ombre, pivot de la feuille, rebond et respiration, **banc d'essai** (parcours automatique du rayon) et premier **test des comptages** | Oui |
 | A3 | Scanner un produit est satisfaisant et donne envie de recommencer | Produits sur les étagères, mise en évidence du plus proche, scanner, particules, création d'une carte, Panier | Oui |
-| A4 | Le rayon a une personnalité | Narrateur, finitions, réglages complets, vérifications de performance | Fin du prototype A |
+| A4 | ✅ validée : `c32eedd` (narrateur, apartés, première rencontre ; séance 51) |
 
 A1 privilégie **la sensation de déplacement** : décor volontairement simple, zone de marche peu complexe, déplacement en ligne droite vers l'endroit touché ou cliqué (le personnage s'arrête contre un obstacle). **Pas de recherche de chemin** à ce stade. Si une fonctionnalité secondaire retarde la validation de la marche, propose-moi de la reporter.
 
