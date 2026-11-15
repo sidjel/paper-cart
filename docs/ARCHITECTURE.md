@@ -3,7 +3,7 @@
 > Comment le jeu est construit **aujourd'hui**, et les règles techniques à respecter.
 > Les règles du jeu sont dans `docs/VISION.md` et les documents de conception (liste et quand les lire : `CLAUDE.md`) ; le plan dans `docs/PROTOTYPES.md` ; les règles de travail dans `CLAUDE.md`.
 > **Économie de lecture** : lire le résumé (§1) et seulement la section utile à la tâche.
-> État vérifié dans le code le 14/11/2026 (séance 29). Repères : ✅ décision de l'auteur · 🔎 constaté dans le code · ⏳ prévu, pas construit.
+> État vérifié dans le code le 15/11/2026 (séance 51). Repères : ✅ décision de l'auteur · 🔎 constaté dans le code · ⏳ prévu, pas construit.
 
 ## 1. Résumé (à lire à chaque fois)
 
@@ -11,7 +11,7 @@
 - **Rendu** en éléments de page (DOM + CSS), seulement `transform` et `opacity` animés. Canevas **au chargement** seulement.
 - **Une boucle**, logique à **pas fixe** (60 Hz), délais liés au temps de jeu (jamais `setTimeout`), une **seule machine à états**.
 - **Toutes** les valeurs réglables dans `src/config.js` et le panneau ⚙ ; tout le contenu en JSON dans `src/data/`.
-- **Rien n'est créé pendant le jeu** (éléments, images, canevas) ; tout est préparé au chargement.
+- **Rien n'est créé pendant le jeu** (éléments, images, canevas) ; tout est préparé au chargement. *Exception connue, à corriger : les cartes créées au moment du scan (audit séance 50, point 8).*
 - Aucune dépendance au jeu ; outils de développement : Vite, Vitest, Playwright ✅. Aucun appel réseau.
 - Une logique de jeu, même petite, va dans `core/` avec ses tests.
 - Ne rien construire « pour plus tard » ✅ ; un fichier d'environ 300 lignes est un **repère** : découper quand il mélange plusieurs rôles ✅.
@@ -20,12 +20,12 @@
 
 | Dossier | Rôle |
 |---|---|
-| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `gear` (Scanette, panier, capacité ; A5a), `world` (état du monde par lieu : produits, objets à prendre — seule source, la scène l'affiche), `focus` (qui a la main), `narrator` (les voix — haut-parleur, apartés du héros avec réponses et confiance, petits regards caméra, pensées, conversations avec le joueur que rien n'interrompt, moments importants jamais perdus, historique : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`. |
-| `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage, objets tenus en main dessinés à part : données `held` et `hands`), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images), `targetMarker`, `debugMask` |
-| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit, deux réponses), `aside` (mise en scène de l'aparté : bandes, bords assombris), `journal` (historique des dialogues, dans la Pause), `title` (écran titre), `playerOptions` (options du joueur depuis le titre : sous-ensemble de TUNABLES, sans réglages de développement), `confirm` (fenêtre Oui / Non). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
+| `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `gear` (Scanette, panier, capacité ; A5), `world` (état du monde par lieu : produits, objets à prendre — seule source, la scène l'affiche), `focus` (qui a la main), `places` (sorties d'un lieu, fondu du changement de lieu), `intro` (texte sur noir après « Commencer »), `names` (nom du joueur dans les répliques), `dizzy` (le tournis), `narrator` (les voix — haut-parleur, apartés du héros avec réponses et confiance, petits regards caméra, pensées, conversations avec le joueur que rien n'interrompt, moments importants jamais perdus, historique : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`, `departs` (points de départ pour tester vite). |
+| `src/scene/` | `placeView` (tout ce qui affiche un lieu, et de quoi le défaire), scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage, objets tenus en main dessinés à part : données `held` et `hands`), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images, libération en quittant un lieu), `targetMarker`, `debugMask` |
+| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit, deux réponses), `aside` (mise en scène de l'aparté : bandes, bords assombris), `journal` (historique des dialogues, dans la Pause), `title` (écran titre), `playerOptions` (options du joueur depuis le titre : sous-ensemble de TUNABLES, sans réglages de développement), `confirm` (fenêtre Oui / Non), `intro` (texte sur noir), `namePicker` (choix du nom pendant la rencontre), `dizzyStars` (étoiles du tournis). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |
-| `src/data/` | `places/rayon-essai.json` (lieu : images, calques, zone de marche, objets, produits, parcours de mesure), `characters/heros.json`, `products.json`, `narrator.json` (moments et répliques), `music/` |
+| `src/data/` | `places/rayon-essai.json`, `places/accueil.json` (lieux : images, calques, zone de marche, objets, produits, sorties, parcours de mesure), `characters/heros.json`, `products.json`, `objects.json` (objets portés : Scanette, panier), `narrator.json` (moments et répliques), `intro.json`, `joueur.json` (noms du joueur), `departs.json` (points de départ), `music/` |
 | `src/config.js` | Valeurs réglables, liste des réglages du panneau, profils de marche |
 | `public/art/placeholder/` | Dessins provisoires (SVG), à remplacer sans changer le code |
 | `tests/unit/` · `tests/e2e/` | Vitest (logique, données) · Playwright (PC et téléphone simulé, comptages) |
@@ -34,7 +34,7 @@
 
 - `requestAnimationFrame` → `stepper` avance la logique par pas fixes, l'affichage interpole entre deux pas.
 - États : `loading`, `title` (écran titre), `options` (options du joueur), `intro` (texte sur noir après « Commencer » : `core/intro`, `ui/intro`, `data/intro.json`), `play`, `transition` (changement de lieu), `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Ce qui s'ouvre **dans** un état (question Oui / Non, grande carte, choix du nom, conversation) est arbitré par une seule règle : `core/focus.js` (« qui a la main ? »). Sous un menu, la scène n'est pas redessinée.
-- Délais (scan…) : comptés en pas de jeu, donc figés en pause. Seule exception : le délai du double toucher (geste du joueur, temps réel).
+- Délais (scan…) : comptés en pas de jeu, donc figés en pause. Exceptions, en temps réel (gestes du joueur dans l'interface) : le délai du double toucher, et les courtes protections contre un double appui (grande carte du Panier, choix du nom).
 - La logique renvoie de petits événements (ex. `stepScan` → `'bip'`) que `main.js` traduit en son et affichage. Pas de bus d'événements : inutile à cette taille.
 
 ## 4. Monde, profondeur, rendu ✅🔎
@@ -78,13 +78,13 @@ Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'au
 
 ## 8. Points connus à reprendre (quand on y travaille)
 
-- `src/main.js` (≈ 590 lignes) mélange l'assemblage, le rendu et le branchement des outils de mesure : à découper (par exemple `src/debug/`) à la prochaine séance qui le touche beaucoup.
+- `src/main.js` (≈ 1370 lignes) mélange l'assemblage, le rendu, les lieux et le branchement des outils de mesure : découpage prévu après les deux séances de remise en ordre, avant A7 (accord de l'auteur requis).
 - Les chaînes de texte créées à chaque image pour placer les éléments sont un coût accepté du rendu en éléments de page (calcul mesuré : 0,67 ms par image en moyenne sur le téléphone).
 - Les dessins provisoires SVG ont été produits par des scripts non gardés : ils seront remplacés par ceux de l'auteur (prototype D).
 
 ## 9. Prévu, pas encore construit ⏳
 
-Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidité) · A6 l'accueil (lieu séparé), A7 le deuxième rayon, A8 le caddie (règles des lieux : §11) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅) · lieux chargés à la demande (dès le deuxième lieu ✅).
+A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des lieux : §11) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅).
 
 ## 10. Héritage de Maxi-Gouffre
 
@@ -96,7 +96,9 @@ Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidit
 
 ## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
 
-Aujourd'hui 🔎 (séance 50) : un seul lieu, mais il se construit, se quitte et se reconstruit (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont libérées en partant (`releaseImages`), celles du héros et des produits restent ; l'état du monde est dans `core/world.js`. Séance 51 : deux lieux (`rayon-essai`, `accueil`) ; sorties dans les données (`exits`) ; `core/places.js` (sorties, fondu) ; état `transition` (rien ne bouge, le lieu suivant est chargé dans le noir). ⏳ Restent : le préchargement des voisins (à décider après mesure du temps de transition sur le téléphone), les comptages et le banc par lieu, le banc qui traverse les lieux.
+État réel 🔎 (séance 51) :
+- ✅ construit : deux lieux (`rayon-essai`, `accueil`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG.
+- ⏳ pas encore : préchargement des voisins (à décider après mesure sur le téléphone) ; comptages et banc par lieu ; banc qui traverse les lieux ; contrôle de la mémoire après plusieurs allers-retours dans le test des comptages (séance 2 de remise en ordre). Un test navigateur vérifie déjà que le nombre d'images ne grimpe pas après 3 allers-retours.
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).
 - **Un seul gestionnaire de lieux**, avec un cycle de vie : préchargement → décodage avant affichage → utilisation → **libération de la mémoire en partant**. Seuls le lieu affiché et au plus ses voisins directs restent chargés.
