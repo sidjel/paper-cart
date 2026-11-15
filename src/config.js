@@ -37,6 +37,12 @@ export const config = {
   carry: {
     panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
   },
+  access: {
+    textSize: 'normale', // taille du texte de l'interface : petite, normale, grande
+    vibration: true, // vibrations (téléphone, manette) : scan, carte, aparté, question
+    brightness: 1, // luminosité du jeu (1 = normale) ; autre que 1 : un filtre qui coûte un peu sur téléphone
+    contrast: 1, // contraste du jeu (1 = normal)
+  },
   narrator: {
     enabled: true, // le narrateur parle
     speed: 38, // lettres par seconde (effet machine à écrire)
@@ -191,7 +197,15 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.heroVolume', label: 'Apartés du héros (papier, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
-  { group: 'Narrateur', key: 'narrator.speed', label: 'Vitesse d’écriture', min: 10, max: 120, step: 2, unit: 'lettres/s' },
+  {
+    group: 'Accessibilité', key: 'access.textSize', label: 'Taille du texte', type: 'choice',
+    options: [['petite', 'Petite'], ['normale', 'Normale'], ['grande', 'Grande'], ['tres-grande', 'Très grande']],
+  },
+  { group: 'Accessibilité', key: 'narrator.speed', label: 'Vitesse du texte', min: 10, max: 120, step: 2, unit: 'lettres/s' },
+  { group: 'Accessibilité', key: 'access.vibration', label: 'Vibrations (téléphone, manette)', type: 'bool' },
+  { group: 'Accessibilité', key: 'access.brightness', label: 'Luminosité', min: 0.6, max: 1.4, step: 0.05, unit: '×' },
+  { group: 'Accessibilité', key: 'access.contrast', label: 'Contraste', min: 0.6, max: 1.4, step: 0.05, unit: '×' },
+  { group: 'Accessibilité', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.hold', label: 'Temps affiché après le texte', min: 0.5, max: 6, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.holdPerChar', label: '… plus, par lettre', min: 0, max: 0.1, step: 0.005, unit: 's' },
   { group: 'Narrateur', key: 'narrator.minGap', label: 'Écart minimal entre deux répliques', min: 0, max: 120, step: 5, unit: 's' },
@@ -211,7 +225,6 @@ export const TUNABLES = [
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
   { group: 'Caméra', key: 'camera.deadZone', label: 'Zone sans mouvement', min: 0, max: 0.4, step: 0.01 },
-  { group: 'Affichage', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
   {
     group: 'Affichage', key: 'display.fullscreenMode', label: 'Plein écran', type: 'choice',
     options: [['auto', 'Automatique (téléphone : oui)'], ['oui', 'Oui'], ['non', 'Non']],

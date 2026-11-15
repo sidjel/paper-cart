@@ -6,7 +6,7 @@ import { config, onConfigChange, setValue, getValue, overrides } from './config.
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
-import { createWalker, setPath, stepWalker, faceProduct, faceScreen } from './core/movement.js';
+import { createWalker, setPath, stepWalker, clearTarget, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
@@ -93,6 +93,27 @@ const crt = document.createElement('div');
 crt.className = 'crt';
 crt.hidden = true;
 uiEl.appendChild(crt);
+// Accessibilité : taille du texte, luminosité et contraste (un filtre seulement s'ils ne valent pas 1).
+const TEXT_SCALE = { petite: 0.85, normale: 1, grande: 1.2, 'tres-grande': 1.4 };
+function applyAccess() {
+  document.documentElement.style.setProperty('--ts', TEXT_SCALE[config.access.textSize] ?? 1);
+  const { brightness: b, contrast: c } = config.access;
+  gameEl.style.filter = b === 1 && c === 1 ? '' : `brightness(${b}) contrast(${c})`;
+}
+applyAccess();
+
+// Vibrations (option) : téléphone et manette. kind : 'leger' (prise, carte) ou 'fort' (aparté).
+function vibrate(kind) {
+  if (!config.access.vibration) return;
+  const strong = kind === 'fort';
+  try {
+    navigator.vibrate?.(strong ? [40, 60, 40] : 25);
+  } catch {
+    /* refus du navigateur : rien */
+  }
+  input?.gamepad.rumble(strong ? 220 : 90, strong ? 0.6 : 0.2, strong ? 0.4 : 0.5);
+}
+
 function applyCrt() {
   crt.hidden = !config.display.crt;
   crt.style.opacity = config.display.crtStrength;
@@ -165,6 +186,7 @@ function chooseCardToDrop(i) {
   say('panier_plein');
   panierMode = 'confirm';
   sm.go('panier');
+  vibrate('leger');
   confirm.ask(`Ton panier est plein. Échanger une carte contre ce produit ?`, (yes) => {
     if (!yes) {
       panierMode = 'consult';
@@ -196,6 +218,7 @@ function takePickup(k) {
   if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
   basketUi.addObject(it.id);
   audio.play('prise');
+  vibrate('leger');
   say(`prise_${it.id}`);
   marker.hide();
   hud.playerMoved();
@@ -247,7 +270,10 @@ function voiceStarted() {
   const reply = hero && asideP > 0; // le héros répond à la réponse du joueur : l'aparté continue
   narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion, voiceLine.choices?.map((c) => c.text) ?? null);
   choiceFocus = 0;
-  if (!reply && !glance) audio.play(hero ? 'aparte' : 'annonce');
+  const thought = narrator.voice === 'pensee';
+  if (thought) audio.play('froissement');
+  else if (!reply && !glance) audio.play(hero ? 'aparte' : 'annonce');
+  if (hero && !reply) vibrate('fort');
   if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
   // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
   const sp = place.speakers?.items ?? [];
@@ -285,7 +311,7 @@ function updateNarrator(dt) {
   const n = Math.floor(narrator.shown);
   narratorUi.setShown(n);
   if (waitingAnswer(narrator)) narratorUi.choicesReady(choiceFocus);
-  const hero = narrator.voice === 'heros';
+  const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
   const every = config.narrator.blipEvery;
   if (letters > 0 && every > 0 && n % every === 0) audio.play(hero ? 'blipHeros' : 'blip');
   if (hero) {
@@ -356,6 +382,7 @@ function onScanEvent(ev) {
     basketUi.add(card, url);
     flyingCard.show(card, url);
     say(basket.cards.length === 1 ? 'premier_scan' : 'scan');
+    vibrate('leger');
     // Points de départ et d'arrivée de la carte, calculés une fois.
     stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, cardFrom);
     const r = basketUi.button.getBoundingClientRect();
@@ -653,6 +680,7 @@ sm.onChange((now, before) => {
 function onTarget(cx, cy) {
   if (!sm.is('play')) return;
   playerActed = true;
+  if (scan.active) return; // pendant une action (scan), le héros ne se déplace pas
   if (heroAside()) {
     skipNarrator(narrator, narratorData, config.narrator); // toucher : la réplique passe
     return;
@@ -676,7 +704,7 @@ function walkTo(target) {
 // Double toucher (ou double clic) sur un produit : le personnage va se placer et le scanne à
 // l'arrivée (logique dans core/scan.js). Ailleurs : rien de plus que « aller là ».
 function onDoubleTap(cx, cy) {
-  if (!sm.is('play') || scan.active) return;
+  if (!sm.is('play') || scan.active || heroAside()) return;
   stage.clientToStage(cx, cy, tmpStage);
   const wx = stageToWorldX(proj, tmpStage.x);
   const margin = config.input.doubleTapMargin;
@@ -797,9 +825,10 @@ function frame(now) {
     for (let i = 0; i < n; i++) {
       input.read(intent);
       if (scan.active || heroAside()) {
-        // Pendant un scan ou un aparté, le personnage ne bouge pas.
+        // Pendant un scan ou un aparté, le personnage ne bouge pas (ni au clavier, ni vers un point touché).
         intent.moveX = 0;
         intent.moveZ = 0;
+        clearTarget(walker);
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
       stepPendingScan();
@@ -891,6 +920,7 @@ async function start() {
       else if (value === 'non') exitFullscreen();
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
+    if (key.startsWith('access.')) applyAccess();
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);

@@ -14,6 +14,7 @@
   --safe-left: max(8px, env(safe-area-inset-left));
 }
 
+/* --ts : taille du texte (⚙ → Accessibilité) ; toutes les tailles de texte de l'interface en dépendent. */
 * { box-sizing: border-box; }
 /* Règle posée une fois : un élément caché (attribut hidden) n'est jamais affiché, même si son style
    lui donne un display (cause du panier visible dans la main avant d'être pris, séance 37). */
@@ -116,7 +117,7 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  font-size: 15px;
+  font-size: calc(15px * var(--ts, 1));
 }
 #ui > * { pointer-events: auto; }
 #ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner, #ui > .flying-card, #ui > .scan-button { pointer-events: none; }
@@ -147,7 +148,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   min-width: 44px;
   min-height: 44px;
   padding: 0 10px;
-  font-size: 18px;
+  font-size: calc(18px * var(--ts, 1));
   font-weight: 700;
   background: rgb(251 248 238 / 0.88);
 }
@@ -158,7 +159,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   position: absolute;
   right: var(--safe-right);
   bottom: var(--safe-bottom);
-  font-size: 11px;
+  font-size: calc(11px * var(--ts, 1));
   color: rgb(61 53 42 / 0.75);
   background: rgb(251 248 238 / 0.6);
   padding: 1px 6px;
@@ -179,8 +180,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 .hint.gone { opacity: 0; }
 
+/* Ordre d'empilement de l'interface (règle posée une fois) : jeu et voix (≤ 25) < fenêtres et menus
+   (Panier, pause : 60 ; question Oui / Non : 65 ; écran titre : 70 ; réglages : 75) < consigne de rotation
+   (80) < filtre cathodique (95). Les menus sont toujours au-dessus des voix. */
 .panel {
   position: absolute;
+  z-index: 60;
   background: var(--paper);
   border: 2px solid var(--ink);
   border-radius: 10px;
@@ -194,7 +199,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   left: var(--safe-left);
   padding: 8px 10px;
   max-width: min(440px, 60vw);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
 }
 .diag pre {
   margin: 0;
@@ -204,7 +209,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   overflow: auto;
   user-select: text;
 }
-.diag button { min-height: 36px; font-size: 13px; }
+.diag button { min-height: 36px; font-size: calc(13px * var(--ts, 1)); }
 
 .settings {
   z-index: 75; /* au-dessus de l'écran titre (Options) */
@@ -218,10 +223,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   overscroll-behavior: contain;
   touch-action: pan-y;
 }
-.settings h2 { margin: 0 0 4px; font-size: 20px; }
+.settings h2 { margin: 0 0 4px; font-size: calc(20px * var(--ts, 1)); }
 .settings h3 {
   margin: 12px 0 4px;
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #7a6c55;
@@ -238,7 +243,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .setting input[type='range'] { width: 100%; height: 32px; accent-color: #5f7a96; }
 .setting input[type='checkbox'] { width: 26px; height: 26px; justify-self: start; accent-color: #5f7a96; }
 .setting select { min-height: 36px; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); }
-.setting-value { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; }
+.setting-value { font-variant-numeric: tabular-nums; font-size: calc(13px * var(--ts, 1)); text-align: right; }
 .settings-tabs {
   position: sticky;
   top: -10px;
@@ -251,25 +256,26 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   background: var(--paper);
   border-bottom: 2px solid rgb(61 53 42 / 0.2);
 }
-.settings-tab { min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.settings-tab { min-height: 36px; padding: 4px 10px; font-size: calc(14px * var(--ts, 1)); }
 .settings-tab.active { background: var(--accent); font-weight: 700; }
 .settings-section[hidden] { display: none; }
-.presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: 14px; }
+.presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: calc(14px * var(--ts, 1)); }
 .presets button { min-height: 36px; padding: 4px 12px; }
 .presets button.active { background: var(--accent); font-weight: 700; }
 .presets button.active::before { content: '✓ '; }
-.settings-note { margin: 10px 0 0; font-size: 13px; }
+.settings-note { margin: 10px 0 0; font-size: calc(13px * var(--ts, 1)); }
 
 .overlay {
   position: absolute;
   inset: 0;
+  z-index: 60;
   display: grid;
   place-items: center;
   text-align: center;
 }
 .overlay[hidden] { display: none; }
 .overlay p { margin: 0; }
-.loading { background: var(--band); color: var(--paper); font-size: 20px; }
+.loading { background: var(--band); color: var(--paper); font-size: calc(20px * var(--ts, 1)); }
 .pause { background: rgb(47 42 36 / 0.55); }
 .pause-card {
   padding: 18px 28px 20px;
@@ -279,11 +285,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 5px 5px 0 rgb(61 53 42 / 0.4);
   max-width: calc(100vw - 32px);
 }
-.pause-card h2 { margin: 0 0 12px; font-size: 28px; letter-spacing: 2px; }
-.pause-card .help { margin-top: 14px; font-size: 14px; line-height: 1.5; }
+.pause-card h2 { margin: 0 0 12px; font-size: calc(28px * var(--ts, 1)); letter-spacing: 2px; }
+.pause-card .help { margin-top: 14px; font-size: calc(14px * var(--ts, 1)); line-height: 1.5; }
 .error { background: var(--band); color: var(--paper); padding: 24px; }
 
-.rotate { display: none; background: var(--band); color: var(--paper); font-size: 20px; z-index: 80; text-align: center; }
+.rotate { display: none; background: var(--band); color: var(--paper); font-size: calc(20px * var(--ts, 1)); z-index: 80; text-align: center; }
 @media (orientation: portrait) and (pointer: coarse) {
   .rotate { display: grid; }
 }
@@ -314,8 +320,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .offscreen { position: fixed; left: -9999px; top: 0; }
 
 @media (max-height: 460px) {
-  #ui { font-size: 14px; }
-  .settings h2 { font-size: 17px; }
+  #ui { font-size: calc(14px * var(--ts, 1)); }
+  .settings h2 { font-size: calc(17px * var(--ts, 1)); }
   .setting { min-height: 36px; }
 }
 
@@ -340,11 +346,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   overflow: auto;
   padding: 10px 16px 14px;
 }
-.bench-result h2 { margin: 0 0 6px; font-size: 20px; }
+.bench-result h2 { margin: 0 0 6px; font-size: calc(20px * var(--ts, 1)); }
 .bench-result pre {
   margin: 0;
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
   white-space: pre-wrap;
   user-select: text;
 }
@@ -415,7 +421,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border: 2px solid var(--ink);
   border-radius: 10px;
   box-shadow: 3px 3px 0 rgb(61 53 42 / 0.35), inset 0 0 0 4px var(--stage);
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   text-align: center;
   user-select: none;
 }
@@ -431,17 +437,17 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   background: var(--ink);
   color: var(--paper);
   font-weight: 700;
-  font-size: 16px;
+  font-size: calc(16px * var(--ts, 1));
 }
-.card-stage { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--ink); font-size: 12px; }
+.card-stage { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--ink); font-size: calc(12px * var(--ts, 1)); }
 .card-stage svg { fill: var(--stage); stroke: var(--ink); stroke-width: 1.5; }
 .card-img { display: block; width: 72px; height: 90px; margin: 4px auto 2px; object-fit: contain; }
-.card-name { font-weight: 700; font-size: 15px; }
+.card-name { font-weight: 700; font-size: calc(15px * var(--ts, 1)); }
 .card-props { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 4px; }
-.card-props span { padding: 1px 6px; border-radius: 999px; border: 1px solid var(--ink); background: var(--card); font-size: 11px; }
+.card-props span { padding: 1px 6px; border-radius: 999px; border: 1px solid var(--ink); background: var(--card); font-size: calc(11px * var(--ts, 1)); }
 
 /* Carte qui apparaît puis file dans le Panier. */
-.flying-card { position: absolute; left: 0; top: 0; z-index: 50; pointer-events: none; will-change: transform, opacity; }
+.flying-card { position: absolute; left: 0; top: 0; z-index: 25; pointer-events: none; will-change: transform, opacity; }
 .flying-card[hidden] { display: none; }
 
 /* ---------- Panier ---------- */
@@ -449,7 +455,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   position: absolute;
   left: var(--safe-left);
   bottom: calc(var(--safe-bottom) + 4px);
-  font-size: 16px;
+  font-size: calc(16px * var(--ts, 1));
 }
 .panier-count {
   display: inline-block;
@@ -459,7 +465,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-radius: 999px;
   background: var(--ink);
   color: var(--paper);
-  font-size: 14px;
+  font-size: calc(14px * var(--ts, 1));
 }
 .panier-button.bump { animation: bump 0.35s ease-out; }
 @keyframes bump { 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
@@ -474,7 +480,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   overscroll-behavior: contain;
   touch-action: pan-y;
 }
-.panier h2 { margin: 0 0 8px; font-size: 20px; }
+.panier h2 { margin: 0 0 8px; font-size: calc(20px * var(--ts, 1)); }
 .panier-tabs { margin: 0 0 10px; }
 .panier-objects { list-style: none; margin: 0; padding: 0 0 8px; display: grid; gap: 8px; }
 .panier-objects li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--card); }
@@ -494,14 +500,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   min-height: 56px;
   border-radius: 999px;
   background: var(--accent);
-  font-size: 18px;
+  font-size: calc(18px * var(--ts, 1));
   font-weight: 700;
   box-shadow: 3px 3px 0 rgb(61 53 42 / 0.4);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s;
 }
-.scan-button small { display: block; font-size: 11px; font-weight: 400; }
+.scan-button small { display: block; font-size: calc(11px * var(--ts, 1)); font-weight: 400; }
 #ui > .scan-button.visible { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .panier-button.bump { animation: none; } }
 
@@ -524,7 +530,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
-  z-index: 40;
+  z-index: 20; /* les voix restent sous les menus */
 }
 .narrator[hidden] { display: none; }
 .narrator.visible { opacity: 1; }
@@ -540,7 +546,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   transform: rotate(45deg);
 }
 .narrator-icon { flex: none; color: var(--accent); margin-top: 1px; }
-.narrator-text { margin: 0; font-size: 15px; line-height: 1.35; }
+.narrator-text { margin: 0; font-size: calc(15px * var(--ts, 1)); line-height: 1.35; }
 .voice-rest { visibility: hidden; }
 
 /* Aparté du héros : bulle de papier au-dessus de sa tête (placée par le code, en transform). */
@@ -558,11 +564,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.18s;
-  z-index: 41;
+  z-index: 21;
 }
 .hero-bubble[hidden] { display: none; }
 .hero-bubble.visible { opacity: 1; }
-.hero-bubble-text { margin: 0; font-size: 15px; line-height: 1.3; font-style: italic; }
+.hero-bubble-text { margin: 0; font-size: calc(15px * var(--ts, 1)); line-height: 1.3; font-style: italic; }
 .hero-bubble-tail {
   position: absolute;
   bottom: -8px;
@@ -576,7 +582,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 @media (max-height: 460px) {
   .narrator { max-width: calc(100% - 300px); padding: 7px 12px 8px 10px; }
-  .narrator-text, .hero-bubble-text { font-size: 14px; }
+  .narrator-text, .hero-bubble-text { font-size: calc(14px * var(--ts, 1)); }
 }
 
 /* Ondes sous le haut-parleur qui parle (dans la scène). */
@@ -642,9 +648,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   transform: translate(-50%, -50%);
   max-width: min(420px, calc(100% - 32px));
   padding: 16px 18px 12px;
-  z-index: 60;
+  z-index: 65;
 }
-.confirm-text { margin: 0 0 10px; font-size: 17px; font-weight: 700; }
+.confirm-text { margin: 0 0 10px; font-size: calc(17px * var(--ts, 1)); font-weight: 700; }
 
 /* ---------- Écran titre ---------- */
 .title-screen { position: absolute; inset: 0; z-index: 70; background: #151827; overflow: hidden; }
@@ -687,14 +693,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-radius: 999px;
   background: rgb(21 24 39 / 0.55);
   color: #f6eedb;
-  font-size: 19px;
+  font-size: calc(19px * var(--ts, 1));
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
 }
 .title-button:hover, .title-button:focus-visible { background: #f3c77a; color: #151827; border-color: #f3c77a; outline: none; }
 /* En portrait : la consigne pour tourner le téléphone propose aussi de passer en paysage. */
-.rotate-button { margin-top: 14px; min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--paper); background: transparent; color: var(--paper); font-size: 17px; }
+.rotate-button { margin-top: 14px; min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--paper); background: transparent; color: var(--paper); font-size: calc(17px * var(--ts, 1)); }
 
 /* Filtre « écran cathodique » : lignes de balayage fines, bords assombris et légèrement bombés.
    Par-dessus tout (même l'écran titre), sans intercepter les clics. Option : ⚙ → Affichage. */
@@ -710,3 +716,5 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-radius: 18px / 14px;
 }
 #ui > .crt { pointer-events: none; }
+/* Pensée du héros (il se parle à lui-même) : bulle en pointillés, plus discrète. */
+.hero-bubble.thought { border-style: dashed; background: #f3efe3; }

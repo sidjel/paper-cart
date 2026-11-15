@@ -71,7 +71,8 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
         this.hide();
         return;
       }
-      const el = voice === 'heros' ? bubble : band;
+      const el = voice === 'heros' || voice === 'pensee' ? bubble : band;
+      bubble.classList.toggle('thought', voice === 'pensee');
       if (current && current !== el) current.hidden = true;
       current = el;
       parts = el === bubble ? bubbleParts : bandParts;

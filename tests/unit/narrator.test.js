@@ -122,6 +122,17 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     run2(4);
     expect(n.line).toBe(null); // le regard suivant attend 25 s
   });
+  it('pensée du héros (il se parle à lui-même) : quand il veut, sans couper personne ; une annonce la coupe', () => {
+    const T = {
+      triggers: { p: { voice: 'pensee', cooldown: 0 }, a: {} },
+      lines: [{ id: 'p', trigger: 'p', text: 'Euh…' }, { id: 'a', trigger: 'a', text: 'Promo' }],
+    };
+    const n = createNarrator();
+    n.asideOk = false; // même en marchant
+    expect(narrate(n, T, 'p', P).id).toBe('p');
+    expect(narrate(n, T, 'a', P).id).toBe('a'); // l'annonce passe
+    expect(narrate(n, T, 'p', P)).toBe(null); // la pensée ne coupe pas l'annonce
+  });
   it('deux réponses : la réplique attend, la confiance évolue, puis le héros répond', () => {
     const Q = {
       triggers: { q: { voice: 'heros' } },

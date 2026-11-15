@@ -3,8 +3,8 @@
 // Quand parler, quoi dire, et l'avancement de l'effet machine à écrire. Logique pure, sans hasard :
 // parmi les répliques possibles, on prend celle dite il y a le plus longtemps. Temps du jeu (figé en pause).
 //
-// Trois voix : le haut-parleur (« narrateur »), les apartés du héros (« heros ») et ses petits regards
-// caméra sans texte (« regard »).
+// Quatre voix : le haut-parleur (« narrateur »), les apartés du héros au joueur (« heros »), ses petits
+// regards caméra sans texte (« regard ») et ses pensées, quand il se parle à lui-même (« pensee »).
 // Règles :
 //  - une seule voix à la fois ;
 //  - pendant un aparté, le temps du magasin se fige : le haut-parleur se tait (rien ne coupe un aparté) ;
@@ -24,6 +24,7 @@
 
 const HERO = 'heros';
 const GLANCE = 'regard';
+const THOUGHT = 'pensee'; // le héros se parle à lui-même (pas au joueur) : une bulle, sans mise en scène
 
 export function createNarrator() {
   return {
@@ -64,15 +65,18 @@ export function narrate(n, data, trigger, p) {
   const from = tr.from ?? 1;
   if (count < from || (tr.every && (count - from) % tr.every !== 0)) return null;
   if (n.line) {
-    if (hero) return null; // un aparté ou un regard ne coupe jamais
+    if (hero || voice === THOUGHT) return null; // un aparté, un regard ou une pensée ne coupe jamais
     if (n.voice === HERO) return null; // pendant un aparté, le magasin est figé : il se tait
-    if (n.voice !== GLANCE && !tr.strong) return null; // une annonce ordinaire ne coupe pas une annonce
+    // Une annonce coupe un regard ou une pensée ; une annonce ordinaire ne coupe pas une annonce.
+    if (n.voice !== GLANCE && n.voice !== THOUGHT && !tr.strong) return null;
   }
   if (voice === HERO) {
     if (n.t - n.lastAside < p.asideGap) return null;
     if (!tr.follows && n.t - n.lastSpoke < p.breath) return null;
   } else if (voice === GLANCE) {
     if (n.t - n.lastGlance < p.glanceGap) return null;
+  } else if (voice === THOUGHT) {
+    // pas d'écart imposé : la pensée répond à une action du joueur
   } else if (!tr.strong && !tr.follows && n.t - n.lastAnnounce < p.minGap) return null;
   const cooldown = tr.cooldown ?? p.lineCooldown;
   let best = null;
@@ -94,7 +98,7 @@ export function narrate(n, data, trigger, p) {
   n.lastSpoke = n.t;
   if (voice === HERO) n.lastAside = n.t;
   else if (voice === GLANCE) n.lastGlance = n.t;
-  else n.lastAnnounce = n.t;
+  else if (voice !== THOUGHT) n.lastAnnounce = n.t; // une pensée ne retarde pas les annonces
   n.pending = null;
   n.answered = -1;
   n.line = best;
@@ -113,7 +117,7 @@ function end(n, data, p) {
   n.lastSpoke = n.t;
   if (voice === HERO) n.lastAside = n.t;
   else if (voice === GLANCE) n.lastGlance = n.t;
-  else n.lastAnnounce = n.t;
+  else if (voice !== THOUGHT) n.lastAnnounce = n.t; // une pensée ne retarde pas les annonces
   for (const [name, tr] of Object.entries(data.triggers)) {
     if (tr.follows === ended.trigger || tr.follows === `@${voice}`) {
       n.pending = { trigger: name, at: n.t + p.followDelay };

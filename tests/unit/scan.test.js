@@ -80,6 +80,14 @@ describe('double toucher : viser, s’approcher, scanner à l’arrivée', () =>
     expect(pickTapped(items, 3120, 770, 3120, 50, P)).toBe(1); // dans la marge
     expect(pickTapped(items, 3050, 300, 3050, 50, P)).toBe(-1); // bien au-dessus : rien
   });
+  it('deux dessins touchés à la fois : le plus proche du doigt l’emporte', () => {
+    const two = [
+      { x: 250, y: 610, w: 320, h: 280, loose: true, scanned: false },
+      { x: 470, y: 610, w: 110, h: 140, loose: true, scanned: false },
+    ];
+    expect(pickTapped(two, 440, 560, 440, 50, P)).toBe(1);
+    expect(pickTapped(two, 300, 500, 300, 50, P)).toBe(0);
+  });
   it('sinon, le produit de l’étagère le plus proche le long du rayon', () => {
     expect(pickTapped(items, 350, 300, 350, 50, P)).toBe(0);
     expect(pickTapped(items, 1500, 300, 1500, 50, P)).toBe(-1);

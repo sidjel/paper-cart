@@ -12,6 +12,30 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 41 — 15/11/2026 — Menus au-dessus des voix, pas de déplacement pendant une action, accueil agrandi, accessibilité
+
+**Retours de l'auteur** (avec une capture du téléphone) :
+- la bande noire du haut-parleur reste au-dessus quand on ouvre un menu ;
+- le héros se déplace pendant un scan ou un échange ;
+- l'accueil doit être plus grand, avec un mur de Scanettes ;
+- sans panier, le héros doit s'interroger lui-même ;
+- options validées : taille du texte, vibrations, luminosité et contraste, vitesse du texte.
+
+**Jouable maintenant** :
+- **Les menus sont toujours au-dessus** (Panier, question Oui / Non, pause, réglages, écran titre). Les voix (bande, bulle) restent derrière. L'ordre d'empilement est écrit une fois pour toutes dans `style.css`.
+- **Pendant un scan ou un aparté, le héros ne bouge pas** : un toucher ailleurs est ignoré, le clavier aussi.
+- **Accueil agrandi** : un mur de 24 Scanettes et une pile de 5 paniers (décor [TEMP]).
+- **Sans panier**, essayer de scanner fait parler le héros **à lui-même**, dans une bulle en pointillés et sans mise en scène : « Euh… et je mets ça où, moi ? Il me faudrait un panier. » C'est une nouvelle voix, la « pensée ».
+- **Onglet Accessibilité** (⚙) : taille du texte (petite, normale, grande, très grande), vitesse du texte, vibrations (téléphone et manette : prise d'objet, carte obtenue, aparté, panier plein), luminosité, contraste, réduire les animations.
+
+**Vérifié** : 118 tests de logique (pensée, double toucher entre deux dessins) ; 58 tests navigateur PC et téléphone simulé, sans erreur console ; captures de l'accueil et de la superposition menu / bande. **Non vérifiable ici** : les vibrations, la manette.
+
+**Décisions prises seul** :
+- Luminosité et contraste : un filtre seulement s'ils ne valent pas 1 (il coûte un peu sur téléphone).
+- « Réduire les animations » est rangé dans Accessibilité.
+
+---
+
 ## Séance 40 — 15/11/2026 — « Commencer » réparé, plein écran au choix, filtre écran cathodique
 
 **Retours de l'auteur** : « Commencer » ne lance pas le jeu ; pouvoir choisir le plein écran dans les options ; un filtre écran cathodique ; d'autres idées d'options.

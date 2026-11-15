@@ -67,5 +67,12 @@ export function createGamepad(onAction, settings) {
       out.moveX += x;
       out.moveZ += z;
     },
+    // Vibration de la manette (si elle sait vibrer) : ms, force du gros et du petit moteur (0 à 1).
+    rumble(ms, strong, weak) {
+      if (connected === 0 || !navigator.getGamepads) return;
+      for (const pad of navigator.getGamepads()) {
+        pad?.vibrationActuator?.playEffect?.('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak })?.catch?.(() => {});
+      }
+    },
   };
 }

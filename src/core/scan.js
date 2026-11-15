@@ -77,12 +77,21 @@ export function standSpot(item, hero) {
 // D'abord un produit posé ailleurs dont on touche le dessin (avec une marge pour le doigt),
 // sinon le produit de l'étagère le plus proche le long du rayon. Renvoie -1 si aucun.
 export function pickTapped(items, sx, sy, wx, margin, p) {
+  // Parmi les dessins touchés (marges comprises), celui dont le centre est le plus proche du doigt.
+  let best = -1;
+  let bestD = Infinity;
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
     if (!it.loose || it.scanned) continue;
-    if (Math.abs(sx - it.x) <= it.w / 2 + margin && sy <= it.y + margin && sy >= it.y - it.h - margin) return i;
+    if (Math.abs(sx - it.x) <= it.w / 2 + margin && sy <= it.y + margin && sy >= it.y - it.h - margin) {
+      const d = Math.hypot(sx - it.x, sy - (it.y - it.h / 2));
+      if (d < bestD) {
+        best = i;
+        bestD = d;
+      }
+    }
   }
-  return shelfProductNear(items, wx, p.range);
+  return best >= 0 ? best : shelfProductNear(items, wx, p.range);
 }
 
 const FAR = 1e6; // « tout au fond » : ramené ensuite au bord de la zone de marche

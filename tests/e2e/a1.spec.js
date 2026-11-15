@@ -685,3 +685,35 @@ test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }
   await page.keyboard.press('Escape');
   await expect(panel).toBeHidden();
 });
+
+test('A5a : Scanette sans panier, le héros s’interroge lui-même (pensée, bulle en pointillés)', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await page.evaluate(() => window.paperCart.set('narrator.enabled', true));
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(async () => (await state(page)).pickup, { timeout: 6000 }).toBe(0);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.press('Enter'); // la Scanette
+  await expect.poll(async () => (await state(page)).gear.scanette).toBe(true);
+  // Un peu à gauche : le panier n'est plus à portée, la banane si.
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForTimeout(200);
+  await page.keyboard.up('ArrowLeft');
+  await expect.poll(async () => (await state(page)).reach, { timeout: 3000 }).toBe(0);
+  await expect.poll(async () => (await state(page)).pickup).toBe(-1);
+  await page.locator('.narrator, .hero-bubble').evaluateAll((els) => els.forEach((e) => e.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))));
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 3000 }).toBe('pensee');
+  expect((await narr(page)).text).toMatch(/panier/);
+  await expect(page.locator('.hero-bubble.thought')).toBeVisible();
+  expect((await state(page)).active).toBe(false);
+});
+
+test('Accessibilité : taille du texte, luminosité et contraste', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC');
+  await page.evaluate(() => window.paperCart.set('access.textSize', 'grande'));
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--ts').trim())).toBe('1.2');
+  await page.evaluate(() => window.paperCart.set('access.brightness', 1.2));
+  expect(await page.locator('#game').evaluate((g) => g.style.filter)).toContain('brightness(1.2)');
+  await page.evaluate(() => window.paperCart.set('access.brightness', 1));
+  expect(await page.locator('#game').evaluate((g) => g.style.filter)).toBe('');
+});

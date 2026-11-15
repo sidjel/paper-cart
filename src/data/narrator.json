@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai).",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai).",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -72,7 +72,9 @@
       "comment": "essai de scan sans Scanette"
     },
     "sans_panier": {
-      "comment": "essai de scan sans panier"
+      "voice": "pensee",
+      "cooldown": 0,
+      "comment": "essai de scan sans panier : le héros s'interroge lui-même"
     },
     "panier_plein": {
       "comment": "essai de scan, panier plein (règle provisoire : le scan est refusé)"
@@ -236,7 +238,7 @@
     {
       "id": "sans_panier_1",
       "trigger": "sans_panier",
-      "text": "[TEMP] Une Scanette sans panier ? Et vous comptiez ranger vos achats où, cher Client ? Dans vos poches en papier ?"
+      "text": "[TEMP] Euh… et je mets ça où, moi ? Il me faudrait un panier."
     },
     {
       "id": "panier_plein_1",
