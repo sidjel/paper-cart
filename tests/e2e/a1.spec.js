@@ -993,3 +993,24 @@ test('A4 : la première rencontre attend que le Panier soit fermé, et le Panier
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
   expect(errors).toEqual([]);
 });
+
+test('doigt qui glisse : le héros suit, et le chemin n’est calculé qu’une fois par image', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'souris');
+  const a = await page.evaluate(() => window.paperCart.worldToClient(500, 60));
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  // 40 mouvements d'un coup (bien plus qu'une image) vers la droite.
+  await page.mouse.move(a.x + 8, a.y);
+  await page.waitForTimeout(100);
+  const before = await page.evaluate(() => window.paperCart.paths());
+  await page.evaluate(([x, y]) => {
+    const el = document.getElementById('game');
+    for (let k = 2; k <= 40; k++) el.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, pointerType: 'mouse', clientX: x + k * 8, clientY: y, bubbles: true }));
+  }, [a.x, a.y]);
+  await page.waitForTimeout(100);
+  expect((await page.evaluate(() => window.paperCart.paths())) - before).toBe(1); // 39 mouvements, un seul calcul
+  await page.waitForTimeout(800);
+  await page.mouse.up();
+  const h = await hero(page);
+  expect(h.x).toBeGreaterThan(600); // il a suivi le doigt
+});

@@ -928,6 +928,7 @@ sm.onChange((now, before) => {
 
 // Un point de l'écran touché ou cliqué → un point du sol à atteindre (fonction de core/).
 function onTarget(cx, cy) {
+  dragPending = false;
   if (!sm.is('play')) return;
   playerActed = true;
   if (scan.active) return; // pendant une action (scan), le héros ne se déplace pas
@@ -942,9 +943,22 @@ function onTarget(cx, cy) {
   walkTo(tmpWorld);
 }
 
+// Doigt qui glisse en restant appuyé : on retient seulement le dernier point ; le chemin est calculé
+// au plus une fois par image (dans la boucle), et non à chaque mouvement du doigt.
+let pathCount = 0; // chemins calculés (pour les tests)
+let dragPending = false;
+let dragX = 0;
+let dragY = 0;
+function onDrag(cx, cy) {
+  dragPending = true;
+  dragX = cx;
+  dragY = cy;
+}
+
 function walkTo(target) {
   clampToBounds(mask, target);
   // Chemin qui contourne les objets si la ligne droite est bloquée.
+  pathCount++;
   const path = findPath(mask, walker.x, walker.z, target.x, target.z);
   setPath(walker, path);
   const [gx, gz] = path[path.length - 1];
@@ -1074,6 +1088,7 @@ function frame(now) {
   if (!placeView) return; // changement de lieu en cours : rien ne bouge
   const playing = sm.is('play');
   if (playing) {
+    if (dragPending) onTarget(dragX, dragY);
     const n = stepper.advance(dt / 1000);
     for (let i = 0; i < n; i++) {
       input.read(intent);
@@ -1190,7 +1205,7 @@ async function start() {
   dust = createDust(backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, loadedImages, backstage, config.character, config.display, onFrameEvent);
   await loadPlace(place.id);
-  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap });
+  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
@@ -1250,6 +1265,7 @@ async function start() {
       narrator.done[trigger] = true;
     },
     flips: () => flips,
+    paths: () => pathCount,
     // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
     async reloadPlace() {
       const id = place.id;

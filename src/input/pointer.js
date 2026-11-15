@@ -6,7 +6,8 @@
 
 const JOYSTICK_ZONE = 0.4; // part gauche de l'écran réservée au joystick
 
-export function createPointer(surface, ui, settings, onTarget, onDoubleTap) {
+// onDrag(x, y) : le doigt (ou la souris) glisse en restant appuyé ; peut arriver plusieurs fois par image.
+export function createPointer(surface, ui, settings, onTarget, onDoubleTap, onDrag = onTarget) {
   let targetId = null;
   let follow = true; // le point suit le doigt (sauf après un double toucher)
   let lastTapTime = -Infinity;
@@ -83,7 +84,7 @@ export function createPointer(surface, ui, settings, onTarget, onDoubleTap) {
 
   surface.addEventListener('pointermove', (e) => {
     if (e.pointerId === stickId) moveStick(e.clientX, e.clientY);
-    else if (e.pointerId === targetId && follow) onTarget(e.clientX, e.clientY);
+    else if (e.pointerId === targetId && follow) onDrag(e.clientX, e.clientY);
   });
 
   const end = (e) => {

@@ -177,6 +177,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Audit, point 5 : règle « qui a la main ? » écrite une fois | 50 | ✅ | `core/focus.js` (testé), utilisé par le traitement des touches. État « transition » : avec A6. |
 | Audit, point 3 : un seul état du monde (le monde se souvient) | 50 | ✅ | `core/world.js` (testé) ; `scene/products.js` ne fait plus qu'afficher. |
 | Audit, points 2 et 4 : construire / quitter / reconstruire un lieu ; images du lieu libérées | 50 | 👀 | `scene/placeView.js`, `loadPlace` / `unloadPlace`, `releaseImages`. Testé par 3 allers-retours (rien ne s'accumule). Banc d'essai à refaire sur le téléphone (comparer à `2aa4b77`). Transition, sorties et préchargement : avec A6. |
+| Audit, point 6 : chemin recalculé à chaque mouvement du doigt | 50 | 👀 | Au plus un calcul par image. Testé. À mesurer sur le téléphone plus tard (décision de l'auteur). Points 7 à 15 : peuvent attendre. |
 | (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | 👀 | Corrigé (validé par l'auteur) : pas de Panier pendant un aparté ou une conversation ; hors du jeu (Panier, menus), le héros ne prend pas la parole, la rencontre attend le retour. Testé. |
 
 ## Interface

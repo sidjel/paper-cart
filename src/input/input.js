@@ -7,10 +7,10 @@ import { createPointer } from './pointer.js';
 // onAction(name) : 'back' | 'pause' | 'settings' | 'diagnostic' | 'debugMask'
 // onTarget(clientX, clientY) : un point de l'écran a été touché ou cliqué.
 // onDoubleTap(clientX, clientY) : double toucher ou double clic.
-export function createInput({ surface, ui, settings, onAction, onTarget, onDoubleTap }) {
+export function createInput({ surface, ui, settings, onAction, onTarget, onDoubleTap, onDrag }) {
   const keyboard = createKeyboard(onAction);
   const gamepad = createGamepad(onAction, settings);
-  const pointer = createPointer(surface, ui, settings, onTarget, onDoubleTap);
+  const pointer = createPointer(surface, ui, settings, onTarget, onDoubleTap, onDrag);
 
   return {
     gamepad,
