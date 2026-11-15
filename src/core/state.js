@@ -3,11 +3,12 @@
 // déclare un état ici plutôt que d'ajouter une condition ailleurs.
 
 export const TRANSITIONS = {
-  loading: ['play'],
+  loading: ['title', 'play'],
+  title: ['play', 'menu'], // écran titre : Commencer, Options
   play: ['pause', 'menu', 'panier'],
   panier: ['play'], // écran du Panier (les cartes obtenues)
   pause: ['play', 'menu'],
-  menu: ['play', 'pause', 'bench'],
+  menu: ['play', 'pause', 'bench', 'title'],
   bench: ['play'], // banc d'essai : le personnage se déplace tout seul, on mesure
 };
 

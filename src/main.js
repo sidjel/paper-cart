@@ -15,6 +15,8 @@ import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, s
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
+import { createConfirm } from './ui/confirm.js';
+import { createTitleScreen } from './ui/title.js';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -74,8 +76,22 @@ let loadedImages = null;
 let productState = null; // produits à scanner (logique, voir core/scan.js)
 const scan = createScan();
 const basket = createBasket();
-const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects });
+const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects, base: BASE });
 const flyingCard = createFlyingCard(uiEl);
+const confirm = createConfirm(uiEl);
+// Écran titre (après le chargement) : Commencer, Options. Sur téléphone, Commencer passe en plein écran
+// paysage (le jeu ne doit pas démarrer à la verticale).
+const titleUi = createTitleScreen(uiEl, {
+  image: `${BASE}art/placeholder/titre/titre.svg`,
+  onStart: () => startGame(true),
+  onOptions: () => sm.go('menu'),
+});
+function startGame(fromPlayer) {
+  if (!sm.is('title')) return;
+  if (fromPlayer && touch) enterLandscape();
+  titleUi.hide();
+  sm.go('play');
+}
 const tip = { x: 0, y: 0 }; // bout de la Scanette sur la scène
 const cardFrom = { x: 0, y: 0 };
 const cardTo = { x: 0, y: 0 };
@@ -112,24 +128,34 @@ function tryScanProduct(i) {
 
 // Panier plein (choix B de l'auteur) : on repose une carte pour faire de la place, puis on scanne ;
 // ou on annule. [TEMP] La carte reposée est abandonnée.
+// D'abord une fenêtre « Échanger une carte ? Oui / Non » ; oui : on choisit la carte à reposer.
+// Le produit de la carte reposée prend la place du produit qu'on vient de scanner (échange).
 let dropFor = -1;
+let panierMode = 'consult'; // 'consult' : on regarde ; 'confirm' : la question ; 'choose' : choisir la carte
+let pendingSwap = null; // { from: produit reposé, to: produit scanné }
 function chooseCardToDrop(i) {
   dropFor = i;
   say('panier_plein');
+  panierMode = 'confirm';
   sm.go('panier');
-  basketUi.open((uid) => {
-    const dropped = removeFromBasket(basket, uid);
-    basketUi.remove(uid);
-    // Choix B de l'auteur : le produit retourne sur l'étagère et peut être rescanné.
-    if (dropped && dropped.slot >= 0) {
-      productState[dropped.slot].scanned = false;
-      products.restore(dropped.slot);
+  confirm.ask(`Ton panier est plein. Échanger une carte contre ce produit ?`, (yes) => {
+    if (!yes) {
+      panierMode = 'consult';
+      sm.go('play');
+      return;
     }
-    basketUi.setCount(basket.cards.length);
-    const target = dropFor;
-    dropFor = -1;
-    sm.go('play');
-    scanProduct(target);
+    panierMode = 'choose';
+    basketUi.open((uid) => {
+      const dropped = removeFromBasket(basket, uid);
+      basketUi.remove(uid);
+      basketUi.setCount(basket.cards.length);
+      const target = dropFor;
+      dropFor = -1;
+      if (dropped && dropped.slot >= 0) pendingSwap = { from: dropped.slot, to: target };
+      panierMode = 'consult';
+      sm.go('play');
+      scanProduct(target);
+    });
   });
 }
 
@@ -290,6 +316,14 @@ function onScanEvent(ev) {
     const it = products.items[scan.index];
     products.remove(scan.index);
     productState[scan.index].scanned = true;
+    if (pendingSwap && pendingSwap.to === scan.index) {
+      // Échange : le produit reposé apparaît à la place de celui qu'on vient de scanner.
+      const { from, to } = pendingSwap;
+      pendingSwap = null;
+      products.moveTo(from, to);
+      const m = products.items[from];
+      Object.assign(productState[from], { x: m.x, z: m.wz, loose: !!m.loose, standAt: m.standAt, y: m.y, w: m.w, h: m.h, scanned: false });
+    }
     const card = addToBasket(basket, it.id, it.def, scan.index);
     const url = imageUrlOf(it.def);
     basketUi.add(card, url);
@@ -462,7 +496,10 @@ function handleAction(action) {
       if (quick) endQuick('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
-      else if (sm.is('panier')) sm.go('play');
+      else if (sm.is('panier')) {
+        if (confirm.open) confirm.no();
+        else sm.go('play');
+      }
       else if (sm.is('play')) sm.go('pause');
       else if (sm.is('pause')) sm.go('play');
       break;
@@ -488,8 +525,13 @@ function handleAction(action) {
     case 'mute':
       setValue('audio.muted', !config.audio.muted);
       break;
+    case 'landscape':
+      enterLandscape();
+      break;
     case 'action':
-      if (waitingAnswer(narrator)) answer(narrator, choiceFocus);
+      if (sm.is('title')) titleUi.press();
+      else if (confirm.open) confirm.yes(); // manette : A = oui
+      else if (waitingAnswer(narrator)) answer(narrator, choiceFocus);
       else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
       else tryScan();
       break;
@@ -499,7 +541,9 @@ function handleAction(action) {
       break;
     case 'left':
     case 'right':
-      if (sm.is('panier')) basketUi.switchTab();
+      if (sm.is('title')) titleUi.move(action === 'left' ? -1 : 1);
+      else if (confirm.open) confirm.focus(action === 'right');
+      else if (sm.is('panier')) basketUi.switchTab();
       else if (waitingAnswer(narrator)) {
         choiceFocus = action === 'left' ? 0 : 1;
         narratorUi.focusChoice(choiceFocus);
@@ -510,6 +554,14 @@ function handleAction(action) {
       else if (sm.is('play') && !scan.active && gear.panier) sm.go('panier');
       break;
   }
+}
+
+// Plein écran et paysage (téléphone) : seulement après un geste du joueur ; le verrouillage de
+// l'orientation n'est possible qu'en plein écran (Chrome Android) ; refus ignorés sans bruit.
+function enterLandscape() {
+  const lock = () => screen.orientation?.lock?.('landscape').catch(() => {});
+  if (document.fullscreenElement) lock();
+  else document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).then(lock).catch(() => {});
 }
 
 function toggleFullscreen() {
@@ -528,9 +580,14 @@ sm.onChange((now, before) => {
   audio.setState(now);
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
-  if (now === 'panier') {
+  if (now === 'title') titleUi.show();
+  if (now === 'panier' && panierMode === 'consult') {
     basketUi.open();
     say('panier');
+  }
+  if (before === 'panier') {
+    if (confirm.open) confirm.no(); // Échap pendant la question : non
+    panierMode = 'consult';
   }
   if (now === 'play' && before === 'pause') say('reprise');
   if (now === 'play' && before === 'panier') say('aparte_panier');
@@ -808,7 +865,7 @@ async function start() {
   layout();
   render();
   hud.ready();
-  sm.go('play');
+  sm.go('title');
   requestAnimationFrame(frame);
 
   // Accès en lecture pour les tests automatiques et le débogage.
@@ -828,6 +885,8 @@ async function start() {
       });
       basketUi.setCapacity(capacity(gear, config.carry));
     },
+    // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).
+    startGame: () => startGame(false),
     narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, trust: narrator.trust, waiting: waitingAnswer(narrator), shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
     products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).

@@ -79,6 +79,8 @@ export function narrate(n, data, trigger, p) {
   let bestT = Infinity;
   for (const l of data.lines) {
     if (l.trigger !== trigger) continue;
+    // Confiance : certaines répliques n'existent qu'au-dessus (minTrust) ou en dessous (maxTrust) d'un seuil.
+    if ((l.minTrust !== undefined && n.trust < l.minTrust) || (l.maxTrust !== undefined && n.trust > l.maxTrust)) continue;
     const when = n.said[l.id] ?? -Infinity;
     if (n.t - when < cooldown) continue;
     if (when < bestT) {
@@ -131,6 +133,9 @@ export function stepNarrator(n, data, dt, p) {
   if (!n.line) {
     if (n.pending && n.t >= n.pending.at) {
       const { trigger } = n.pending;
+      // Un aparté (ou regard) enchaîné attend que le héros soit disponible, p.followWait s au plus.
+      const v = data.triggers[trigger]?.voice;
+      if ((v === HERO || v === GLANCE) && !n.asideOk && n.t < n.pending.at + p.followWait) return 0;
       n.pending = null;
       narrate(n, data, trigger, p);
     }

@@ -12,6 +12,37 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 39 — 15/11/2026 — Écran titre, objets illustrés, échange de cartes, confiance à l'essai
+
+**Demandes de l'auteur** :
+- objets illustrés dans l'onglet Objets ;
+- fenêtre Oui / Non avant d'échanger une carte, et le produit reposé à la place du produit scanné ;
+- réponses de l'aparté jamais vues ;
+- l'onglet « Courses » renommé « Cartes » ;
+- le jeu qui démarre parfois à la verticale ;
+- un écran titre (esprit Baten Kaitos / FF) ;
+- la confiance, à noter et à intégrer comme essai.
+
+**Jouable maintenant**
+- **Écran titre** : « PAPER CART — The Final Checkout » en grand, sur une image [TEMP] d'un rayon sans fin qui file vers une lueur (caddie abandonné, petite silhouette de papier). Boutons **Commencer** et **Options**, au doigt, à la souris, au clavier et à la manette.
+- **Sur téléphone**, « Commencer » passe en **plein écran paysage**. En portrait, la consigne « Tourne ton téléphone » propose un bouton pour passer en paysage.
+- **Onglet Objets** : chaque objet a une **icône** et une courte description. Onglet « **Cartes** » (au lieu de « Courses »).
+- **Panier plein** :
+  - une fenêtre demande « **Échanger une carte contre ce produit ? Oui / Non** » ;
+  - Oui : on choisit la carte, et son produit **apparaît à la place du produit scanné** ;
+  - Non : rien ne change.
+- **Aparté d'accueil** : s'il arrive pendant que le héros marche, il **attend qu'il s'arrête** (20 s au plus) au lieu d'être perdu. C'est lui qui pose la première question.
+- **Confiance à l'essai** : deux nouvelles répliques d'inactivité n'existent qu'avec une confiance haute (complice) ou basse (blessé).
+
+**Vérifié** : 116 passed tests de logique (dont l'attente de l'aparté et les répliques selon la confiance) ; 54 tests navigateur PC et téléphone simulé sans erreur console, dont l'écran titre (Commencer, Options, clavier), la question Oui / Non et l'échange de place ; comptages ; captures PC et téléphone simulé. **Non vérifiable ici** : le plein écran paysage sur un vrai téléphone, la manette.
+
+**Décisions prises seul** :
+- Polices du système en attendant une police choisie (aucune ressource ajoutée sans accord).
+- Icônes et image de titre [TEMP].
+- En plein écran paysage seulement depuis « Commencer » (le navigateur l'exige après un geste).
+
+---
+
 ## Séance 38 — 15/11/2026 — Publication, carte reposée sur l'étagère, apartés enrichis
 
 **Décisions de l'auteur** :

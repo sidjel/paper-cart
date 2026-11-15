@@ -22,7 +22,7 @@
 |---|---|
 | `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `gear` (Scanette, panier, capacité ; A5a), `narrator` (les voix — haut-parleur, apartés du héros avec réponses et confiance, petits regards caméra : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`. |
 | `src/scene/` | Scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage, objets tenus en main dessinés à part : données `held` et `hands`), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images), `targetMarker`, `debugMask` |
-| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit, deux réponses), `aside` (mise en scène de l'aparté : bandes, bords assombris). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
+| `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit, deux réponses), `aside` (mise en scène de l'aparté : bandes, bords assombris), `title` (écran titre), `confirm` (fenêtre Oui / Non). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |
 | `src/data/` | `places/rayon-essai.json` (lieu : images, calques, zone de marche, objets, produits, parcours de mesure), `characters/heros.json`, `products.json`, `narrator.json` (moments et répliques), `music/` |
@@ -33,7 +33,7 @@
 ## 3. Boucle, temps et états 🔎
 
 - `requestAnimationFrame` → `stepper` avance la logique par pas fixes, l'affichage interpole entre deux pas.
-- États : `loading`, `play`, `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Sous un menu, la scène n'est pas redessinée.
+- États : `loading`, `title` (écran titre), `play`, `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Sous un menu, la scène n'est pas redessinée.
 - Délais (scan…) : comptés en pas de jeu, donc figés en pause. Seule exception : le délai du double toucher (geste du joueur, temps réel).
 - La logique renvoie de petits événements (ex. `stepScan` → `'bip'`) que `main.js` traduit en son et affichage. Pas de bus d'événements : inutile à cette taille.
 

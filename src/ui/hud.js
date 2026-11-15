@@ -73,7 +73,11 @@ export function createHud(root, { version, onAction, touch, muted }) {
 
   const rotate = document.createElement('div');
   rotate.className = 'overlay rotate';
-  rotate.innerHTML = '<p>Tourne ton téléphone en paysage ↻</p>';
+  rotate.innerHTML = '<div><p>Tourne ton téléphone en paysage ↻</p><button class="rotate-button">Passer en plein écran paysage</button></div>';
+  rotate.querySelector('button').addEventListener('click', (e) => {
+    e.stopPropagation();
+    onAction('landscape');
+  });
 
   const error = document.createElement('div');
   error.className = 'overlay error';

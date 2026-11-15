@@ -282,7 +282,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .pause-card .help { margin-top: 14px; font-size: 14px; line-height: 1.5; }
 .error { background: var(--band); color: var(--paper); padding: 24px; }
 
-.rotate { display: none; background: var(--band); color: var(--paper); font-size: 20px; }
+.rotate { display: none; background: var(--band); color: var(--paper); font-size: 20px; z-index: 80; text-align: center; }
 @media (orientation: portrait) and (pointer: coarse) {
   .rotate { display: grid; }
 }
@@ -476,7 +476,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .panier h2 { margin: 0 0 8px; font-size: 20px; }
 .panier-tabs { margin: 0 0 10px; }
 .panier-objects { list-style: none; margin: 0; padding: 0 0 8px; display: grid; gap: 8px; }
-.panier-objects li { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--card); }
+.panier-objects li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--card); }
+.panier-objects li > div { display: flex; flex-direction: column; gap: 2px; }
+.object-icon { flex: none; width: 56px; height: 56px; }
 .panier-hint { font-weight: 700; }
 .panier.choosing .card { cursor: pointer; }
 .panier.choosing .card:hover, .panier.choosing .card:focus-visible { outline: 3px solid #c0503f; outline-offset: 2px; }
@@ -631,3 +633,64 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   cursor: pointer;
 }
 .hero-choice:focus-visible, .hero-choice:hover { background: var(--accent); }
+
+/* Fenêtre Oui / Non (panier plein…) */
+.confirm {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: min(420px, calc(100% - 32px));
+  padding: 16px 18px 12px;
+  z-index: 60;
+}
+.confirm-text { margin: 0 0 10px; font-size: 17px; font-weight: 700; }
+
+/* ---------- Écran titre ---------- */
+.title-screen { position: absolute; inset: 0; z-index: 70; background: #151827; overflow: hidden; }
+.title-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.title-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(10 10 20 / 0.55) 0%, rgb(10 10 20 / 0) 45%, rgb(10 10 20 / 0.6) 100%); }
+.title-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(5vh, var(--safe-top)) var(--safe-right) max(7vh, var(--safe-bottom)) var(--safe-left);
+  text-align: center;
+}
+/* Polices du système en attendant une police choisie par l'auteur (aucune ressource externe). */
+.title-name { margin: 0; display: flex; flex-direction: column; align-items: center; color: #f6eedb; }
+.title-main {
+  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", "Trebuchet MS", sans-serif;
+  font-weight: 800;
+  font-size: clamp(40px, 11vh, 120px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 0 24px rgb(243 199 122 / 0.35), 0 3px 0 rgb(0 0 0 / 0.5);
+}
+.title-sub {
+  margin-top: 1.2vh;
+  font-family: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  font-style: italic;
+  font-size: clamp(16px, 4vh, 38px);
+  letter-spacing: 0.32em;
+  color: #f3c77a;
+}
+.title-menu { display: flex; flex-direction: column; gap: 10px; min-width: min(280px, 70vw); }
+.title-button {
+  min-height: 46px;
+  padding: 8px 24px;
+  border: 2px solid rgb(246 238 219 / 0.75);
+  border-radius: 999px;
+  background: rgb(21 24 39 / 0.55);
+  color: #f6eedb;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.title-button:hover, .title-button:focus-visible { background: #f3c77a; color: #151827; border-color: #f3c77a; outline: none; }
+/* En portrait : la consigne pour tourner le téléphone propose aussi de passer en paysage. */
+.rotate-button { margin-top: 14px; min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--paper); background: transparent; color: var(--paper); font-size: 17px; }

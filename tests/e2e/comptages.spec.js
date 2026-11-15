@@ -36,6 +36,9 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   await page.goto('./');
+  // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
 
   // Objets du décor qui changent de calque pendant le parcours (cause de clignotements sur

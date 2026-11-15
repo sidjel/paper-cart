@@ -178,5 +178,22 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
     it.el.hidden = false;
   }
 
-  return { items, setMarker, markAt, update, remove, restore };
+  // Échange (panier plein) : le produit `from` prend la place du produit `to` (sur l'étagère, sur une
+  // table, dans le caddie), avec le calque qui va avec.
+  function moveTo(from, to) {
+    const it = items[from];
+    const dst = items[to];
+    it.x = dst.x;
+    it.y = dst.y;
+    it.loose = dst.loose;
+    it.wz = dst.wz;
+    it.standAt = dst.standAt;
+    const parentEl = dst.loose ? loose.parent : parent;
+    if (it.el.parentNode !== parentEl) parentEl.appendChild(it.el);
+    it.el.classList.toggle('prop', !!dst.loose);
+    it.el.style.zIndex = dst.loose ? dst.el.style.zIndex : '';
+    restore(from);
+  }
+
+  return { items, setMarker, markAt, update, remove, restore, moveTo };
 }

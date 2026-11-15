@@ -12,6 +12,9 @@ test.beforeEach(async ({ page }, info) => {
   });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   await page.goto('./');
+  // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   // Les tests du scanner commencent équipés (Scanette et panier) ; ceux de l'accueil (A5a), mains vides.
   if (!info.title.startsWith('A5a')) await page.evaluate(() => window.paperCart.equip());
@@ -635,15 +638,29 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(1);
   await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter');
+  // D'abord la question « Échanger une carte ? » : Oui.
+  await expect(page.locator('.confirm')).toBeVisible();
+  await expect(page.locator('.confirm')).toContainText('plein');
+  await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-echanger.png` });
+  await page.locator('.confirm button', { hasText: 'Oui' }).click();
   await expect(page.locator('.panier h2')).toHaveText('Panier plein');
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-plein.png` });
   await page.locator('.panier .card').first().click();
   await expect(page.locator('.panier')).toBeHidden();
   await expect.poll(async () => (await state(page)).cards, { timeout: 5000 }).toEqual(['Lait']);
   await expect(page.locator('.panier-count')).toHaveText('1/1');
-  // Choix B : la banane reposée est revenue sur l'étagère, on peut la rescanner.
-  expect((await page.evaluate(() => window.paperCart.products()))[0].scanned).toBe(false);
+  // Échange : la banane reposée apparaît à la place du lait (et non à sa place d'origine).
+  const banane = (await page.evaluate(() => window.paperCart.products()))[0];
+  expect(banane.scanned).toBe(false);
+  expect(banane.x).toBe(560);
   await expect(page.locator('.product').nth(0)).toBeVisible();
+  // « Non » à la question : rien ne change.
+  await page.keyboard.press('Enter'); // la banane est à portée, à la place du lait
+  await expect(page.locator('.confirm')).toBeVisible();
+  await page.locator('.confirm button', { hasText: 'Non' }).click();
+  await expect(page.locator('.confirm')).toBeHidden();
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  expect((await state(page)).cards).toEqual(['Lait']);
 });
 
 test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }, info) => {
@@ -658,7 +675,7 @@ test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }
   await expect(panel.locator('.panier-objects')).toContainText('Panier à main');
   await expect(panel.locator('.panier-grid')).toBeHidden();
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-objets.png` });
-  await panel.locator('.settings-tab', { hasText: 'Courses' }).click();
+  await panel.locator('.settings-tab', { hasText: 'Cartes' }).click();
   await expect(panel.locator('.panier-objects')).toBeHidden();
   // Au clavier : flèche droite ou gauche change d'onglet.
   await page.keyboard.press('ArrowRight');

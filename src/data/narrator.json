@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face.",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai).",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -259,6 +259,20 @@
       "trigger": "regard",
       "text": "",
       "emotion": "complice"
+    },
+    {
+      "id": "aparte_confiance_haute",
+      "trigger": "aparte_inactivite",
+      "minTrust": 1,
+      "emotion": "complice",
+      "text": "[TEMP] Tu es toujours là, hein ? Je le sens. Bizarrement, ça me rassure."
+    },
+    {
+      "id": "aparte_confiance_basse",
+      "trigger": "aparte_inactivite",
+      "maxTrust": -1,
+      "emotion": "inquiet",
+      "text": "[TEMP] Tu me laisses encore planté là… Je commence à avoir l'habitude, tu sais."
     }
   ]
 }

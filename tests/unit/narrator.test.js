@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle, answer, waitingAnswer } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
-const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25 };
+const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20 };
 const DATA = {
   triggers: { arrivee: { once: true, strong: true }, scan: { every: 3 }, idle: {} },
   lines: [
@@ -150,6 +150,17 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     go(n, 3);
     expect(narrate(n, D, 'aparte_vide', { ...P, lineCooldown: 0 })).toBe(null); // moins de 4 s de silence
   });
+  it('l’aparté enchaîné attend que le héros s’arrête (20 s au plus), au lieu d’être perdu', () => {
+    const n = createNarrator();
+    narrate(n, D, 'arrivee', P);
+    n.asideOk = false; // le joueur marche
+    go(n, 8);
+    expect(n.line).toBe(null);
+    expect(n.pending?.trigger).toBe('aparte_accueil');
+    n.asideOk = true; // il s'arrête
+    go(n, 0.1);
+    expect(n.line?.id).toBe('h');
+  });
   it('« from » : l’inactivité ne fait parler le haut-parleur qu’à partir de la 2e fois', () => {
     const n = createNarrator();
     expect(narrate(n, D, 'inactif', P)).toBe(null);
@@ -162,6 +173,24 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     expect(narrate(n, D, 'aparte_vide', P)).toBe(null);
     n.asideOk = true;
     expect(narrate(n, D, 'aparte_vide', P).id).toBe('hv');
+  });
+  it('confiance : certaines répliques n’existent qu’au-dessus ou en dessous d’un seuil', () => {
+    const T = {
+      triggers: { a: { voice: 'heros', cooldown: 0 } },
+      lines: [
+        { id: 'haut', trigger: 'a', text: 'Merci', minTrust: 1 },
+        { id: 'bas', trigger: 'a', text: 'Bof', maxTrust: -1 },
+      ],
+    };
+    const n = createNarrator();
+    n.t = 100;
+    expect(narrate(n, T, 'a', P)).toBe(null); // confiance 0 : ni l'une ni l'autre
+    n.trust = 2;
+    expect(narrate(n, T, 'a', P).id).toBe('haut');
+    const m = createNarrator();
+    m.t = 100;
+    m.trust = -1;
+    expect(narrate(m, T, 'a', P).id).toBe('bas');
   });
   it('apartés désactivés : le héros se tait', () => {
     const n = createNarrator();

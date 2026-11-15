@@ -1,7 +1,15 @@
 {
-  "comment": "Objets que le héros porte (onglet « Objets » du panier) : de vrais objets, pas des cartes. Textes [TEMP], à réécrire par l'auteur.",
+  "comment": "Objets que le héros porte (onglet « Objets » du panier) : de vrais objets, pas des cartes. image : icône affichée dans l'onglet. Textes [TEMP], à réécrire par l'auteur.",
   "objects": {
-    "scanette": { "name": "[TEMP] Scanette", "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits en cartes." },
-    "panier": { "name": "[TEMP] Panier à main", "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir." }
+    "scanette": {
+      "name": "[TEMP] Scanette",
+      "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits en cartes.",
+      "image": "art/placeholder/objets/scanette.svg"
+    },
+    "panier": {
+      "name": "[TEMP] Panier à main",
+      "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir.",
+      "image": "art/placeholder/objets/panier.svg"
+    }
   }
 }

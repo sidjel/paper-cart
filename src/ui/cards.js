@@ -37,7 +37,8 @@ export function buildCard(card, imageUrl) {
 // Mode « reposer » (panier plein) : toucher une carte la repose pour faire de la place, ou annuler.
 const TEMP = /^\[TEMP\]\s*/;
 
-export function createBasketUi(root, { onOpen, onClose, objects }) {
+// objects : data/objects.json ; base : chemin des images du jeu.
+export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   const button = document.createElement('button');
   button.className = 'hud-button panier-button';
   button.setAttribute('aria-label', 'Panier (I)');
@@ -62,7 +63,7 @@ export function createBasketUi(root, { onOpen, onClose, objects }) {
   tabs.setAttribute('role', 'tablist');
   const tabCards = document.createElement('button');
   const tabObjects = document.createElement('button');
-  for (const [t, label] of [[tabCards, 'Courses'], [tabObjects, 'Objets']]) {
+  for (const [t, label] of [[tabCards, 'Cartes'], [tabObjects, 'Objets']]) {
     t.className = 'settings-tab';
     t.textContent = label;
     t.setAttribute('role', 'tab');
@@ -150,11 +151,20 @@ export function createBasketUi(root, { onOpen, onClose, objects }) {
       if (!def || owned.includes(id)) return;
       owned.push(id);
       const li = document.createElement('li');
+      const img = new Image(); // petite icône d'interface, chargée au moment où l'objet est pris
+      img.className = 'object-icon';
+      img.alt = '';
+      img.width = 56;
+      img.height = 56;
+      img.decoding = 'async';
+      img.src = base + def.image;
+      const txt = document.createElement('div');
       const b = document.createElement('strong');
       b.textContent = def.name.replace(TEMP, '');
       const p = document.createElement('span');
       p.textContent = def.text.replace(TEMP, '');
-      li.append(b, p);
+      txt.append(b, p);
+      li.append(img, txt);
       objList.appendChild(li);
     },
     setCount(n) {
