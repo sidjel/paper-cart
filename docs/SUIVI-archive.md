@@ -98,3 +98,10 @@ Déplacés tels quels depuis `docs/SUIVI.md` à la séance 51, sans rien perdre.
 ### Questions de l'auteur (réponses données)
 - Faut-il dessiner les personnages avant l'étape suivante ? Non : les dessins arrivent au prototype D, préparé une séance à l'avance avec docs/IMAGES.md (séance 5).
 - Pourquoi le clignotement du caddie n'existait pas avant ? Mesuré (séance 28) : la bascule de calque était déjà là en A1 et A2, de façon identique. Ce n'est pas un défaut ajouté ensuite. Ce qui a changé, c'est sans doute sa visibilité (hypothèses non prouvées : plus d'images en mémoire depuis A3, et des images lentes qui le masquaient avant).
+
+### Remise en ordre (séance 52)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A4 et A5 validées | 52 | ✅ | `c32eedd` (JOURNAL, PROTOTYPES). |
+| Séance 1 de remise en ordre : documentation (ARCHITECTURE, HISTOIRE, REGLES, DIRECTION_ARTISTIQUE, SUIVI, JOURNAL, CLAUDE.md, skills, CLAUDE.md de dossier) | 52 | ✅ | Un commit par point. VISION.md en attente de l'accord de l'auteur. |
+

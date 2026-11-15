@@ -131,6 +131,13 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | 14. Écarts documents / code (ARCHITECTURE, SUIVI, tests dans un seul fichier) | 🔧 | Petit. |
 | 15. Images de plus de 4 096 pixels réels réduites sans prévenir | ❓ | Règle à décider avant de dessiner le vrai hall. |
 
+### Remise en ordre (séances 52 et 53)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| VISION.md : remplacer le détail du style par une phrase qui renvoie à DIRECTION_ARTISTIQUE.md | 52 | ❓ | Détail déjà recopié dans DIRECTION_ARTISTIQUE.md. Modification de VISION.md proposée à l'auteur, pas enregistrée. |
+| Flou réel optionnel des bords (rencontre) : le garder ? | 52 | ❓ | Désactivé par défaut (0 px), coût jamais mesuré sur le téléphone. Décision de l'auteur. |
+| Séance 2 de remise en ordre (garde-fous automatiques), puis découpage de main.js | 52 | 🔧 | Dans cet ordre (demande de l'auteur). |
+
 ## À trancher par l'auteur : les points 👀
 Pour chacun : **validé** (→ archive), **à refaire** (→ 🔧) ou **abandonné** (→ archive, noté abandonné). Répondre par numéros, par exemple « 1 à 20 validés, 23 à refaire, 31 abandonné ».
 
