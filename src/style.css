@@ -1190,3 +1190,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   to { transform: rotate(360deg) translateX(56px) rotate(-360deg) scaleY(2.6); }
 }
 .dizzy-stars.still .dizzy-ring span { animation: none; }
+/* Panier : pas de zoom du navigateur sur un double toucher (cartes, grande carte). */
+.panier-grid .card { touch-action: manipulation; }
+.card-detail { touch-action: none; }

@@ -12,6 +12,21 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 49 (suite) — Bug du double clic sur une carte
+
+**Retour de l'auteur** : un double clic (ou un double toucher) rapide sur une carte du Panier donne une carte zoomée à fond.
+
+**Cause (reproduite)** : le second clic tombait sur la carte encore en vol et coupait l'animation d'ouverture : la carte sautait d'un coup à sa grande taille. Sur téléphone, le navigateur pouvait aussi zoomer la page.
+
+**Corrigé** :
+- Un toucher sur la carte pendant une animation est ignoré : l'animation va jusqu'au bout.
+- Le zoom du navigateur au double toucher est coupé sur cette zone.
+- Toucher à côté referme toujours, même pendant un retournement.
+
+**Vérifié** : 140 tests de logique, 74 tests navigateur sans erreur console. Nouveau test : double clic (PC) et double toucher (téléphone simulé) ; la carte s'ouvre normalement, une seule fois.
+
+---
+
 ## Séance 49 (suite) — Le tournis
 
 **Retours de l'auteur** :

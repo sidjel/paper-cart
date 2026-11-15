@@ -906,3 +906,27 @@ test('Tournis : trop de demi-tours, trop vite → étoiles autour de la tête, p
   await expect(page.locator('.dizzy-stars')).toBeVisible(); // tant qu'il s'en plaint
   expect(errors).toEqual([]);
 });
+
+test('Panier : un double clic (ou double toucher) sur une carte ne casse pas l’animation', async ({ page }, info) => {
+  const phone = info.project.name === 'telephone';
+  await page.goto('./?depart=panier-plein');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  if (phone) await page.locator('.panier-button').tap();
+  else await page.keyboard.press('KeyI');
+  const c = page.locator('.panier .card-mini').nth(2);
+  await c.waitFor();
+  if (phone) {
+    await c.tap();
+    await page.waitForTimeout(60);
+    await page.locator('.card-flip').tap({ force: true });
+  } else await c.dblclick();
+  // Le second toucher est ignoré : l'ouverture continue normalement (pas de saut à la grande taille).
+  await page.waitForTimeout(40);
+  const w = await page.locator('.card-flip').evaluate((e) => e.getBoundingClientRect().width);
+  const big = await page.locator('.card-flip').evaluate((e) => e.offsetWidth);
+  expect(w).toBeLessThan(big * 0.9); // encore en vol, petite
+  await expect.poll(() => page.locator('.card-flip').getAttribute('class')).toBe('card-flip show-back'); // ouverte, au dos
+  expect(await page.evaluate(() => window.paperCart.flips())).toBe(1);
+  expect(await page.locator('.card-detail').evaluate((e) => getComputedStyle(e).touchAction)).toBe('none');
+  expect(errors).toEqual([]);
+});

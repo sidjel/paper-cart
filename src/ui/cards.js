@@ -254,8 +254,11 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     };
   }
   // Toucher la grande carte : elle se retourne (recto, verso).
+  // Une animation en cours (ouverture, retournement, fermeture) va jusqu'au bout : un second toucher
+  // (double clic, double toucher) ne l'interrompt pas (sinon la carte sautait d'un coup à sa grande taille).
+  const busy = () => closing || /\banim-/.test(flipper.className);
   function flipDetail() {
-    if (closing) return;
+    if (busy()) return;
     animate('anim-fold', 'anim-unfold', () => setFace(!backShown));
   }
   flipper.addEventListener('click', (e) => {
@@ -293,6 +296,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     const el = target.closest('.card');
     if (!el) return;
     if (!choose) {
+      if (!detail.hidden) return; // déjà ouverte (double clic)
       openDetail(el); // consultation : la carte se retourne et s'affiche en grand
       return;
     }
