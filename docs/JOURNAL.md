@@ -12,6 +12,20 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 50 (suite) — Audit, point 3 : un seul état du monde
+
+**Fait** (aucun changement visible pour le joueur) :
+- `core/world.js` (testé) : l'état de chaque lieu (produits : place, scanné ; objets à prendre) est créé à la première visite et retrouvé tel quel ensuite.
+- L'affichage des produits (`scene/products.js`) ne garde plus sa propre copie : il montre cet état.
+- L'échange du panier plein passe par une fonction testée (`moveProduct`).
+- Une carte retient son lieu d'origine.
+
+**Vérifié** : 147 tests de logique (dont : « en revenant dans un lieu, un produit scanné est toujours scanné ») ; 77 tests navigateur, sans erreur console ; comptages inchangés.
+
+**Reste de l'audit** : points 2 + 4 (premier pas d'A6), puis 6.
+
+---
+
 ## Séance 50 (suite) — Audit, point 5 : « qui a la main ? »
 
 **Fait** (aucun changement visible pour le joueur) :

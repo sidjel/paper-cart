@@ -175,6 +175,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Règles des lieux (données, gestionnaire avec cycle de vie, transition par la machine à états, le monde se souvient, mesures) | 50 | ✅ | Écrites dans ARCHITECTURE.md §11, avant de coder A6. |
 | Audit de l'architecture et de la fluidité avant A6 et A7, sans rien modifier | 50 | ❓ | Fait (rapport dans le JOURNAL, séance 50). 15 points ; **l'auteur valide une correction à la fois**, banc d'essai sur le téléphone avant et après pour la fluidité. |
 | Audit, point 5 : règle « qui a la main ? » écrite une fois | 50 | ✅ | `core/focus.js` (testé), utilisé par le traitement des touches. État « transition » : avec A6. |
+| Audit, point 3 : un seul état du monde (le monde se souvient) | 50 | ✅ | `core/world.js` (testé) ; `scene/products.js` ne fait plus qu'afficher. |
 | (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | 👀 | Corrigé (validé par l'auteur) : pas de Panier pendant un aparté ou une conversation ; hors du jeu (Panier, menus), le héros ne prend pas la parole, la rencontre attend le retour. Testé. |
 
 ## Interface

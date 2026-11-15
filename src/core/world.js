@@ -1,0 +1,54 @@
+// L'état du monde : ce dont le jeu se souvient, lieu par lieu (logique pure, une seule source).
+// Un produit scanné reste scanné, un objet pris reste pris ; l'affichage (scene/products.js) ne fait que
+// montrer cet état. Les cartes et les objets portés suivent le héros (core/cards.js, core/gear.js).
+//
+// Par lieu : { products: [...], pickups: [...] }
+//  - products : [{ id, def, x, y, w, h, loose, z, standAt, on, scanned }] — x, y : bas du dessin sur la
+//    scène ; loose (posé ailleurs que sur l'étagère) : z = profondeur au sol, standAt = où se placer,
+//    on = objet du décor qui le porte. Mêmes champs que ceux lus par core/scan.js.
+//  - pickups : objets à prendre (présentoir), visés comme des produits posés ailleurs ; scanned = déjà pris.
+
+export function createWorld() {
+  return { places: {}, current: '' };
+}
+
+// Entrer dans un lieu : son état est créé la première fois (build), retrouvé tel quel ensuite.
+export function enterPlace(world, id, build) {
+  if (!world.places[id]) world.places[id] = build();
+  world.current = id;
+  return world.places[id];
+}
+
+// Produits d'un lieu, d'après ses données. stageY(z) : hauteur sur la scène du sol à la profondeur z.
+export function buildProducts(place, catalog, stageY) {
+  const entry = (it, x, y, scale, extra) => {
+    const def = catalog.products[it.product];
+    return { id: it.product, def, x, y, w: Math.round(def.size[0] * scale), h: Math.round(def.size[1] * scale), loose: false, z: undefined, standAt: undefined, on: undefined, scanned: false, ...extra };
+  };
+  const out = (place.shelfProducts?.items ?? []).map((it) => entry(it, it.at[0], it.at[1], 1));
+  for (const it of place.looseProducts?.items ?? []) {
+    const [wx, wz] = it.at;
+    out.push(entry(it, wx, stageY(wz) - it.lift, it.scale ?? 1, { loose: true, z: wz, standAt: it.standAt, on: it.on }));
+  }
+  return out;
+}
+
+// Objets à prendre au présentoir : au fond (backZ), contre l'étagère ; on s'y présente de face.
+export function buildPickups(place, backZ) {
+  return (place.accueil?.items ?? []).map((it) => ({
+    id: it.id, x: it.at[0], z: backZ, loose: true, scanned: false, standAt: [[it.at[0], backZ - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
+  }));
+}
+
+// Échange (panier plein) : le produit `from` (reposé) prend la place du produit `to` (qu'on vient de scanner).
+export function moveProduct(products, from, to) {
+  const a = products[from];
+  const b = products[to];
+  a.x = b.x;
+  a.y = b.y;
+  a.loose = b.loose;
+  a.z = b.z;
+  a.standAt = b.standAt;
+  a.on = b.on;
+  a.scanned = false;
+}

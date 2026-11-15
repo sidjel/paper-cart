@@ -30,6 +30,7 @@ import { createDizzyStars } from './ui/dizzyStars.js';
 import departsFile from './data/departs.json';
 import { findDepart, cardCount, pickProducts, saidFor } from './core/departs.js';
 import { findPath } from './core/pathfinding.js';
+import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -97,7 +98,8 @@ const journal = createJournal(hud.pauseCard, config.narrator.logMax, { onFirstBu
 // ---------- Scanner, cartes et Panier ----------
 let products = null; // produits à scanner (affichage)
 let loadedImages = null;
-let productState = null; // produits à scanner (logique, voir core/scan.js)
+let productState = null; // produits du lieu (état du monde, core/world.js ; lus par core/scan.js)
+const world = createWorld(); // ce dont le jeu se souvient, lieu par lieu
 const scan = createScan();
 const basket = createBasket();
 let flips = 0; // cartes retournées (bruitage ; compté pour les tests)
@@ -261,7 +263,7 @@ function chooseCardToDrop(i) {
       basketUi.setCount(basket.cards.length);
       const target = dropFor;
       dropFor = -1;
-      if (dropped && dropped.slot >= 0) pendingSwap = { from: dropped.slot, to: target };
+      if (dropped && dropped.slot >= 0 && dropped.place === place.id) pendingSwap = { from: dropped.slot, to: target };
       panierMode = 'consult';
       sm.go('play');
       scanProduct(target);
@@ -542,13 +544,13 @@ function applyDepart(def) {
   for (const t of saidFor(def)) narrator.done[t] = true;
   if (def.equip) arrived = true; // pas d'annonce d'arrivée ni de premières pensées
   // Cartes déjà dans le panier : des produits du rayon, retirés de l'étagère (sans effet de scan).
-  const free = products.items.map((it, i) => ({ i, category: it.def.category ?? 'alimentaire', ok: !productState[i].scanned })).filter((x) => x.ok);
+  const free = productState.map((it, i) => ({ i, category: it.def.category ?? 'alimentaire', ok: !it.scanned })).filter((x) => x.ok);
   for (const k of pickProducts(free, cardCount(def, capacity(gear, config.carry)))) {
     const i = free[k].i;
-    const it = products.items[i];
+    const it = productState[i];
+    it.scanned = true;
     products.remove(i);
-    productState[i].scanned = true;
-    basketUi.add(addToBasket(basket, it.id, it.def, i), imageUrlOf(it.def));
+    basketUi.add(addToBasket(basket, it.id, it.def, i, place.id), imageUrlOf(it.def));
   }
   if (basket.cards.length) basketUi.setCount(basket.cards.length);
 }
@@ -562,18 +564,17 @@ function onScanEvent(ev) {
   if (!ev) return;
   if (ev === 'bip' || ev === 'aspire') audio.play(ev);
   else if (ev === 'carte') {
-    const it = products.items[scan.index];
+    const it = productState[scan.index];
+    it.scanned = true;
     products.remove(scan.index);
-    productState[scan.index].scanned = true;
     if (pendingSwap && pendingSwap.to === scan.index) {
       // Échange : le produit reposé apparaît à la place de celui qu'on vient de scanner.
       const { from, to } = pendingSwap;
       pendingSwap = null;
-      products.moveTo(from, to);
-      const m = products.items[from];
-      Object.assign(productState[from], { x: m.x, z: m.wz, loose: !!m.loose, standAt: m.standAt, y: m.y, w: m.w, h: m.h, scanned: false });
+      moveProduct(productState, from, to);
+      products.sync(from);
     }
-    const card = addToBasket(basket, it.id, it.def, scan.index);
+    const card = addToBasket(basket, it.id, it.def, scan.index, place.id);
     const url = imageUrlOf(it.def);
     basketUi.add(card, url);
     flyingCard.show(card, url);
@@ -1145,17 +1146,18 @@ async function start() {
   props = createProps(place, images, stage.layers.acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
   speakerWaves = createSpeakerWaves(stage.layers.acteurs);
-  products = createProducts(place, catalog, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display, {
+  // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
+  const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
+  const here = enterPlace(world, place.id, () => ({
+    products: buildProducts(place, catalog, (z) => worldToStageY(proj, z)),
+    pickups: buildPickups(place, back),
+  }));
+  productState = here.products;
+  pickupState = here.pickups;
+  products = createProducts(productState, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display, {
     parent: stage.layers.acteurs,
-    proj,
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
-  productState = products.items.map((it) => ({ x: it.x, scanned: false, loose: !!it.loose, z: it.wz, standAt: it.standAt, y: it.y, w: it.w, h: it.h }));
-  // Présentoir de l'accueil : au fond, contre l'étagère ; on s'y présente de face.
-  const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
-  pickupState = (place.accueil?.items ?? []).map((it) => ({
-    id: it.id, x: it.at[0], z: back, loose: true, scanned: false, standAt: [[it.at[0], back - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
-  }));
   depthRefs = props.map((p) => p.depthRef);
   dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);
@@ -1227,7 +1229,7 @@ async function start() {
     // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).
     startGame: () => startGame(false),
     narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, trust: narrator.trust, waiting: waitingAnswer(narrator), shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
-    products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
+    products: () => productState.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
     worldToClient(x, z) {

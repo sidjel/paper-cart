@@ -8,8 +8,6 @@
 // seulement en transform et opacity. Les éléments qui bougent ont leur propre calque pendant
 // l'effet seulement (will-change posé au début, retiré à la fin).
 
-import { worldToStageY } from './projection.js';
-
 const BITS_MAX = 24;
 
 // Petit générateur déterministe (positions des confettis identiques d'un scan à l'autre).
@@ -18,34 +16,32 @@ function noise(i, k) {
   return v - Math.floor(v);
 }
 
-// loose : { parent, proj, levelOf(idObjet) } pour les produits posés ailleurs que sur l'étagère.
-export function createProducts(place, catalog, images, parent, effectsParent, settings, display, loose) {
-  function make(it, x, y, scale, into) {
-    const def = catalog.products[it.product];
-    const img = images.get(def.image);
+// items : produits du lieu (état du monde, core/world.js) — la seule source : ici on ne fait que les montrer.
+// loose : { parent, levelOf(idObjet) } pour les produits posés ailleurs que sur l'étagère.
+export function createProducts(items, images, parent, effectsParent, settings, display, loose) {
+  // Place (ou replace) le dessin d'un produit d'après son état : calque, niveau, position, visible ou non.
+  function place(i) {
+    const it = items[i];
+    const el = els[i];
+    const into = it.loose ? loose.parent : parent;
+    if (el.parentNode !== into) into.appendChild(el);
+    el.classList.toggle('prop', !!it.loose); // posé ailleurs : même calque fixe que les objets du décor
+    el.style.zIndex = it.loose ? loose.levelOf(it.on) : '';
+    el.style.opacity = '';
+    el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px)`;
+    el.hidden = it.scanned;
+  }
+  const els = items.map((it) => {
     const el = new Image();
-    el.src = img.url;
+    el.src = images.get(it.def.image).url;
     el.className = 'product';
     el.alt = '';
     el.draggable = false;
-    const w = Math.round(def.size[0] * scale);
-    const h = Math.round(def.size[1] * scale);
-    el.width = w;
-    el.height = h;
-    el.style.transform = `translate(${x - w / 2}px, ${y - h}px)`;
-    into.appendChild(el);
-    return { id: it.product, def, x, y, w, h, el, scanned: false };
-  }
-  const items = place.shelfProducts.items.map((it) => make(it, it.at[0], it.at[1], 1, parent));
-  // Produits posés ailleurs : x, y sur la scène (bas du produit) ; on garde aussi leur place au sol.
-  for (const it of place.looseProducts?.items ?? []) {
-    const [wx, wz] = it.at;
-    const p = make(it, wx, worldToStageY(loose.proj, wz) - it.lift, it.scale ?? 1, loose.parent);
-    p.el.classList.add('prop'); // même calque fixe que les objets du décor
-    p.el.style.zIndex = loose.levelOf(it.on);
-    Object.assign(p, { loose: true, wz, standAt: it.standAt });
-    items.push(p);
-  }
+    el.width = it.w;
+    el.height = it.h;
+    return el;
+  });
+  items.forEach((_, i) => place(i));
 
   // Repère au-dessus du produit à portée.
   const marker = document.createElement('div');
@@ -105,6 +101,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
       return;
     }
     const it = items[scan.index];
+    const el = els[scan.index];
     const cx = it.x;
     const cy = it.y - it.h / 2;
 
@@ -127,7 +124,7 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
     if (scan.phase === 'dissolve') {
       if (dissolving !== scan.index) {
         dissolving = scan.index;
-        it.el.style.willChange = 'transform, opacity';
+        el.style.willChange = 'transform, opacity';
         const colors = it.def.colors;
         bits.forEach((b, i) => {
           b.hidden = false;
@@ -136,8 +133,8 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
         bitsOn = true;
       }
       const p = progress;
-      it.el.style.opacity = 1 - p;
-      it.el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px) scale(${1 - 0.5 * p})`;
+      el.style.opacity = 1 - p;
+      el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px) scale(${1 - 0.5 * p})`;
       const n = bits.length;
       for (let i = 0; i < n; i++) {
         // Chaque confetti part d'un point du produit, avec un petit retard, et file en courbe vers la Scanette.
@@ -160,40 +157,12 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
     }
   }
 
-  // Le produit a été aspiré : il disparaît de l'étagère.
+  // Le produit a été aspiré : il disparaît de l'étagère (l'état « scanné » est tenu par le monde).
   function remove(index) {
-    const it = items[index];
-    it.scanned = true;
-    it.el.hidden = true;
-    it.el.style.willChange = '';
+    els[index].hidden = true;
+    els[index].style.willChange = '';
     dissolving = -1;
   }
 
-  // Une carte reposée : le produit retourne à sa place, tel qu'au début.
-  function restore(index) {
-    const it = items[index];
-    it.scanned = false;
-    it.el.style.opacity = '';
-    it.el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px)`;
-    it.el.hidden = false;
-  }
-
-  // Échange (panier plein) : le produit `from` prend la place du produit `to` (sur l'étagère, sur une
-  // table, dans le caddie), avec le calque qui va avec.
-  function moveTo(from, to) {
-    const it = items[from];
-    const dst = items[to];
-    it.x = dst.x;
-    it.y = dst.y;
-    it.loose = dst.loose;
-    it.wz = dst.wz;
-    it.standAt = dst.standAt;
-    const parentEl = dst.loose ? loose.parent : parent;
-    if (it.el.parentNode !== parentEl) parentEl.appendChild(it.el);
-    it.el.classList.toggle('prop', !!dst.loose);
-    it.el.style.zIndex = dst.loose ? dst.el.style.zIndex : '';
-    restore(from);
-  }
-
-  return { items, setMarker, markAt, update, remove, restore, moveTo };
+  return { setMarker, markAt, update, remove, sync: place };
 }

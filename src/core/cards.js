@@ -22,9 +22,11 @@ export function createBasket() {
 }
 
 // slot : produit d'origine dans le lieu (une carte reposée y retourne).
-export function addToBasket(basket, productId, def, slot = -1) {
+// place : le lieu de ce produit (une carte reposée ne retourne à sa place que dans ce lieu-là).
+export function addToBasket(basket, productId, def, slot = -1, place = '') {
   const card = createCard(productId, def, ++basket.serial);
   card.slot = slot;
+  card.place = place;
   basket.cards.push(card);
   return card;
 }
