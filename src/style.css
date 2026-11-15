@@ -1166,3 +1166,27 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .depart-tools { display: grid; gap: 6px; padding: 4px 0 8px; }
 .depart-tools button { text-align: left; }
 .depart-tools button.current { font-weight: 700; outline: 2px solid currentColor; }
+/* Le tournis : étoiles autour de la tête (anneau aplati qui tourne). */
+.dizzy-stars { position: absolute; left: 0; top: 0; width: 1px; height: 1px; z-index: 19; pointer-events: none; }
+.dizzy-stars[hidden] { display: none; }
+.dizzy-ring { position: absolute; left: -60px; top: -22px; width: 120px; height: 44px; transform: scaleY(0.38); }
+.dizzy-ring span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -12px 0 0 -10px;
+  font-size: 24px;
+  line-height: 24px;
+  color: #f2c94c;
+  text-shadow: 0 0 2px #3d352a, 0 0 1px #3d352a;
+  animation: dizzy-orbit 1.1s linear infinite;
+}
+.dizzy-ring span:nth-child(2) { animation-delay: -0.275s; }
+.dizzy-ring span:nth-child(3) { animation-delay: -0.55s; }
+.dizzy-ring span:nth-child(4) { animation-delay: -0.825s; color: #fbf8ee; }
+/* Chaque étoile tourne sur le cercle (rotation, décalage, contre-rotation pour rester droite). */
+@keyframes dizzy-orbit {
+  from { transform: rotate(0deg) translateX(56px) rotate(0deg) scaleY(2.6); }
+  to { transform: rotate(360deg) translateX(56px) rotate(-360deg) scaleY(2.6); }
+}
+.dizzy-stars.still .dizzy-ring span { animation: none; }

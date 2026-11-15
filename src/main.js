@@ -25,6 +25,8 @@ import narratorFile from './data/narrator.json';
 import playerFile from './data/joueur.json';
 import { playerName, fillName, OTHER, MAX_NAME } from './core/names.js';
 import { createNamePicker } from './ui/namePicker.js';
+import { createDizzy, stepDizzy, dizzyActive } from './core/dizzy.js';
+import { createDizzyStars } from './ui/dizzyStars.js';
 import departsFile from './data/departs.json';
 import { findDepart, cardCount, pickProducts, saidFor } from './core/departs.js';
 import { findPath } from './core/pathfinding.js';
@@ -401,6 +403,20 @@ function watchSceneWalk() {
 }
 
 // Mise en scène de l'aparté : avance vers 1 pendant l'aparté, revient à 0 après (temps de jeu).
+const dizzy = createDizzy();
+const dizzyStars = createDizzyStars(uiEl);
+const starHead = { x: 0, y: 0 };
+// Étoiles du tournis : pendant leur durée, et tant qu'il s'en plaint.
+function updateDizzyStars() {
+  const on = dizzyActive(dizzy, narrator.t) || narrator.line?.trigger === 'tournis';
+  if (!on) {
+    if (dizzyStars.visible) dizzyStars.hide();
+    return;
+  }
+  const k = shown.scale * heroData.scale;
+  stage.stageToClient(shown.x, shown.y - (HEAD_HEIGHT - 30) * k, starHead);
+  dizzyStars.show(starHead.x, starHead.y, k * stage.view.scale * 1.5, config.display.reduceMotion);
+}
 let veilP = 0; // voile d'une rencontre importante (0 à 1)
 let sceneMode = false; // interface effacée (conversation en cours)
 function updateAside(dt) {
@@ -474,6 +490,8 @@ function watchNarrator(dt) {
   const active = walker.moving || scan.active || pendingScan >= 0 || playerActed;
   playerActed = false;
   if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite') || say('aparte_inactivite');
+  // Le tournis : trop de demi-tours, trop vite → étoiles, et il s'en plaint dès qu'il s'arrête.
+  if (stepDizzy(dizzy, narrator.t, walker.facing, walker.moving, config.dizzy) && !inScene(narrator)) say('tournis');
   if (walker.x >= endOfAisleX) say('bout_du_rayon');
   if (!gear.scanette && walker.x > CONSIGNE_X) say('consigne_scanette');
 }
@@ -1061,6 +1079,7 @@ function frame(now) {
     updateNarrator(sec);
     updateAside(sec);
     render();
+    updateDizzyStars();
   } else if (sm.is('intro')) {
     updateIntro(Math.min(dt / 1000, 0.1));
   } else if (sm.is('panier')) {
@@ -1190,6 +1209,7 @@ async function start() {
       narrator.done[trigger] = true;
     },
     flips: () => flips,
+    dizzy: () => ({ count: dizzy.count, times: dizzy.times.length, facing: walker.facing, moving: walker.moving, t: narrator.t }),
     journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
     equip: () => equipAll(),
     // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).

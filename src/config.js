@@ -37,6 +37,13 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  dizzy: {
+    enabled: true, // le tournis : trop de demi-tours, trop vite → étoiles et plainte du héros
+    flips: 6, // demi-tours (changements de sens en marchant)…
+    window: 3, // … en moins de N secondes
+    duration: 3.5, // étoiles autour de la tête (s)
+    cooldown: 60, // avant que ça puisse revenir (s)
+  },
   player: {
     name: 'epaisseur', // comment le héros appelle le joueur (data/joueur.json), ou 'autre' : le nom tapé
     customName: '', // le nom tapé par le joueur (choix « Autre »)
@@ -242,6 +249,11 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.asideDim', label: 'Aparté : assombrissement des bords', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.glanceGap', label: 'Petits regards caméra : au plus un toutes les', min: 5, max: 300, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
+  { group: 'Personnage', key: 'dizzy.enabled', label: 'Tournis (trop de demi-tours, trop vite)', type: 'bool' },
+  { group: 'Personnage', key: 'dizzy.flips', label: 'Tournis : nombre de demi-tours', min: 3, max: 12, step: 1 },
+  { group: 'Personnage', key: 'dizzy.window', label: 'Tournis : en moins de', min: 1, max: 8, step: 0.5, unit: 's' },
+  { group: 'Personnage', key: 'dizzy.duration', label: 'Tournis : étoiles pendant', min: 1, max: 8, step: 0.5, unit: 's' },
+  { group: 'Personnage', key: 'dizzy.cooldown', label: 'Tournis : pas avant (la fois suivante)', min: 5, max: 300, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.meetZ', label: 'Rencontre : profondeur du point de rencontre', min: -150, max: 250, step: 10 },
   { group: 'Narrateur', key: 'narrator.walkTimeout', label: 'Rencontre : marche abandonnée au bout de', min: 2, max: 20, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.veilTime', label: 'Rencontre : apparition du voile', min: 0.2, max: 4, step: 0.1, unit: 's' },

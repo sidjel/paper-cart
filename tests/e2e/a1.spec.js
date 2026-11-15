@@ -870,3 +870,39 @@ test('Accessibilité : taille du texte, luminosité et contraste', async ({ page
   await page.evaluate(() => window.paperCart.set('access.brightness', 1));
   expect(await page.locator('#game').evaluate((g) => g.style.filter)).toBe('');
 });
+
+test('Tournis : trop de demi-tours, trop vite → étoiles autour de la tête, puis il s’en plaint', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'clavier');
+  await page.evaluate(() => {
+    // sans l'annonce d'arrivée ni les premières pensées (éteindre puis rallumer efface la suite)
+    window.paperCart.set('narrator.enabled', false);
+    window.paperCart.set('narrator.enabled', true);
+  });
+  // Lent : un demi-tour par seconde → rien.
+  for (let k = 0; k < 2; k++) {
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(1000);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(1000);
+    await page.keyboard.up('ArrowLeft');
+  }
+  await expect(page.locator('.dizzy-stars')).toBeHidden();
+  // Vite : gauche, droite, gauche… toutes les 0,25 s.
+  for (let k = 0; k < 5; k++) {
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(250);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(250);
+    await page.keyboard.up('ArrowLeft');
+  }
+  await expect(page.locator('.dizzy-stars')).toBeVisible();
+  // Arrêté, il se tourne vers le joueur et se plaint (aparté).
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 5000 }).toBe('heros');
+  expect((await narr(page)).text).toMatch(/tête qui tourne/);
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `test-results/captures/tournis-${info.project.name}.png` });
+  await expect(page.locator('.dizzy-stars')).toBeVisible(); // tant qu'il s'en plaint
+  expect(errors).toEqual([]);
+});

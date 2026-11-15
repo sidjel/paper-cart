@@ -12,6 +12,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 49 (suite) — Le tournis
+
+**Retours de l'auteur** :
+- Validé : le Panier (le dos de la carte sera revu plus tard).
+- Ce qui manque : le tournis. Si le joueur fait aller le héros de droite à gauche trop vite, des étoiles tournent autour de sa tête et il se plaint, avec d'autres phrases s'il recommence.
+
+**Jouable maintenant** :
+- **6 demi-tours en marchant, en moins de 3 secondes** : des étoiles tournent autour de la tête pendant 3,5 s.
+- Dès qu'il s'arrête, il se tourne vers le joueur (aparté) et se plaint : « Hé ! Stop !… J'ai la tête qui tourne ! Tu vas me faire vomir… ».
+- Les fois suivantes, d'autres répliques [TEMP] (girouette, trois Caisses Finales, le carrelage…).
+- Pas avant 60 s la fois d'après. Tout est réglable dans ⚙ → Personnage.
+
+**Vérifié** :
+- 140 tests de logique : déclenchement, demi-tours lents, attente, arrêt.
+- 72 tests navigateur sans erreur console : lent → rien ; vite → étoiles, puis la plainte.
+- Comptages inchangés.
+
+**Décision prise seul** : la plainte est un aparté (il parle au joueur), donc avec la mise en scène habituelle (zoom, bandes). À dire si c'est trop pour un gag.
+
+---
+
 ## Séance 49 — 15/11/2026 — Panier : plus de clignotement, bruitage de carte
 
 **Retours de l'auteur** :

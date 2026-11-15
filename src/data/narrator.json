@@ -115,6 +115,11 @@
       "every": 2,
       "cooldown": 0,
       "comment": "petit regard caméra sans texte, après une annonce sur deux (humour) ; au plus un toutes les 25 s (réglable)"
+    },
+    "tournis": {
+      "voice": "heros",
+      "must": true,
+      "comment": "le joueur fait changer le héros de sens trop souvent, trop vite : étoiles autour de la tête, et il s'en plaint (une réplique différente à chaque fois, la plus ancienne d'abord)"
     }
   },
   "lines": [
@@ -393,6 +398,36 @@
       "maxTrust": -1,
       "emotion": "inquiet",
       "text": "[TEMP] Tu me laisses encore planté là… Je commence à avoir l'habitude, tu sais."
+    },
+    {
+      "id": "tournis_1",
+      "trigger": "tournis",
+      "text": "[TEMP] Hé ! Stop !… J'ai la tête qui tourne ! Tu vas me faire vomir, arrête de me faire bouger dans tous les sens !",
+      "emotion": "inquiet"
+    },
+    {
+      "id": "tournis_2",
+      "trigger": "tournis",
+      "text": "[TEMP] Encore ?! {Mon… nom}, je suis une feuille, pas une girouette ! Tu m'entends ?",
+      "emotion": "blase"
+    },
+    {
+      "id": "tournis_3",
+      "trigger": "tournis",
+      "text": "[TEMP] Gauche, droite, gauche, droite… Tu cherches quoi, exactement ? Moi, je cherche mon équilibre.",
+      "emotion": "blase"
+    },
+    {
+      "id": "tournis_4",
+      "trigger": "tournis",
+      "text": "[TEMP] Je crois que je vois trois Caisses Finales. Dont deux qui tournent. Laisse-moi souffler, tu veux ?",
+      "emotion": "inquiet"
+    },
+    {
+      "id": "tournis_5",
+      "trigger": "tournis",
+      "text": "[TEMP] Si je vomis sur le carrelage, c'est toi qui nettoies. Je te préviens.",
+      "emotion": "complice"
     }
   ]
 }
