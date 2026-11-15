@@ -920,12 +920,17 @@ test('Panier : un double clic (ou double toucher) sur une carte ne casse pas l�
     await page.waitForTimeout(60);
     await page.locator('.card-flip').tap({ force: true });
   } else await c.dblclick();
+  // Second toucher à côté de la petite carte qui grandit : ce n'est pas « toucher à côté pour refermer ».
+  const box = await c.boundingBox();
+  if (phone) await page.touchscreen.tap(box.x - 20, box.y + box.height / 2);
+  else await page.mouse.click(box.x - 20, box.y + box.height / 2);
   // Le second toucher est ignoré : l'ouverture continue normalement (pas de saut à la grande taille).
   await page.waitForTimeout(40);
   const w = await page.locator('.card-flip').evaluate((e) => e.getBoundingClientRect().width);
   const big = await page.locator('.card-flip').evaluate((e) => e.offsetWidth);
   expect(w).toBeLessThan(big * 0.9); // encore en vol, petite
   await expect.poll(() => page.locator('.card-flip').getAttribute('class')).toBe('card-flip show-back'); // ouverte, au dos
+  await expect(page.locator('.card-detail')).toBeVisible(); // et elle reste ouverte
   expect(await page.evaluate(() => window.paperCart.flips())).toBe(1);
   expect(await page.locator('.card-detail').evaluate((e) => getComputedStyle(e).touchAction)).toBe('none');
   expect(errors).toEqual([]);

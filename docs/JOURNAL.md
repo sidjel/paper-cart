@@ -25,6 +25,11 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 **Vérifié** : 140 tests de logique, 74 tests navigateur sans erreur console. Nouveau test : double clic (PC) et double toucher (téléphone simulé) ; la carte s'ouvre normalement, une seule fois.
 
+**Suite (retour de l'auteur : au double toucher, la carte s'agrandit puis rapetisse aussitôt)** :
+- Cause : le second toucher tombait à côté de la petite carte qui commence à grandir. Il était compris comme « toucher à côté pour refermer ».
+- Corrigé : pendant l'ouverture (et au moins 0,35 s), toucher à côté est ignoré.
+- Le test complété échoue sur l'ancienne version et passe sur la nouvelle.
+
 ---
 
 ## Séance 49 (suite) — Le tournis

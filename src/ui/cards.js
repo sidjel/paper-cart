@@ -219,6 +219,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     setFace(false);
     detail.hidden = false;
     measureFrom(el);
+    openedAt = performance.now();
     el.classList.add('lifted'); // la petite carte quitte le Panier : une seule carte à l'écran
     animate('anim-in', 'anim-out', () => setFace(true));
     detail.focus({ preventScroll: true });
@@ -257,6 +258,8 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
   // Une animation en cours (ouverture, retournement, fermeture) va jusqu'au bout : un second toucher
   // (double clic, double toucher) ne l'interrompt pas (sinon la carte sautait d'un coup à sa grande taille).
   const busy = () => closing || /\banim-/.test(flipper.className);
+  let openedAt = -Infinity;
+  const opening = () => /\banim-(in|out)\b/.test(flipper.className) || performance.now() - openedAt < 350;
   function flipDetail() {
     if (busy()) return;
     animate('anim-fold', 'anim-unfold', () => setFace(!backShown));
@@ -267,7 +270,9 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
   });
   // Toucher à côté de la carte : elle se referme.
   detail.addEventListener('click', (e) => {
-    if (e.target === detail) closeDetail();
+    // Pas pendant l'ouverture : le second toucher d'un double toucher tombe souvent à côté de la petite
+    // carte qui commence à grandir (elle se refermait aussitôt).
+    if (e.target === detail && !opening()) closeDetail();
   });
   const cards = new Map(); // uid → { card, url }
 
