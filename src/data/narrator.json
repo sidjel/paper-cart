@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai). steps (conversation) : répliques à la suite, voice « heros », « epaisseur » (le joueur répond, sans choix) ou « regard » ; la dernière peut proposer deux réponses. must : moment important, jamais perdu (il attend son tour).",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai). steps (conversation) : répliques à la suite, voice « heros », « epaisseur » (le joueur répond, sans choix) ou « regard » ; la dernière peut proposer deux réponses. must : moment important, jamais perdu (il attend son tour). Dans une conversation : voice « marche » (walk : part du chemin vers le milieu de l'écran, un peu en avant ; 1 = arrivé), auto : la réplique passe seule (sans toucher). veil (moment) : bords de l'écran flous, vagues violettes.",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -39,7 +39,8 @@
       "voice": "heros",
       "once": true,
       "must": true,
-      "comment": "première vraie rencontre avec son Épaisseur, après la première carte : une conversation que rien n'interrompt, jamais perdue (elle attend que le héros soit libre)"
+      "comment": "première vraie rencontre avec son Épaisseur, après la première carte : une conversation que rien n'interrompt, jamais perdue (elle attend que le héros soit libre)",
+      "veil": true
     },
     "scan": {
       "every": 3,
@@ -101,7 +102,8 @@
       "comment": "essai de scan sans panier : le héros s'interroge lui-même"
     },
     "panier_plein": {
-      "comment": "essai de scan, panier plein (règle provisoire : le scan est refusé)"
+      "strong": true,
+      "comment": "panier plein, le joueur refuse d'échanger une carte (pendant la question Oui / Non, le haut-parleur se tait)"
     },
     "consigne_scanette": {
       "once": true,
@@ -151,6 +153,19 @@
       "trigger": "rencontre",
       "emotion": "inquiet",
       "steps": [
+        {
+          "voice": "marche",
+          "walk": 0.5
+        },
+        {
+          "voice": "pensee",
+          "text": "[TEMP] Hum ?…",
+          "auto": true
+        },
+        {
+          "voice": "marche",
+          "walk": 1
+        },
         {
           "voice": "regard",
           "emotion": "inquiet"

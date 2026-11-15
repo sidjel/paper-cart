@@ -1,6 +1,8 @@
 // Mise en scène d'un aparté (le héros parle au joueur) : bandes « cinéma » en haut et en bas de
 // l'écran, et bords assombris. Deux éléments créés au chargement ; animés seulement en transform et
 // opacity, selon l'avancement p (0 = rien, 1 = aparté installé), calculé avec le temps de jeu.
+// Voile d'une rencontre importante : bords de l'écran flous (flou réel réglable, 0 = sans), et des
+// vagues violettes qui roulent des bords vers le centre (animation CSS en transform et opacity).
 
 export function createAsideFx(root) {
   const vignette = document.createElement('div');
@@ -12,9 +14,30 @@ export function createAsideFx(root) {
   const bottom = document.createElement('div');
   bottom.className = 'aside-bar aside-bar-bottom';
   bottom.hidden = true;
-  root.prepend(vignette, top, bottom); // sous l'interface (boutons, bulle)
+  const veil = document.createElement('div');
+  veil.className = 'aside-veil';
+  veil.hidden = true;
+  veil.innerHTML = '<div class="veil-blur"></div><div class="veil-wave"></div><div class="veil-wave veil-wave-2"></div>';
+  const veilBlur = veil.firstChild;
+  root.prepend(veil, vignette, top, bottom); // sous l'interface (boutons, bulle)
   let last = -1;
+  let lastVeil = -1;
+  let lastBlur = -1;
   return {
+    // Voile : p (0 à 1) ; blur : flou des bords (px, 0 = sans) ; still : « réduire les animations ».
+    setVeil(p, blur, still) {
+      if (p === lastVeil) return;
+      lastVeil = p;
+      veil.hidden = p <= 0;
+      if (p <= 0) return;
+      veil.style.opacity = p;
+      veil.classList.toggle('still', still);
+      if (blur !== lastBlur) {
+        lastBlur = blur;
+        veilBlur.hidden = blur <= 0;
+        veilBlur.style.setProperty('--veil-blur', `${blur}px`);
+      }
+    },
     // p : avancement (0 à 1) ; dim : assombrissement maximal ; still : « réduire les animations ».
     set(p, dim, still) {
       if (p === last) return;

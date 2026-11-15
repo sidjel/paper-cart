@@ -21,8 +21,10 @@
 //    n'importe quelle réplique d'une voix (« @heros »), après p.followDelay s ;
 //  - must : un moment important n'est jamais perdu : s'il ne peut pas commencer tout de suite (une
 //    autre réplique, le héros occupé), il attend son tour, aussi longtemps qu'il le faut ;
-//  - conversation (steps) : une suite de répliques (héros, joueur « epaisseur », regard) que rien
-//    n'interrompt ; avec p.sceneWait, chaque réplique attend un toucher du joueur ;
+//  - conversation (steps) : une suite de répliques (héros, joueur « epaisseur », regard, pensée) que
+//    rien n'interrompt ; avec p.sceneWait, chaque réplique attend un toucher du joueur (sauf « auto ») ;
+//    une étape « marche » (walk : part du chemin vers le point de rencontre) dure jusqu'à ce que le jeu
+//    signale l'arrivée (endLine) ;
 //  - historique : chaque réplique dite (et chaque réponse du joueur) est gardée dans n.log
 //    (p.logMax au plus), pour être relue.
 //
@@ -142,7 +144,8 @@ function begin(n, line, voice, p) {
   n.line = line;
   n.voice = voice;
   n.shown = 0;
-  n.hold = line.text.length ? 0 : holdFor(line.text, p); // regard sans texte : seulement le temps affiché
+  // Regard sans texte : seulement le temps affiché ; marche : jusqu'à l'arrivée (signalée par le jeu).
+  n.hold = line.walk !== undefined ? Infinity : line.text.length ? 0 : holdFor(line.text, p);
   if (line.text) addLog(n, voice, line.text, p);
 }
 
@@ -161,7 +164,8 @@ function stepLine(line, k, prev, p) {
     text: s.text ?? '',
     emotion: s.emotion ?? prev,
     choices: s.choices,
-    wait: p.sceneWait && !!s.text,
+    wait: p.sceneWait && !!s.text && !s.auto,
+    walk: s.walk,
   };
 }
 
@@ -258,11 +262,16 @@ export function answer(n, k, p) {
 
 // Le joueur touche la réplique : la première fois le texte s'affiche en entier, la suivante il disparaît.
 export function skipNarrator(n, data, p) {
-  if (!n.line || waitingAnswer(n)) return; // une question attend une réponse
+  if (!n.line || waitingAnswer(n) || n.line.walk !== undefined) return; // une question attend une réponse ; une marche, l'arrivée
   if (n.shown < n.line.text.length) {
     n.shown = n.line.text.length;
     n.hold = holdFor(n.line.text, p);
   } else end(n, data, p);
+}
+
+// Le jeu signale la fin d'une étape (le héros est arrivé au bout de sa marche).
+export function endLine(n, data, p) {
+  if (n.line) end(n, data, p);
 }
 
 // Désactivation en cours de partie : tout se tait.
@@ -305,4 +314,10 @@ export function nearestSpeaker(items, x) {
     }
   }
   return best;
+}
+
+// Mise en scène (zoom, voile) : avance v vers goal d'au plus step, sans le dépasser ; une fois arrivé, ne
+// bouge plus (avant la séance 45, le zoom reculait d'un pas une image sur deux : léger tremblement).
+export function approach(v, goal, step) {
+  return v < goal ? Math.min(goal, v + step) : Math.max(goal, v - step);
 }

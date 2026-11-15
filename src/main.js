@@ -11,7 +11,7 @@ import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, creat
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene } from './core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach } from './core/narrator.js';
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
@@ -226,7 +226,6 @@ let panierMode = 'consult'; // 'consult' : on regarde ; 'confirm' : la question 
 let pendingSwap = null; // { from: produit reposé, to: produit scanné }
 function chooseCardToDrop(i) {
   dropFor = i;
-  say('panier_plein');
   panierMode = 'confirm';
   sm.go('panier');
   vibrate('leger');
@@ -234,6 +233,7 @@ function chooseCardToDrop(i) {
     if (!yes) {
       panierMode = 'consult';
       sm.go('play');
+      say('panier_plein'); // la question d'abord ; le haut-parleur ne commente qu'un refus
       return;
     }
     panierMode = 'choose';
@@ -310,16 +310,18 @@ function say(trigger) {
 // (s'il est à l'arrêt et ne scanne pas).
 function voiceStarted() {
   const scene = inScene(narrator);
-  const hero = narrator.voice === 'heros' || scene; // conversation : héros, joueur, regard
+  const hero = narrator.voice === 'heros' || scene; // conversation : héros, joueur, regard, marche
   const glance = narrator.voice === 'regard';
-  // Le héros répond à la réponse du joueur, ou la conversation continue : pas de nouveau son d'aparté.
-  const reply = hero && (asideP > 0 || (scene && narrator.scene.i > 0));
+  const thought = narrator.voice === 'pensee';
+  // Conversation : le son d'aparté au premier regard vers le joueur ; aparté : à son début seulement
+  // (le héros répond à la réponse du joueur : l'aparté continue).
+  const reply = scene ? !glance : hero && asideP > 0;
+  if (voiceLine.walk !== undefined) startSceneWalk(voiceLine.walk);
   narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion, voiceLine.choices?.map((c) => c.text) ?? null);
   choiceFocus = 0;
-  const thought = narrator.voice === 'pensee';
   if (thought) audio.play('froissement');
   else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
-  if (hero && !reply) vibrate('fort');
+  if (hero && !reply && !thought) vibrate('fort');
   if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
   if (narrator.voice === 'epaisseur') audio.play('froissement'); // le joueur répond (sans voix : ses pensées)
   // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
@@ -328,22 +330,61 @@ function voiceStarted() {
   if (speaker) speakerWaves.show(speaker[0], speaker[1]);
   else speakerWaves.hide();
   hudLeft = hud.bar.getBoundingClientRect().left; // lu une fois par réplique
-  if (hero && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
+  if (hero && !thought && voiceLine.walk === undefined && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
+}
+
+// Conversation : le héros s'avance vers le milieu de l'écran (un peu en avant), en plusieurs fois.
+// part : part du chemin depuis l'endroit où la conversation a commencé (1 = arrivé).
+const sceneFrom = { x: 0, z: 0 };
+const sceneMeet = { x: 0, z: 0 };
+let sceneWalkT = -1; // temps de jeu au début de la marche en cours (-1 : pas de marche)
+function startSceneWalk(part) {
+  if (narrator.scene.i === 0) {
+    // Première marche : point de départ, et point de rencontre au milieu de l'image actuelle.
+    sceneFrom.x = walker.x;
+    sceneFrom.z = walker.z;
+    const v = stage.view;
+    sceneMeet.x = stageToWorldX(proj, camera.x + v.viewW / 2);
+    sceneMeet.z = config.narrator.meetZ;
+  }
+  tmpWorld.x = sceneFrom.x + (sceneMeet.x - sceneFrom.x) * part;
+  tmpWorld.z = sceneFrom.z + (sceneMeet.z - sceneFrom.z) * part;
+  walkTo(tmpWorld);
+  marker.hide(); // une marche du héros, pas un ordre du joueur
+  sceneWalkT = narrator.t;
+}
+
+// Fin d'une marche de conversation : arrivé (ou bloqué trop longtemps).
+function watchSceneWalk() {
+  if (sceneWalkT < 0 || narrator.line?.walk === undefined) return;
+  const late = narrator.t - sceneWalkT > config.narrator.walkTimeout;
+  if ((narrator.t - sceneWalkT > 0.1 && !walker.hasTarget && !walker.moving) || late) {
+    if (late) clearTarget(walker);
+    sceneWalkT = -1;
+    endLine(narrator, narratorData, config.narrator);
+  }
 }
 
 // Mise en scène de l'aparté : avance vers 1 pendant l'aparté, revient à 0 après (temps de jeu).
+let veilP = 0; // voile d'une rencontre importante (0 à 1)
 function updateAside(dt) {
-  const goal = heroAside() ? 1 : 0;
+  // Pendant une marche ou une pensée de la conversation, pas encore de mise en scène (ni zoom).
+  const goal = heroAside() && narrator.voice !== 'pensee' && narrator.voice !== 'marche' ? 1 : 0;
   const step = dt / Math.max(0.05, config.narrator.asideZoomTime);
-  asideP = goal > asideP ? Math.min(1, asideP + step) : Math.max(0, asideP - step);
+  asideP = approach(asideP, goal, step);
   const still = config.display.reduceMotion;
   asideFx.set(asideP, config.narrator.asideDim, still);
+  const veilGoal = inScene(narrator) && narratorData.triggers[narrator.scene.line.trigger]?.veil ? 1 : 0;
+  const vs = dt / Math.max(0.05, config.narrator.veilTime);
+  veilP = approach(veilP, veilGoal, vs);
+  asideFx.setVeil(veilP, config.narrator.veilBlur, still);
   stage.setZoom(still ? 1 : 1 + (config.narrator.asideZoom - 1) * ease(asideP));
   audio.setFrozen(asideP > 0);
 }
 
 // À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
 function updateNarrator(dt) {
+  watchSceneWalk();
   const letters = stepNarrator(narrator, narratorData, dt, config.narrator);
   if (narrator.line !== voiceLine) {
     voiceLine = narrator.line;
@@ -841,7 +882,7 @@ function render() {
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
   // Au présentoir, ce qu'on peut prendre passe avant les produits.
-  const free = sm.is('play') && !scan.active;
+  const free = sm.is('play') && !scan.active && !heroAside(); // pendant une conversation : ni repère ni bouton « Scanner »
   const pk = free ? nearestProduct(pickupState, walker, config.scan) : -1;
   const reach = free && pk < 0 ? nearestProduct(productState, walker, config.scan) : -1;
   if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
@@ -868,6 +909,8 @@ function render() {
     camera.x = Math.min(Math.max(0, place.size[0] - v.viewW), Math.max(0, mid - v.viewW / 2));
     camera.y = 0;
     camera.ready = true;
+  } else if (inScene(narrator) && asideP === 0) {
+    // Conversation, avant la mise en scène : la caméra ne bouge plus, le héros s'avance au milieu de l'image.
   } else if (asideP > 0) {
     // Aparté : la caméra se centre sur le héros (le zoom resserre l'image autour de lui).
     const k = 1 - Math.exp(-12 * camDt);
@@ -894,10 +937,11 @@ function frame(now) {
     for (let i = 0; i < n; i++) {
       input.read(intent);
       if (scan.active || heroAside()) {
-        // Pendant un scan ou un aparté, le personnage ne bouge pas (ni au clavier, ni vers un point touché).
+        // Pendant un scan ou un aparté, le personnage ne bouge pas (ni au clavier, ni vers un point touché),
+        // sauf la marche d'une conversation (il s'avance tout seul).
         intent.moveX = 0;
         intent.moveZ = 0;
-        clearTarget(walker);
+        if (narrator.line?.walk === undefined) clearTarget(walker);
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
       stepPendingScan();

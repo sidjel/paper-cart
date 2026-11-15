@@ -68,6 +68,10 @@ export const config = {
     glanceGap: 25, // petits regards caméra (sans texte) : au plus un toutes les N secondes
     followWait: 20, // un aparté enchaîné attend que le héros s'arrête, au plus N secondes
     sceneWait: true, // conversation : chaque réplique attend un toucher du joueur (sinon, elle passe seule)
+    meetZ: 110, // conversation : profondeur du point de rencontre (milieu de l'écran, un peu en avant)
+    walkTimeout: 8, // conversation : une marche qui n'arrive pas (obstacle) se termine au bout de N s
+    veilTime: 1.2, // voile de la rencontre (bords flous, vagues violettes) : apparition en N s
+    veilBlur: 6, // flou réel des bords (px) ; 0 = sans flou (seulement la brume violette, moins coûteux)
     logMax: 40, // historique des dialogues (Pause → Dialogues) : nombre de répliques gardées (fixé au chargement)
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
@@ -230,6 +234,10 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.asideDim', label: 'Aparté : assombrissement des bords', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.glanceGap', label: 'Petits regards caméra : au plus un toutes les', min: 5, max: 300, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.meetZ', label: 'Rencontre : profondeur du point de rencontre', min: -150, max: 250, step: 10 },
+  { group: 'Narrateur', key: 'narrator.walkTimeout', label: 'Rencontre : marche abandonnée au bout de', min: 2, max: 20, step: 1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.veilTime', label: 'Rencontre : apparition du voile', min: 0.2, max: 4, step: 0.1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.veilBlur', label: 'Rencontre : flou des bords (0 = sans flou)', min: 0, max: 16, step: 1, unit: 'px' },
   { group: 'Narrateur', key: 'narrator.sceneWait', label: 'Conversation : attendre un toucher entre les répliques', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.followWait', label: 'Aparté enchaîné : attendre que le héros s’arrête (max)', min: 0, max: 60, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },

@@ -667,6 +667,37 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   pointer-events: none;
   will-change: opacity;
 }
+/* Voile de la rencontre : bords flous et vagues violettes ; le centre (le héros) reste net. */
+.aside-veil { position: absolute; inset: 0; pointer-events: none; overflow: hidden; will-change: opacity; }
+.aside-veil[hidden], .veil-blur[hidden] { display: none; }
+.veil-blur {
+  position: absolute;
+  inset: 0;
+  -webkit-backdrop-filter: blur(var(--veil-blur, 6px));
+  backdrop-filter: blur(var(--veil-blur, 6px));
+  -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 55%, transparent 55%, #000 100%);
+  mask-image: radial-gradient(ellipse 62% 66% at 50% 55%, transparent 55%, #000 100%);
+}
+.veil-wave {
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(ellipse 60% 64% at 50% 55%, rgb(120 70 190 / 0) 52%, rgb(150 90 220 / 0.55) 70%, rgb(90 40 150 / 0.75) 100%);
+  opacity: 0;
+  animation: veil-wave 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.veil-wave-2 { animation-delay: -1.8s; }
+@keyframes veil-wave {
+  0% { transform: scale(1.18); opacity: 0; }
+  45% { opacity: 0.85; }
+  100% { transform: scale(0.96); opacity: 0; }
+}
+.aside-veil.still .veil-wave { animation: none; transform: none; opacity: 0.55; }
+.aside-veil.still .veil-wave-2 { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .veil-wave { animation: none; transform: none; opacity: 0.55; }
+  .veil-wave-2 { display: none; }
+}
 .aside-bar {
   position: absolute;
   left: 0;

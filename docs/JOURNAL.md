@@ -12,6 +12,36 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 45 — 15/11/2026 — La rencontre : il s'avance au milieu de l'écran, voile flou et violet ; plus de double message pendant l'échange
+
+**Retours de l'auteur** :
+- La rencontre : le héros doit s'avancer au milieu de l'écran en deux fois, avec « Hum ?… » à mi-chemin, et les bords de l'écran doivent être flous, avec des vagues violettes.
+- Panier plein : le commentaire du haut-parleur arrive en même temps que la question Oui / Non.
+
+**Jouable maintenant** :
+- **La rencontre** :
+  - après la première carte, la caméra s'immobilise ;
+  - le héros s'avance vers le milieu de l'image, s'arrête à mi-chemin (« Hum ?… », bulle de pensée), puis repart un peu en avant ;
+  - ensuite seulement viennent le regard, le zoom et la conversation ;
+  - pendant toute la scène, les bords de l'écran sont flous, avec des vagues violettes qui roulent vers le centre (immobiles avec « réduire les animations ») ;
+  - le bouton « Scanner » est caché pendant la scène.
+- **Panier plein** : pendant la question « Échanger une carte ? », le haut-parleur se tait. Il ne commente (« Votre panier est plein… ») qu'après un « Non ».
+- **Correction** : le zoom des apartés reculait d'un pas une image sur deux (léger tremblement). Corrigé.
+
+**Vérifié** :
+- 129 tests de logique, dont : marche de conversation, « auto », zoom sans tremblement.
+- 63 tests navigateur PC et téléphone simulé, sans erreur console : la rencontre entière, et pas de commentaire pendant la question de l'échange.
+- Comptages inchangés.
+- Captures de « Hum ? », de la rencontre et du cadre « Toi ».
+
+**Non vérifiable ici** : le coût du flou sur le téléphone (le navigateur de test n'a pas de carte graphique).
+
+**Décisions prises seul** :
+- Point de rencontre à mi-profondeur de l'allée (réglable : ⚙ → Narrateur), pour que ses jambes ne passent pas derrière le rayon de devant.
+- Une marche bloquée par un obstacle s'arrête au bout de 8 s (réglable).
+
+---
+
 ## Séance 44 — 15/11/2026 — La première rencontre après la première carte, jamais manquée ; historique des dialogues ; bouton Panier en petit panier rouge
 
 **Retours de l'auteur** :

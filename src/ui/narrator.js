@@ -77,7 +77,7 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
     // voice : 'heros' (bulle), 'regard' (rien : un regard sans texte) ou autre (bande) ;
     // still : « réduire les animations » ; choices : deux réponses (le texte de chacune) ou null.
     show(t, voice, still, choices = null) {
-      if (voice === 'regard') {
+      if (voice === 'regard' || voice === 'marche') {
         this.hide();
         return;
       }

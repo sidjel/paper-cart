@@ -538,6 +538,7 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
 });
 
 test('A4 : la première rencontre, après la première carte : une conversation que rien n’interrompt, puis un choix ; relue dans la Pause', async ({ page }, info) => {
+  test.setTimeout(90_000); // il s'avance d'abord (deux marches), puis toute la conversation
   const phone = info.project.name === 'telephone';
   const viewW0 = (await page.evaluate(() => window.paperCart.camera())).viewW;
   await page.evaluate(() => {
@@ -547,7 +548,14 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   await toBanana(page);
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await narr(page)).text, { timeout: 6000 }).toContain('essence');
-  await expect.poll(async () => (await narr(page)).voice, { timeout: 10000 }).toBe('heros');
+  // Il s'avance d'abord vers le milieu de l'écran, s'arrête à mi-chemin (« Hum ? »), repart.
+  const x0 = (await hero(page)).x;
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 10000 }).toBe('marche');
+  await expect(page.locator('.aside-veil')).toBeVisible();
+  await expect.poll(async () => (await narr(page)).text, { timeout: 10000 }).toMatch(/Hum/);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-hum.png` });
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 20000 }).toBe('heros');
+  expect(Math.abs((await hero(page)).x - x0)).toBeGreaterThan(50);
   const bubble = page.locator('.hero-bubble');
   await expect(bubble).toContainText('Ce bip');
   expect((await hero(page)).away).toBe(false);
@@ -719,6 +727,8 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   // D'abord la question « Échanger une carte ? » : Oui.
   await expect(page.locator('.confirm')).toBeVisible();
   await expect(page.locator('.confirm')).toContainText('plein');
+  // Pendant la question, le haut-parleur ne commente pas le panier plein (une seule chose à lire).
+  expect((await narr(page)).text).not.toMatch(/panier est plein/);
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-echanger.png` });
   await page.locator('.confirm button', { hasText: 'Oui' }).click();
   await expect(page.locator('.panier h2')).toHaveText('Panier plein');
@@ -739,6 +749,8 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   await expect(page.locator('.confirm')).toBeHidden();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
   expect((await state(page)).cards).toEqual(['Lait']);
+  // Après un refus seulement, le haut-parleur commente.
+  await expect.poll(async () => (await narr(page)).text, { timeout: 8000 }).toMatch(/panier est plein/);
 });
 
 test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }, info) => {

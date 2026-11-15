@@ -113,6 +113,9 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Filtres de cartes futurs : vieillissement, fusions et stade (a, b et c) | 44 | ❓ | Prototype B, quand ces familles existeront. Cohérent : ce sont des axes différents (deux rangées : type, état). |
 | Styles des menus Panier (kraft) et réglages (ticket) | 44 | ✅ | Gardés pour le moment. |
 | Bouton du Panier en bas à gauche : rouge, en forme de petit panier | 44 | 👀 | Petit panier rouge en papier découpé, le nombre de cartes sur son flanc. |
+| Rencontre : le héros s'avance au milieu de l'écran en deux fois (« Hum ?… » à mi-chemin), un peu en avant ; bords flous avec vagues violettes | 45 | 👀 | Caméra immobile pendant qu'il s'avance, puis zoom. Flou réel des bords (⚙ → Narrateur, 6 px, 0 = sans) : à mesurer sur le téléphone (règle « pas de flou sur ce qui bouge »). |
+| Échange de carte : commentaire du haut-parleur en même temps que la question Oui / Non | 45 | 👀 | Le haut-parleur se tait pendant la question ; il ne commente (« panier plein ») qu'après un « Non ». ❓ À confirmer (autres options : supprimer le commentaire, ou commenter aussi l'échange). |
+| (constaté) Le zoom des apartés tremblait légèrement (reculait d'un pas une image sur deux) | 45 | ✅ | Corrigé ; testé. |
 | Accueil plus grand, avec un mur de Scanettes | 41 | 👀 | Mur de 24 Scanettes et pile de 5 paniers (décor [TEMP]). Double toucher : le dessin le plus proche du doigt l'emporte. |
 | Sans panier : le héros s'interroge lui-même | 41 | 👀 | Nouvelle voix « pensée » : bulle en pointillés, il se parle à lui-même (« Et je mets ça où, moi ? »), sans mise en scène. |
 | Écran titre (nom en grand, image mystérieuse, Commencer, Options ; esprit Baten Kaitos / FF) | 39 | 👀 | Construit avec une image [TEMP] et les polices du système (aucune police ajoutée sans accord) ; police à choisir par l'auteur. |

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene } from '../../src/core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
 const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20 };
@@ -310,6 +310,23 @@ describe('conversation, moment important (must), historique', () => {
     expect(n.log.length).toBe(5);
     expect(n.log[4].text).toBe('Bip');
   });
+  it('marche : l’étape dure jusqu’à l’arrivée signalée par le jeu (un toucher ne la passe pas) ; « auto » passe sans toucher', () => {
+    const W = {
+      triggers: { r: { voice: 'heros', must: true } },
+      lines: [{ id: 'r', trigger: 'r', steps: [{ voice: 'marche', walk: 0.5 }, { voice: 'pensee', text: 'Hum ?', auto: true }, { voice: 'heros', text: 'Toi ?' }] }],
+    };
+    const n = createNarrator();
+    narrate(n, W, 'r', PS);
+    expect(n.voice).toBe('marche');
+    expect(n.line.walk).toBe(0.5);
+    for (let t = 0; t < 30; t += 1 / 60) stepNarrator(n, W, 1 / 60, PS);
+    skipNarrator(n, W, PS);
+    expect(n.voice).toBe('marche'); // toujours en marche
+    endLine(n, W, PS); // arrivé
+    expect(n.voice).toBe('pensee');
+    for (let t = 0; t < 5; t += 1 / 60) stepNarrator(n, W, 1 / 60, PS);
+    expect(n.voice).toBe('heros'); // « Hum ? » est passé seul
+  });
   it('narrateur coupé pendant une conversation : elle reprendra depuis le début', () => {
     const n = createNarrator();
     narrate(n, SC, 'rencontre', PS);
@@ -366,8 +383,9 @@ describe('répliques du narrateur (données)', () => {
       const parts = l.steps ?? [{ ...l, voice: file.triggers[l.trigger].voice }];
       for (const st of parts) {
         if (st.voice === 'regard') expect(st.text ?? '', l.id).toBe(''); // regard : sans texte
+        else if (st.voice === 'marche') expect(st.walk > 0 && st.walk <= 1 && !st.text, l.id).toBe(true); // marche : une part du chemin
         else expect(st.text.startsWith('[TEMP] '), l.id).toBe(true);
-        expect(['heros', 'epaisseur', 'regard', 'pensee', 'narrateur', undefined], l.id).toContain(st.voice);
+        expect(['heros', 'epaisseur', 'regard', 'pensee', 'narrateur', 'marche', undefined], l.id).toContain(st.voice);
         for (const c of st.choices ?? []) {
           expect(c.text.startsWith('[TEMP] ') && c.reply.startsWith('[TEMP] '), l.id).toBe(true);
           expect(typeof c.trust, l.id).toBe('number');
@@ -387,6 +405,12 @@ describe('répliques du narrateur (données)', () => {
     const firstChoice = l.steps.findIndex((st) => st.choices);
     expect(firstPlayer).toBeGreaterThan(0);
     expect(firstChoice).toBeGreaterThan(firstPlayer); // d'abord la réponse sans choix, ensuite un choix
+    // Il s'avance en deux fois, avec un « Hum ? » à mi-chemin, avant de regarder le joueur.
+    expect(l.steps.slice(0, 4).map((st) => st.voice)).toEqual(['marche', 'pensee', 'marche', 'regard']);
+    expect(l.steps[0].walk).toBe(0.5);
+    expect(l.steps[2].walk).toBe(1);
+    expect(l.steps[1].text).toMatch(/Hum/);
+    expect(file.triggers.rencontre.veil).toBe(true);
   });
   it('chaque moment a au moins une réplique', () => {
     for (const tr of Object.keys(file.triggers)) expect(file.lines.some((l) => l.trigger === tr), tr).toBe(true);
@@ -416,5 +440,17 @@ describe('répliques du narrateur (données)', () => {
     const all = file.lines.map((l) => l.text).join(' ');
     expect(all).toContain('Client');
     expect(all).toContain('Article non référencé');
+  });
+});
+
+describe('mise en scène', () => {
+  it('approach : avance vers le but sans le dépasser, puis ne bouge plus (pas de tremblement du zoom)', () => {
+    let v = 0.9;
+    v = approach(v, 1, 0.2);
+    expect(v).toBe(1);
+    for (let k = 0; k < 5; k++) v = approach(v, 1, 0.2);
+    expect(v).toBe(1);
+    expect(approach(0.1, 0, 0.3)).toBe(0);
+    expect(approach(0.5, 0, 0.2)).toBeCloseTo(0.3);
   });
 });
