@@ -24,15 +24,7 @@ Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le mag
 
 ## Direction visuelle
 
-Inspirée de Paper Mario et de Baten Kaitos.
-
-- **Personnages et produits plats**, comme des illustrations découpées dans du papier, posés dans un décor qui a de la profondeur. **Contour de papier découpé** (fin liseré clair autour de la silhouette) et option de **tranche visible** : une fine épaisseur de papier qui apparaît quand la feuille pivote.
-- **Décors en diorama** : plusieurs calques dessinés (fond, plans intermédiaires, plan de jeu, premier plan), avec un léger effet de parallaxe quand la caméra glisse. La profondeur vient des calques, de l'échelle et des décalages, pas d'une vraie 3D.
-- **Pivot de la feuille** : pour changer de sens, le dessin s'amincit jusqu'à presque disparaître, l'image est remplacée par l'autre orientation, puis la feuille se rouvre. On utilise `scaleX`, jamais un `rotateY` à 180°, qui montrerait le dessin à l'envers.
-- **Animations expressives de papier** : rebond, écrasement et étirement. Plus tard : s'aplatir en tombant, se plier en sautant, se mettre de profil pour passer dans un passage étroit.
-- **Ombre séparée du dessin**, jamais incluse dans l'image : une ellipse douce au sol, plus petite et plus diffuse quand le personnage s'élève.
-- **Texture dessinée à la main** : trait de crayon visible, grain du papier, contours légèrement irréguliers, ombrages simples.
-- **Couleurs** : franches et joyeuses dans la zone 1 (« L'Illusion »). Elles se salissent, se désaturent et verdissent dans la zone 2 (« La Réalité »), où les **néons du magasin** (qui bourdonnent, clignotent) sont permis, avec l'option « Réduire les clignotements » *(précision de l'auteur, séance 32 ; l'interdit ci-dessus vise les néons génériques sur fond noir)*. Pas d'ambiance de conte de fées générique.
+Inspirée de Paper Mario et de Baten Kaitos : personnages et produits plats en papier découpé, dans des décors en diorama à plusieurs calques, dessinés à la main. Le détail (pivot de la feuille, ombre, texture, couleurs des zones) est dans `docs/DIRECTION_ARTISTIQUE.md`.
 
 ## Piliers
 
