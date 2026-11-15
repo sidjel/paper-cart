@@ -34,6 +34,12 @@ export const config = {
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
   },
+  intro: {
+    enabled: true, // texte d'introduction après « Commencer »
+    fadeIn: 0.9, // apparition d'une ligne (s)
+    fadeOut: 0.7, // disparition d'une ligne (s)
+    endFade: 1.8, // fondu final du noir vers la partie (s)
+  },
   carry: {
     panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
   },
@@ -95,6 +101,7 @@ export const config = {
     propLayers: true,
     // Plein écran : 'auto' (téléphone : oui, en paysage, en touchant « Commencer » ; PC : non), 'oui', 'non'.
     fullscreenMode: 'auto',
+    narratorAlpha: 0.78, // opacité du fond des annonces du haut-parleur (1 = opaque)
     crt: false, // filtre « écran cathodique » (lignes de balayage, bords sombres) ; coûte un peu sur téléphone
     crtStrength: 0.6, // force du filtre cathodique (0 à 1)
   },
@@ -196,6 +203,9 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.scanVolume', label: 'Sons du scanner', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.heroVolume', label: 'Apartés du héros (papier, bips)', min: 0, max: 1, step: 0.05 },
+  { group: 'Narrateur', key: 'intro.enabled', label: 'Introduction après « Commencer »', type: 'bool' },
+  { group: 'Narrateur', key: 'intro.fadeIn', label: 'Intro : apparition d’une ligne', min: 0.1, max: 3, step: 0.1, unit: 's' },
+  { group: 'Narrateur', key: 'intro.endFade', label: 'Intro : fondu final', min: 0.2, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
   {
     group: 'Accessibilité', key: 'access.textSize', label: 'Taille du texte', type: 'choice',
@@ -229,6 +239,7 @@ export const TUNABLES = [
     group: 'Affichage', key: 'display.fullscreenMode', label: 'Plein écran', type: 'choice',
     options: [['auto', 'Automatique (téléphone : oui)'], ['oui', 'Oui'], ['non', 'Non']],
   },
+  { group: 'Affichage', key: 'display.narratorAlpha', label: 'Opacité des annonces du haut-parleur', min: 0.3, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.crt', label: 'Filtre écran cathodique', type: 'bool' },
   { group: 'Affichage', key: 'display.crtStrength', label: 'Force du filtre cathodique', min: 0.1, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },

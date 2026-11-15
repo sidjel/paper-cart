@@ -73,8 +73,30 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   const hint = document.createElement('p');
   hint.className = 'settings-note panier-hint';
   hint.hidden = true;
+  // Sous-onglets des cartes (filtres) : Toutes, Alimentaire, Non alimentaire, Spéciales.
+  const filters = document.createElement('div');
+  filters.className = 'panier-filters';
+  const FILTERS = [['toutes', 'Toutes'], ['alimentaire', 'Alimentaire'], ['non-alimentaire', 'Non alimentaire'], ['speciale', 'Spéciales']];
+  const filterBtns = FILTERS.map(([id, label]) => {
+    const b = document.createElement('button');
+    b.className = 'panier-filter';
+    b.textContent = label;
+    b.dataset.filter = id;
+    b.addEventListener('click', () => setFilter(id));
+    filters.appendChild(b);
+    return b;
+  });
   const grid = document.createElement('div');
   grid.className = 'panier-grid';
+  const noneInFilter = document.createElement('p');
+  noneInFilter.className = 'settings-note panier-none';
+  noneInFilter.textContent = 'Aucune carte de ce genre pour l’instant.';
+  function setFilter(id) {
+    grid.dataset.filter = id;
+    filterBtns.forEach((b) => b.classList.toggle('active', b.dataset.filter === id));
+    const visible = id === 'toutes' ? shown : grid.querySelectorAll(`.card[data-category="${id}"]`).length;
+    noneInFilter.hidden = tab !== 'cards' || shown === 0 || visible > 0;
+  }
   const empty = document.createElement('p');
   empty.className = 'settings-note';
   empty.textContent = "Le panier est vide. Approche-toi d'un produit sur l'étagère et scanne-le avec la Scanette.";
@@ -87,7 +109,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   const row = document.createElement('div');
   row.className = 'panel-buttons';
   row.appendChild(close);
-  panel.append(title, tabs, hint, empty, grid, objList, row);
+  panel.append(title, tabs, filters, hint, empty, noneInFilter, grid, objList, row);
   root.append(button, panel);
 
   let shown = 0;
@@ -103,6 +125,8 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     tabCards.classList.toggle('active', tab === 'cards');
     tabObjects.classList.toggle('active', tab === 'objects');
     grid.hidden = tab !== 'cards';
+    filters.hidden = tab !== 'cards' || !!choose;
+    setFilter(choose ? 'toutes' : grid.dataset.filter || 'toutes');
     empty.hidden = tab !== 'cards' || shown > 0;
     objList.hidden = tab !== 'objects';
     tabs.hidden = !!choose;
@@ -136,6 +160,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     add(card, imageUrl) {
       const el = buildCard(card, imageUrl);
       el.dataset.uid = card.uid;
+      el.dataset.category = card.category;
       el.tabIndex = 0;
       grid.appendChild(el);
       shown++;

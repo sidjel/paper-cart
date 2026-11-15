@@ -118,6 +118,58 @@ export function createAudio(settings, song) {
     tone('triangle', 1318, 1318, t + 0.1, 0.3, 0.12);
   }
 
+  // [TEMP] Pluie (intro) : bruit filtré en boucle, qui monte doucement ; arrêtée par stopRain().
+  let rain = null;
+  function pluie() {
+    if (rain) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1800;
+    bp.Q.value = 0.6;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.16, t + 1.5);
+    src.connect(bp).connect(g).connect(sfxBus);
+    src.start(t);
+    rain = { src, g };
+  }
+  function stopRain() {
+    if (!rain || !ctx) return;
+    const t = ctx.currentTime;
+    rain.g.gain.setTargetAtTime(0.0001, t, 0.5);
+    rain.src.stop(t + 2.5);
+    rain = null;
+  }
+
+  // [TEMP] Portes automatiques : souffle qui glisse.
+  function portes() {
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 1.5;
+    bp.frequency.setValueAtTime(500, t);
+    bp.frequency.exponentialRampToValueAtTime(1500, t + 0.9);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    src.connect(bp).connect(g).connect(sfxBus);
+    src.start(t, 0.4, 1.2);
+  }
+
+  // [TEMP] Ding (une seule note claire, un peu réverbérée).
+  function ding() {
+    const t = ctx.currentTime;
+    tone('sine', 1318, 1318, t, 1.6, 0.18, voiceBus);
+    tone('sine', 2636, 2636, t, 0.6, 0.04, voiceBus);
+  }
+
   // [TEMP] Prendre un objet (Scanette, panier) : petit déclic puis note qui monte.
   function prise() {
     const t = ctx.currentTime;
@@ -214,7 +266,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros, aparte };
+  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.
@@ -232,6 +284,9 @@ export function createAudio(settings, song) {
       return `${ctx.state} · ${ctx.sampleRate} Hz · réserve « ${settings.latency} » · latence ${ms(ctx.baseLatency)} + sortie ${ms(ctx.outputLatency)}`;
     },
     applyVolumes,
+    stopRain() {
+      stopRain();
+    },
     // Pendant un aparté, le magasin est figé : sa musique se tait (et reprend doucement après).
     setFrozen(f) {
       if (f === frozen) return;

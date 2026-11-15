@@ -522,11 +522,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   align-items: flex-start;
   gap: 10px;
   padding: 9px 14px 10px 12px;
-  background: var(--band);
+  /* Un peu transparente : le décor se devine derrière (--narrator-alpha, réglable). */
+  background: rgb(47 42 36 / var(--narrator-alpha, 0.78));
   color: var(--paper);
-  border: 2px solid var(--paper);
+  border: 2px solid rgb(251 248 238 / 0.85);
   border-radius: 8px;
-  box-shadow: 0 0 0 2px var(--ink);
+  box-shadow: 0 0 0 2px rgb(61 53 42 / 0.6);
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
@@ -540,9 +541,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   width: 14px;
   height: 14px;
   margin-left: -7px;
-  background: var(--band);
-  border-left: 2px solid var(--paper);
-  border-top: 2px solid var(--paper);
+  background: rgb(47 42 36 / var(--narrator-alpha, 0.78));
+  border-left: 2px solid rgb(251 248 238 / 0.85);
+  border-top: 2px solid rgb(251 248 238 / 0.85);
   transform: rotate(45deg);
 }
 .narrator-icon { flex: none; color: var(--accent); margin-top: 1px; }
@@ -775,3 +776,113 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   text-transform: uppercase;
 }
 .po-back:hover, .po-back:focus-visible { background: #8fd3ff; color: #0b0d14; }
+
+/* Sous-onglets des cartes (filtres) */
+.panier-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.panier-filter { min-height: 32px; padding: 3px 12px; border-radius: 999px; font-size: calc(13px * var(--ts, 1)); }
+.panier-grid[data-filter="alimentaire"] .card:not([data-category="alimentaire"]),
+.panier-grid[data-filter="non-alimentaire"] .card:not([data-category="non-alimentaire"]),
+.panier-grid[data-filter="speciale"] .card:not([data-category="speciale"]) { display: none; }
+
+/* ---------- Habillage des menus (séance 43) : le magasin en papier ----------
+   Panier : un sac en papier kraft, onglets comme des étiquettes, l'onglet actif tamponné en rouge.
+   Réglages (développement) : un ticket de caisse, papier thermique, chiffres à chasse fixe, pointillés. */
+.panier.panel {
+  background:
+    repeating-linear-gradient(97deg, rgb(255 255 255 / 0.05) 0 2px, rgb(0 0 0 / 0) 2px 7px),
+    repeating-linear-gradient(-8deg, rgb(90 60 30 / 0.05) 0 1px, rgb(0 0 0 / 0) 1px 9px),
+    #c9a46e;
+  color: #2b2116;
+  border: 3px solid #2b2116;
+  border-radius: 6px 6px 14px 14px;
+  box-shadow: 0 0 0 4px #f3ead6, 6px 8px 0 rgb(43 33 22 / 0.35);
+}
+.panier.panel h2 {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 2px 14px;
+  background: #f3ead6;
+  border: 2px solid #2b2116;
+  border-radius: 4px;
+  transform: rotate(-1.5deg);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.panier .settings-tab, .panier .panier-filter {
+  background: #f3ead6;
+  color: #2b2116;
+  border: 2px solid #2b2116;
+}
+.panier .settings-tab.active, .panier .panier-filter.active {
+  background: #c0503f;
+  color: #fbf8ee;
+  border-color: #2b2116;
+  box-shadow: 2px 2px 0 #2b2116;
+}
+.panier .settings-note { color: #3b2c1c; }
+.panier-objects li { background: #f3ead6; border-color: #2b2116; }
+.panier .primary { background: #2b2116; color: #f3ead6; border-color: #2b2116; }
+
+.settings.panel {
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0) 0 23px, rgb(60 70 90 / 0.05) 23px 24px),
+    #fbfaf4;
+  color: #23262d;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(35 38 45 / 0.25), 6px 8px 0 rgb(35 38 45 / 0.2);
+}
+.settings.panel h2 {
+  font-family: "Courier New", ui-monospace, monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px dashed #23262d;
+  padding-bottom: 4px;
+}
+.settings .settings-tab { font-family: "Courier New", ui-monospace, monospace; background: transparent; border: 1px dashed #23262d; }
+.settings .settings-tab.active { background: #23262d; color: #fbfaf4; }
+.settings .setting { border-bottom: 1px dotted rgb(35 38 45 / 0.35); }
+.settings .setting-value { font-family: "Courier New", ui-monospace, monospace; }
+.settings input[type="range"], .settings input[type="checkbox"] { accent-color: #c0503f; }
+
+/* ---------- Intro : texte blanc sur fond noir, puis fondu sur la partie ---------- */
+.intro {
+  position: absolute;
+  inset: 0;
+  z-index: 72; /* au-dessus du jeu et du titre, sous les réglages */
+  display: grid;
+  place-items: center;
+  background: #000;
+  cursor: pointer;
+}
+.intro-text {
+  max-width: min(760px, 86vw);
+  margin: 0;
+  padding: 0 24px;
+  text-align: center;
+  color: #f2f2f2;
+  font-family: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  font-size: calc(22px * var(--ts, 1));
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+.intro-text.speaker {
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: calc(18px * var(--ts, 1));
+  color: #9fd8ff;
+  letter-spacing: 0.08em;
+}
+.intro-skip {
+  position: absolute;
+  right: calc(var(--safe-right) + 10px);
+  bottom: calc(var(--safe-bottom) + 10px);
+  min-height: 40px;
+  padding: 6px 16px;
+  border: 1px solid rgb(242 242 242 / 0.5);
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(242 242 242 / 0.8);
+  font-size: calc(14px * var(--ts, 1));
+  letter-spacing: 0.1em;
+}

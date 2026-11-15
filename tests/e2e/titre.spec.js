@@ -26,7 +26,22 @@ test('écran titre : nom du jeu, image, Commencer lance la partie', async ({ pag
   const start = screen.locator('.title-button', { hasText: 'Commencer' });
   if (info.project.name === 'telephone') await start.tap();
   else await start.click();
+  // Intro : texte blanc sur fond noir, une ligne à la fois.
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('intro');
+  const intro = page.locator('.intro');
+  await expect(intro).toBeVisible();
+  await expect(intro.locator('.intro-text')).toContainText('pleuvait');
+  expect(await intro.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgb(0, 0, 0)');
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `test-results/captures/intro-${info.project.name}.png` });
+  // Toucher : ligne suivante.
+  if (info.project.name === 'telephone') await intro.tap({ position: { x: 50, y: 50 } });
+  else await intro.click({ position: { x: 50, y: 50 } });
+  await expect(intro.locator('.intro-text')).toContainText('parking');
+  // « Passer » : la partie commence derrière le noir qui s'efface.
+  await intro.locator('.intro-skip').click();
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
+  await expect(intro).toBeHidden({ timeout: 5000 });
   await expect(screen).toBeHidden();
 });
 
@@ -40,6 +55,10 @@ test('écran titre : Options ouvre les réglages, Fermer revient au titre ; clav
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('title');
   await expect(page.locator('.title-screen')).toBeVisible();
   await page.keyboard.press('Enter'); // de retour au titre, « Commencer » est mis en avant
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('intro');
+  await page.keyboard.press('Enter'); // ligne suivante
+  await expect(page.locator('.intro-text')).toContainText('parking');
+  await page.keyboard.press('Escape'); // passer l'intro
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
 });
 
@@ -58,8 +77,9 @@ test('Options : plein écran (choix) et filtre écran cathodique', async ({ page
   const start = page.locator('.title-button', { hasText: 'Commencer' });
   if (info.project.name === 'telephone') await start.tap();
   else await start.click();
+  await page.locator('.intro-skip').click();
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(2000);
   await page.screenshot({ path: `test-results/captures/jeu-${info.project.name}-crt.png` });
 });
 

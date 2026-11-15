@@ -61,9 +61,10 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - À terme, distinct du premier rayon : grand hall d'entrée, portes automatiques, **portique de sécurité**, **agent de sécurité**, présentoir de Scanettes et de paniers, **comptoir** d'échange panier → caddie. Un **point de retour** du joueur. (En attendant, l'accueil provisoire reste au début du rayon d'essai.)
 - ❓ À DÉFINIR : c'est en passant le portique que le héros est **scanné par le magasin et aplati** (enregistré comme un article) ; le « bip » du portique serait le **dernier son** dont il se souvient avant son trou de mémoire.
 
-## L'intro du jeu ❓ À DÉFINIR (piste notée, rien de codé)
-- Aucun personnage en 3D. Écran noir, des sons : pluie, parking, portes qui coulissent, « ding ».
+## L'intro du jeu 🧪 À TESTER (séance 43, textes [TEMP] dans `src/data/intro.json`)
+- Aucun personnage en 3D. Écran noir, texte blanc ligne par ligne, des sons : pluie, parking, portes qui coulissent, « ding ». Toucher : ligne suivante ; « Passer » ; puis fondu sur le jeu.
 - Puis le narrateur : « Bienvenue au Maxi-Gouffre. Nous avons pris la liberté d'optimiser votre format. » (piste : le « bip » du portique de sécurité juste avant, voir « L'accueil, un lieu à part »)
+- 🧪 **Première rencontre graduée** (séance 43, `narrator.json`) : annonce d'arrivée → 4 pensées du héros (le trou de mémoire, « pourquoi je me sens si plat ? », l'objectif : la Caisse Finale puis rentrer, « il me manque quelque chose… on me regarde ») → un regard caméra muet → premier aparté : « Toi. Là-haut. Tu me vois ? C'est toi… ce qui me manque ? » (deux réponses, confiance). Il découvre son Épaisseur avant de la nommer.
 - Le héros apparaît directement en papier.
 - La scène de l'aplatissement est révélée plus tard (pendant la Révélation ?), en quelques dessins : le héros a d'abord du volume, puis il est plaqué à plat.
 

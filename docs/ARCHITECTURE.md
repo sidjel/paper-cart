@@ -33,7 +33,7 @@
 ## 3. Boucle, temps et états 🔎
 
 - `requestAnimationFrame` → `stepper` avance la logique par pas fixes, l'affichage interpole entre deux pas.
-- États : `loading`, `title` (écran titre), `options` (options du joueur), `play`, `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Sous un menu, la scène n'est pas redessinée.
+- États : `loading`, `title` (écran titre), `options` (options du joueur), `intro` (texte sur noir après « Commencer » : `core/intro`, `ui/intro`, `data/intro.json`), `play`, `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Sous un menu, la scène n'est pas redessinée.
 - Délais (scan…) : comptés en pas de jeu, donc figés en pause. Seule exception : le délai du double toucher (geste du joueur, temps réel).
 - La logique renvoie de petits événements (ex. `stepScan` → `'bip'`) que `main.js` traduit en son et affichage. Pas de bus d'événements : inutile à cette taille.
 

@@ -18,6 +18,9 @@ import { createAsideFx } from './ui/aside.js';
 import { createConfirm } from './ui/confirm.js';
 import { createTitleScreen } from './ui/title.js';
 import { createPlayerOptions } from './ui/playerOptions.js';
+import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } from './core/intro.js';
+import { createIntroUi } from './ui/intro.js';
+import introFile from './data/intro.json';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -98,6 +101,7 @@ uiEl.appendChild(crt);
 const TEXT_SCALE = { petite: 0.85, normale: 1, grande: 1.2, 'tres-grande': 1.4 };
 function applyAccess() {
   document.documentElement.style.setProperty('--ts', TEXT_SCALE[config.access.textSize] ?? 1);
+  document.documentElement.style.setProperty('--narrator-alpha', config.display.narratorAlpha);
   const { brightness: b, contrast: c } = config.access;
   gameEl.style.filter = b === 1 && c === 1 ? '' : `brightness(${b}) contrast(${c})`;
 }
@@ -133,7 +137,9 @@ function startGame(fromPlayer) {
   if (sm.is('menu') && titleUi.visible) sm.back(); // les Options étaient ouvertes : on les ferme d'abord
   if (!sm.is('title')) return;
   titleUi.hide();
-  sm.go('play');
+  // Intro (texte blanc sur fond noir) seulement quand le joueur touche « Commencer ».
+  if (fromPlayer && config.intro.enabled) startIntro();
+  else sm.go('play');
   // Ensuite seulement : plein écran (et paysage sur téléphone), si l'option est active.
   if (fromPlayer && wantsFullscreen()) {
     try {
@@ -143,6 +149,37 @@ function startGame(fromPlayer) {
     }
   }
 }
+// ---------- Intro ----------
+const introLines = introFile.lines.map((l) => ({ ...l, text: l.text.replace(/^\[TEMP\]\s*/, '').replace(/ ([?!:;»])/g, '\u00a0$1') }));
+let introRun = null;
+const introUi = createIntroUi(uiEl, {
+  onNext: () => introRun && skipLine(introRun),
+  onSkip: () => introRun && skipAll(introRun),
+});
+function startIntro() {
+  introRun = createIntro(introLines);
+  introUi.show();
+  audio.setFrozen(true); // pas de musique de magasin pendant l'intro
+  sm.go('intro');
+}
+// À chaque image, pendant l'intro puis pendant le fondu final (le jeu est déjà lancé derrière).
+function updateIntro(dt) {
+  if (!introRun) return;
+  const started = stepIntro(introRun, dt, config.intro);
+  if (started >= 0 && introLines[started].sound) audio.play(introLines[started].sound);
+  const line = introRun.phase === 'line' ? introLines[introRun.i] : null;
+  introUi.set(line, introRun.phase === 'line' ? introRun.i : -1, lineOpacity(introRun, config.intro), blackOpacity(introRun, config.intro));
+  if (introRun.phase === 'end' && sm.is('intro')) {
+    audio.stopRain();
+    audio.setFrozen(false);
+    sm.go('play'); // la partie commence derrière le noir qui s'efface
+  }
+  if (introRun.done) {
+    introUi.hide();
+    introRun = null;
+  }
+}
+
 const tip = { x: 0, y: 0 }; // bout de la Scanette sur la scène
 const cardFrom = { x: 0, y: 0 };
 const cardTo = { x: 0, y: 0 };
@@ -551,7 +588,8 @@ function handleAction(action) {
   playerActed = true;
   switch (action) {
     case 'back':
-      if (quick) endQuick('annulé par le joueur (résultats partiels)');
+      if (sm.is('intro')) skipAll(introRun);
+      else if (quick) endQuick('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
       else if (sm.is('options')) sm.go('title');
@@ -592,7 +630,8 @@ function handleAction(action) {
       if (sm.is('options')) playerOptions.move(action === 'up' ? -1 : 1);
       break;
     case 'action':
-      if (sm.is('options')) playerOptions.press();
+      if (sm.is('intro')) skipLine(introRun);
+      else if (sm.is('options')) playerOptions.press();
       else if (sm.is('title')) titleUi.press();
       else if (confirm.open) confirm.yes(); // manette : A = oui
       else if (waitingAnswer(narrator)) answer(narrator, choiceFocus);
@@ -848,10 +887,13 @@ function frame(now) {
     }
     if (walker.moving) hud.playerMoved();
     const sec = Math.min(dt / 1000, 0.1);
+    updateIntro(sec); // fondu final de l'intro, s'il est en cours
     watchNarrator(sec);
     updateNarrator(sec);
     updateAside(sec);
     render();
+  } else if (sm.is('intro')) {
+    updateIntro(Math.min(dt / 1000, 0.1));
   } else if (sm.is('panier')) {
     updateNarrator(Math.min(dt / 1000, 0.1));
   } else if (quick) {
@@ -932,7 +974,7 @@ async function start() {
       else if (value === 'non') exitFullscreen();
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
-    if (key.startsWith('access.')) applyAccess();
+    if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);

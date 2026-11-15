@@ -1,0 +1,12 @@
+{
+  "comment": "Intro (après « Commencer ») : texte blanc sur fond noir, une ligne à la fois, puis fondu vers la partie. voice « haut-parleur » : l'annonce du magasin (autre style). sound : bruitage au début de la ligne (pluie, portes, ding). hold : temps affiché (s). Textes [TEMP], à réécrire par l'auteur ; piste d'intro dans docs/HISTOIRE.md.",
+  "lines": [
+    { "text": "[TEMP] Il pleuvait.", "sound": "pluie", "hold": 2.2 },
+    { "text": "[TEMP] Un parking presque vide. Des lampadaires fatigués.", "hold": 2.8 },
+    { "text": "[TEMP] Une enseigne qu'on n'avait jamais remarquée : MAXI-GOUFFRE.", "hold": 3 },
+    { "text": "[TEMP] Des portes automatiques, grandes ouvertes, comme si elles attendaient quelqu'un.", "sound": "portes", "hold": 3.2 },
+    { "text": "[TEMP] Ding.", "sound": "ding", "hold": 1.8 },
+    { "text": "[TEMP] Et puis… plus rien.", "hold": 2.4 },
+    { "text": "[TEMP] Bienvenue au Maxi-Gouffre. Nous avons pris la liberté d'optimiser votre format.", "voice": "haut-parleur", "sound": "annonce", "hold": 3.6 }
+  ]
+}

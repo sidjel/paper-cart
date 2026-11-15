@@ -6,6 +6,37 @@
       "strong": true,
       "comment": "le jeu commence"
     },
+    "reflexion_1": {
+      "voice": "pensee",
+      "once": true,
+      "follows": "arrivee",
+      "comment": "1re réflexion du héros (il se parle à lui-même) : ses souvenirs s'arrêtent aux portes"
+    },
+    "reflexion_2": {
+      "voice": "pensee",
+      "once": true,
+      "follows": "reflexion_1",
+      "comment": "2e : ses questions"
+    },
+    "reflexion_3": {
+      "voice": "pensee",
+      "once": true,
+      "follows": "reflexion_2",
+      "comment": "3e : son but (la Caisse Finale)"
+    },
+    "presence": {
+      "voice": "pensee",
+      "once": true,
+      "follows": "reflexion_3",
+      "comment": "4e : il sent qu'il lui manque quelque chose, et qu'on le regarde"
+    },
+    "regard_decouverte": {
+      "voice": "regard",
+      "once": true,
+      "follows": "presence",
+      "cooldown": 0,
+      "comment": "premier regard vers l'écran, sans un mot"
+    },
     "premier_scan": {
       "once": true,
       "strong": true,
@@ -39,8 +70,8 @@
     "aparte_accueil": {
       "voice": "heros",
       "once": true,
-      "follows": "arrivee",
-      "comment": "juste après l'annonce d'accueil"
+      "follows": "regard_decouverte",
+      "comment": "première rencontre avec son Épaisseur, après ses réflexions et un premier regard"
     },
     "aparte_vide": {
       "voice": "heros",
@@ -95,7 +126,33 @@
     {
       "id": "arrivee_1",
       "trigger": "arrivee",
-      "text": "[TEMP] Bienvenue au Maxi-Gouffre, cher Client. La sortie se trouve à la Caisse Finale. La Caisse Finale se trouve… plus loin."
+      "text": "[TEMP] Cher Client, la sortie se trouve à la Caisse Finale. La Caisse Finale se trouve… plus loin. Bonnes courses."
+    },
+    {
+      "id": "reflexion_1",
+      "trigger": "reflexion_1",
+      "text": "[TEMP] Le parking… la pluie… les portes qui s'ouvrent. Et après ? Rien. Comme une page arrachée."
+    },
+    {
+      "id": "reflexion_2",
+      "trigger": "reflexion_2",
+      "text": "[TEMP] Pourquoi je me sens si… plat ? Et qu'est-ce que je venais chercher ici, déjà ?"
+    },
+    {
+      "id": "reflexion_3",
+      "trigger": "reflexion_3",
+      "text": "[TEMP] La Caisse Finale. Bon. Je trouve la sortie, et je rentre chez moi."
+    },
+    {
+      "id": "presence",
+      "trigger": "presence",
+      "text": "[TEMP] … C'est bizarre. Il me manque quelque chose. Et j'ai l'impression qu'on me regarde. D'en haut."
+    },
+    {
+      "id": "regard_decouverte",
+      "trigger": "regard_decouverte",
+      "text": "",
+      "emotion": "inquiet"
     },
     {
       "id": "premier_scan_1",
@@ -155,19 +212,19 @@
     {
       "id": "aparte_accueil_1",
       "trigger": "aparte_accueil",
-      "text": "[TEMP] Psst… mon Épaisseur ? Tu es là, là-haut ? Ne me laisse pas tout seul ici.",
+      "text": "[TEMP] … Toi. Là-haut. Tu me vois ? C'est toi… ce qui me manque ?",
       "emotion": "inquiet",
       "choices": [
         {
-          "text": "[TEMP] Je suis là.",
+          "text": "[TEMP] Oui. Je suis là.",
           "trust": 1,
-          "reply": "[TEMP] Ouf. Alors on avance ensemble : toi, tu regardes, moi, je marche.",
+          "reply": "[TEMP] Alors je ne suis pas tout seul. Mon… Épaisseur. Toi, tu regardes ; moi, je marche. On trouve la sortie ensemble ?",
           "emotion": "complice"
         },
         {
           "text": "[TEMP] …",
           "trust": -1,
-          "reply": "[TEMP] D'accord. Le silence. C'est… rassurant. Pas du tout.",
+          "reply": "[TEMP] Rien ? … D'accord. Je vais faire comme si je n'avais pas peur. Mais je sais que tu es là, mon Épaisseur.",
           "emotion": "blase"
         }
       ]

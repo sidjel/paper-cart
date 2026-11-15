@@ -8,9 +8,9 @@ import { TUNABLES, getValue, setValue, onConfigChange } from '../config.js';
 
 const SECTIONS = [
   ['Son', ['audio.muted', 'audio.master', 'audio.music', 'audio.steps', 'audio.scanVolume', 'audio.voiceVolume', 'audio.heroVolume']],
-  ['Affichage', ['display.fullscreenMode', 'display.crt', 'display.crtStrength']],
+  ['Affichage', ['display.fullscreenMode', 'display.narratorAlpha', 'display.crt', 'display.crtStrength']],
   ['Accessibilité', ['access.textSize', 'narrator.speed', 'access.vibration', 'access.brightness', 'access.contrast', 'display.reduceMotion']],
-  ['Jeu', ['narrator.enabled', 'input.virtualJoystick']],
+  ['Jeu', ['intro.enabled', 'narrator.enabled', 'input.virtualJoystick']],
 ];
 
 function format(t, v) {

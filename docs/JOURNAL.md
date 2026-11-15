@@ -12,6 +12,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 43 — 15/11/2026 — Intro au noir, premières pensées du héros, rencontre graduée avec l'Épaisseur, menus restylés
+
+**Retours de l'auteur** : sous-onglets des cartes ; intro blanc sur noir après « Commencer », puis fondu ; annonces un peu transparentes ; couleurs des menus Panier et réglages ; première réflexion du héros et première rencontre graduée avec son Épaisseur.
+
+**Jouable maintenant** :
+- **Intro** : après « Commencer », écran noir, 7 lignes blanches une à une [TEMP] (pluie, parking, l'enseigne, les portes, « ding », le trou noir, puis le haut-parleur : « Nous avons pris la liberté d'optimiser votre format. »), avec les sons. Toucher, clic, Entrée ou A : ligne suivante ; « Passer » ou Échap : tout passer. Puis fondu lent sur le rayon. Désactivable (Options → Jeu).
+- **Première rencontre, graduée** : annonce d'arrivée → 4 pensées du héros (bulle en pointillés : le trou de mémoire, « pourquoi je me sens si plat ? », l'objectif — trouver la Caisse Finale et rentrer —, « il me manque quelque chose… on me regarde. D'en haut. ») → un regard muet vers l'écran → premier aparté : « Toi. Là-haut. Tu me vois ? C'est toi… ce qui me manque ? » (deux réponses ; il nomme son Épaisseur dans sa réponse).
+- **Annonces un peu transparentes** (fond à 78 %, réglable : Options → Affichage).
+- **Panier** façon sac kraft, onglet actif tamponné en rouge ; **filtres des cartes** : Toutes · Alimentaire · Non alimentaire · Spéciales.
+- **Réglages ⚙** façon ticket de caisse (police machine, pointillés).
+
+**Vérifié** : 122 tests de logique (dont : déroulé de l'intro ; une suite écrite survit à une annonce qui s'intercale) ; 61 tests navigateur PC et téléphone simulé, sans erreur console (dont : intro au doigt, au clavier, « Passer » ; pensées puis aparté puis réponse) ; comptages inchangés ; captures de l'intro, des pensées, de l'aparté, du Panier et des réglages. **À vérifier par l'auteur** : le rythme de l'intro et des pensées sur le vrai téléphone, les sons de l'intro.
+
+**Décisions prises seul** : le filtre « Spéciales » reste vide tant qu'aucune carte spéciale n'existe ; l'intro se règle aussi dans ⚙ → Narrateur (durées des fondus).
+
+---
+
 ## Séance 42 — 15/11/2026 — Accueil dégagé, Options du joueur assorties au titre, Scanette du scan corrigée
 
 **Retours de l'auteur** :

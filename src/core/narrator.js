@@ -99,7 +99,7 @@ export function narrate(n, data, trigger, p) {
   if (voice === HERO) n.lastAside = n.t;
   else if (voice === GLANCE) n.lastGlance = n.t;
   else if (voice !== THOUGHT) n.lastAnnounce = n.t; // une pensée ne retarde pas les annonces
-  n.pending = null;
+  if (n.pending?.trigger === trigger) n.pending = null; // un enchaînement en attente survit aux autres répliques
   n.answered = -1;
   n.line = best;
   n.voice = voice;
@@ -118,12 +118,14 @@ function end(n, data, p) {
   if (voice === HERO) n.lastAside = n.t;
   else if (voice === GLANCE) n.lastGlance = n.t;
   else if (voice !== THOUGHT) n.lastAnnounce = n.t; // une pensée ne retarde pas les annonces
-  for (const [name, tr] of Object.entries(data.triggers)) {
-    if (tr.follows === ended.trigger || tr.follows === `@${voice}`) {
-      n.pending = { trigger: name, at: n.t + p.followDelay };
-      return;
-    }
-  }
+  // Enchaînement : d'abord un moment qui suit précisément celui-ci (une suite écrite : l'arrivée, les
+  // premières pensées…), qui remplace l'attente en cours ; sinon un moment qui suit toute la voix
+  // (« @heros »…), seulement si rien n'attend déjà.
+  const entries = Object.entries(data.triggers);
+  const own = entries.find(([, tr]) => tr.follows === ended.trigger);
+  const any = entries.find(([, tr]) => tr.follows === `@${voice}`);
+  if (own) n.pending = { trigger: own[0], at: n.t + p.followDelay };
+  else if (any && !n.pending) n.pending = { trigger: any[0], at: n.t + p.followDelay };
 }
 
 // Durée d'affichage une fois le texte complet.

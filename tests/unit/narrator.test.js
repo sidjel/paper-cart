@@ -172,6 +172,24 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     go(n, 0.1);
     expect(n.line?.id).toBe('h');
   });
+  it('une suite écrite (arrivée → pensée → …) survit à une annonce qui s’intercale', () => {
+    const S = {
+      triggers: { a: {}, b: { voice: 'pensee', follows: 'a' }, c: { voice: 'pensee', follows: 'b' }, x: { strong: true } },
+      lines: [{ id: 'a', trigger: 'a', text: 'A' }, { id: 'b', trigger: 'b', text: 'B' }, { id: 'c', trigger: 'c', text: 'C' }, { id: 'x', trigger: 'x', text: 'X' }],
+    };
+    const n = createNarrator();
+    const run = (s) => {
+      for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, S, 1 / 60, P);
+    };
+    narrate(n, S, 'a', P);
+    run(2.2); // A finie : B attend
+    expect(n.pending?.trigger).toBe('b');
+    narrate(n, S, 'x', P); // une annonce s'intercale
+    expect(n.line?.id).toBe('x');
+    expect(n.pending?.trigger).toBe('b'); // B attend toujours
+    run(2.5); // X finie : B commence aussitôt
+    expect(n.line?.id).toBe('b');
+  });
   it('« from » : l’inactivité ne fait parler le haut-parleur qu’à partir de la 2e fois', () => {
     const n = createNarrator();
     expect(narrate(n, D, 'inactif', P)).toBe(null);

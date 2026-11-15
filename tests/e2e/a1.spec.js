@@ -517,12 +517,21 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   else await band.click();
   await expect(band).toBeHidden();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
-  // Juste après l'accueil : aparté du héros, dans une bulle, tourné vers l'écran.
+  // Première rencontre, graduée : il se parle d'abord à lui-même (pensées, bulle en pointillés)…
   const bubble = page.locator('.hero-bubble');
-  await expect(bubble).toBeVisible({ timeout: 3000 });
+  await expect(page.locator('.hero-bubble.thought')).toBeVisible({ timeout: 4000 });
+  expect((await narr(page)).voice).toBe('pensee');
+  expect((await narr(page)).text).toMatch(/parking/);
+  await expect.poll(async () => (await narr(page)).shown, { timeout: 5000 }).toBeGreaterThan(40);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-pensee.png` });
+  // (on accélère la suite pour le test : pensées, regard, aparté)
+  await page.evaluate(() => {
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1]]) window.paperCart.set(k, v);
+  });
+  // … puis il découvre son Épaisseur : aparté, dans une bulle, tourné vers l'écran.
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 15000 }).toBe('heros');
   const n3 = await narr(page);
-  expect(n3.voice).toBe('heros');
-  expect(n3.text).toMatch(/Épaisseur/);
+  expect(n3.text).toMatch(/Tu me vois/);
   expect((await hero(page)).away).toBe(false);
   // Mise en scène : bandes « cinéma », tête de face, la caméra zoome sur le héros.
   await expect(page.locator('.aside-bar-top')).toBeVisible();
@@ -538,11 +547,11 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   if (info.project.name === 'telephone') await choice.tap();
   else await choice.click();
   await expect.poll(async () => (await narr(page)).trust).toBe(1);
-  expect((await narr(page)).text).toMatch(/ensemble/);
+  expect((await narr(page)).text).toMatch(/Épaisseur/);
   // Puis le haut-parleur croit qu'un client parle au mur.
   await expect.poll(async () => (await narr(page)).voice, { timeout: 12000 }).toBe('narrateur');
   expect((await narr(page)).text).toMatch(/mur|plafond/);
-  expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeGreaterThan(viewW0 * 0.95); // fin du zoom
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.camera())).viewW).toBeGreaterThan(viewW0 * 0.95); // fin du zoom
   await expect(bubble).toBeHidden();
   await expect(band).toBeVisible();
 });
@@ -567,6 +576,11 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
   await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
   await page.locator('.narrator').click();
   await page.locator('.narrator').click();
+  await page.evaluate(() => {
+    // sans les premières pensées de l'accueil (éteindre puis rallumer efface la suite en attente)
+    window.paperCart.set('narrator.enabled', false);
+    window.paperCart.set('narrator.enabled', true);
+  });
   // Rien à portée : Entrée fait réagir le narrateur.
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await narr(page)).text, { timeout: 3000 }).toMatch(/vide|rien/i);

@@ -12,6 +12,7 @@ export function createCard(productId, def, serial) {
     power: def.power,
     stage: STAGES.includes(def.stage) ? def.stage : 'frais',
     properties: [...def.properties],
+    category: def.category ?? 'alimentaire', // alimentaire, non-alimentaire, speciale (sous-onglets)
   };
 }
 
