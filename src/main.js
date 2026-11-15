@@ -30,6 +30,7 @@ import { createDizzyStars } from './ui/dizzyStars.js';
 import departsFile from './data/departs.json';
 import { findDepart, cardCount, pickProducts, saidFor } from './core/departs.js';
 import { findPath } from './core/pathfinding.js';
+import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
 import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds, QUICK_SUITES } from './core/quicktest.js';
@@ -755,28 +756,37 @@ function endBench(status) {
   sm.go('play');
 }
 
+// Qui a la main ? (core/focus.js) : une seule règle de priorité pour toutes les commandes.
+function owner() {
+  return focusOwner(sm.get(), {
+    confirm: confirm.open,
+    card: basketUi.detailOpen,
+    name: namePicker.visible,
+    choice: waitingAnswer(narrator),
+    scene: heroAside(),
+  });
+}
+
 function handleAction(action) {
   playerActed = true;
+  const who = owner();
+  const dir = action === 'up' || action === 'left' ? -1 : 1;
+  const stopBench = () => (quick ? endQuick : endBench)('annulé par le joueur (résultats partiels)');
   switch (action) {
     case 'back':
-      if (sm.is('intro')) skipAll(introRun);
-      else if (quick) endQuick('annulé par le joueur (résultats partiels)');
-      else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
-      else if (sm.is('menu')) sm.back();
-      else if (sm.is('options')) sm.go('title');
-      else if (sm.is('panier')) {
-        if (confirm.open) confirm.no();
-        else if (basketUi.detailOpen) basketUi.closeDetail(); // d'abord la grande carte
-        else sm.go('play');
-      }
-      else if (sm.is('play')) sm.go('pause');
-      else if (sm.is('pause')) sm.go('play');
+      if (who === 'intro') skipAll(introRun);
+      else if (who === 'bench') stopBench();
+      else if (who === 'menu') sm.back();
+      else if (who === 'options') sm.go('title');
+      else if (who === 'confirm') confirm.no();
+      else if (who === 'card') basketUi.closeDetail(); // d'abord la grande carte
+      else if (who === 'panier' || who === 'pause') sm.go('play');
+      else if (inGame(who)) sm.go('pause');
       break;
     case 'pause':
-      if (quick) endQuick('annulé par le joueur (résultats partiels)');
-      else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
-      else if (sm.is('play')) sm.go('pause');
-      else if (sm.is('pause')) sm.go('play');
+      if (who === 'bench') stopBench();
+      else if (who === 'pause') sm.go('play');
+      else if (inGame(who)) sm.go('pause');
       break;
     case 'settings':
       if (sm.is('menu')) sm.back();
@@ -799,39 +809,38 @@ function handleAction(action) {
       break;
     case 'up':
     case 'down':
-      if (sm.is('options')) playerOptions.move(action === 'up' ? -1 : 1);
-      else if (sm.is('pause')) journal.move(action === 'up' ? -1 : 1);
-      else if (namePicker.visible) namePicker.move(action === 'up' ? -1 : 1);
-      else if (sm.is('panier') && !confirm.open) basketUi.move(action === 'up' ? -1 : 1);
+      if (who === 'options') playerOptions.move(dir);
+      else if (who === 'pause') journal.move(dir);
+      else if (who === 'name') namePicker.move(dir);
+      else if (who === 'panier') basketUi.move(dir);
       break;
     case 'action':
-      if (sm.is('intro')) skipLine(introRun);
-      else if (sm.is('pause')) {
+      if (who === 'intro') skipLine(introRun);
+      else if (who === 'pause') {
         // Manette (A) : le bouton mis en avant de l'écran Pause (Reprendre ou Dialogues).
         const el = document.activeElement;
         if (el?.tagName === 'BUTTON' && hud.pauseCard.contains(el)) el.click();
-      }
-      else if (sm.is('options')) playerOptions.press();
-      else if (sm.is('title')) titleUi.press();
-      else if (confirm.open) confirm.yes(); // manette : A = oui
-      else if (sm.is('panier')) basketUi.press(); // la carte mise en avant (ou retourner la grande)
-      else if (namePicker.visible) namePicker.press();
-      else if (waitingAnswer(narrator)) answer(narrator, choiceFocus, config.narrator);
-      else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
-      else tryScan();
+      } else if (who === 'options') playerOptions.press();
+      else if (who === 'title') titleUi.press();
+      else if (who === 'confirm') confirm.yes(); // manette : A = oui
+      else if (who === 'card' || who === 'panier') basketUi.press(); // la carte mise en avant (ou retourner la grande)
+      else if (who === 'name') namePicker.press();
+      else if (who === 'choice') answer(narrator, choiceFocus, config.narrator);
+      else if (who === 'scene') skipNarrator(narrator, narratorData, config.narrator);
+      else if (who === 'play') tryScan();
       break;
     case 'choice1':
     case 'choice2':
-      if (waitingAnswer(narrator)) answer(narrator, action === 'choice1' ? 0 : 1, config.narrator);
+      if (who === 'choice') answer(narrator, action === 'choice1' ? 0 : 1, config.narrator);
       break;
     case 'left':
     case 'right':
-      if (sm.is('options')) playerOptions.adjust(action === 'left' ? -1 : 1);
-      else if (sm.is('title')) titleUi.move(action === 'left' ? -1 : 1);
-      else if (confirm.open) confirm.focus(action === 'right');
-      else if (sm.is('panier')) basketUi.switchTab();
-      else if (namePicker.visible) namePicker.move(action === 'left' ? -1 : 1);
-      else if (waitingAnswer(narrator)) {
+      if (who === 'options') playerOptions.adjust(dir);
+      else if (who === 'title') titleUi.move(dir);
+      else if (who === 'confirm') confirm.focus(action === 'right');
+      else if (who === 'card' || who === 'panier') basketUi.switchTab();
+      else if (who === 'name') namePicker.move(dir);
+      else if (who === 'choice') {
         choiceFocus = action === 'left' ? 0 : 1;
         narratorUi.focusChoice(choiceFocus);
       }
@@ -839,7 +848,7 @@ function handleAction(action) {
     case 'panier':
       if (sm.is('panier')) sm.go('play');
       // Pas de Panier pendant un aparté ou une conversation (rien ne les interrompt).
-      else if (sm.is('play') && !scan.active && gear.panier && !heroAside()) sm.go('panier');
+      else if (heroFree(who) && !scan.active && gear.panier) sm.go('panier');
       break;
   }
 }

@@ -12,6 +12,20 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 50 (suite) — Audit, point 5 : « qui a la main ? »
+
+**Fait** (aucun changement visible pour le joueur) :
+- La règle de priorité des commandes est écrite une seule fois, dans `core/focus.js`, avec ses tests : question Oui / Non, puis grande carte, puis Panier ; choix du nom, puis réponse attendue, puis conversation, puis héros libre.
+- Le traitement des touches (`main.js`) s'en sert au lieu de conditions répétées.
+
+**Reporté** : l'état « transition » sera ajouté avec A6, quand il servira (règle : rien de construit pour plus tard).
+
+**Vérifié** : 144 tests de logique, 77 tests navigateur, sans erreur console.
+
+**Reste de l'audit** : points 3, 2 + 4, 6.
+
+---
+
 ## Séance 50 (suite) — Correction n° 1 de l'audit : la rencontre ne se cache plus sous le Panier
 
 **Validé par l'auteur** : point 1 de l'audit.

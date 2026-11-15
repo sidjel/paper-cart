@@ -174,6 +174,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Plan du magasin (affiche ou dépliant, dans les Objets) pour retrouver son caddie ; « plan », pas « carte » | 50 | ❓ | GAME_DESIGN.md. Plus tard. |
 | Règles des lieux (données, gestionnaire avec cycle de vie, transition par la machine à états, le monde se souvient, mesures) | 50 | ✅ | Écrites dans ARCHITECTURE.md §11, avant de coder A6. |
 | Audit de l'architecture et de la fluidité avant A6 et A7, sans rien modifier | 50 | ❓ | Fait (rapport dans le JOURNAL, séance 50). 15 points ; **l'auteur valide une correction à la fois**, banc d'essai sur le téléphone avant et après pour la fluidité. |
+| Audit, point 5 : règle « qui a la main ? » écrite une fois | 50 | ✅ | `core/focus.js` (testé), utilisé par le traitement des touches. État « transition » : avec A6. |
 | (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | 👀 | Corrigé (validé par l'auteur) : pas de Panier pendant un aparté ou une conversation ; hors du jeu (Panier, menus), le héros ne prend pas la parole, la rencontre attend le retour. Testé. |
 
 ## Interface
