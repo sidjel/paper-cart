@@ -31,7 +31,10 @@ export function createPlaceView(container, place, images, common, here, proj, co
     products,
     debugMask,
     // En partant : tout ce qui a été construit pour ce lieu quitte la page.
+    // Les images perdent aussi leur source : sinon le navigateur garde chaque <img> inscrite pour suivre la
+    // taille de l'écran, et avec elle tout l'ancien lieu (mesuré : +58 éléments par changement de lieu).
     destroy() {
+      for (const img of stage.el.querySelectorAll('img')) img.removeAttribute('src');
       stage.el.remove();
     },
   };

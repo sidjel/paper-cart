@@ -126,3 +126,48 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
   expect(errors).toEqual([]);
   expect(await page.evaluate(() => window.paperCart.benchReport())).toContain('Résultat : terminé');
 });
+
+// Mémoire après les changements de lieu : des comptages (pas des temps), fiables sans carte graphique.
+// Après 5 allers-retours rayon ↔ accueil, les éléments de page, les écouteurs d'événements et la mémoire
+// JavaScript reviennent à leur niveau de départ (petite marge).
+test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
+  test.setTimeout(90_000);
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('./?depart=3-cartes');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('HeapProfiler.enable');
+  const measure = async () => {
+    await cdp.send('HeapProfiler.collectGarbage');
+    await cdp.send('HeapProfiler.collectGarbage');
+    const dom = await cdp.send('Memory.getDOMCounters');
+    const heap = await cdp.send('Runtime.getHeapUsage');
+    const assets = await page.evaluate(() => window.paperCart.assets());
+    return { nodes: dom.nodes, listeners: dom.jsEventListeners, heapMb: heap.usedSize / 1048576, images: assets.images, pixels: assets.pixels };
+  };
+  const travel = async (to) => {
+    await page.evaluate(() => window.paperCart.useExit());
+    await page.waitForFunction((p) => window.paperCart.place() === p && window.paperCart.state() === 'play', to, { timeout: 15_000 });
+  };
+  // Un premier aller-retour pour amorcer (ce qui est créé une seule fois, à la première visite).
+  await travel('accueil');
+  await travel('rayon-essai');
+  await page.waitForTimeout(500);
+  const start = await measure();
+  for (let k = 0; k < 5; k++) {
+    await travel('accueil');
+    await travel('rayon-essai');
+  }
+  await page.waitForTimeout(500);
+  const end = await measure();
+  console.log('Mémoire après 5 allers-retours :', JSON.stringify({ start, end }));
+  test.info().annotations.push({ type: 'mémoire', description: JSON.stringify({ start, end }) });
+  expect(end.images).toBe(start.images);
+  expect(end.pixels).toBe(start.pixels);
+  expect(end.listeners).toBeLessThanOrEqual(start.listeners + 5);
+  expect(end.nodes).toBeLessThanOrEqual(start.nodes + 30); // séance 53 : une fuite de +58 éléments par changement de lieu a été trouvée ainsi
+  expect(end.heapMb).toBeLessThanOrEqual(start.heapMb * 1.15 + 1);
+  expect(errors).toEqual([]);
+});

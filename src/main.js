@@ -1323,6 +1323,15 @@ async function start() {
     },
     flips: () => flips,
     place: () => place.id,
+    // Tests : prendre la sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
+    useExit(id) {
+      const exit = (place.exits?.items ?? []).find((e) => !id || e.id === id);
+      if (!exit || transition || !sm.is('play')) return false;
+      transition = createTransition(exit);
+      fadeEl.hidden = false;
+      sm.go('transition');
+      return true;
+    },
     lastTransitionMs: () => lastTransitionMs,
     paths: () => pathCount,
     // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
