@@ -8,6 +8,7 @@
 - Face à face, tour par tour, sans chrono (*Baten Kaitos*, *Final Fantasy*).
 - Points de vie des deux côtés.
 - Panier de 12 cartes, main de 5, jusqu'à 3 cartes jouées par tour.
+- ❓ À DÉFINIR avant B (séance 51) : « Panier de 12 cartes » ne colle pas avec le contenant porté ([TEMP] panier = 6, caddie plus grand : `GAME_DESIGN.md`). Combien de cartes en combat, et d'où viennent-elles (tout le contenu du panier ou du caddie ? un choix avant le combat ?) ?
 - L'ennemi **annonce son prochain coup**.
 - Jauge épique et attaque ultime mise en scène : prototype C.
 
