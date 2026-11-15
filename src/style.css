@@ -182,7 +182,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .hint.gone { opacity: 0; }
 
 /* Ordre d'empilement de l'interface (règle posée une fois) : jeu et voix (≤ 25) < fenêtres et menus
-   (Panier, pause : 60 ; question Oui / Non : 65 ; écran titre : 70 ; réglages : 75) < consigne de rotation
+   (Panier, pause : 60 ; grande carte du Panier : 62 ; question Oui / Non : 65 ; écran titre : 70 ; réglages : 75) < consigne de rotation
    (80) < filtre cathodique (95). Les menus sont toujours au-dessus des voix. */
 .panel {
   position: absolute;
@@ -1062,3 +1062,95 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .journal .journal-heros span, .journal .journal-pensee span { font-style: italic; }
 .journal .journal-epaisseur { padding-left: 8px; border-left: 3px solid #8fd3ff; }
 .journal-empty { margin: 0; opacity: 0.7; }
+
+/* ---------- Panier : petites cartes, grande carte qui se retourne (séance 48) ---------- */
+/* Petites cartes : deux fois plus petites ; on y lit la puissance, le stade (couleur et forme), l'image
+   et le nom. Le reste (propriétés, description) est sur la grande carte. */
+.card.card-mini { width: 66px; padding: 4px 4px 5px; border-radius: 7px; border-width: 1.5px; box-shadow: 2px 2px 0 rgb(61 53 42 / 0.35), inset 0 0 0 2.5px var(--stage); cursor: pointer; }
+.card-mini .card-power { width: 18px; height: 18px; font-size: calc(11px * var(--ts, 1)); }
+.card-mini .card-stage svg { width: 12px; height: 12px; }
+.card-mini .card-stage-label, .card-mini .card-props { display: none; }
+.card-mini .card-img { width: 36px; height: 45px; margin: 2px auto 1px; }
+.card-mini .card-name { font-size: calc(11px * var(--ts, 1)); line-height: 1.15; overflow-wrap: anywhere; }
+.panier-grid { gap: 8px; }
+.panier:not(.choosing) .card-mini:hover, .panier:not(.choosing) .card-mini:focus-visible { outline: 3px solid #2b2116; outline-offset: 2px; }
+
+/* En-tête du Panier : le titre, et « Fermer » en haut à droite. */
+.panier-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.panier .panel-buttons { justify-content: flex-end; }
+/* Boutons Fermer / Annuler : papier kraft marron foncé. */
+.kraft-close {
+  min-height: 40px;
+  padding: 4px 14px;
+  font-weight: 700;
+  color: #f3ead6;
+  background:
+    repeating-linear-gradient(97deg, rgb(255 255 255 / 0.06) 0 2px, rgb(0 0 0 / 0) 2px 7px),
+    #5a3a1e;
+  border: 2px solid #2b2116;
+  border-radius: 6px;
+  box-shadow: 2px 2px 0 #2b2116;
+}
+.kraft-close:hover, .kraft-close:focus-visible { background: #6e4826; outline: 3px solid #f3ead6; outline-offset: 1px; }
+
+/* Grande carte : au-dessus du Panier (fenêtres 60 < grande carte 62 < question Oui / Non 65).
+   Dessinée à sa taille : --u est l'unité (2 px, ou moins si l'écran est bas), tout est en --u. */
+.card-detail {
+  position: absolute;
+  inset: 0;
+  z-index: 62;
+  display: grid;
+  place-items: center;
+  background: rgb(30 22 14 / 0.55);
+}
+.card-detail[hidden] { display: none; }
+.card-detail-top { position: absolute; top: calc(var(--safe-top) + 6px); right: calc(var(--safe-right) + 6px); }
+.card-detail-bottom { position: absolute; bottom: calc(var(--safe-bottom) + 6px); right: calc(var(--safe-right) + 6px); }
+.card-flip {
+  --u: min(2px, calc(80vh / 236));
+  display: grid;
+  cursor: pointer;
+  will-change: transform;
+}
+.card-flip > .card { grid-area: 1 / 1; }
+.card.card-big {
+  width: calc(132 * var(--u));
+  min-height: calc(220 * var(--u));
+  padding: calc(7 * var(--u)) calc(8 * var(--u)) calc(9 * var(--u));
+  border-width: calc(2 * var(--u));
+  border-radius: calc(10 * var(--u));
+  box-shadow: calc(4 * var(--u)) calc(4 * var(--u)) 0 rgb(30 22 14 / 0.45), inset 0 0 0 calc(4 * var(--u)) var(--stage);
+  font-size: calc(13 * var(--u) * var(--ts, 1));
+}
+.card-big .card-power { width: calc(28 * var(--u)); height: calc(28 * var(--u)); font-size: calc(16 * var(--u)); }
+.card-big .card-stage { font-size: calc(12 * var(--u) * var(--ts, 1)); }
+.card-big .card-stage svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); }
+.card-big .card-img { width: calc(72 * var(--u)); height: calc(90 * var(--u)); margin: calc(4 * var(--u)) auto calc(2 * var(--u)); }
+.card-big .card-name { font-size: calc(15 * var(--u) * var(--ts, 1)); }
+.card-big .card-props { gap: calc(3 * var(--u)); margin-top: calc(4 * var(--u)); }
+.card-big .card-props span { padding: calc(1 * var(--u)) calc(6 * var(--u)); font-size: calc(11 * var(--u) * var(--ts, 1)); border-width: max(1px, calc(0.6 * var(--u))); }
+/* Dos de la carte : la description complète. */
+.card-back { display: flex; flex-direction: column; text-align: left; }
+.card-back .card-name { margin-top: calc(6 * var(--u)); text-align: center; }
+.card-back-cat { font-size: calc(10 * var(--u) * var(--ts, 1)); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.card-desc { flex: 1; margin: calc(8 * var(--u)) 0; font-size: calc(12 * var(--u) * var(--ts, 1)); line-height: 1.4; font-style: italic; }
+.card-back-stage { margin: calc(6 * var(--u)) 0 0; font-size: calc(10 * var(--u) * var(--ts, 1)); text-align: center; opacity: 0.8; }
+.card-back .card-props { justify-content: center; }
+.card-flip:not(.show-back) .card-back, .card-flip.show-back .card-front { visibility: hidden; }
+/* La feuille se retourne : elle se plie de profil (largeur → 0), puis se déplie de l'autre côté.
+   À l'ouverture, elle part de la petite carte (--fx, --fy, --fs) et grandit en se retournant. */
+.card-flip.anim-in { animation: card-in 0.22s ease-in forwards; }
+.card-flip.anim-out { animation: card-out 0.24s ease-out; }
+.card-flip.anim-fold { animation: card-fold 0.14s ease-in forwards; }
+.card-flip.anim-unfold { animation: card-unfold 0.16s ease-out; }
+@keyframes card-in {
+  from { transform: translate(var(--fx), var(--fy)) scale(var(--fs)); }
+  to { transform: translate(calc(var(--fx) * 0.4), calc(var(--fy) * 0.4)) scale(calc(var(--fs) * 0.4 + 0.6)) scaleX(0.02); }
+}
+@keyframes card-out {
+  from { transform: translate(calc(var(--fx) * 0.4), calc(var(--fy) * 0.4)) scale(calc(var(--fs) * 0.4 + 0.6)) scaleX(0.02); }
+  to { transform: none; }
+}
+@keyframes card-fold { to { transform: scaleX(0.02); } }
+@keyframes card-unfold { from { transform: scaleX(0.02); } }
+.panier.detail-open .kraft-close { visibility: hidden; } /* la grande carte a ses propres boutons */

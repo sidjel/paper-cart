@@ -16,6 +16,12 @@ describe('données : références entre fichiers', () => {
     const frames = JSON.stringify(hero.views).match(/art\/[^"]+\.svg/g);
     for (const f of new Set(frames)) expect(existsSync(art(f)), f).toBe(true);
   });
+  it('chaque produit a une description [TEMP] pour le dos de sa carte (courte)', () => {
+    for (const [id, def] of Object.entries(catalog.products)) {
+      expect(def.description?.startsWith('[TEMP] '), id).toBe(true);
+      expect(def.description.length, id).toBeLessThan(140);
+    }
+  });
   it('chaque objet du décor utilise une image du lieu, chaque calque aussi', () => {
     for (const p of place.props) expect(place.images[p.image], p.id).toBeDefined();
     for (const l of place.layers) if (l.image) expect(place.images[l.image], l.id).toBeDefined();

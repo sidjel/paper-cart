@@ -9,6 +9,7 @@ export function createCard(productId, def, serial) {
     uid: serial,
     productId,
     name: def.name.replace(/^\[TEMP\]\s*/, ''),
+    description: (def.description ?? '').replace(/^\[TEMP\]\s*/, ''), // dos de la carte
     power: def.power,
     stage: STAGES.includes(def.stage) ? def.stage : 'frais',
     properties: [...def.properties],

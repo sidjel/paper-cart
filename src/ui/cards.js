@@ -7,29 +7,42 @@ const STAGE_INFO = {
   pourri: { label: 'Pourri', shape: '<rect x="3" y="3" width="14" height="14" rx="2"/>' },
 };
 
+const MAX_PROPS = 4; // propriétés affichées au plus (éléments préparés à l'avance)
+
 // card : { name, power, stage, properties } ; imageUrl : illustration du produit.
 export function buildCard(card, imageUrl) {
   const el = document.createElement('div');
-  el.className = `card stage-${card.stage}`;
-  const info = STAGE_INFO[card.stage];
   el.innerHTML = `
     <div class="card-top">
-      <span class="card-power" title="Puissance">${card.power}</span>
-      <span class="card-stage"><svg viewBox="0 0 20 20" width="16" height="16">${info.shape}</svg>${info.label}</span>
+      <span class="card-power" title="Puissance"></span>
+      <span class="card-stage"><svg viewBox="0 0 20 20" width="16" height="16"></svg><span class="card-stage-label"></span></span>
     </div>
     <img class="card-img" alt="" draggable="false">
     <div class="card-name"></div>
-    <div class="card-props"></div>`;
-  el.querySelector('.card-img').src = imageUrl;
-  el.querySelector('.card-name').textContent = card.name;
-  const props = el.querySelector('.card-props');
-  for (const p of card.properties) {
-    const s = document.createElement('span');
-    s.textContent = p;
-    props.appendChild(s);
-  }
+    <div class="card-props">${'<span></span>'.repeat(MAX_PROPS)}</div>`;
+  fillCard(el, card, imageUrl);
   return el;
 }
+
+// Remplit une carte déjà construite (la grande carte du Panier est préparée une fois et remplie à
+// chaque ouverture : rien n'est créé).
+function fillCard(el, card, imageUrl, extra = '') {
+  const info = STAGE_INFO[card.stage] ?? STAGE_INFO.frais;
+  el.className = `card stage-${card.stage}${extra}`;
+  el.querySelector('.card-power').textContent = card.power;
+  el.querySelector('.card-stage svg').innerHTML = info.shape;
+  el.querySelector('.card-stage-label').textContent = info.label;
+  const img = el.querySelector('.card-img');
+  if (imageUrl) img.src = imageUrl;
+  el.querySelector('.card-name').textContent = card.name;
+  const spans = el.querySelectorAll('.card-props span');
+  spans.forEach((sp, k) => {
+    sp.textContent = card.properties[k] ?? '';
+    sp.hidden = k >= card.properties.length;
+  });
+}
+
+const CATEGORY = { alimentaire: 'Alimentaire', 'non-alimentaire': 'Non alimentaire', speciale: 'Spéciale' };
 
 // Panier : bouton dans l'interface (nombre de cartes / capacité) et écran à deux onglets :
 //  - « Cartes » (la liste de courses, nom provisoire) ;
@@ -68,6 +81,13 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', 'Panier');
   const title = document.createElement('h2');
+  // Fermer (ou Annuler) : en haut à droite et en bas à droite, papier kraft foncé.
+  const closeTop = document.createElement('button');
+  closeTop.className = 'kraft-close';
+  closeTop.addEventListener('click', () => onClose());
+  const head = document.createElement('div');
+  head.className = 'panier-head';
+  head.append(title, closeTop);
   const tabs = document.createElement('div');
   tabs.className = 'settings-tabs panier-tabs';
   tabs.setAttribute('role', 'tablist');
@@ -113,14 +133,123 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   const objList = document.createElement('ul');
   objList.className = 'panier-objects';
   const close = document.createElement('button');
-  close.className = 'primary';
+  close.className = 'kraft-close';
   close.textContent = 'Fermer (Échap)';
   close.addEventListener('click', () => onClose());
   const row = document.createElement('div');
   row.className = 'panel-buttons';
   row.appendChild(close);
-  panel.append(title, tabs, filters, hint, empty, noneInFilter, grid, objList, row);
-  root.append(button, panel);
+  panel.append(head, tabs, filters, hint, empty, noneInFilter, grid, objList, row);
+
+  // Une carte touchée : elle se retourne comme une feuille et s'affiche en grand, sa description au dos.
+  // La grande carte est dessinée à sa taille (texte net), pas agrandie. Préparée une fois.
+  const detail = document.createElement('div');
+  detail.className = 'card-detail';
+  detail.hidden = true;
+  detail.setAttribute('role', 'dialog');
+  detail.setAttribute('aria-label', 'Carte');
+  const dTop = document.createElement('button');
+  dTop.className = 'kraft-close card-detail-top';
+  dTop.textContent = 'Fermer ✕';
+  const dBottom = document.createElement('button');
+  dBottom.className = 'kraft-close card-detail-bottom';
+  dBottom.textContent = 'Fermer (Échap)';
+  const flipper = document.createElement('div');
+  flipper.className = 'card-flip';
+  const front = buildCard({ name: '', power: 0, stage: 'frais', properties: [] }, '');
+  const back = document.createElement('div');
+  back.innerHTML = `
+    <div class="card-top"><span class="card-power"></span><span class="card-back-cat"></span></div>
+    <div class="card-name"></div>
+    <p class="card-desc"></p>
+    <div class="card-props">${'<span></span>'.repeat(MAX_PROPS)}</div>
+    <p class="card-back-stage"></p>`;
+  flipper.append(front, back);
+  detail.append(dTop, flipper, dBottom);
+  root.append(button, panel, detail);
+  let detailCard = null;
+  let backShown = false;
+  let reduce = () => false;
+
+  function setFace(showBack) {
+    backShown = showBack;
+    flipper.classList.toggle('show-back', showBack);
+  }
+  // Animation en deux temps (la feuille se plie de profil, puis se déplie de l'autre côté) ;
+  // fin de chaque temps : événement animationend (rien n'est compté en temps réel).
+  function animate(first, second, mid) {
+    if (reduce()) {
+      mid();
+      return;
+    }
+    flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold');
+    void flipper.offsetWidth;
+    flipper.classList.add(first);
+    flipper.onanimationend = () => {
+      flipper.classList.remove(first);
+      mid();
+      flipper.classList.add(second);
+      flipper.onanimationend = () => {
+        flipper.classList.remove(second);
+        flipper.onanimationend = null;
+      };
+    };
+  }
+  function openDetail(el) {
+    const card = cards.get(Number(el.dataset.uid));
+    if (!card) return;
+    detailCard = el;
+    fillCard(front, card.card, card.url, ' card-big card-front');
+    back.className = `card card-big card-back stage-${card.card.stage}`;
+    back.querySelector('.card-power').textContent = card.card.power;
+    back.querySelector('.card-back-cat').textContent = CATEGORY[card.card.category] ?? '';
+    back.querySelector('.card-name').textContent = card.card.name;
+    back.querySelector('.card-desc').textContent = card.card.description || '…';
+    back.querySelectorAll('.card-props span').forEach((sp, k) => {
+      sp.textContent = card.card.properties[k] ?? '';
+      sp.hidden = k >= card.card.properties.length;
+    });
+    back.querySelector('.card-back-stage').textContent = `Stade : ${(STAGE_INFO[card.card.stage] ?? STAGE_INFO.frais).label}`;
+    setFace(false);
+    detail.hidden = false;
+    panel.classList.add('detail-open'); // un seul jeu de boutons Fermer à la fois
+    // Départ de l'animation : là où est la petite carte (mesuré une fois, à l'ouverture).
+    const a = el.getBoundingClientRect();
+    const b = flipper.getBoundingClientRect();
+    flipper.style.setProperty('--fx', `${a.left + a.width / 2 - (b.left + b.width / 2)}px`);
+    flipper.style.setProperty('--fy', `${a.top + a.height / 2 - (b.top + b.height / 2)}px`);
+    flipper.style.setProperty('--fs', String(a.width / b.width));
+    animate('anim-in', 'anim-out', () => setFace(true));
+    dBottom.focus({ preventScroll: true });
+  }
+  function closeDetail() {
+    if (detail.hidden) return;
+    detail.hidden = true;
+    panel.classList.remove('detail-open');
+    flipper.onanimationend = null;
+    flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold');
+    detailCard?.focus({ preventScroll: true });
+    detailCard = null;
+  }
+  // Toucher la grande carte : elle se retourne (recto, verso).
+  function flipDetail() {
+    animate('anim-fold', 'anim-unfold', () => setFace(!backShown));
+  }
+  for (const b of [dTop, dBottom]) {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeDetail();
+    });
+  }
+  flipper.addEventListener('click', (e) => {
+    e.stopPropagation();
+    flipDetail();
+  });
+  // Toucher à côté de la carte : elle se referme.
+  detail.addEventListener('click', (e) => {
+    if (e.target === detail) closeDetail();
+  });
+  const cards = new Map(); // uid → { card, url }
 
   let shown = 0;
   let cap = 0;
@@ -145,7 +274,11 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   // En mode « reposer », chaque carte devient un bouton (doigt, souris, ou Entrée sur la carte).
   function pickFrom(target) {
     const el = target.closest('.card');
-    if (!choose || !el) return;
+    if (!el) return;
+    if (!choose) {
+      openDetail(el); // consultation : la carte se retourne et s'affiche en grand
+      return;
+    }
     const pick = choose;
     choose = null;
     pick(Number(el.dataset.uid));
@@ -169,7 +302,11 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {
       const el = buildCard(card, imageUrl);
+      el.classList.add('card-mini');
       el.dataset.uid = card.uid;
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', `${card.name} : voir la carte`);
+      cards.set(card.uid, { card, url: imageUrl });
       el.dataset.category = card.category;
       el.tabIndex = 0;
       grid.appendChild(el);
@@ -178,6 +315,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     // Une carte reposée quitte l'écran.
     remove(uid) {
       grid.querySelector(`.card[data-uid="${uid}"]`)?.remove();
+      cards.delete(uid);
       shown--;
     },
     // Un objet porté apparaît dans l'onglet « Objets » (id : clé dans data/objects.json).
@@ -222,11 +360,40 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
       showTab(choose ? 'cards' : tab);
       panel.hidden = false;
       close.textContent = choose ? 'Annuler (Échap)' : 'Fermer (Échap)';
+      closeTop.textContent = choose ? 'Annuler ✕' : 'Fermer ✕';
       (choose ? grid.querySelector('.card') ?? close : close).focus({ preventScroll: true });
     },
     close() {
+      closeDetail();
       panel.hidden = true;
       choose = null;
+    },
+    // La grande carte est ouverte (Échap, B : la refermer d'abord).
+    get detailOpen() {
+      return !detail.hidden;
+    },
+    closeDetail,
+    // « Réduire les animations » : la carte s'affiche sans se retourner.
+    setReduceMotion(fn) {
+      reduce = fn;
+    },
+    // Manette, clavier : A / Entrée sur la carte mise en avant (ou retourner la grande carte).
+    press() {
+      if (!detail.hidden) {
+        flipDetail();
+        return;
+      }
+      const a = document.activeElement;
+      if (a?.classList.contains('card') && grid.contains(a)) pickFrom(a);
+      else if (a?.tagName === 'BUTTON' && panel.contains(a)) a.click();
+    },
+    // Haut / bas : carte précédente ou suivante (parmi celles affichées).
+    move(dir) {
+      if (!detail.hidden || panel.hidden) return;
+      const list = [...grid.querySelectorAll('.card')].filter((c) => c.offsetParent !== null);
+      if (!list.length) return;
+      const i = list.indexOf(document.activeElement);
+      list[i < 0 ? 0 : (i + dir + list.length) % list.length].focus({ preventScroll: false });
     },
   };
 }

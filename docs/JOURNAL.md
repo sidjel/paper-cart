@@ -12,6 +12,41 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 48 — 15/11/2026 — Panier : petites cartes, grande carte qui se retourne
+
+**Retours de l'auteur** :
+- 1 : tous les noms gardés.
+- 2 : objets en main mieux (un autre modèle viendra plus tard).
+- Cartes du Panier : deux fois plus petites. Une carte touchée doit se retourner et s'afficher en grand, avec sa description au dos. On doit pouvoir la refermer.
+
+**Jouable maintenant** :
+- **Petites cartes** (66 px au lieu de 132) : puissance, stade (couleur et forme), image, nom.
+- **Toucher une carte** : elle part de sa place, grandit et se retourne comme une feuille (pliée de profil, puis dépliée).
+  - Elle montre son dos : catégorie, puissance, nom, description [TEMP], propriétés, stade.
+  - La grande carte est dessinée à sa taille (texte net). Elle est deux fois plus grande que les cartes d'avant, ou moins si l'écran est trop bas pour qu'elle tienne.
+  - Toucher la grande carte la retourne (recto, verso).
+- **Refermer** : boutons Fermer en papier kraft foncé, en haut et en bas à droite ; ou toucher à côté ; ou Échap / B.
+  - Le Panier a lui aussi ses boutons Fermer/Annuler en haut et en bas à droite.
+  - Clavier : Entrée ouvre. Manette : haut/bas choisit une carte, A ouvre ou retourne.
+- « Réduire les animations » : la carte s'affiche sans se retourner.
+
+**Vérifié** :
+- 132 tests de logique, dont : chaque produit a une description.
+- 66 tests navigateur PC et téléphone simulé, sans erreur console, dont :
+  - petite carte ;
+  - grande carte au dos, qui tient dans l'écran, texte de taille réelle ;
+  - retournement ;
+  - toucher à côté ;
+  - Échap puis Échap.
+- Comptages inchangés.
+- Captures des petites cartes et de la grande carte (PC, téléphone).
+
+**Décisions prises seul** :
+- Pendant que la grande carte est ouverte, les boutons du Panier sont cachés (un seul jeu de boutons Fermer).
+- En mode « panier plein », toucher une carte la repose toujours (pas de grande carte).
+
+---
+
 ## Séance 47 — 15/11/2026 — Le héros propose de changer de nom ; les mains tiennent vraiment le panier et la Scanette ; têtes de face corrigées
 
 **Retours de l'auteur** :

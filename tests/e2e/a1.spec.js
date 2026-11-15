@@ -364,6 +364,71 @@ test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, 
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
 });
 
+test('Panier : petites cartes ; toucher une carte la retourne en grand (description au dos) ; on la referme', async ({ page }, info) => {
+  const phone = info.project.name === 'telephone';
+  await toBanana(page);
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Banane']);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active).toBe(false);
+  await page.keyboard.press('KeyI');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('panier');
+  const mini = page.locator('.panier .card-mini');
+  await expect(mini).toHaveCount(1);
+  expect((await mini.boundingBox()).width).toBeLessThan(75); // deux fois plus petite (132 → 66 px)
+  // Les deux boutons Fermer : en haut à droite et en bas à droite.
+  const vp = page.viewportSize();
+  for (const b of await page.locator('.panier .kraft-close').all()) {
+    const r = await b.boundingBox();
+    expect(r.x + r.width).toBeGreaterThan(vp.width * 0.6);
+  }
+  await page.screenshot({ path: `test-results/captures/panier-${info.project.name}-petites.png` });
+  if (phone) await mini.tap();
+  else await mini.click();
+  // La grande carte : elle se retourne et montre son dos (la description), deux fois plus grande.
+  const detail = page.locator('.card-detail');
+  await expect(detail).toBeVisible();
+  await expect(page.locator('.card-flip')).toHaveClass(/show-back/);
+  await expect.poll(() => page.locator('.card-flip').getAttribute('class')).not.toMatch(/anim-/); // animation finie
+  const backCard = page.locator('.card-flip .card-back');
+  await expect(backCard).toBeVisible();
+  await expect(backCard).toContainText('Courbée par nature');
+  await expect(backCard).toContainText('Banane');
+  const big = await backCard.boundingBox();
+  expect(big.width).toBeGreaterThan(phone ? 130 : 250);
+  expect(big.y).toBeGreaterThanOrEqual(0);
+  expect(big.y + big.height).toBeLessThanOrEqual(vp.height); // tient dans l'écran
+  // Texte net : la description est écrite à sa taille (pas une petite carte agrandie).
+  const fs = await backCard.locator('.card-desc').evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+  expect(fs).toBeGreaterThan(phone ? 13 : 20);
+  expect(await page.locator('.card-flip').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
+  await page.screenshot({ path: `test-results/captures/panier-${info.project.name}-carte.png` });
+  // Toucher la grande carte : elle se retourne (recto).
+  if (phone) await page.locator('.card-flip').tap();
+  else await page.locator('.card-flip').click();
+  await expect(page.locator('.card-flip')).not.toHaveClass(/show-back/);
+  await expect(page.locator('.card-flip .card-front')).toContainText('Mûr');
+  // Toucher à côté : elle se referme (le Panier reste ouvert).
+  if (phone) await page.touchscreen.tap(8, vp.height / 2);
+  else await page.mouse.click(8, vp.height / 2);
+  await expect(detail).toBeHidden();
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('panier');
+  if (!phone) {
+    // Clavier : Entrée sur la carte l'ouvre, Échap la referme, puis Échap ferme le Panier.
+    await mini.focus();
+    await page.keyboard.press('Enter');
+    await expect(detail).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(detail).toBeHidden();
+    expect(await page.evaluate(() => window.paperCart.state())).toBe('panier');
+    await page.keyboard.press('Escape');
+    expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  } else {
+    await page.locator('.panier .kraft-close').last().tap(); // en bas à droite
+    expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  }
+  expect(errors).toEqual([]);
+});
+
 test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   // Toucher l'étagère au-dessus du lait : le personnage va au pied de l'étagère.
@@ -376,7 +441,7 @@ test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne',
   await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-scan.png` });
   await page.locator('.panier-button').tap();
   await expect(page.locator('.panier .card')).toHaveCount(1);
-  await page.locator('.panier button', { hasText: 'Fermer' }).tap();
+  await page.locator('.panier button', { hasText: 'Fermer ✕' }).tap(); // en haut à droite
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
 });
 

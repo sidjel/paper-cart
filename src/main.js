@@ -96,6 +96,7 @@ let productState = null; // produits à scanner (logique, voir core/scan.js)
 const scan = createScan();
 const basket = createBasket();
 const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects, base: BASE });
+basketUi.setReduceMotion(() => config.display.reduceMotion);
 const flyingCard = createFlyingCard(uiEl);
 const confirm = createConfirm(uiEl);
 // Filtre « écran cathodique » : un calque par-dessus tout (lignes de balayage, bords sombres), sans clic.
@@ -686,6 +687,7 @@ function handleAction(action) {
       else if (sm.is('options')) sm.go('title');
       else if (sm.is('panier')) {
         if (confirm.open) confirm.no();
+        else if (basketUi.detailOpen) basketUi.closeDetail(); // d'abord la grande carte
         else sm.go('play');
       }
       else if (sm.is('play')) sm.go('pause');
@@ -721,6 +723,7 @@ function handleAction(action) {
       if (sm.is('options')) playerOptions.move(action === 'up' ? -1 : 1);
       else if (sm.is('pause')) journal.move(action === 'up' ? -1 : 1);
       else if (namePicker.visible) namePicker.move(action === 'up' ? -1 : 1);
+      else if (sm.is('panier') && !confirm.open) basketUi.move(action === 'up' ? -1 : 1);
       break;
     case 'action':
       if (sm.is('intro')) skipLine(introRun);
@@ -732,6 +735,7 @@ function handleAction(action) {
       else if (sm.is('options')) playerOptions.press();
       else if (sm.is('title')) titleUi.press();
       else if (confirm.open) confirm.yes(); // manette : A = oui
+      else if (sm.is('panier')) basketUi.press(); // la carte mise en avant (ou retourner la grande)
       else if (namePicker.visible) namePicker.press();
       else if (waitingAnswer(narrator)) answer(narrator, choiceFocus, config.narrator);
       else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
