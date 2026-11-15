@@ -395,6 +395,8 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
   await expect(detail).toBeVisible();
   await expect(detail.locator('button')).toHaveCount(0); // pas de bouton : on touche à côté pour refermer
   await expect(mini).toHaveCSS('visibility', 'hidden'); // pas de carte en double : elle a quitté le Panier
+  expect(await page.evaluate(() => window.paperCart.flips())).toBe(1); // bruitage de la carte qui se retourne
+  expect(await detail.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)'); // pas de fond assombri
   await expect(page.locator('.card-flip')).toHaveClass(/show-back/);
   await expect.poll(() => page.locator('.card-flip').getAttribute('class')).not.toMatch(/anim-/); // animation finie
   const backCard = page.locator('.card-flip .card-back');

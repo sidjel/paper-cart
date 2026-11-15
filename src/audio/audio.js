@@ -211,6 +211,38 @@ export function createAudio(settings, song) {
     }
   }
 
+  // [TEMP] Carte qui se retourne (Panier) : un petit souffle de papier qui glisse (bruit filtré dont le
+  // ton descend), puis un léger claquement quand la feuille retombe à plat.
+  function retourne() {
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 0.9;
+    bp.frequency.setValueAtTime(4200, t);
+    bp.frequency.exponentialRampToValueAtTime(1300, t + 0.13);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+    src.connect(bp).connect(g).connect(scanBus);
+    src.start(t, 0.37, 0.16);
+    // claquement : très court, plus aigu
+    const c = ctx.createBufferSource();
+    c.buffer = noise;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 2500;
+    const cg = ctx.createGain();
+    const at = t + 0.15;
+    cg.gain.setValueAtTime(0.0001, at);
+    cg.gain.exponentialRampToValueAtTime(0.18, at + 0.004);
+    cg.gain.exponentialRampToValueAtTime(0.0001, at + 0.035);
+    c.connect(hp).connect(cg).connect(scanBus);
+    c.start(at, 0.61, 0.04);
+  }
+
   // [TEMP] Aparté : souffle grave qui monte (le temps s'arrête), puis une note basse tenue.
   function aparte() {
     const t = ctx.currentTime;
@@ -266,7 +298,7 @@ export function createAudio(settings, song) {
     src.start(t, foot ? 0.2 : 0.6, 0.12);
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.

@@ -12,6 +12,22 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 49 — 15/11/2026 — Panier : plus de clignotement, bruitage de carte
+
+**Retours de l'auteur** :
+- Ce qui gêne : en refermant une carte, le fond noir transparent clignote.
+- Ce qui manque : un bruitage quand une carte se retourne.
+
+**Constaté (enregistrement image par image)** : en refermant, le fond assombri s'effaçait progressivement pendant que la carte revenait. C'est ce qui se voyait comme un clignotement.
+
+**Jouable maintenant** :
+- Plus de fond assombri : la grande carte s'affiche directement sur le Panier.
+- Bruitage [TEMP] (synthétisé) à chaque retournement : ouvrir, retourner, refermer. C'est un petit souffle de papier puis un léger claquement. Volume : celui du scanner.
+
+**Vérifié** : 136 tests de logique ; 71 tests navigateur PC et téléphone simulé, sans erreur console (bruitage déclenché, plus de fond). **Non vérifiable ici** : le son lui-même (à écouter sur le téléphone).
+
+---
+
 ## Séance 48 (suite) — Points de départ pour tester vite
 
 **Demande de l'auteur** : tester sans refaire tout le début (Scanette, panier, rencontre, nom, 6 scans…). Sauvegarde, choix de séquence, ou « passer la séquence » ?

@@ -97,7 +97,11 @@ let loadedImages = null;
 let productState = null; // produits à scanner (logique, voir core/scan.js)
 const scan = createScan();
 const basket = createBasket();
-const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), objects: objectsFile.objects, base: BASE });
+let flips = 0; // cartes retournées (bruitage ; compté pour les tests)
+const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), onFlip: () => {
+    flips++;
+    audio.play('retourne');
+  }, objects: objectsFile.objects, base: BASE });
 basketUi.setReduceMotion(() => config.display.reduceMotion);
 const flyingCard = createFlyingCard(uiEl);
 const confirm = createConfirm(uiEl);
@@ -1185,6 +1189,7 @@ async function start() {
     markSaid(trigger) {
       narrator.done[trigger] = true;
     },
+    flips: () => flips,
     journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
     equip: () => equipAll(),
     // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).

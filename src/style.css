@@ -1106,7 +1106,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   z-index: 62;
   display: grid;
   place-items: center;
-  background: rgb(30 22 14 / 0.55);
+  /* Pas de fond assombri (séance 49) : il clignotait en se refermant, et n'apportait rien. */
 }
 .card-detail[hidden] { display: none; }
 .card-flip {
@@ -1161,7 +1161,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 /* Refermer : le chemin inverse (elle se replie de profil, puis redevient petite, à sa place). */
 .card-flip.anim-back1 { animation: card-out 0.2s ease-in reverse forwards; }
 .card-flip.anim-back2 { animation: card-in 0.22s ease-out reverse forwards; }
-.card-detail.closing { background: rgb(30 22 14 / 0); transition: background 0.4s; pointer-events: none; }
+.card-detail.closing { pointer-events: none; }
 /* ⚙ → Départ : un bouton par point de départ (tests rapides). */
 .depart-tools { display: grid; gap: 6px; padding: 4px 0 8px; }
 .depart-tools button { text-align: left; }

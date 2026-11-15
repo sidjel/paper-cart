@@ -51,7 +51,8 @@ const CATEGORY = { alimentaire: 'Alimentaire', 'non-alimentaire': 'Non alimentai
 const TEMP = /^\[TEMP\]\s*/;
 
 // objects : data/objects.json ; base : chemin des images du jeu.
-export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
+// onFlip() : une carte se retourne (bruitage).
+export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objects, base = '' }) {
   const button = document.createElement('button');
   button.className = 'hud-button panier-button';
   button.setAttribute('aria-label', 'Panier (I)');
@@ -174,6 +175,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   // Animation en deux temps (la feuille se plie de profil, puis se déplie de l'autre côté) ;
   // fin de chaque temps : événement animationend (rien n'est compté en temps réel).
   function animate(first, second, mid) {
+    onFlip(); // la feuille se retourne : bruitage (aussi sans animation)
     if (reduce()) {
       mid();
       return;
