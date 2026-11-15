@@ -11,7 +11,7 @@ import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, creat
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach } from './core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from './core/narrator.js';
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
@@ -23,7 +23,8 @@ import { createIntroUi } from './ui/intro.js';
 import introFile from './data/intro.json';
 import narratorFile from './data/narrator.json';
 import playerFile from './data/joueur.json';
-import { playerName, fillName } from './core/names.js';
+import { playerName, fillName, OTHER, MAX_NAME } from './core/names.js';
+import { createNamePicker } from './ui/namePicker.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -296,6 +297,18 @@ function applyPlayerName() {
 const narrator = createNarrator();
 const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator), onChoose: (k) => answer(narrator, k, config.narrator) });
 applyScreenFx();
+// Pendant la rencontre, le héros propose au joueur de choisir son nom (changeable ensuite dans les options).
+const namePicker = createNamePicker(uiEl, {
+  names: playerFile.names,
+  other: OTHER,
+  maxLength: MAX_NAME,
+  onPick(id, custom, label) {
+    if (id === OTHER) setValue('player.customName', custom);
+    setValue('player.name', id); // enregistré, et les répliques sont refaites avec ce nom
+    namePicker.hide();
+    answerName(narrator, narratorData, label, config.narrator);
+  },
+});
 let choiceFocus = 0; // réponse mise en avant (clavier, manette)
 let arrived = false;
 let endOfAisleX = Infinity;
@@ -422,6 +435,11 @@ function updateNarrator(dt) {
   narratorUi.setShown(n);
   if (waitingAnswer(narrator)) narratorUi.choicesReady(choiceFocus);
   narratorUi.setWaiting(waitingTap(narrator));
+  const asking = waitingName(narrator);
+  if (asking !== namePicker.visible) {
+    if (asking) namePicker.show(config.player.name, config.player.customName);
+    else namePicker.hide();
+  }
   const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
   const player = narrator.voice === 'epaisseur'; // le joueur : l'écran parle, en bas, sans petits bips
   const every = config.narrator.blipEvery;
@@ -561,10 +579,8 @@ let quickSavedReduce = false;
 
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
-  // Rayon de devant : façon de le dessiner pendant la campagne (sinon, comme dans le jeu).
-  const fg = { 'fg-half': 'half', 'fg-parallax1': 'parallax1' }[variant] ?? 'normal';
-  stage.setLayerVariant('premier-plan', fg);
-  if (variant === 'T2') stage.layers['premier-plan'].style.opacity = 0;
+  stage.applyOpacity(); // rayon de devant comme dans le jeu…
+  if (variant === 'T2') stage.layers['premier-plan'].style.opacity = 0; // … ou invisible (T2)
 }
 
 async function startQuick(params, suite = 'T012') {
@@ -585,7 +601,7 @@ function endQuick(status) {
   if (!quick) return;
   quick = null;
   config.display.reduceMotion = quickSavedReduce;
-  stage.setLayerVariant('premier-plan', 'normal');
+  stage.applyOpacity();
   sm.go('play');
   quickUi.finish(status);
 }
@@ -704,6 +720,7 @@ function handleAction(action) {
     case 'down':
       if (sm.is('options')) playerOptions.move(action === 'up' ? -1 : 1);
       else if (sm.is('pause')) journal.move(action === 'up' ? -1 : 1);
+      else if (namePicker.visible) namePicker.move(action === 'up' ? -1 : 1);
       break;
     case 'action':
       if (sm.is('intro')) skipLine(introRun);
@@ -715,6 +732,7 @@ function handleAction(action) {
       else if (sm.is('options')) playerOptions.press();
       else if (sm.is('title')) titleUi.press();
       else if (confirm.open) confirm.yes(); // manette : A = oui
+      else if (namePicker.visible) namePicker.press();
       else if (waitingAnswer(narrator)) answer(narrator, choiceFocus, config.narrator);
       else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
       else tryScan();
@@ -729,6 +747,7 @@ function handleAction(action) {
       else if (sm.is('title')) titleUi.move(action === 'left' ? -1 : 1);
       else if (confirm.open) confirm.focus(action === 'right');
       else if (sm.is('panier')) basketUi.switchTab();
+      else if (namePicker.visible) namePicker.move(action === 'left' ? -1 : 1);
       else if (waitingAnswer(narrator)) {
         choiceFocus = action === 'left' ? 0 : 1;
         narratorUi.focusChoice(choiceFocus);
@@ -1132,8 +1151,6 @@ async function start() {
       startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => quickUi.lastReport,
-    // Tests automatiques seulement : façon de dessiner le rayon de devant (voir stage.setLayerVariant).
-    diagForeground: (variant) => stage.setLayerVariant('premier-plan', variant),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
     // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).

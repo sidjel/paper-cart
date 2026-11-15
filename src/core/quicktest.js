@@ -1,7 +1,8 @@
 // Tests rapides : plusieurs variantes mesurées dans un seul essai, en ALTERNANCE par blocs courts
 // (ordre inversé un tour sur deux) : la chaleur et l'état du téléphone pèsent pareil sur toutes.
 // Les variantes ne s'appliquent que pendant le test. Logique pure.
-// (Les variantes F1 à F3 des rayons lointains, rejetées par les mesures de la séance 20, ont été retirées.)
+// (Les variantes F1 à F3 des rayons lointains, rejetées par les mesures de la séance 20, ont été retirées ;
+// la campagne « rayon de devant » DEVANT2 aussi, séance 47 : le rayon de devant est réduit à sa moitié haute.)
 //
 // Situations : A = personnage en marche, caméra fixe ; B = personnage en marche, caméra mobile.
 
@@ -25,25 +26,6 @@ export const QUICK_SUITES = {
       ['T1 contre T0, caméra mobile (B)', 'B-T1', 'B-T0'],
       ['T2 contre T0, caméra mobile (B)', 'B-T2', 'B-T0'],
       ['Caméra mobile contre fixe (T0)', 'B-T0', 'A-T0'],
-    ],
-  },
-  // Campagne « rayon de devant » n° 2 (séance 24) : sa surface et sa vitesse de glissement.
-  // (La campagne n° 1, séance 21 : T0, T2, G1, G4, G2 ; résultats dans le journal.)
-  DEVANT2: {
-    title: 'campagne « rayon de devant » n° 2 (caméra mobile)',
-    rounds: 8, // trois variantes seulement : plus de tours pour plus de précision
-    variants:
-      'T0 = référence · G4 = rayon de devant réduit à sa moitié haute · ' +
-      'G3 = rayon de devant entier, mais qui glisse à la vitesse du sol (sans effet de profondeur propre)',
-    conditions: [
-      { id: 'T0', variant: 'T0', camera: 'hero' },
-      { id: 'G4', variant: 'fg-half', camera: 'hero' },
-      { id: 'G3', variant: 'fg-parallax1', camera: 'hero' },
-    ],
-    warmup: 0, // chauffe en T0
-    comparisons: [
-      ['G4 (moitié de hauteur) contre T0 : confirmation', 'G4', 'T0'],
-      ['G3 (glisse à la vitesse du sol) contre T0', 'G3', 'T0'],
     ],
   },
 };

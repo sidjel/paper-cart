@@ -3,9 +3,7 @@
 //   un écran plus allongé (20:9) montre simplement plus de largeur, sans rien couper ;
 // - la caméra fait glisser la scène ; les calques avec une parallaxe (rayons lointains,
 //   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
-// - les calques sont créés d'après la pile déclarée dans les données du lieu ;
-// - DIAGNOSTIC SEULEMENT : setLayerVariant change la façon de dessiner un calque pendant une
-//   campagne de mesure (puis la remet comme avant). En jeu normal, rien ne change.
+// - les calques sont créés d'après la pile déclarée dans les données du lieu.
 
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
 export function createStage(container, place, images, getValue) {
@@ -16,7 +14,6 @@ export function createStage(container, place, images, getValue) {
   el.style.height = `${H}px`;
 
   const layers = {};
-  const layerInfo = {}; // pour le diagnostic : { def, img } de chaque calque à image
   const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
   for (const def of place.layers) {
     const layer = document.createElement('div');
@@ -32,12 +29,11 @@ export function createStage(container, place, images, getValue) {
       img.el.draggable = false;
       img.el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
       layer.appendChild(img.el);
-      layerInfo[def.id] = { def, img };
     }
     const f = def.parallax ?? 1;
     if (f !== 1) {
       layer.classList.add('layer-parallax');
-      parallax.push({ el: layer, f, f0: f, id: def.id, last: NaN });
+      parallax.push({ el: layer, f, id: def.id, last: NaN });
     }
     el.appendChild(layer);
     layers[def.id] = layer;
@@ -123,30 +119,5 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  // DIAGNOSTIC (campagne « rayon de devant ») : façon de dessiner un calque pendant une mesure.
-  // 'normal' : comme dans le jeu ; 'half' : seulement la moitié haute de l'image ;
-  // 'parallax1' : le calque glisse à la vitesse du sol (sans effet de profondeur propre).
-  function setLayerVariant(id, variant) {
-    const info = layerInfo[id];
-    if (!info) return;
-    const layer = layers[id];
-    const { def, img } = info;
-    const [x, y] = def.position ?? [0, 0];
-    const half = variant === 'half';
-    layer.style.left = half ? `${x}px` : '';
-    layer.style.top = half ? `${y}px` : '';
-    layer.style.width = half ? `${img.w}px` : '';
-    layer.style.height = half ? `${img.h / 2}px` : '';
-    layer.style.overflow = half ? 'hidden' : '';
-    img.el.style.transform = half ? 'none' : `translate(${x}px, ${y}px)`;
-    const p = parallax.find((q) => q.id === id);
-    if (p) {
-      p.f = variant === 'parallax1' ? 1 : p.f0;
-      p.last = NaN;
-    }
-    apply();
-    applyOpacity();
-  }
-
-  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity, setLayerVariant };
+  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity };
 }

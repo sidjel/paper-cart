@@ -12,6 +12,38 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 47 — 15/11/2026 — Le héros propose de changer de nom ; les mains tiennent vraiment le panier et la Scanette ; têtes de face corrigées
+
+**Retours de l'auteur** :
+- Validé : l'effet de vague de la voix du joueur (principe validé).
+- Ce qui manque : pendant la rencontre, le héros propose un autre nom si « Épaisseur » ne plaît pas.
+- Ce qui gêne :
+  - les mains ne tiennent ni le panier ni la Scanette ;
+  - l'oreille et la mèche des têtes de face sont mal placées.
+- Réponse : 3 A (retirer la campagne DEVANT2).
+
+**Jouable maintenant** :
+- **Pendant la rencontre**, le héros dit : « Il te faut un nom. Moi, je t'appellerais bien… mon Épaisseur. À moins que tu préfères autre chose ? »
+  - Les propositions s'affichent en bas, dans le style de l'écran qui parle : Épaisseur d'abord, puis les autres, et « Autre… » pour taper le sien.
+  - La suite emploie le nom choisi (« Ma… Moitié. D'accord. On trouve la sortie ensemble ? »).
+  - Le nom est enregistré, et reste changeable dans Options → Jeu.
+- **Les mains tiennent les objets** :
+  - le panier par l'anse, la Scanette par la poignée (tête au-dessus, nez vers l'avant) ;
+  - les deux passent devant le héros, de face et de profil (marche, scan) ;
+  - vue de dos : le panier aussi ; la Scanette reste cachée par le corps.
+- **Têtes de face** (apartés) : une oreille de chaque côté, au bord de la tête ; cheveux en frange (plus de mèche sur le côté).
+- **Campagne DEVANT2 retirée** (outil de mesure) : le test rapide T0/T1/T2 reste.
+
+**Vérifié** :
+- 131 tests de logique, dont le choix du nom dans une conversation.
+- 64 tests navigateur PC et téléphone simulé, sans erreur console : la rencontre jusqu'au choix « Moitié », puis la réplique avec le nom et le nom enregistré.
+- Comptages inchangés.
+- Captures du choix du nom ; montage des poses (face, scan, marche, dos) avec les objets.
+
+**Décision prise seul** : juste après l'apparition des propositions, un appui de 0,35 s est ignoré. Sinon, appuyer sur Entrée pour faire défiler le texte choisissait « Épaisseur » sans le vouloir (constaté par le test).
+
+---
+
 ## Séance 46 — 15/11/2026 — L'écran qui parle, bords hypnotiques, nom du joueur, rayon du bas deux fois moins haut
 
 **Retours de l'auteur** :

@@ -24,7 +24,8 @@
 //  - conversation (steps) : une suite de répliques (héros, joueur « epaisseur », regard, pensée) que
 //    rien n'interrompt ; avec p.sceneWait, chaque réplique attend un toucher du joueur (sauf « auto ») ;
 //    une étape « marche » (walk : part du chemin vers le point de rencontre) dure jusqu'à ce que le jeu
-//    signale l'arrivée (endLine) ;
+//    signale l'arrivée (endLine) ; une étape « pickName » attend que le joueur choisisse son nom
+//    (answerName) : les répliques suivantes l'emploient (le jeu refait les textes, relus à chaque étape) ;
 //  - historique : chaque réplique dite (et chaque réponse du joueur) est gardée dans n.log
 //    (p.logMax au plus), pour être relue.
 //
@@ -166,6 +167,7 @@ function stepLine(line, k, prev, p) {
     choices: s.choices,
     wait: p.sceneWait && !!s.text && !s.auto,
     walk: s.walk,
+    pickName: !!s.pickName,
   };
 }
 
@@ -177,8 +179,10 @@ export function inScene(n) {
 // Fin d'une réplique : silence, et peut-être un moment enchaîné.
 function end(n, data, p) {
   if (n.scene && n.scene.i + 1 < n.scene.line.steps.length) {
-    // Conversation : la réplique suivante, tout de suite.
+    // Conversation : la réplique suivante, tout de suite (relue dans les données : le nom du joueur a
+    // pu changer en route).
     const sc = n.scene;
+    sc.line = data.lines.find((l) => l.id === sc.line.id) ?? sc.line;
     sc.i++;
     begin(n, stepLine(sc.line, sc.i, n.line.emotion ?? '', p), sc.line.steps[sc.i].voice ?? HERO, p);
     return;
@@ -236,7 +240,7 @@ export function stepNarrator(n, data, dt, p) {
     if (n.shown >= len) n.hold = holdFor(n.line.text, p);
     return Math.floor(n.shown) - before;
   }
-  if (waitingAnswer(n) || n.line.wait) return 0; // la réplique attend la réponse, ou un toucher du joueur
+  if (waitingAnswer(n) || waitingName(n) || n.line.wait) return 0; // la réplique attend la réponse, le nom, ou un toucher
   n.hold -= dt;
   if (n.hold <= 0) end(n, data, p);
   return 0;
@@ -262,7 +266,7 @@ export function answer(n, k, p) {
 
 // Le joueur touche la réplique : la première fois le texte s'affiche en entier, la suivante il disparaît.
 export function skipNarrator(n, data, p) {
-  if (!n.line || waitingAnswer(n) || n.line.walk !== undefined) return; // une question attend une réponse ; une marche, l'arrivée
+  if (!n.line || waitingAnswer(n) || waitingName(n) || n.line.walk !== undefined) return; // une question attend une réponse ; une marche, l'arrivée
   if (n.shown < n.line.text.length) {
     n.shown = n.line.text.length;
     n.hold = holdFor(n.line.text, p);
@@ -288,7 +292,22 @@ export function silenceNarrator(n) {
 
 // La réplique en cours est entièrement écrite et attend un toucher du joueur (conversation).
 export function waitingTap(n) {
-  return !!n.line?.wait && n.shown >= n.line.text.length && !waitingAnswer(n);
+  return !!n.line?.wait && n.shown >= n.line.text.length && !waitingAnswer(n) && !waitingName(n);
+}
+
+// La réplique en cours demande au joueur son nom (texte écrit en entier, pas encore choisi).
+export function waitingName(n) {
+  return !!n.line?.pickName && n.answered < 0 && n.shown >= n.line.text.length;
+}
+
+// Le joueur a choisi son nom (label : ce qu'il « dit », pour l'historique). Le jeu a déjà enregistré le
+// nom et refait les textes ; la conversation continue.
+export function answerName(n, data, label, p) {
+  if (!waitingName(n)) return false;
+  n.answered = 0;
+  addLog(n, PLAYER, label, p);
+  end(n, data, p);
+  return true;
 }
 
 // Inactivité : renvoie true une fois quand le joueur n'a rien fait depuis p.inactivity secondes.

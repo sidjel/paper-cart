@@ -58,16 +58,8 @@ export function createQuickTestUi(root, { onStart, getContext }) {
   help.className = 'settings-note';
   help.textContent =
     'Compare, dans un seul essai et en alternance, la référence (T0), « réduire les animations » (T1) et le rayon de devant invisible (T2). Téléphone débranché, plein écran, ne touche à rien.';
-  const btnC = document.createElement('button');
-  btnC.className = 'primary';
-  btnC.textContent = 'Lancer la campagne « rayon de devant » n° 2 (3 variantes, ≈ 8 min)';
-  const helpC = document.createElement('p');
-  helpC.className = 'settings-note';
-  helpC.textContent =
-    'Caméra mobile, même trajet. Compare à la référence T0 : rayon de devant réduit à sa moitié haute (G4) et rayon de devant qui glisse à la vitesse du sol (G3). Variantes alternées, 8 tours. Batterie au-dessus de 50 %, débranché, plein écran, ne touche à rien.';
   btn.className = '';
-  launcher.append(btnC, helpC, btn, help);
-  btnC.addEventListener('click', () => onStart('DEVANT2'));
+  launcher.append(btn, help);
   btn.addEventListener('click', () => onStart('T012'));
 
   const panel = document.createElement('div');

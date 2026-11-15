@@ -61,35 +61,4 @@ describe('test rapide T0 / T1 / T2', () => {
   });
 });
 
-import { QUICK_SUITES, quickConditionDef } from '../../src/core/quicktest.js';
 
-describe('campagne « rayon de devant » n° 2 (caméra mobile)', () => {
-  const C = QUICK_SUITES.DEVANT2;
-  it('3 variantes, toutes en caméra mobile, 8 tours, ≈ 8 min 30 avec le protocole habituel', () => {
-    expect(C.conditions.map((c) => c.id)).toEqual(['T0', 'G4', 'G3']);
-    expect(C.conditions.every((c) => c.camera === 'hero')).toBe(true);
-    const q = createQuickTest(place.diagnostic, { warmup: 30, block: 20, settle: 2, rounds: C.rounds }, 'DEVANT2');
-    expect(quickTotalSeconds(q)).toBe(30 + 8 * 3 * 20); // 510 s ; 144 s mesurées par variante
-  });
-  it('comparaisons : une seule différence avec la référence', () => {
-    expect(C.comparisons.map(([, a, b]) => `${a}/${b}`)).toEqual(['G4/T0', 'G3/T0']);
-  });
-  it('enchaîne les variantes en alternance, en marchant', () => {
-    const hero = createWalker(0, 0);
-    const q = createQuickTest(place.diagnostic, { warmup: 1, block: 1, settle: 0.2, rounds: 2 }, 'DEVANT2');
-    startQuickTest(q, hero);
-    const seen = [];
-    while (q.phase !== 'done') {
-      stepQuickTest(q, hero, DT);
-      stepWalker(hero, { moveX: 0, moveZ: 0 }, mask, P, DT);
-      if (q.measuring) {
-        const key = `${q.round}.${q.slot}`;
-        if (seen.lastKey !== key) {
-          seen.push(quickConditionDef(q).id);
-          seen.lastKey = key;
-        }
-      }
-    }
-    expect([...seen]).toEqual(['T0', 'G4', 'G3', 'G3', 'G4', 'T0']);
-  });
-});

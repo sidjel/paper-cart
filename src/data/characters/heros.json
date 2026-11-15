@@ -110,7 +110,7 @@
     }
   },
   "held": {
-    "comment": "Objets tenus en main, dessinés à part et posés derrière le dessin du héros (sa main passe devant). Chaque image a les mêmes coordonnées que le héros. pivot : épaule du bras qui tient l'objet ; offset : décalage pour cette vue. Le mouvement de chaque bras, image par image, est dans hands.",
+    "comment": "Objets tenus en main, dessinés à part. Chaque image a les mêmes coordonnées que le héros. front : l'objet passe devant le héros et dessine lui-même la main qui le tient (séance 47 : la main tient vraiment l'anse ou la poignée) ; sinon il passe derrière (la main du héros passe devant). pivot : épaule du bras qui tient l'objet ; offset : décalage pour cette vue. Le mouvement de chaque bras, image par image, est dans hands.",
     "scanette": {
       "hand": "right",
       "face": {
@@ -122,7 +122,8 @@
         "offset": [
           0,
           0
-        ]
+        ],
+        "front": true
       },
       "dos": {
         "src": "art/placeholder/tenu-scanette-dos.svg",
@@ -147,7 +148,8 @@
         "offset": [
           0,
           0
-        ]
+        ],
+        "front": true
       },
       "dos": {
         "src": "art/placeholder/tenu-panier.svg",
@@ -158,7 +160,8 @@
         "offset": [
           -2,
           0
-        ]
+        ],
+        "front": true
       }
     }
   },

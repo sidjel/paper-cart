@@ -68,7 +68,8 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     return elements.get(url);
   }
-  // Objets tenus : un élément par image distincte, derrière les images du héros.
+  // Objets tenus : un élément par image distincte, derrière les images du héros, ou devant (front) quand
+  // l'objet dessine lui-même la main qui le tient.
   const held = [];
   const heldEls = new Map();
   for (const [name, item] of Object.entries(data.held ?? {})) {
@@ -117,6 +118,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       const [px, py] = view.pivot;
       const [ox, oy] = view.offset;
       el.style.transform = `translate(${dx + ox}px, ${dy + oy}px) translate(${px}px, ${py}px) rotate(${rot}deg) translate(${-px}px, ${-py}px)`;
+      el.classList.toggle('front', !!view.front); // devant le héros : l'objet dessine la main qui le tient
     }
   }
 

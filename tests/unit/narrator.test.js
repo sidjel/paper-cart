@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach } from '../../src/core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach, waitingName, answerName } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
 const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20 };
@@ -326,6 +326,24 @@ describe('conversation, moment important (must), historique', () => {
     expect(n.voice).toBe('pensee');
     for (let t = 0; t < 5; t += 1 / 60) stepNarrator(n, W, 1 / 60, PS);
     expect(n.voice).toBe('heros'); // « Hum ? » est passé seul
+  });
+  it('choix du nom : la réplique attend le nom (un toucher ne la passe pas) ; la suite emploie le nouveau nom', () => {
+    const N = {
+      triggers: { r: { voice: 'heros', must: true } },
+      lines: [{ id: 'r', trigger: 'r', steps: [{ voice: 'heros', text: 'Ton nom ?', pickName: true }, { voice: 'heros', text: 'Mon Épaisseur.' }] }],
+    };
+    const n = createNarrator();
+    narrate(n, N, 'r', PS);
+    for (let t = 0; t < 5; t += 1 / 60) stepNarrator(n, N, 1 / 60, PS);
+    expect(waitingName(n)).toBe(true);
+    expect(waitingTap(n)).toBe(false);
+    skipNarrator(n, N, PS);
+    expect(n.line.text).toBe('Ton nom ?'); // toujours la question
+    // Le jeu enregistre le nom et refait les textes, puis signale la réponse.
+    N.lines = [{ ...N.lines[0], steps: [N.lines[0].steps[0], { voice: 'heros', text: 'Ma Moitié.' }] }];
+    expect(answerName(n, N, 'Moitié', PS)).toBe(true);
+    expect(n.line.text).toBe('Ma Moitié.');
+    expect(n.log.at(-2)).toEqual({ voice: 'epaisseur', text: 'Moitié' });
   });
   it('narrateur coupé pendant une conversation : elle reprendra depuis le début', () => {
     const n = createNarrator();

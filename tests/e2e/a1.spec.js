@@ -325,37 +325,6 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
 });
 
-test('campagne « rayon de devant » n° 2 (version courte) : chaque variante est appliquée puis le jeu est rétabli', async ({ page }, info) => {
-  test.skip(info.project.name === 'telephone', 'une fois suffit');
-  test.setTimeout(90_000);
-  const state = () => page.locator('.layer-premier-plan').evaluate((el) => ({
-    opacite: el.style.opacity,
-    hauteur: el.style.height,
-    coupe: el.style.overflow,
-  }));
-  // Décalage du rayon de devant par rapport au sol : nul s'il glisse à la vitesse du sol.
-  const offset = () => page.locator('.layer-premier-plan').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
-  const at = (id) => page.waitForFunction((x) => [...document.querySelectorAll('.bench-banner')].some((e) => !e.hidden && e.textContent.includes(`· ${x} ·`)), id, { timeout: 40_000 });
-  await page.evaluate(() => window.paperCart.startQuick(1, 3, 0.5, 1, 'DEVANT2'));
-  await at('T0');
-  await page.waitForTimeout(800);
-  expect(await state()).toEqual({ opacite: '0.55', hauteur: '', coupe: '' });
-  expect(Math.abs(await offset())).toBeGreaterThan(1);
-  await at('G4');
-  await page.waitForTimeout(250);
-  expect(await state()).toEqual({ opacite: '0.55', hauteur: '75px', coupe: 'hidden' });
-  await at('G3');
-  await page.waitForTimeout(800);
-  expect(await state()).toEqual({ opacite: '0.55', hauteur: '', coupe: '' });
-  expect(Math.abs(await offset())).toBeLessThan(0.01);
-  await page.waitForFunction(() => window.paperCart.quickReport(), null, { timeout: 40_000 });
-  const r = await page.evaluate(() => window.paperCart.quickReport());
-  expect(r).toContain('rayon de devant');
-  expect(r).toMatch(/Vitesse du téléphone .* début \d/);
-  expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(2);
-  expect(await state()).toEqual({ opacite: '0.55', hauteur: '', coupe: '' }); // le jeu est rendu tel qu'avant
-});
-
 // ---------- Étape A3 : le scanner ----------
 
 test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, la carte rejoint le Panier', async ({ page }, info) => {
@@ -573,7 +542,7 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   const next = async (loc) => {
     // Attendre que la réplique soit écrite en entier : alors un toucher passe à la suivante.
     await expect.poll(async () => { const n = await narr(page); return n.shown >= n.text.length; }).toBe(true);
-    if ((await narr(page)).waiting) return; // une question : il faut choisir une réponse
+    if ((await narr(page)).waiting || (await page.locator('.name-picker').isVisible())) return; // une question : il faut choisir
     if (phone) await loc.tap({ force: true }); // la bulle suit le héros (zoom) : pas d'attente de stabilité
     else await page.keyboard.press('Enter');
   };
@@ -594,11 +563,25 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   expect(Number(await page.locator('.hud-bar').evaluate((e) => getComputedStyle(e).opacity))).toBeLessThan(0.05);
   await page.waitForTimeout(800);
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-toi.png` });
-  for (let k = 0; k < 12 && !(await narr(page)).waiting; k++) {
+  const picker = page.locator('.name-picker');
+  for (let k = 0; k < 12 && !(await picker.isVisible()); k++) {
     const v = (await narr(page)).voice;
     await next(v === 'epaisseur' ? player : bubble);
     await page.waitForTimeout(100);
   }
+  // Le héros propose un nom (« Épaisseur ») ; le joueur peut en choisir un autre, ou taper le sien.
+  await expect(picker).toBeVisible();
+  await expect(picker.locator('.name-choice').first()).toHaveText('Épaisseur'); // le nom actuel d'abord
+  await expect(picker).toContainText('Autre…');
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-nom.png` });
+  await page.waitForTimeout(400); // (un appui juste à l'apparition ne choisit rien)
+  const moitie = picker.locator('.name-choice', { hasText: 'Moitié' });
+  if (phone) await moitie.tap();
+  else await moitie.click();
+  await expect(picker).toBeHidden();
+  await expect.poll(async () => (await narr(page)).text).toMatch(/Ma… Moitié/); // la suite emploie le nouveau nom
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('paper-cart.reglages.v1') || '{}')['player.name'])).toBe('moitie');
+  for (let k = 0; k < 4 && !(await narr(page)).waiting; k++) await page.waitForTimeout(300);
   // Seulement ensuite, un choix.
   expect((await narr(page)).waiting).toBe(true);
   const choice = page.locator('.hero-choices.ready .hero-choice').first();
@@ -620,6 +603,7 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   await expect(journal).toContainText('Qui es-tu');
   await expect(journal.locator('.journal-epaisseur').first()).toContainText('Toi');
   await expect(journal).toContainText('Oui. Ensemble.');
+  await expect(journal).toContainText('Moitié');
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-journal.png` });
   expect(errors).toEqual([]);
 });
