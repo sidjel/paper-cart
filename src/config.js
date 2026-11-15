@@ -67,6 +67,8 @@ export const config = {
     breath: 4, // silence minimal avant un aparté (s), sauf enchaîné à une réplique
     glanceGap: 25, // petits regards caméra (sans texte) : au plus un toutes les N secondes
     followWait: 20, // un aparté enchaîné attend que le héros s'arrête, au plus N secondes
+    sceneWait: true, // conversation : chaque réplique attend un toucher du joueur (sinon, elle passe seule)
+    logMax: 40, // historique des dialogues (Pause → Dialogues) : nombre de répliques gardées (fixé au chargement)
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
   scan: {
@@ -228,6 +230,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.asideDim', label: 'Aparté : assombrissement des bords', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'narrator.glanceGap', label: 'Petits regards caméra : au plus un toutes les', min: 5, max: 300, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.sceneWait', label: 'Conversation : attendre un toucher entre les répliques', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.followWait', label: 'Aparté enchaîné : attendre que le héros s’arrête (max)', min: 0, max: 60, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },

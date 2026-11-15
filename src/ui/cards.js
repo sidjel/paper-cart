@@ -43,7 +43,17 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   button.className = 'hud-button panier-button';
   button.setAttribute('aria-label', 'Panier (I)');
   button.title = 'Panier (I)';
-  button.innerHTML = 'Panier <span class="panier-count">0</span>';
+  // Un petit panier rouge (mêmes formes que le panier tenu en main), avec le nombre de cartes dessus.
+  button.innerHTML =
+    '<svg class="panier-icon" viewBox="0 0 80 64" aria-hidden="true">' +
+    '<g stroke-linejoin="round"><g stroke="#fbf8ee" stroke-width="7">' +
+    '<path d="M22 24 q0 -20 18 -20 q18 0 18 20 h-6 q0 -14 -12 -14 q-12 0 -12 14 z" fill="#b8473a"/>' +
+    '<path d="M6 22 h68 l-7 34 q-1 5 -6 5 h-42 q-5 0 -6 -5 z" fill="#c0503f"/></g>' +
+    '<g stroke="#3d352a" stroke-width="2.4">' +
+    '<path d="M22 24 q0 -20 18 -20 q18 0 18 20 h-6 q0 -14 -12 -14 q-12 0 -12 14 z" fill="#b8473a"/>' +
+    '<path d="M6 22 h68 l-7 34 q-1 5 -6 5 h-42 q-5 0 -6 -5 z" fill="#c0503f"/></g>' +
+    '<path d="M11 33 h58 M13 44 h54 M18 22 v36 M62 22 v36" stroke="#8e2f25" stroke-width="2" fill="none"/></g></svg>' +
+    '<span class="panier-count">0</span>';
   button.hidden = true; // pas de panier au début : on le prend à l'accueil
   button.addEventListener('click', (e) => {
     e.stopPropagation();

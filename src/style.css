@@ -285,6 +285,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 5px 5px 0 rgb(61 53 42 / 0.4);
   max-width: calc(100vw - 32px);
 }
+.pause-card { max-height: calc(100vh - 24px); overflow-y: auto; }
+.pause-card:has(.journal:not([hidden])) .help { display: none; } /* place pour l'historique */
 .pause-card h2 { margin: 0 0 12px; font-size: calc(28px * var(--ts, 1)); letter-spacing: 2px; }
 .pause-card .help { margin-top: 14px; font-size: calc(14px * var(--ts, 1)); line-height: 1.5; }
 .error { background: var(--band); color: var(--paper); padding: 24px; }
@@ -451,22 +453,35 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .flying-card[hidden] { display: none; }
 
 /* ---------- Panier ---------- */
+/* Bouton du Panier : un petit panier rouge en papier découpé, le nombre de cartes sur son flanc. */
 .panier-button {
   position: absolute;
   left: var(--safe-left);
-  bottom: calc(var(--safe-bottom) + 4px);
-  font-size: calc(16px * var(--ts, 1));
+  bottom: calc(var(--safe-bottom) + 2px);
+  width: calc(76px * var(--ts, 1));
+  height: calc(61px * var(--ts, 1));
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
 }
+.panier-icon { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .panier-count {
-  display: inline-block;
-  min-width: 22px;
-  margin-left: 4px;
-  padding: 0 6px;
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+  min-width: 26px;
+  padding: 1px 6px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
-  font-size: calc(14px * var(--ts, 1));
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-size: calc(13px * var(--ts, 1));
+  font-weight: 700;
+  line-height: 1.2;
 }
+.panier-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
 .panier-button.bump { animation: bump 0.35s ease-out; }
 @keyframes bump { 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
 .panier {
@@ -581,9 +596,46 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-bottom: 2px solid var(--ink);
   transform: rotate(45deg);
 }
+/* Voix du joueur (son « Épaisseur ») dans une conversation : en haut, d'où il regarde ; nuit et bleu clair,
+   les couleurs de l'écran titre (le monde du joueur, hors du magasin). Placée en largeur par le code. */
+.player-voice {
+  position: absolute;
+  top: calc(var(--safe-top) + 4px);
+  left: 0;
+  max-width: min(520px, calc(100% - 330px));
+  padding: 8px 14px 10px;
+  background: rgb(21 24 39 / 0.92);
+  color: #e6edf5;
+  border: 2px solid #8fd3ff;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgb(143 211 255 / 0.25);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 22;
+}
+.player-voice[hidden] { display: none; }
+.player-voice.visible { opacity: 1; }
+.player-voice-label { display: block; margin-bottom: 2px; color: #8fd3ff; font-size: calc(11px * var(--ts, 1)); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+.player-voice-text { margin: 0; font-size: calc(15px * var(--ts, 1)); line-height: 1.35; }
+/* Réplique écrite qui attend un toucher : petit ▾ qui palpite en bas à droite. */
+.hero-bubble.tap::after, .player-voice.tap::after {
+  content: '▾';
+  position: absolute;
+  right: 8px;
+  bottom: 1px;
+  font-size: 14px;
+  font-style: normal;
+  animation: tap-blink 0.9s ease-in-out infinite;
+}
+.player-voice.tap::after { color: #8fd3ff; }
+.still.tap::after { animation: none; }
+@keyframes tap-blink { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .hero-bubble.tap::after, .player-voice.tap::after { animation: none; } }
 @media (max-height: 460px) {
   .narrator { max-width: calc(100% - 300px); padding: 7px 12px 8px 10px; }
-  .narrator-text, .hero-bubble-text { font-size: calc(14px * var(--ts, 1)); }
+  .narrator-text, .hero-bubble-text, .player-voice-text { font-size: calc(14px * var(--ts, 1)); }
+  .player-voice { max-width: calc(100% - 300px); }
 }
 
 /* Ondes sous le haut-parleur qui parle (dans la scène). */
@@ -886,3 +938,26 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   font-size: calc(14px * var(--ts, 1));
   letter-spacing: 0.1em;
 }
+
+/* ---------- Historique des dialogues (écran Pause) ---------- */
+.journal-toggle { display: block; margin: 8px auto 0; }
+.journal {
+  max-height: min(46vh, 340px);
+  margin: 10px 0 4px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  text-align: left;
+  border: 2px dashed var(--ink);
+  border-radius: 8px;
+  background: var(--card);
+}
+.journal[hidden] { display: none; }
+.journal ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.journal li { font-size: calc(14px * var(--ts, 1)); line-height: 1.35; }
+.journal li[hidden] { display: none; }
+.journal li b { display: block; font-size: calc(11px * var(--ts, 1)); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.journal .journal-heros span, .journal .journal-pensee span { font-style: italic; }
+.journal .journal-epaisseur { padding-left: 8px; border-left: 3px solid #8fd3ff; }
+.journal-empty { margin: 0; opacity: 0.7; }

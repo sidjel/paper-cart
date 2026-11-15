@@ -12,6 +12,47 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 44 — 15/11/2026 — La première rencontre après la première carte, jamais manquée ; historique des dialogues ; bouton Panier en petit panier rouge
+
+**Retours de l'auteur** :
+- Ce qui gêne : le premier aparté ne se déclenchait pas toujours.
+- Ce qui manque :
+  - il doit venir après la première carte, plus long, sans interruption possible ;
+  - le joueur doit répondre (sans choix) avant tout choix ;
+  - un historique pour relire les dialogues ;
+  - le bouton Panier en petit panier rouge.
+- Réponses : 1 B (il ne se souvient plus pourquoi il est entré, pour le moment) ; 2 a, b et c ; 3 styles gardés.
+
+**Jouable maintenant** :
+- **Arrivée** : l'annonce puis les 4 pensées du héros (sans aparté).
+- **La première carte déclenche la rencontre**. Elle attend que l'annonce soit finie et que le héros soit arrêté, aussi longtemps qu'il le faut : elle n'est plus jamais perdue (avant, elle se perdait si le héros marchait trop longtemps). Pendant la conversation :
+  - rien ne parle, le héros ne bouge pas, rien ne scanne ;
+  - chaque réplique attend un toucher (petit ▾) ;
+  - déroulé : regard muet → le héros (le bip, ce n'est pas lui qui a décidé, il la sent là-haut, plat comme une feuille, « est-ce toi ce qui me manque ? une partie de moi ? », « Qui es-tu ? ») → **toi**, dans un cadre « Toi » en haut de l'écran (perdu aussi, tu vois d'en haut et le fais marcher, il te manque un corps, mais tu penses, décides, agis) → il comprend → un choix à la fin.
+- **Pause → « Dialogues »** : les 40 dernières répliques, avec tes réponses.
+- **Bouton Panier** : un petit panier rouge, le nombre de cartes sur son flanc.
+
+**Vérifié** :
+- 127 tests de logique, dont :
+  - un moment important attend son tour et n'est jamais perdu ;
+  - rien n'interrompt une conversation ;
+  - attente du toucher ;
+  - historique ;
+  - narrateur coupé puis remis : la conversation recommence.
+- 63 tests navigateur PC et téléphone simulé, sans erreur console. Le test de la rencontre fait au doigt et au clavier : la conversation entière, le choix, puis la relecture dans la Pause.
+- Comptages inchangés.
+- Captures de la rencontre, du cadre « Toi », de l'historique et du bouton.
+
+**À vérifier par l'auteur** : le rythme (toucher entre chaque réplique), la lisibilité du cadre « Toi » sur le téléphone.
+
+**Décisions prises seul** :
+- L'historique est dans la Pause (accessible tout le temps, même sans panier).
+- La voix du joueur n'a pas de petits bips (ce sont ses pensées).
+- Si le narrateur est coupé pendant la conversation, elle reprendra depuis le début.
+- Réglage ⚙ → Narrateur : « Conversation : attendre un toucher entre les répliques ».
+
+---
+
 ## Séance 43 — 15/11/2026 — Intro au noir, premières pensées du héros, rencontre graduée avec l'Épaisseur, menus restylés
 
 **Retours de l'auteur** : sous-onglets des cartes ; intro blanc sur noir après « Commencer », puis fondu ; annonces un peu transparentes ; couleurs des menus Panier et réglages ; première réflexion du héros et première rencontre graduée avec son Épaisseur.

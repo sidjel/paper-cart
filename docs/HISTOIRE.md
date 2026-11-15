@@ -64,7 +64,8 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 ## L'intro du jeu 🧪 À TESTER (séance 43, textes [TEMP] dans `src/data/intro.json`)
 - Aucun personnage en 3D. Écran noir, texte blanc ligne par ligne, des sons : pluie, parking, portes qui coulissent, « ding ». Toucher : ligne suivante ; « Passer » ; puis fondu sur le jeu.
 - Puis le narrateur : « Bienvenue au Maxi-Gouffre. Nous avons pris la liberté d'optimiser votre format. » (piste : le « bip » du portique de sécurité juste avant, voir « L'accueil, un lieu à part »)
-- 🧪 **Première rencontre graduée** (séance 43, `narrator.json`) : annonce d'arrivée → 4 pensées du héros (le trou de mémoire, « pourquoi je me sens si plat ? », l'objectif : la Caisse Finale puis rentrer, « il me manque quelque chose… on me regarde ») → un regard caméra muet → premier aparté : « Toi. Là-haut. Tu me vois ? C'est toi… ce qui me manque ? » (deux réponses, confiance). Il découvre son Épaisseur avant de la nommer.
+- 🧪 **Arrivée** (séance 43) : annonce, puis 4 pensées du héros (le trou de mémoire, « pourquoi je me sens si plat ? », l'objectif : la Caisse Finale puis rentrer, « il me manque quelque chose… on me regarde. D'en haut. »).
+- ✅ VALIDÉ (séance 44) : la **première rencontre** vient **après la première carte scannée**, ne doit jamais être manquée ni interrompue, et se relit (historique). 🧪 Texte [TEMP] : regard muet → le héros (« ce n'est pas moi qui ai décidé de scanner ça », il la sent là-haut, il se sent plat comme une feuille, « est-ce toi ce qui me manque ? une partie de moi ? », « Qui es-tu ? ») → **le joueur répond, sans choix** (lui aussi perdu ; il voit d'en haut et fait marcher son « double » ; il lui manque un corps, il a l'impression de ne pas exister, mais il pense, décide, agit) → le héros comprend (il marche sans décider) → seulement alors un choix (« On trouve la sortie ensemble ? »).
 - Le héros apparaît directement en papier.
 - La scène de l'aplatissement est révélée plus tard (pendant la Révélation ?), en quelques dessins : le héros a d'abord du volume, puis il est plaqué à plat.
 
@@ -75,4 +76,4 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - **La Révélation** : le système détecte enfin l'Épaisseur du héros et s'adresse pour la première fois directement au joueur.
 - **La Caisse Finale** : retrouver son Épaisseur et redevenir entier, ou se faire « encaisser » (scanner, étiqueter, vendre) ? Double sens de *checkout* : passer en caisse, partir, mourir.
 - **Le panier** : tout ce qu'on scanne va dans *son* panier… qu'il faudra peut-être payer à la Caisse Finale.
-- Raison de l'entrée du héros (voir `PERSONNAGES.md`).
+- Raison de l'entrée du héros : pour le moment, il ne s'en souvient plus (séance 44, voir `PERSONNAGES.md`).

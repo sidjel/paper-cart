@@ -89,6 +89,10 @@ export function createHud(root, { version, onAction, touch, muted }) {
   let shownAction = 'scanner';
   return {
     bar, // boutons du haut (la bande du narrateur ne passe pas dessous)
+    pauseCard: card, // l'écran Pause (l'historique des dialogues s'y ajoute)
+    focusResume() {
+      resume.focus({ preventScroll: true });
+    },
     ready() {
       loading.hidden = true;
     },

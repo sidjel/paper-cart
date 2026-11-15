@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle, answer, waitingAnswer } from '../../src/core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
 const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20 };
@@ -145,7 +145,7 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     expect(waitingAnswer(n)).toBe(true); // elle attend, même après 10 s
     skipNarrator(n, Q, P);
     expect(n.line.id).toBe('q'); // toucher ne fait pas disparaître une question
-    answer(n, 0);
+    answer(n, 0, P);
     expect(n.trust).toBe(1);
     expect(n.line.text).toBe('Ouf.');
     expect(waitingAnswer(n)).toBe(false);
@@ -228,6 +228,100 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
   });
 });
 
+describe('conversation, moment important (must), historique', () => {
+  const PS = { ...P, sceneWait: true, logMax: 5 };
+  const SC = {
+    triggers: { carte: { strong: true }, rencontre: { voice: 'heros', once: true, must: true }, bavard: {}, regard: { voice: 'regard', follows: '@narrateur' } },
+    lines: [
+      { id: 'c', trigger: 'carte', text: 'Bip' },
+      { id: 'b', trigger: 'bavard', text: 'Bla' },
+      { id: 'g', trigger: 'regard', text: '' },
+      {
+        id: 'r',
+        trigger: 'rencontre',
+        emotion: 'inquiet',
+        steps: [
+          { voice: 'regard', emotion: 'inquiet' },
+          { voice: 'heros', text: 'Qui es-tu ?' },
+          { voice: 'epaisseur', text: 'Je ne sais pas.' },
+          { voice: 'heros', text: 'Ensemble ?', emotion: 'complice', choices: [{ text: 'Oui', trust: 1, reply: 'Bien.' }, { text: 'Non', trust: -1, reply: 'Ah.' }] },
+        ],
+      },
+    ],
+  };
+  const go = (n, s) => {
+    for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, SC, 1 / 60, PS);
+  };
+  it('un moment important attend que le héros soit libre et que l’annonce finisse, puis commence (jamais perdu)', () => {
+    const n = createNarrator();
+    narrate(n, SC, 'carte', PS);
+    n.asideOk = false; // le héros marche
+    expect(narrate(n, SC, 'rencontre', PS)).toBeNull();
+    expect(n.queue).toEqual(['rencontre']);
+    go(n, 30); // l'annonce est finie, mais le héros marche toujours
+    expect(n.line).toBeNull();
+    n.asideOk = true;
+    go(n, 0.1);
+    expect(inScene(n)).toBe(true);
+    expect(n.voice).toBe('regard');
+  });
+  it('une conversation : regard, héros, joueur, puis un choix ; chaque réplique attend un toucher ; rien ne l’interrompt', () => {
+    const n = createNarrator();
+    narrate(n, SC, 'rencontre', PS);
+    go(n, 3); // le regard passe seul (sans texte)
+    expect(n.voice).toBe('heros');
+    expect(n.line.text).toBe('Qui es-tu ?');
+    expect(n.line.emotion).toBe('inquiet'); // garde l'expression du regard
+    go(n, 60); // écrite, elle attend un toucher
+    expect(waitingTap(n)).toBe(true);
+    expect(narrate(n, SC, 'carte', PS)).toBeNull(); // même une annonce forte n'interrompt pas
+    expect(narrate(n, SC, 'bavard', PS)).toBeNull();
+    skipNarrator(n, SC, PS);
+    expect(n.voice).toBe('epaisseur');
+    skipNarrator(n, SC, PS); // texte entier
+    skipNarrator(n, SC, PS); // suivante
+    expect(n.line.text).toBe('Ensemble ?');
+    go(n, 5);
+    expect(waitingAnswer(n)).toBe(true);
+    answer(n, 0, PS);
+    expect(n.trust).toBe(1);
+    expect(n.line.text).toBe('Bien.');
+    skipNarrator(n, SC, PS);
+    skipNarrator(n, SC, PS);
+    expect(inScene(n)).toBe(false);
+    expect(n.line).toBeNull();
+  });
+  it('historique : chaque réplique dite et la réponse du joueur, les plus anciennes oubliées au-delà de logMax', () => {
+    const n = createNarrator();
+    narrate(n, SC, 'rencontre', PS);
+    go(n, 3);
+    skipNarrator(n, SC, PS);
+    skipNarrator(n, SC, PS);
+    skipNarrator(n, SC, PS);
+    skipNarrator(n, SC, PS);
+    go(n, 5);
+    answer(n, 1, PS);
+    expect(n.log.map((e) => e.text)).toEqual(['Qui es-tu ?', 'Je ne sais pas.', 'Ensemble ?', 'Non', 'Ah.']);
+    expect(n.log[1].voice).toBe('epaisseur');
+    expect(n.log[3].voice).toBe('epaisseur');
+    skipNarrator(n, SC, PS);
+    skipNarrator(n, SC, PS);
+    narrate(n, SC, 'carte', PS);
+    expect(n.log.length).toBe(5);
+    expect(n.log[4].text).toBe('Bip');
+  });
+  it('narrateur coupé pendant une conversation : elle reprendra depuis le début', () => {
+    const n = createNarrator();
+    narrate(n, SC, 'rencontre', PS);
+    go(n, 3);
+    silenceNarrator(n);
+    expect(n.queue).toEqual(['rencontre']);
+    go(n, 0.1);
+    expect(inScene(n)).toBe(true);
+    expect(n.voice).toBe('regard');
+  });
+});
+
 describe('narrateur : machine à écrire', () => {
   it('les lettres apparaissent au rythme réglé, puis la réplique reste, puis disparaît', () => {
     const n = createNarrator();
@@ -268,14 +362,31 @@ describe('répliques du narrateur (données)', () => {
       expect(file.triggers[l.trigger], l.id).toBeDefined();
       expect(ids.has(l.id), l.id).toBe(false);
       ids.add(l.id);
-      if (file.triggers[l.trigger].voice === 'regard') expect(l.text, l.id).toBe(''); // regard : sans texte
-      else expect(l.text.startsWith('[TEMP] '), l.id).toBe(true);
-      for (const c of l.choices ?? []) {
-        expect(c.text.startsWith('[TEMP] ') && c.reply.startsWith('[TEMP] '), l.id).toBe(true);
-        expect(typeof c.trust, l.id).toBe('number');
+      // Une conversation (steps) : chaque réplique est vérifiée comme une réplique ordinaire.
+      const parts = l.steps ?? [{ ...l, voice: file.triggers[l.trigger].voice }];
+      for (const st of parts) {
+        if (st.voice === 'regard') expect(st.text ?? '', l.id).toBe(''); // regard : sans texte
+        else expect(st.text.startsWith('[TEMP] '), l.id).toBe(true);
+        expect(['heros', 'epaisseur', 'regard', 'pensee', 'narrateur', undefined], l.id).toContain(st.voice);
+        for (const c of st.choices ?? []) {
+          expect(c.text.startsWith('[TEMP] ') && c.reply.startsWith('[TEMP] '), l.id).toBe(true);
+          expect(typeof c.trust, l.id).toBe('number');
+        }
+        if (st.choices) expect(st.choices.length, l.id).toBe(2);
       }
-      if (l.choices) expect(l.choices.length, l.id).toBe(2);
+      if (l.steps) expect(l.steps.findIndex((st) => st.choices) === -1 || l.steps.findIndex((st) => st.choices) === l.steps.length - 1, l.id).toBe(true); // un choix : seulement à la fin
     }
+  });
+  it('la première rencontre : après la première carte, jamais perdue ; le héros demande « Qui es-tu ? », le joueur répond sans choix, puis un choix', () => {
+    expect(file.triggers.rencontre).toMatchObject({ voice: 'heros', once: true, must: true });
+    const l = file.lines.find((x) => x.trigger === 'rencontre');
+    const heroText = l.steps.filter((st) => st.voice === 'heros').map((st) => st.text).join(' ');
+    expect(heroText).toMatch(/Qui es-tu/);
+    expect(heroText).toMatch(/feuille/);
+    const firstPlayer = l.steps.findIndex((st) => st.voice === 'epaisseur');
+    const firstChoice = l.steps.findIndex((st) => st.choices);
+    expect(firstPlayer).toBeGreaterThan(0);
+    expect(firstChoice).toBeGreaterThan(firstPlayer); // d'abord la réponse sans choix, ensuite un choix
   });
   it('chaque moment a au moins une réplique', () => {
     for (const tr of Object.keys(file.triggers)) expect(file.lines.some((l) => l.trigger === tr), tr).toBe(true);
@@ -283,8 +394,9 @@ describe('répliques du narrateur (données)', () => {
   it('les apartés du héros tutoient leur « Épaisseur » ; le haut-parleur vouvoie', () => {
     for (const l of file.lines) {
       const hero = file.triggers[l.trigger].voice === 'heros';
-      if (hero) expect(/\b(tu|te|toi|mon Épaisseur)\b/i.test(l.text), l.id).toBe(true);
-      else expect(/\b(tu|toi)\b/i.test(l.text), l.id).toBe(false);
+      const text = l.steps ? l.steps.filter((st) => st.voice === 'heros').map((st) => st.text).join(' ') : l.text;
+      if (hero) expect(/\b(tu|te|toi|t'|mon Épaisseur)\b/i.test(text), l.id).toBe(true);
+      else expect(/\b(tu|toi)\b/i.test(text), l.id).toBe(false);
     }
     expect(file.lines.filter((l) => file.triggers[l.trigger].voice === 'heros').length).toBeGreaterThanOrEqual(4);
   });
@@ -293,6 +405,11 @@ describe('répliques du narrateur (données)', () => {
     for (const l of file.lines) {
       if (!['heros', 'regard'].includes(file.triggers[l.trigger].voice)) continue;
       expect(hero.views.face[`aparte_${l.emotion}`], `${l.id} : ${l.emotion}`).toBeDefined();
+      for (const st of l.steps ?? []) {
+        for (const e of [st.emotion, ...(st.choices ?? []).map((c) => c.emotion)]) {
+          if (e) expect(hero.views.face[`aparte_${e}`], `${l.id} : ${e}`).toBeDefined();
+        }
+      }
     }
   });
   it('le fil « Client » → « Article non référencé » est présent', () => {

@@ -1,7 +1,10 @@
 // Les deux voix à l'écran :
 //  - le haut-parleur du magasin : une bande sombre juste sous le haut-parleur (dessiné au plafond) d'où
 //    sort la voix, avec une pointe vers lui ; elle ne passe jamais sous les boutons du haut ;
-//  - les apartés du héros : une bulle de papier au-dessus de sa tête, qui le suit.
+//  - les apartés du héros : une bulle de papier au-dessus de sa tête, qui le suit ;
+//  - la voix du joueur (son « Épaisseur »), dans une conversation : un cadre « Toi » en haut de l'écran,
+//    d'où il regarde.
+// Une réplique qui attend un toucher (conversation) montre un petit ▾.
 // Le texte s'écrit lettre par lettre (avancement calculé dans core/narrator.js). La place du texte
 // entier est réservée dès le début (le reste est invisible) : rien ne change de taille.
 // Toucher ou cliquer la réplique : le texte s'affiche en entier, puis elle disparaît.
@@ -45,7 +48,14 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
     });
   });
 
-  for (const el of [band, bubble]) {
+  const player = document.createElement('div');
+  player.className = 'player-voice';
+  player.hidden = true;
+  player.setAttribute('role', 'status');
+  player.innerHTML = '<span class="player-voice-label">Toi</span><p class="player-voice-text"></p>';
+  const playerParts = textParts(player.querySelector('.player-voice-text'));
+
+  for (const el of [band, bubble, player]) {
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -71,11 +81,12 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
         this.hide();
         return;
       }
-      const el = voice === 'heros' || voice === 'pensee' ? bubble : band;
+      const el = voice === 'heros' || voice === 'pensee' ? bubble : voice === 'epaisseur' ? player : band;
       bubble.classList.toggle('thought', voice === 'pensee');
       if (current && current !== el) current.hidden = true;
       current = el;
-      parts = el === bubble ? bubbleParts : bandParts;
+      parts = el === bubble ? bubbleParts : el === player ? playerParts : bandParts;
+      el.classList.remove('tap');
       text = t;
       count = -1;
       el.classList.toggle('still', still);
@@ -122,6 +133,18 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
     focusChoice(k) {
       choiceBtns[k]?.focus({ preventScroll: true });
     },
+    // Voix du joueur : en haut, au milieu, sans passer sous les boutons du haut (maxRight).
+    placePlayer(maxRight) {
+      if (current !== player) return;
+      const left = Math.max(MARGIN, Math.min(maxRight - bw - MARGIN, root.clientWidth / 2 - bw / 2));
+      if (Math.abs(left - lastX) < 0.5) return;
+      lastX = left;
+      player.style.transform = `translate3d(${left}px, 0, 0)`;
+    },
+    // La réplique est écrite et attend un toucher : petit ▾.
+    setWaiting(w) {
+      if (current && current.classList.contains('tap') !== w) current.classList.toggle('tap', w);
+    },
     // Bande : (x, y) = bouche du haut-parleur, en pixels d'écran ; maxRight : bord gauche des boutons du haut.
     placeBand(x, y, maxRight) {
       if (current !== band) return;
@@ -144,7 +167,7 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
       return current !== null;
     },
     get voice() {
-      return current === bubble ? 'heros' : current === band ? 'narrateur' : '';
+      return current === bubble ? 'heros' : current === band ? 'narrateur' : current === player ? 'epaisseur' : '';
     },
   };
 }

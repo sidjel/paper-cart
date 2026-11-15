@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai).",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai). steps (conversation) : répliques à la suite, voice « heros », « epaisseur » (le joueur répond, sans choix) ou « regard » ; la dernière peut proposer deux réponses. must : moment important, jamais perdu (il attend son tour).",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -30,17 +30,16 @@
       "follows": "reflexion_3",
       "comment": "4e : il sent qu'il lui manque quelque chose, et qu'on le regarde"
     },
-    "regard_decouverte": {
-      "voice": "regard",
-      "once": true,
-      "follows": "presence",
-      "cooldown": 0,
-      "comment": "premier regard vers l'écran, sans un mot"
-    },
     "premier_scan": {
       "once": true,
       "strong": true,
       "comment": "première carte"
+    },
+    "rencontre": {
+      "voice": "heros",
+      "once": true,
+      "must": true,
+      "comment": "première vraie rencontre avec son Épaisseur, après la première carte : une conversation que rien n'interrompt, jamais perdue (elle attend que le héros soit libre)"
     },
     "scan": {
       "every": 3,
@@ -66,12 +65,6 @@
     "reprise": {
       "every": 3,
       "comment": "retour de pause"
-    },
-    "aparte_accueil": {
-      "voice": "heros",
-      "once": true,
-      "follows": "regard_decouverte",
-      "comment": "première rencontre avec son Épaisseur, après ses réflexions et un premier regard"
     },
     "aparte_vide": {
       "voice": "heros",
@@ -149,15 +142,82 @@
       "text": "[TEMP] … C'est bizarre. Il me manque quelque chose. Et j'ai l'impression qu'on me regarde. D'en haut."
     },
     {
-      "id": "regard_decouverte",
-      "trigger": "regard_decouverte",
-      "text": "",
-      "emotion": "inquiet"
-    },
-    {
       "id": "premier_scan_1",
       "trigger": "premier_scan",
       "text": "[TEMP] Félicitations, cher Client : vous venez d'extraire l'essence d'un produit. Le produit, lui, ne vous félicite pas."
+    },
+    {
+      "id": "rencontre_1",
+      "trigger": "rencontre",
+      "emotion": "inquiet",
+      "steps": [
+        {
+          "voice": "regard",
+          "emotion": "inquiet"
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] … Attends. Ce bip. Cette carte. Ce n'est pas moi qui ai décidé de scanner ça.",
+          "emotion": "inquiet"
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] C'est toi, hein ? Là-haut, quelque part. Je ne te vois pas… mais je te sens. Depuis les portes, tu es là."
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] Je me sens plat. Comme une feuille. Comme s'il manquait tout un morceau de moi : le poids, le volume… le recul."
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] Est-ce que c'est toi, ce qui me manque ? Une partie de moi ?"
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] … Qui es-tu ?"
+        },
+        {
+          "voice": "epaisseur",
+          "text": "[TEMP] Je… je ne sais pas. Je viens d'arriver, moi aussi. Tout est flou."
+        },
+        {
+          "voice": "epaisseur",
+          "text": "[TEMP] Je te vois d'en haut, tout petit, tout plat. Et quand je décide d'aller quelque part… c'est toi qui marches."
+        },
+        {
+          "voice": "epaisseur",
+          "text": "[TEMP] À moi aussi, il manque quelque chose. Je pense, je décide, j'agis… mais je n'ai pas de corps. Comme si je n'existais pas vraiment."
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] Alors moi, je marche sans savoir où aller… et toi, tu sais où aller, mais tu ne peux pas marcher.",
+          "emotion": "blase"
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] C'est pour ça que j'ai l'impression de ne rien contrôler. Ce n'est pas moi qui décide. C'est toi.",
+          "emotion": "inquiet"
+        },
+        {
+          "voice": "heros",
+          "text": "[TEMP] Mon… Épaisseur. C'est comme ça que je vais t'appeler. On trouve la sortie ensemble ?",
+          "emotion": "complice",
+          "choices": [
+            {
+              "text": "[TEMP] Oui. Ensemble.",
+              "trust": 1,
+              "reply": "[TEMP] D'accord. Toi, tu regardes ; moi, je marche. Ne me lâche pas, hein.",
+              "emotion": "complice"
+            },
+            {
+              "text": "[TEMP] Je ne sais pas encore.",
+              "trust": -1,
+              "reply": "[TEMP] … Moi non plus. Mais on n'a pas vraiment le choix, ni toi ni moi.",
+              "emotion": "blase"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "scan_1",
@@ -208,26 +268,6 @@
       "id": "reprise_1",
       "trigger": "reprise",
       "text": "[TEMP] Ah, vous revoilà. Le magasin, lui, n'a pas fait de pause."
-    },
-    {
-      "id": "aparte_accueil_1",
-      "trigger": "aparte_accueil",
-      "text": "[TEMP] … Toi. Là-haut. Tu me vois ? C'est toi… ce qui me manque ?",
-      "emotion": "inquiet",
-      "choices": [
-        {
-          "text": "[TEMP] Oui. Je suis là.",
-          "trust": 1,
-          "reply": "[TEMP] Alors je ne suis pas tout seul. Mon… Épaisseur. Toi, tu regardes ; moi, je marche. On trouve la sortie ensemble ?",
-          "emotion": "complice"
-        },
-        {
-          "text": "[TEMP] …",
-          "trust": -1,
-          "reply": "[TEMP] Rien ? … D'accord. Je vais faire comme si je n'avais pas peur. Mais je sais que tu es là, mon Épaisseur.",
-          "emotion": "blase"
-        }
-      ]
     },
     {
       "id": "aparte_vide_1",

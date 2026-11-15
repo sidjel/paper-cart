@@ -18,6 +18,8 @@ test.beforeEach(async ({ page }, info) => {
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   // Les tests du scanner commencent équipés (Scanette et panier) ; ceux de l'accueil (A5a), mains vides.
   if (!info.title.startsWith('A5a')) await page.evaluate(() => window.paperCart.equip());
+  // La première rencontre (conversation après la première carte) a son propre test.
+  if (!info.title.startsWith('A4 : la première rencontre')) await page.evaluate(() => window.paperCart.markSaid('rencontre'));
 });
 
 test.afterEach(async () => {
@@ -524,36 +526,90 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   expect((await narr(page)).text).toMatch(/parking/);
   await expect.poll(async () => (await narr(page)).shown, { timeout: 5000 }).toBeGreaterThan(40);
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-pensee.png` });
-  // (on accélère la suite pour le test : pensées, regard, aparté)
+  // (on accélère la suite pour le test) Les pensées s'enchaînent, sans aparté : la rencontre vient après la première carte.
   await page.evaluate(() => {
     for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1]]) window.paperCart.set(k, v);
   });
-  // … puis il découvre son Épaisseur : aparté, dans une bulle, tourné vers l'écran.
-  await expect.poll(async () => (await narr(page)).voice, { timeout: 15000 }).toBe('heros');
-  const n3 = await narr(page);
-  expect(n3.text).toMatch(/Tu me vois/);
+  await expect.poll(async () => (await narr(page)).text, { timeout: 15000 }).toMatch(/D'en haut/);
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 5000 }).toBe('');
+  expect((await page.evaluate(() => window.paperCart.journal())).join(' ')).not.toMatch(/heros:/);
+  expect(errors).toEqual([]);
+  expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeCloseTo(viewW0, 0);
+});
+
+test('A4 : la première rencontre, après la première carte : une conversation que rien n’interrompt, puis un choix ; relue dans la Pause', async ({ page }, info) => {
+  const phone = info.project.name === 'telephone';
+  const viewW0 = (await page.evaluate(() => window.paperCart.camera())).viewW;
+  await page.evaluate(() => {
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1], ['narrator.enabled', false], ['narrator.enabled', true]]) window.paperCart.set(k, v);
+  });
+  // Première carte : le haut-parleur la commente, puis le héros se tourne vers le joueur.
+  await toBanana(page);
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await narr(page)).text, { timeout: 6000 }).toContain('essence');
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 10000 }).toBe('heros');
+  const bubble = page.locator('.hero-bubble');
+  await expect(bubble).toContainText('Ce bip');
   expect((await hero(page)).away).toBe(false);
-  // Mise en scène : bandes « cinéma », tête de face, la caméra zoome sur le héros.
   await expect(page.locator('.aside-bar-top')).toBeVisible();
-  await expect(page.locator('.actor-frame:visible')).toHaveAttribute('src', /blob:/);
-  await page.waitForTimeout(1000);
-  expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeLessThan(viewW0 * 0.9);
-  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-aparte.png` });
-  // Le héros attend une réponse (deux choix) : le joueur répond, la confiance monte, le héros répond.
-  await expect.poll(async () => (await narr(page)).waiting, { timeout: 8000 }).toBe(true);
+  // Chaque réplique attend un toucher (petit ▾) : elle ne passe pas toute seule.
+  await expect(page.locator('.hero-bubble.tap')).toBeVisible({ timeout: 3000 });
+  await page.waitForTimeout(1500);
+  await expect(bubble).toContainText('Ce bip');
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-rencontre.png` });
+  // Rien ne l'interrompt : ni le scanner, ni un déplacement.
+  const h0 = await hero(page);
+  await page.keyboard.press('ArrowLeft');
+  expect((await hero(page)).x).toBeCloseTo(h0.x, 0);
+  // Toucher (ou Entrée) : réplique suivante, jusqu'à « Qui es-tu ? ».
+  const next = async (loc) => {
+    // Attendre que la réplique soit écrite en entier : alors un toucher passe à la suivante.
+    await expect.poll(async () => { const n = await narr(page); return n.shown >= n.text.length; }).toBe(true);
+    if ((await narr(page)).waiting) return; // une question : il faut choisir une réponse
+    if (phone) await loc.tap({ force: true }); // la bulle suit le héros (zoom) : pas d'attente de stabilité
+    else await page.keyboard.press('Enter');
+  };
+  for (let k = 0; k < 10 && !(await narr(page)).text.includes('Qui es-tu'); k++) await next(bubble);
+  expect((await narr(page)).text).toMatch(/Qui es-tu/);
+  await next(bubble);
+  // Le joueur répond, sans choix : cadre « Toi » en haut de l'écran.
+  const player = page.locator('.player-voice');
+  await expect(player).toBeVisible();
+  expect((await narr(page)).voice).toBe('epaisseur');
+  await expect(player).toContainText('Toi');
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-toi.png` });
+  const pb = await player.boundingBox();
+  const hb = await page.locator('.hud-bar').boundingBox();
+  expect(pb.x + pb.width).toBeLessThanOrEqual(hb.x);
+  for (let k = 0; k < 12 && !(await narr(page)).waiting; k++) {
+    const v = (await narr(page)).voice;
+    await next(v === 'epaisseur' ? player : bubble);
+    await page.waitForTimeout(100);
+  }
+  // Seulement ensuite, un choix.
+  expect((await narr(page)).waiting).toBe(true);
   const choice = page.locator('.hero-choices.ready .hero-choice').first();
   await expect(choice).toBeVisible();
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-reponses.png` });
-  if (info.project.name === 'telephone') await choice.tap();
+  if (phone) await choice.tap();
   else await choice.click();
   await expect.poll(async () => (await narr(page)).trust).toBe(1);
-  expect((await narr(page)).text).toMatch(/Épaisseur/);
-  // Puis le haut-parleur croit qu'un client parle au mur.
+  for (let k = 0; k < 3 && (await narr(page)).voice === 'heros'; k++) await next(bubble); // sa réponse, puis fin
+  // Puis le haut-parleur croit qu'un client parle au mur ; le zoom revient.
   await expect.poll(async () => (await narr(page)).voice, { timeout: 12000 }).toBe('narrateur');
   expect((await narr(page)).text).toMatch(/mur|plafond/);
-  await expect.poll(async () => (await page.evaluate(() => window.paperCart.camera())).viewW).toBeGreaterThan(viewW0 * 0.95); // fin du zoom
-  await expect(bubble).toBeHidden();
-  await expect(band).toBeVisible();
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.camera())).viewW).toBeGreaterThan(viewW0 * 0.95);
+  // Pause → Dialogues : toute la conversation se relit, avec les réponses du joueur.
+  await page.locator('.hud-bar button[aria-label^="Pause"]').click();
+  await page.locator('.journal-toggle').click();
+  const journal = page.locator('.journal');
+  await expect(journal).toBeVisible();
+  await expect(journal).toContainText('Qui es-tu');
+  await expect(journal.locator('.journal-epaisseur').first()).toContainText('Toi');
+  await expect(journal).toContainText('Oui. Ensemble.');
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-journal.png` });
+  expect(errors).toEqual([]);
 });
 
 test('A4 : le premier scan est commenté, même si l’accueil n’est pas fini', async ({ page }, info) => {

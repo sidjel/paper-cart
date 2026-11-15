@@ -18,13 +18,21 @@
 //  - une même réplique ne revient pas avant p.lineCooldown s (ou le cooldown de son moment) ;
 //  - once : une seule fois ; every N (à partir de la from-ième occurrence, 1 par défaut) ;
 //  - follows : ce moment suit la fin d'une réplique d'un autre moment (« arrivee »), ou de
-//    n'importe quelle réplique d'une voix (« @heros »), après p.followDelay s.
+//    n'importe quelle réplique d'une voix (« @heros »), après p.followDelay s ;
+//  - must : un moment important n'est jamais perdu : s'il ne peut pas commencer tout de suite (une
+//    autre réplique, le héros occupé), il attend son tour, aussi longtemps qu'il le faut ;
+//  - conversation (steps) : une suite de répliques (héros, joueur « epaisseur », regard) que rien
+//    n'interrompt ; avec p.sceneWait, chaque réplique attend un toucher du joueur ;
+//  - historique : chaque réplique dite (et chaque réponse du joueur) est gardée dans n.log
+//    (p.logMax au plus), pour être relue.
 //
-// data : { triggers: { nom: { voice?, once?, every?, from?, strong?, follows? } }, lines: [{ id, trigger, text }] }
+// data : { triggers: { nom: { voice?, once?, every?, from?, strong?, follows?, must? } },
+//          lines: [{ id, trigger, text, steps? }] }
 
 const HERO = 'heros';
 const GLANCE = 'regard';
 const THOUGHT = 'pensee'; // le héros se parle à lui-même (pas au joueur) : une bulle, sans mise en scène
+export const PLAYER = 'epaisseur'; // le joueur (son Épaisseur) répond, dans une conversation
 
 export function createNarrator() {
   return {
@@ -38,6 +46,9 @@ export function createNarrator() {
     seen: {}, // moment → nombre d'occurrences
     done: {}, // moments « once » déjà dits
     pending: null, // moment enchaîné en attente : { trigger, at }
+    queue: [], // moments importants (must) qui attendent leur tour
+    scene: null, // conversation en cours : { line, i } (line.steps : les répliques)
+    log: [], // historique : [{ voice, text }]
     answered: -1, // réponse donnée à la réplique en cours (-1 : pas encore)
     // Réplique en cours d'affichage
     line: null,
@@ -54,23 +65,36 @@ function voiceOf(tr) {
 }
 
 // Un moment du jeu arrive : renvoie la réplique à dire (et la commence), ou null.
-export function narrate(n, data, trigger, p) {
+// force : un moment important (must) qui sort de la file d'attente : sans écart minimal.
+export function narrate(n, data, trigger, p, force = false) {
   const tr = data.triggers[trigger];
   if (!tr || !p.enabled) return null;
   const voice = voiceOf(tr);
   const hero = voice === HERO || voice === GLANCE;
+  if (tr.must && !force) {
+    // Important : commence dès que possible, sinon attend son tour (jamais perdu).
+    if (tr.once && n.done[trigger]) return null;
+    if (!n.line && (!hero || (p.asides && n.asideOk))) return narrate(n, data, trigger, p, true);
+    if (!n.queue.includes(trigger)) n.queue.push(trigger);
+    return null;
+  }
+  if (n.scene) return null; // rien n'interrompt une conversation
   if (hero && (!p.asides || !n.asideOk)) return null; // aparté, regard : seulement si le héros est disponible
   const count = (n.seen[trigger] = (n.seen[trigger] ?? 0) + 1);
   if (tr.once && n.done[trigger]) return null;
   const from = tr.from ?? 1;
-  if (count < from || (tr.every && (count - from) % tr.every !== 0)) return null;
-  if (n.line) {
+  if (!force && (count < from || (tr.every && (count - from) % tr.every !== 0))) return null;
+  if (force) {
+    // la place est libre (vérifié par l'appelant)
+  } else if (n.line) {
     if (hero || voice === THOUGHT) return null; // un aparté, un regard ou une pensée ne coupe jamais
     if (n.voice === HERO) return null; // pendant un aparté, le magasin est figé : il se tait
     // Une annonce coupe un regard ou une pensée ; une annonce ordinaire ne coupe pas une annonce.
     if (n.voice !== GLANCE && n.voice !== THOUGHT && !tr.strong) return null;
   }
-  if (voice === HERO) {
+  if (force) {
+    // pas d'écart imposé
+  } else if (voice === HERO) {
     if (n.t - n.lastAside < p.asideGap) return null;
     if (!tr.follows && n.t - n.lastSpoke < p.breath) return null;
   } else if (voice === GLANCE) {
@@ -78,7 +102,7 @@ export function narrate(n, data, trigger, p) {
   } else if (voice === THOUGHT) {
     // pas d'écart imposé : la pensée répond à une action du joueur
   } else if (!tr.strong && !tr.follows && n.t - n.lastAnnounce < p.minGap) return null;
-  const cooldown = tr.cooldown ?? p.lineCooldown;
+  const cooldown = force ? 0 : tr.cooldown ?? p.lineCooldown; // un moment important passe toujours
   let best = null;
   let bestT = Infinity;
   for (const l of data.lines) {
@@ -100,18 +124,64 @@ export function narrate(n, data, trigger, p) {
   else if (voice === GLANCE) n.lastGlance = n.t;
   else if (voice !== THOUGHT) n.lastAnnounce = n.t; // une pensée ne retarde pas les annonces
   if (n.pending?.trigger === trigger) n.pending = null; // un enchaînement en attente survit aux autres répliques
+  if (best.steps) {
+    // Conversation : les répliques s'enchaînent, rien ne l'interrompt ; ce qui attendait est oublié
+    // (les pensées de l'arrivée, un regard…).
+    n.pending = null;
+    n.scene = { line: best, i: 0 };
+    begin(n, stepLine(best, 0, '', p), best.steps[0].voice ?? voice, p);
+    return n.line;
+  }
+  begin(n, best, voice, p);
+  return best;
+}
+
+// Une réplique s'affiche : machine à écrire depuis le début, et une ligne dans l'historique.
+function begin(n, line, voice, p) {
   n.answered = -1;
-  n.line = best;
+  n.line = line;
   n.voice = voice;
   n.shown = 0;
-  n.hold = best.text.length ? 0 : holdFor(best.text, p); // regard sans texte : seulement le temps affiché
-  return best;
+  n.hold = line.text.length ? 0 : holdFor(line.text, p); // regard sans texte : seulement le temps affiché
+  if (line.text) addLog(n, voice, line.text, p);
+}
+
+function addLog(n, voice, text, p) {
+  n.log.push({ voice, text });
+  if (n.log.length > p.logMax) n.log.shift();
+}
+
+// La k-ième réplique d'une conversation, comme une réplique ordinaire. Le héros garde son
+// expression d'une réplique à l'autre (prev) tant qu'une nouvelle n'est pas donnée.
+function stepLine(line, k, prev, p) {
+  const s = line.steps[k];
+  return {
+    id: `${line.id}~${k}`,
+    trigger: line.trigger,
+    text: s.text ?? '',
+    emotion: s.emotion ?? prev,
+    choices: s.choices,
+    wait: p.sceneWait && !!s.text,
+  };
+}
+
+// Une conversation est en cours (rien ne l'interrompt, le héros reste tourné vers le joueur).
+export function inScene(n) {
+  return n.scene !== null;
 }
 
 // Fin d'une réplique : silence, et peut-être un moment enchaîné.
 function end(n, data, p) {
-  const ended = n.line;
-  const voice = n.voice;
+  if (n.scene && n.scene.i + 1 < n.scene.line.steps.length) {
+    // Conversation : la réplique suivante, tout de suite.
+    const sc = n.scene;
+    sc.i++;
+    begin(n, stepLine(sc.line, sc.i, n.line.emotion ?? '', p), sc.line.steps[sc.i].voice ?? HERO, p);
+    return;
+  }
+  const ended = n.scene ? n.scene.line : n.line;
+  const voice = n.scene ? voiceOf(data.triggers[ended.trigger]) : n.voice;
+  n.scene = null;
   n.line = null;
   n.voice = '';
   n.lastSpoke = n.t;
@@ -137,6 +207,14 @@ function holdFor(text, p) {
 export function stepNarrator(n, data, dt, p) {
   n.t += dt;
   if (!n.line) {
+    // Un moment important qui attendait son tour passe avant tout le reste.
+    if (n.queue.length) {
+      const v = voiceOf(data.triggers[n.queue[0]] ?? {});
+      if ((v !== HERO && v !== GLANCE) || (p.asides && n.asideOk)) {
+        narrate(n, data, n.queue.shift(), p, true);
+        return 0;
+      }
+    }
     if (n.pending && n.t >= n.pending.at) {
       const { trigger } = n.pending;
       // Un aparté (ou regard) enchaîné attend que le héros soit disponible, p.followWait s au plus.
@@ -154,7 +232,7 @@ export function stepNarrator(n, data, dt, p) {
     if (n.shown >= len) n.hold = holdFor(n.line.text, p);
     return Math.floor(n.shown) - before;
   }
-  if (waitingAnswer(n)) return 0; // la réplique attend la réponse du joueur
+  if (waitingAnswer(n) || n.line.wait) return 0; // la réplique attend la réponse, ou un toucher du joueur
   n.hold -= dt;
   if (n.hold <= 0) end(n, data, p);
   return 0;
@@ -166,15 +244,15 @@ export function waitingAnswer(n) {
 }
 
 // Le joueur répond (k : 0 ou 1) : la confiance évolue, puis le héros répond à son tour.
-export function answer(n, k) {
+export function answer(n, k, p) {
   if (!waitingAnswer(n)) return null;
   const c = n.line.choices[k];
   if (!c) return null;
-  n.answered = k;
   n.trust += c.trust ?? 0;
-  n.line = { id: `${n.line.id}#${k}`, trigger: n.line.trigger, text: c.reply, emotion: c.emotion ?? n.line.emotion };
-  n.shown = 0;
-  n.hold = 0;
+  addLog(n, PLAYER, c.text, p); // la réponse du joueur, dans l'historique
+  const line = { id: `${n.line.id}#${k}`, trigger: n.line.trigger, text: c.reply, emotion: c.emotion ?? n.line.emotion, wait: n.line.wait };
+  begin(n, line, n.voice, p);
+  n.answered = k; // (begin remet à zéro : la réponse reste donnée)
   return n.line;
 }
 
@@ -188,11 +266,20 @@ export function skipNarrator(n, data, p) {
 }
 
 // Désactivation en cours de partie : tout se tait.
+// Une conversation en cours reprend depuis son début au prochain moment possible (elle n'est jamais perdue).
 export function silenceNarrator(n) {
+  if (n.scene) n.queue.unshift(n.scene.line.trigger);
+  if (n.scene) delete n.done[n.scene.line.trigger];
+  n.scene = null;
   n.answered = -1;
   n.line = null;
   n.voice = '';
   n.pending = null;
+}
+
+// La réplique en cours est entièrement écrite et attend un toucher du joueur (conversation).
+export function waitingTap(n) {
+  return !!n.line?.wait && n.shown >= n.line.text.length && !waitingAnswer(n);
 }
 
 // Inactivité : renvoie true une fois quand le joueur n'a rien fait depuis p.inactivity secondes.
