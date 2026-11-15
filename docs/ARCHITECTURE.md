@@ -71,6 +71,7 @@ Ils ne changent rien au jeu normal. Aujourd'hui (≈ 20 % du code) :
 | Diagnostic DBG (F3), rapport copiable | `ui/diagnostic.js` | Exigé par CLAUDE.md |
 | Banc d'essai + interrupteurs d'essai | `core/bench.js`, `ui/bench.js` | Exigé par CLAUDE.md |
 | Test rapide (variantes alternées, verdict) | `core/quicktest.js`, `ui/quicktest.js`, `ui/speedindex.js` | Sert à comparer deux versions sur le téléphone |
+| Points de départ (tests rapides : ⚙ → Départ, lien `?depart=<id>`) | `core/departs.js`, `data/departs.json`, `main.js` | Demandé par l'auteur (séance 48) ; recalculés à chaque chargement, pas une sauvegarde |
 | Fonctions d'essai `window.paperCart` | `main.js` | Présentes aussi en ligne (utiles au diagnostic et aux tests), sans danger |
 
 Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'auteur) : le test rapide le remplace. La campagne « rayon de devant » (DEVANT2) aussi (séance 47, décision de l'auteur) : le rayon de devant est désormais réduit à sa moitié haute.

@@ -1162,3 +1162,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .card-flip.anim-back1 { animation: card-out 0.2s ease-in reverse forwards; }
 .card-flip.anim-back2 { animation: card-in 0.22s ease-out reverse forwards; }
 .card-detail.closing { background: rgb(30 22 14 / 0); transition: background 0.4s; pointer-events: none; }
+/* ⚙ → Départ : un bouton par point de départ (tests rapides). */
+.depart-tools { display: grid; gap: 6px; padding: 4px 0 8px; }
+.depart-tools button { text-align: left; }
+.depart-tools button.current { font-weight: 700; outline: 2px solid currentColor; }

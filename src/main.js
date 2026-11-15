@@ -25,6 +25,8 @@ import narratorFile from './data/narrator.json';
 import playerFile from './data/joueur.json';
 import { playerName, fillName, OTHER, MAX_NAME } from './core/names.js';
 import { createNamePicker } from './ui/namePicker.js';
+import departsFile from './data/departs.json';
+import { findDepart, cardCount, pickProducts, saidFor } from './core/departs.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -490,6 +492,44 @@ function productScales() {
   return m;
 }
 
+// Prendre tout ce qui est au présentoir (Scanette, panier), sans marcher : tests et points de départ.
+function equipAll() {
+  pickupState.forEach((it, k) => {
+    if (takeItem(gear, pickupState, k)) {
+      sprite.setHeld(it.id, true);
+      basketUi.addObject(it.id);
+    }
+  });
+  basketUi.setCapacity(capacity(gear, config.carry));
+}
+
+// ---------- Points de départ (tests rapides) ----------
+// ⚙ → Départ, ou lien ?depart=<id> : le jeu se recharge, puis se met dans l'état choisi (data/departs.json).
+// Recalculé à partir du jeu actuel : reste valable après une mise à jour (ce n'est pas une sauvegarde).
+const departId = new URLSearchParams(location.search).get('depart');
+function goToDepart(id) {
+  const url = new URL(location.href);
+  if (id === 'debut') url.searchParams.delete('depart');
+  else url.searchParams.set('depart', id);
+  location.replace(url.href); // rechargement : on part d'un jeu propre
+}
+function applyDepart(def) {
+  sm.go('play'); // sans écran titre ni intro
+  if (def.equip) equipAll();
+  for (const t of saidFor(def)) narrator.done[t] = true;
+  if (def.equip) arrived = true; // pas d'annonce d'arrivée ni de premières pensées
+  // Cartes déjà dans le panier : des produits du rayon, retirés de l'étagère (sans effet de scan).
+  const free = products.items.map((it, i) => ({ i, category: it.def.category ?? 'alimentaire', ok: !productState[i].scanned })).filter((x) => x.ok);
+  for (const k of pickProducts(free, cardCount(def, capacity(gear, config.carry)))) {
+    const i = free[k].i;
+    const it = products.items[i];
+    products.remove(i);
+    productState[i].scanned = true;
+    basketUi.add(addToBasket(basket, it.id, it.def, i), imageUrlOf(it.def));
+  }
+  if (basket.cards.length) basketUi.setCount(basket.cards.length);
+}
+
 function imageUrlOf(def) {
   return loadedImages.get(def.image).url;
 }
@@ -571,7 +611,24 @@ const quickUi = createQuickTestUi(uiEl, {
 });
 const diagTools = document.createElement('div');
 diagTools.append(quickUi.launcher, benchUi.launcher);
-const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: diagTools } });
+// Onglet « Départ » : choisir où commencer (le jeu se recharge).
+const departTools = document.createElement('div');
+departTools.className = 'depart-tools';
+{
+  const note = document.createElement('p');
+  note.className = 'settings-note';
+  note.textContent = 'Pour tester vite : le jeu se recharge et commence à ce point. Lien direct : ajouter ?depart=<nom> à l’adresse.';
+  departTools.appendChild(note);
+  for (const d of departsFile.departs) {
+    const b = document.createElement('button');
+    b.textContent = d.label;
+    b.dataset.depart = d.id;
+    if (d.id === (departId ?? 'debut')) b.classList.add('current');
+    b.addEventListener('click', () => goToDepart(d.id));
+    departTools.appendChild(b);
+  }
+}
+const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: diagTools, Départ: departTools } });
 
 // ---------- Test rapide T0 / T1 / T2 ----------
 // Les variantes sont appliquées en mémoire seulement (rien n'est enregistré) et annulées à la fin.
@@ -1109,6 +1166,11 @@ async function start() {
   render();
   hud.ready();
   sm.go('title');
+  const depart = departId && findDepart(departsFile.departs, departId);
+  if (depart) {
+    titleUi.hide();
+    applyDepart(depart);
+  }
   requestAnimationFrame(frame);
 
   // Accès en lecture pour les tests automatiques et le débogage.
@@ -1124,15 +1186,7 @@ async function start() {
       narrator.done[trigger] = true;
     },
     journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
-    equip() {
-      pickupState.forEach((it, k) => {
-        if (takeItem(gear, pickupState, k)) {
-          sprite.setHeld(it.id, true);
-          basketUi.addObject(it.id);
-        }
-      });
-      basketUi.setCapacity(capacity(gear, config.carry));
-    },
+    equip: () => equipAll(),
     // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).
     startGame: () => startGame(false),
     narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, trust: narrator.trust, waiting: waitingAnswer(narrator), shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),

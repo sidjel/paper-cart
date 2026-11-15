@@ -50,7 +50,7 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
   } catch {
     /* pas de mémoire : premier onglet */
   }
-  if (!TUNABLES.some((t) => t.group === currentTab)) currentTab = TUNABLES[0].group;
+  if (!TUNABLES.some((t) => t.group === currentTab) && !extras[currentTab]) currentTab = TUNABLES[0].group;
   const tabBar = document.createElement('div');
   tabBar.className = 'settings-tabs';
   tabBar.setAttribute('role', 'tablist');
@@ -82,7 +82,9 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
     }
   }
 
-  for (const t of TUNABLES) {
+  // Onglets sans réglage, seulement un contenu ajouté (par exemple « Départ »).
+  const extraOnly = Object.keys(extras).filter((g) => !TUNABLES.some((t) => t.group === g)).map((g) => ({ group: g, key: null }));
+  for (const t of [...TUNABLES, ...extraOnly]) {
     if (t.group !== group && sections.has(t.group)) {
       // Thème déjà rencontré plus haut dans la liste : on complète son onglet.
       group = t.group;
@@ -122,6 +124,7 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
         section.appendChild(row);
       }
     }
+    if (!t.key) continue; // onglet sans réglage
     const row = document.createElement('label');
     row.className = 'setting';
     const name = document.createElement('span');

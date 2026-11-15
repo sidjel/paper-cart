@@ -12,6 +12,25 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 48 (suite) — Points de départ pour tester vite
+
+**Demande de l'auteur** : tester sans refaire tout le début (Scanette, panier, rencontre, nom, 6 scans…). Sauvegarde, choix de séquence, ou « passer la séquence » ?
+
+**Choix** : des **points de départ**. Une sauvegarde casserait à chaque mise à jour, et « passer la séquence » n'évite que les dialogues. Les départs sont recalculés à chaque chargement à partir du jeu actuel.
+
+**Jouable maintenant** : ⚙ → onglet **Départ**. Le jeu se recharge et commence au point choisi :
+- Début normal ;
+- Scanette et panier pris (la rencontre viendra au premier scan) ;
+- Équipé, rencontre faite ;
+- 3 cartes ;
+- Panier plein (6 cartes, dont la pile et la plante).
+
+Ou par lien direct : `?depart=equipe`, `libre`, `3-cartes`, `panier-plein`.
+
+**Vérifié** : 136 tests de logique (choix des produits, moments déjà passés) ; 71 tests navigateur PC et téléphone simulé, sans erreur console (liens directs, lien inconnu → début normal, onglet Départ qui recharge au bon point).
+
+---
+
 ## Séance 48 — 15/11/2026 — Panier : petites cartes, grande carte qui se retourne
 
 **Retours de l'auteur** :
