@@ -12,6 +12,20 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 50 (suite) — Correction n° 1 de l'audit : la rencontre ne se cache plus sous le Panier
+
+**Validé par l'auteur** : point 1 de l'audit.
+
+**Corrigé** :
+- Le Panier ne s'ouvre plus pendant un aparté ou une conversation (bouton, touche I, bouton Y).
+- Quand le Panier ou un menu est ouvert, le héros ne prend pas la parole : la rencontre attend qu'on revienne en jeu, puis commence normalement (il s'avance, « Hum ?… »).
+
+**Vérifié** : 140 tests de logique, 77 tests navigateur (nouveau test : Panier ouvert après la première carte, la rencontre attend ; touche I pendant la rencontre sans effet), sans erreur console.
+
+**Reste de l'audit** : points 5, 3, 2 + 4, 6, en attente de validation, un à la fois.
+
+---
+
 ## Séance 50 — 15/11/2026 — Nouvel ordre des étapes ; audit avant les lieux (aucun code modifié)
 
 **Décisions de l'auteur** (inscrites dans les documents) :

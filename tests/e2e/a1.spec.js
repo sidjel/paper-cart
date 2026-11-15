@@ -967,3 +967,29 @@ test('Panier : double toucher sur la grande carte : elle se retourne une fois et
   await expect(page.locator('.panier .card-mini').nth(1)).toHaveCSS('visibility', 'visible');
   expect(errors).toEqual([]);
 });
+
+test('A4 : la première rencontre attend que le Panier soit fermé, et le Panier ne s’ouvre pas pendant elle', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'clavier');
+  test.setTimeout(60_000);
+  await page.goto('./?depart=equipe');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  await page.evaluate(() => {
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0]]) window.paperCart.set(k, v);
+  });
+  await toBanana(page);
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => window.paperCart.scanState().cards.length === 1 && !window.paperCart.scanState().active);
+  // Le Panier ouvert juste après la première carte : la rencontre ne commence pas dessous.
+  await page.keyboard.press('KeyI');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('panier');
+  await page.waitForTimeout(4000);
+  expect(['', 'narrateur']).toContain((await narr(page)).voice);
+  expect((await page.evaluate(() => window.paperCart.journal())).join(' ')).not.toMatch(/Hum/);
+  // Panier fermé : elle commence, par la marche.
+  await page.keyboard.press('Escape');
+  await expect.poll(async () => (await narr(page)).voice, { timeout: 10000 }).toBe('marche');
+  // Pendant la rencontre, la touche du Panier ne fait rien.
+  await page.keyboard.press('KeyI');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+  expect(errors).toEqual([]);
+});

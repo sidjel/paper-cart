@@ -838,7 +838,8 @@ function handleAction(action) {
       break;
     case 'panier':
       if (sm.is('panier')) sm.go('play');
-      else if (sm.is('play') && !scan.active && gear.panier) sm.go('panier');
+      // Pas de Panier pendant un aparté ou une conversation (rien ne les interrompt).
+      else if (sm.is('play') && !scan.active && gear.panier && !heroAside()) sm.go('panier');
       break;
   }
 }
@@ -878,6 +879,8 @@ function toggleFullscreen() {
 }
 
 sm.onChange((now, before) => {
+  // Hors du jeu (Panier, menus), le héros ne prend pas la parole : un moment important attend le retour.
+  if (now !== 'play') narrator.asideOk = false;
   if (now === 'pause') journal.prepare(narrator.log);
   hud.setPaused(now === 'pause');
   audio.setState(now);
