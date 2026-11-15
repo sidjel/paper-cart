@@ -375,18 +375,25 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
   const mini = page.locator('.panier .card-mini');
   await expect(mini).toHaveCount(1);
   expect((await mini.boundingBox()).width).toBeLessThan(75); // deux fois plus petite (132 → 66 px)
-  // Les deux boutons Fermer : en haut à droite et en bas à droite.
+  // Les deux boutons Fermer : en haut à droite et en bas à droite du menu (dans le menu).
   const vp = page.viewportSize();
-  for (const b of await page.locator('.panier .kraft-close').all()) {
-    const r = await b.boundingBox();
-    expect(r.x + r.width).toBeGreaterThan(vp.width * 0.6);
+  const pr = await page.locator('.panier').boundingBox();
+  const [topBtn, bottomBtn] = await page.locator('.panier .kraft-close').all();
+  const t = await topBtn.boundingBox();
+  const b = await bottomBtn.boundingBox();
+  for (const r of [t, b]) {
+    expect(r.x + r.width).toBeLessThanOrEqual(pr.x + pr.width);
+    expect(r.x + r.width).toBeGreaterThan(pr.x + pr.width - 40); // collé au bord droit
   }
+  expect(t.y).toBeLessThan(pr.y + 40); // en haut
+  expect(b.y + b.height).toBeGreaterThan(pr.y + pr.height - 40); // en bas
   await page.screenshot({ path: `test-results/captures/panier-${info.project.name}-petites.png` });
   if (phone) await mini.tap();
   else await mini.click();
   // La grande carte : elle se retourne et montre son dos (la description), deux fois plus grande.
   const detail = page.locator('.card-detail');
   await expect(detail).toBeVisible();
+  await expect(detail.locator('button')).toHaveCount(0); // pas de bouton : on touche à côté pour refermer
   await expect(page.locator('.card-flip')).toHaveClass(/show-back/);
   await expect.poll(() => page.locator('.card-flip').getAttribute('class')).not.toMatch(/anim-/); // animation finie
   const backCard = page.locator('.card-flip .card-back');

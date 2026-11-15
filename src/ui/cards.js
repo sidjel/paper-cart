@@ -141,19 +141,15 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   row.appendChild(close);
   panel.append(head, tabs, filters, hint, empty, noneInFilter, grid, objList, row);
 
-  // Une carte touchée : elle se retourne comme une feuille et s'affiche en grand, sa description au dos.
+  // Une carte touchée : elle se retourne comme une feuille et s'affiche en grand, sa description au dos ;
+  // elle se referme en touchant à côté (ou Échap, B), sans bouton.
   // La grande carte est dessinée à sa taille (texte net), pas agrandie. Préparée une fois.
   const detail = document.createElement('div');
   detail.className = 'card-detail';
   detail.hidden = true;
   detail.setAttribute('role', 'dialog');
   detail.setAttribute('aria-label', 'Carte');
-  const dTop = document.createElement('button');
-  dTop.className = 'kraft-close card-detail-top';
-  dTop.textContent = 'Fermer ✕';
-  const dBottom = document.createElement('button');
-  dBottom.className = 'kraft-close card-detail-bottom';
-  dBottom.textContent = 'Fermer (Échap)';
+  detail.tabIndex = -1; // reçoit le focus (clavier, manette) ; on referme en touchant à côté, Échap ou B
   const flipper = document.createElement('div');
   flipper.className = 'card-flip';
   const front = buildCard({ name: '', power: 0, stage: 'frais', properties: [] }, '');
@@ -165,7 +161,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     <div class="card-props">${'<span></span>'.repeat(MAX_PROPS)}</div>
     <p class="card-back-stage"></p>`;
   flipper.append(front, back);
-  detail.append(dTop, flipper, dBottom);
+  detail.append(flipper);
   root.append(button, panel, detail);
   let detailCard = null;
   let backShown = false;
@@ -212,7 +208,6 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     back.querySelector('.card-back-stage').textContent = `Stade : ${(STAGE_INFO[card.card.stage] ?? STAGE_INFO.frais).label}`;
     setFace(false);
     detail.hidden = false;
-    panel.classList.add('detail-open'); // un seul jeu de boutons Fermer à la fois
     // Départ de l'animation : là où est la petite carte (mesuré une fois, à l'ouverture).
     const a = el.getBoundingClientRect();
     const b = flipper.getBoundingClientRect();
@@ -220,12 +215,11 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     flipper.style.setProperty('--fy', `${a.top + a.height / 2 - (b.top + b.height / 2)}px`);
     flipper.style.setProperty('--fs', String(a.width / b.width));
     animate('anim-in', 'anim-out', () => setFace(true));
-    dBottom.focus({ preventScroll: true });
+    detail.focus({ preventScroll: true });
   }
   function closeDetail() {
     if (detail.hidden) return;
     detail.hidden = true;
-    panel.classList.remove('detail-open');
     flipper.onanimationend = null;
     flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold');
     detailCard?.focus({ preventScroll: true });
@@ -234,12 +228,6 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
   // Toucher la grande carte : elle se retourne (recto, verso).
   function flipDetail() {
     animate('anim-fold', 'anim-unfold', () => setFace(!backShown));
-  }
-  for (const b of [dTop, dBottom]) {
-    b.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeDetail();
-    });
   }
   flipper.addEventListener('click', (e) => {
     e.stopPropagation();

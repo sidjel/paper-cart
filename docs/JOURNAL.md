@@ -25,8 +25,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
   - Elle montre son dos : catégorie, puissance, nom, description [TEMP], propriétés, stade.
   - La grande carte est dessinée à sa taille (texte net). Elle est deux fois plus grande que les cartes d'avant, ou moins si l'écran est trop bas pour qu'elle tienne.
   - Toucher la grande carte la retourne (recto, verso).
-- **Refermer** : boutons Fermer en papier kraft foncé, en haut et en bas à droite ; ou toucher à côté ; ou Échap / B.
-  - Le Panier a lui aussi ses boutons Fermer/Annuler en haut et en bas à droite.
+- **Refermer** : toucher à côté, ou Échap / B.
   - Clavier : Entrée ouvre. Manette : haut/bas choisit une carte, A ouvre ou retourne.
 - « Réduire les animations » : la carte s'affiche sans se retourner.
 
@@ -41,8 +40,11 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Comptages inchangés.
 - Captures des petites cartes et de la grande carte (PC, téléphone).
 
+**Correction demandée dans la même séance** :
+- La grande carte n'a plus de boutons : elle se referme en touchant à côté (ou Échap, B).
+- Les boutons Fermer/Annuler du Panier sont seulement en haut à droite et en bas à droite du menu (celui du bas est poussé en bas). Ils sont en kraft marron clair, texte foncé.
+
 **Décisions prises seul** :
-- Pendant que la grande carte est ouverte, les boutons du Panier sont cachés (un seul jeu de boutons Fermer).
 - En mode « panier plein », toucher une carte la repose toujours (pas de grande carte).
 
 ---
