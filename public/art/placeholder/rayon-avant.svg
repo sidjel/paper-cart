@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="4300" height="300" viewBox="0 780 4300 300">
-<!-- [TEMP] Rayon du premier plan, affiché en transparence. Généré, provisoire. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="4300" height="150" viewBox="0 780 4300 150">
+<!-- [TEMP] Rayon du premier plan, affiché en transparence. Généré, provisoire. Séance 46 : deux fois moins haut (choix de l'auteur) : seule la partie haute (produits et tablette) est montrée, posée en bas de l'écran ; le bas du rayon (montants, panneau perforé) reste dans le fichier mais hors du cadre. -->
 <defs><filter id="crayon" x="-2%" y="-5%" width="104%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter>
 <pattern id="trous2" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="3" fill="#6b6455"/></pattern></defs>
 <g filter="url(#crayon)">

@@ -215,7 +215,7 @@
         },
         {
           "voice": "heros",
-          "text": "[TEMP] Mon… Épaisseur. C'est comme ça que je vais t'appeler. On trouve la sortie ensemble ?",
+          "text": "[TEMP] {Mon… nom}. C'est comme ça que je vais t'appeler. On trouve la sortie ensemble ?",
           "emotion": "complice",
           "choices": [
             {
@@ -293,7 +293,7 @@
     {
       "id": "aparte_inactif_1",
       "trigger": "aparte_inactivite",
-      "text": "[TEMP] Hé, mon Épaisseur… tu es toujours là ? Je n'aime pas rester planté au milieu du rayon.",
+      "text": "[TEMP] Hé, {mon nom}… tu es toujours là ? Je n'aime pas rester planté au milieu du rayon.",
       "emotion": "inquiet"
     },
     {

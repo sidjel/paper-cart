@@ -22,6 +22,8 @@ import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } 
 import { createIntroUi } from './ui/intro.js';
 import introFile from './data/intro.json';
 import narratorFile from './data/narrator.json';
+import playerFile from './data/joueur.json';
+import { playerName, fillName } from './core/names.js';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
@@ -102,6 +104,11 @@ crt.hidden = true;
 uiEl.appendChild(crt);
 // Accessibilité : taille du texte, luminosité et contraste (un filtre seulement s'ils ne valent pas 1).
 const TEXT_SCALE = { petite: 0.85, normale: 1, grande: 1.2, 'tres-grande': 1.4 };
+// Effet des mots du joueur (l'écran qui parle) ; « réduire les animations » : aucun.
+function applyScreenFx() {
+  narratorUi.setScreenFx(config.display.reduceMotion ? 'aucun' : config.narrator.screenFx);
+}
+
 function applyAccess() {
   document.documentElement.style.setProperty('--ts', TEXT_SCALE[config.access.textSize] ?? 1);
   document.documentElement.style.setProperty('--narrator-alpha', config.display.narratorAlpha);
@@ -271,7 +278,9 @@ function takePickup(k) {
 // Logique dans core/narrator.js, répliques dans data/narrator.json. Les [TEMP] s'affichent sans préfixe,
 // avec des espaces insécables à la française (jamais un « ? » seul en début de ligne).
 const frenchSpaces = (t) => t.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
-const clean = (t) => frenchSpaces((t ?? '').replace(/^\[TEMP\]\s*/, ''));
+// Le nom du joueur (« mon Épaisseur », ou celui choisi dans les options) remplace ses repères.
+let who = playerName(playerFile.names, config.player.name, config.player.customName);
+const clean = (t) => frenchSpaces(fillName((t ?? '').replace(/^\[TEMP\]\s*/, ''), who));
 const cleanLine = (l) => ({
   ...l,
   text: clean(l.text),
@@ -279,8 +288,14 @@ const cleanLine = (l) => ({
   steps: l.steps?.map(cleanLine), // conversation : chaque réplique
 });
 const narratorData = { triggers: narratorFile.triggers, lines: narratorFile.lines.map(cleanLine) };
+// Nom changé dans les options : les répliques sont refaites (les prochaines l'emploient).
+function applyPlayerName() {
+  who = playerName(playerFile.names, config.player.name, config.player.customName);
+  narratorData.lines = narratorFile.lines.map(cleanLine);
+}
 const narrator = createNarrator();
 const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator), onChoose: (k) => answer(narrator, k, config.narrator) });
+applyScreenFx();
 let choiceFocus = 0; // réponse mise en avant (clavier, manette)
 let arrived = false;
 let endOfAisleX = Infinity;
@@ -367,6 +382,7 @@ function watchSceneWalk() {
 
 // Mise en scène de l'aparté : avance vers 1 pendant l'aparté, revient à 0 après (temps de jeu).
 let veilP = 0; // voile d'une rencontre importante (0 à 1)
+let sceneMode = false; // interface effacée (conversation en cours)
 function updateAside(dt) {
   // Pendant une marche ou une pensée de la conversation, pas encore de mise en scène (ni zoom).
   const goal = heroAside() && narrator.voice !== 'pensee' && narrator.voice !== 'marche' ? 1 : 0;
@@ -378,6 +394,12 @@ function updateAside(dt) {
   const vs = dt / Math.max(0.05, config.narrator.veilTime);
   veilP = approach(veilP, veilGoal, vs);
   asideFx.setVeil(veilP, config.narrator.veilBlur, still);
+  // Pendant une conversation avec le joueur, l'interface (boutons, Panier, version) s'efface.
+  const sceneOn = inScene(narrator);
+  if (sceneOn !== sceneMode) {
+    sceneMode = sceneOn;
+    uiEl.classList.toggle('scene-mode', sceneOn);
+  }
   stage.setZoom(still ? 1 : 1 + (config.narrator.asideZoom - 1) * ease(asideP));
   audio.setFrozen(asideP > 0);
 }
@@ -401,11 +423,12 @@ function updateNarrator(dt) {
   if (waitingAnswer(narrator)) narratorUi.choicesReady(choiceFocus);
   narratorUi.setWaiting(waitingTap(narrator));
   const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
-  const player = narrator.voice === 'epaisseur'; // le joueur : en haut de l'écran, sans petits bips
+  const player = narrator.voice === 'epaisseur'; // le joueur : l'écran parle, en bas, sans petits bips
   const every = config.narrator.blipEvery;
   if (letters > 0 && every > 0 && n % every === 0 && !player) audio.play(hero ? 'blipHeros' : 'blip');
-  if (player) narratorUi.placePlayer(hudLeft);
-  else if (hero) {
+  if (player) {
+    // (centré en bas par la feuille de style)
+  } else if (hero) {
     stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, head);
     narratorUi.placeBubble(head.x, head.y);
   } else if (speaker) {
@@ -1037,6 +1060,8 @@ async function start() {
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
+    if (key === 'narrator.screenFx' || key === 'display.reduceMotion') applyScreenFx();
+    if (key.startsWith('player.')) applyPlayerName();
     if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);

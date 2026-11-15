@@ -2,8 +2,9 @@
 //  - le haut-parleur du magasin : une bande sombre juste sous le haut-parleur (dessiné au plafond) d'où
 //    sort la voix, avec une pointe vers lui ; elle ne passe jamais sous les boutons du haut ;
 //  - les apartés du héros : une bulle de papier au-dessus de sa tête, qui le suit ;
-//  - la voix du joueur (son « Épaisseur »), dans une conversation : un cadre « Toi » en haut de l'écran,
-//    d'où il regarde.
+//  - la voix du joueur (son « Épaisseur »), dans une conversation : pas de bulle ni de cadre, c'est
+//    l'écran qui parle : des mots violets, centrés en bas, qui apparaissent un à un et ondulent
+//    (effet réglable : vague, souffle, aucun). Les mots sont des éléments créés au chargement (WORDS).
 // Une réplique qui attend un toucher (conversation) montre un petit ▾.
 // Le texte s'écrit lettre par lettre (avancement calculé dans core/narrator.js). La place du texte
 // entier est réservée dès le début (le reste est invisible) : rien ne change de taille.
@@ -13,6 +14,7 @@ const SPEAKER =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
 const MARGIN = 8; // marge au bord de l'écran (px)
+const WORDS = 60; // mots au plus dans une réplique du joueur
 const TAIL = 14; // hauteur de la pointe de la bulle (px)
 
 function textParts(el) {
@@ -49,11 +51,19 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
   });
 
   const player = document.createElement('div');
-  player.className = 'player-voice';
+  player.className = 'screen-voice fx-vague';
   player.hidden = true;
   player.setAttribute('role', 'status');
-  player.innerHTML = '<span class="player-voice-label">Toi</span><p class="player-voice-text"></p>';
-  const playerParts = textParts(player.querySelector('.player-voice-text'));
+  const words = [];
+  const wordStart = new Int32Array(WORDS); // indice de la première lettre de chaque mot
+  for (let k = 0; k < WORDS; k++) {
+    const w = document.createElement('span');
+    w.style.setProperty('--i', k); // décalage de la vague
+    player.appendChild(w);
+    words.push(w);
+  }
+  let wordCount = 0;
+  let wordsOn = 0;
 
   for (const el of [band, bubble, player]) {
     el.addEventListener('pointerdown', (e) => {
@@ -85,8 +95,31 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
       bubble.classList.toggle('thought', voice === 'pensee');
       if (current && current !== el) current.hidden = true;
       current = el;
-      parts = el === bubble ? bubbleParts : el === player ? playerParts : bandParts;
       el.classList.remove('tap');
+      if (el === player) {
+        // L'écran parle : les mots sont posés une fois, puis apparaissent un à un (setShown).
+        text = t;
+        count = -1;
+        wordCount = 0;
+        wordsOn = 0;
+        let i = 0;
+        for (const w of t.split(' ')) {
+          if (wordCount >= WORDS) break;
+          if (w) {
+            words[wordCount].textContent = w;
+            words[wordCount].classList.remove('on');
+            words[wordCount].hidden = false;
+            wordStart[wordCount++] = i;
+          }
+          i += w.length + 1;
+        }
+        for (let k = wordCount; k < WORDS; k++) words[k].hidden = true;
+        el.setAttribute('aria-label', t);
+        el.hidden = false;
+        el.classList.add('visible');
+        return;
+      }
+      parts = el === bubble ? bubbleParts : bandParts;
       text = t;
       count = -1;
       el.classList.toggle('still', still);
@@ -108,6 +141,10 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
     setShown(n) {
       if (n === count) return;
       count = n;
+      if (current === player) {
+        while (wordsOn < wordCount && wordStart[wordsOn] < n) words[wordsOn++].classList.add('on');
+        return;
+      }
       parts[0].textContent = text.slice(0, n);
       parts[1].textContent = text.slice(n);
     },
@@ -133,13 +170,9 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
     focusChoice(k) {
       choiceBtns[k]?.focus({ preventScroll: true });
     },
-    // Voix du joueur : en haut, au milieu, sans passer sous les boutons du haut (maxRight).
-    placePlayer(maxRight) {
-      if (current !== player) return;
-      const left = Math.max(MARGIN, Math.min(maxRight - bw - MARGIN, root.clientWidth / 2 - bw / 2));
-      if (Math.abs(left - lastX) < 0.5) return;
-      lastX = left;
-      player.style.transform = `translate3d(${left}px, 0, 0)`;
+    // Effet des mots de l'écran : 'vague', 'souffle' ou 'aucun' (« réduire les animations » : aucun).
+    setScreenFx(fx) {
+      for (const f of ['vague', 'souffle', 'aucun']) player.classList.toggle(`fx-${f}`, f === fx);
     },
     // La réplique est écrite et attend un toucher : petit ▾.
     setWaiting(w) {

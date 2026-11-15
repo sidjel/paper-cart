@@ -27,7 +27,7 @@
     },
     "rayon-avant": {
       "src": "art/placeholder/rayon-avant.svg",
-      "size": [4300, 300]
+      "size": [4300, 150]
     },
     "rayon-lointain": {
       "src": "art/placeholder/rayon-lointain.svg",
@@ -62,10 +62,10 @@
     {
       "id": "premier-plan",
       "image": "rayon-avant",
-      "position": [0, 780],
+      "position": [0, 930],
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
-      "contains": "rayon d'en face (côté caméra), en transparence",
+      "contains": "rayon d'en face (côté caméra), en transparence ; seulement sa partie haute (produits), deux fois moins haut depuis la séance 46",
       "hiddenBy": "rien"
     }
   ],

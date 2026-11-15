@@ -1,6 +1,9 @@
 // Toutes les valeurs réglables du jeu, à un seul endroit.
 // Chaque valeur listée dans TUNABLES apparaît dans le panneau de réglages (F2 ou ⚙).
 
+import playerFile from './data/joueur.json';
+import { OTHER, MAX_NAME, cleanName } from './core/names.js';
+
 export const config = {
   loop: {
     stepHz: 60, // pas fixe de la logique (déplacements), indépendant de l'affichage
@@ -33,6 +36,10 @@ export const config = {
     dustSize: 1.3, // taille du nuage (×)
     dustDuration: 0.45, // durée de vie du nuage (s)
     dustOpacity: 0.85, // opacité de départ du nuage
+  },
+  player: {
+    name: 'epaisseur', // comment le héros appelle le joueur (data/joueur.json), ou 'autre' : le nom tapé
+    customName: '', // le nom tapé par le joueur (choix « Autre »)
   },
   intro: {
     enabled: true, // texte d'introduction après « Commencer »
@@ -68,10 +75,11 @@ export const config = {
     glanceGap: 25, // petits regards caméra (sans texte) : au plus un toutes les N secondes
     followWait: 20, // un aparté enchaîné attend que le héros s'arrête, au plus N secondes
     sceneWait: true, // conversation : chaque réplique attend un toucher du joueur (sinon, elle passe seule)
-    meetZ: 110, // conversation : profondeur du point de rencontre (milieu de l'écran, un peu en avant)
+    meetZ: 20, // conversation : profondeur du point de rencontre (milieu de l'écran, un peu en avant)
     walkTimeout: 8, // conversation : une marche qui n'arrive pas (obstacle) se termine au bout de N s
     veilTime: 1.2, // voile de la rencontre (bords flous, vagues violettes) : apparition en N s
-    veilBlur: 6, // flou réel des bords (px) ; 0 = sans flou (seulement la brume violette, moins coûteux)
+    veilBlur: 0, // flou réel des bords (px), coûteux sur téléphone ; 0 = sans flou (vagues et lueur violettes seulement)
+    screenFx: 'vague', // la voix du joueur (l'écran qui parle) : 'vague' (mots qui ondulent), 'souffle' (la ligne respire) ou 'aucun'
     logMax: 40, // historique des dialogues (Pause → Dialogues) : nombre de répliques gardées (fixé au chargement)
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
@@ -238,6 +246,15 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.walkTimeout', label: 'Rencontre : marche abandonnée au bout de', min: 2, max: 20, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.veilTime', label: 'Rencontre : apparition du voile', min: 0.2, max: 4, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.veilBlur', label: 'Rencontre : flou des bords (0 = sans flou)', min: 0, max: 16, step: 1, unit: 'px' },
+  {
+    group: 'Narrateur', key: 'narrator.screenFx', label: 'Voix du joueur (l’écran qui parle) : effet', type: 'choice',
+    options: [['vague', 'Vague (les mots ondulent)'], ['souffle', 'Souffle (la ligne respire, moins coûteux)'], ['aucun', 'Aucun']],
+  },
+  {
+    group: 'Narrateur', key: 'player.name', label: 'Ton nom (comment le héros t’appelle)', type: 'choice',
+    options: [...playerFile.names.map((n) => [n.id, n.name]), [OTHER, 'Autre : ton propre nom']],
+  },
+  { group: 'Narrateur', key: 'player.customName', label: 'Ton propre nom (choix « Autre »)', type: 'text', maxLength: MAX_NAME },
   { group: 'Narrateur', key: 'narrator.sceneWait', label: 'Conversation : attendre un toucher entre les répliques', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.followWait', label: 'Aparté enchaîné : attendre que le héros s’arrête (max)', min: 0, max: 60, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
@@ -299,6 +316,7 @@ export function sanitize(key, value) {
   if (!t) return undefined;
   if (t.type === 'bool') return typeof value === 'boolean' ? value : undefined;
   if (t.type === 'choice') return t.options.some(([v]) => v === value) ? value : undefined;
+  if (t.type === 'text') return typeof value === 'string' ? cleanName(value) : undefined;
   const n = Number(value);
   if (!Number.isFinite(n)) return undefined;
   return Math.min(t.max, Math.max(t.min, n));

@@ -1,8 +1,10 @@
 // Mise en scène d'un aparté (le héros parle au joueur) : bandes « cinéma » en haut et en bas de
 // l'écran, et bords assombris. Deux éléments créés au chargement ; animés seulement en transform et
 // opacity, selon l'avancement p (0 = rien, 1 = aparté installé), calculé avec le temps de jeu.
-// Voile d'une rencontre importante : bords de l'écran flous (flou réel réglable, 0 = sans), et des
-// vagues violettes qui roulent des bords vers le centre (animation CSS en transform et opacity).
+// Voile d'une rencontre importante (« une autre dimension », le héros comme hypnotisé) : sur les quatre
+// bords, des traits ondulés violets qui défilent (haut vers la gauche, bas vers la droite, côtés en
+// sens contraires : l'œil croit voir tourner), une lueur violette qui palpite, et en option un flou réel
+// des bords (coûteux). Animations CSS en transform et opacity seulement.
 
 export function createAsideFx(root) {
   const vignette = document.createElement('div');
@@ -17,9 +19,11 @@ export function createAsideFx(root) {
   const veil = document.createElement('div');
   veil.className = 'aside-veil';
   veil.hidden = true;
-  veil.innerHTML = '<div class="veil-blur"></div><div class="veil-wave"></div><div class="veil-wave veil-wave-2"></div>';
+  veil.innerHTML =
+    '<div class="veil-blur"></div><div class="veil-glow"></div>' +
+    ['top', 'bottom', 'left', 'right'].map((side) => `<div class="veil-band veil-${side}"><div class="veil-lines"></div></div>`).join('');
   const veilBlur = veil.firstChild;
-  root.prepend(veil, vignette, top, bottom); // sous l'interface (boutons, bulle)
+  root.prepend(vignette, top, bottom, veil); // sous l'interface (boutons, bulle), au-dessus des bandes noires
   let last = -1;
   let lastVeil = -1;
   let lastBlur = -1;
@@ -29,6 +33,8 @@ export function createAsideFx(root) {
       if (p === lastVeil) return;
       lastVeil = p;
       veil.hidden = p <= 0;
+      top.classList.toggle('veiled', p > 0);
+      bottom.classList.toggle('veiled', p > 0);
       if (p <= 0) return;
       veil.style.opacity = p;
       veil.classList.toggle('still', still);

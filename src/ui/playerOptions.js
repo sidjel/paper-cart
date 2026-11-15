@@ -10,11 +10,11 @@ const SECTIONS = [
   ['Son', ['audio.muted', 'audio.master', 'audio.music', 'audio.steps', 'audio.scanVolume', 'audio.voiceVolume', 'audio.heroVolume']],
   ['Affichage', ['display.fullscreenMode', 'display.narratorAlpha', 'display.crt', 'display.crtStrength']],
   ['Accessibilité', ['access.textSize', 'narrator.speed', 'access.vibration', 'access.brightness', 'access.contrast', 'display.reduceMotion']],
-  ['Jeu', ['intro.enabled', 'narrator.enabled', 'input.virtualJoystick']],
+  ['Jeu', ['player.name', 'player.customName', 'intro.enabled', 'narrator.enabled', 'input.virtualJoystick']],
 ];
 
 function format(t, v) {
-  if (t.type === 'bool' || t.type === 'choice') return '';
+  if (t.type === 'bool' || t.type === 'choice' || t.type === 'text') return '';
   if (t.min === 0 && t.max === 1 && !t.unit) return `${Math.round(v * 100)} %`; // volumes, forces
   const d = t.step < 0.1 ? 2 : t.step < 1 ? 1 : 0;
   return `${Number(v).toFixed(d)}${t.unit ? ` ${t.unit}` : ''}`;
@@ -55,6 +55,13 @@ export function createPlayerOptions(root, { onClose }) {
         input = document.createElement('input');
         input.type = 'checkbox';
         input.addEventListener('change', () => setValue(key, input.checked));
+      } else if (t.type === 'text') {
+        input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = t.maxLength ?? 20;
+        input.autocomplete = 'off';
+        input.placeholder = 'Ton nom';
+        input.addEventListener('change', () => setValue(key, input.value));
       } else if (t.type === 'choice') {
         input = document.createElement('select');
         for (const [value, text] of t.options) input.add(new Option(text, value));
@@ -125,6 +132,7 @@ export function createPlayerOptions(root, { onClose }) {
       const r = rows.find((x) => x.input === document.activeElement);
       if (!r) return;
       const { t, input } = r;
+      if (t.type === 'text') return; // un nom se tape (gauche/droite déplacent le curseur)
       if (t.type === 'bool') setValue(t.key, !getValue(t.key));
       else if (t.type === 'choice') {
         const values = t.options.map((o) => o[0]);

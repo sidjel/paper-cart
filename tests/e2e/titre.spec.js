@@ -115,3 +115,22 @@ test('Options du joueur : au clavier (haut/bas, Échap)', async ({ page }, info)
   await page.keyboard.press('Escape');
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('title');
 });
+
+test('Options : le nom du joueur (une proposition, ou son propre nom tapé)', async ({ page }, info) => {
+  await page.locator('.title-button', { hasText: 'Options' }).click();
+  const panel = page.locator('.player-options');
+  const select = panel.locator('select[data-key="player.name"]');
+  await expect(select).toHaveValue('epaisseur'); // par défaut : Épaisseur
+  await expect(select.locator('option')).toContainText(['Épaisseur', 'Moitié', 'Double', 'Autre : ton propre nom']);
+  await select.selectOption('autre');
+  const field = panel.locator('input[data-key="player.customName"]');
+  await field.click();
+  // Taper un nom ne déclenche aucune commande du jeu (P = pause, I = Panier, D = droite…).
+  await page.keyboard.type('Pid<{}>');
+  await page.keyboard.press('Enter');
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('options');
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('paper-cart.reglages.v1') || '{}'));
+  expect(saved['player.name']).toBe('autre');
+  expect(saved['player.customName']).toBe('Pid');
+  await page.screenshot({ path: `test-results/captures/options-nom-${info.project.name}.png` });
+});

@@ -12,6 +12,47 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 46 — 15/11/2026 — L'écran qui parle, bords hypnotiques, nom du joueur, rayon du bas deux fois moins haut
+
+**Retours de l'auteur** :
+- Ce qui gêne :
+  - le cadre « Toi » ;
+  - aucune animation visible sur les bords ;
+  - le flou coûteux ;
+  - l'interface pendant les dialogues.
+- Ce qui manque :
+  - une voix du joueur en bas, en violet, qui ondule, comme si l'écran parlait ;
+  - des vagues hypnotiques ;
+  - le choix du nom du joueur ;
+  - un rayon du bas deux fois moins haut.
+- Réponses : 2 A (commentaire seulement après un « Non »).
+
+**Jouable maintenant** :
+- **La voix du joueur** : ni cadre ni nom. Des mots violets lumineux, centrés en bas dans la bande violette, apparaissent un à un et ondulent doucement. Effet au choix (⚙ → Narrateur) : vague, souffle (moins coûteux), aucun.
+- **Les bords de la rencontre** : traits ondulés violets qui défilent sur les quatre bords, en sens contraires (l'œil croit voir tourner), lueur violette qui palpite, bandes « cinéma » violet nuit. Le flou réel est retiré par défaut (il reste réglable).
+- **Interface effacée** pendant la conversation : boutons, Panier, version.
+- **Nom du joueur** (Options → Jeu) : Épaisseur par défaut, 11 propositions [TEMP], ou son propre nom. Le héros l'emploie (« Hé, ma Moitié… », « … Sid. C'est comme ça que je vais t'appeler »).
+- **Rayon du bas deux fois moins haut** (seulement les produits du haut), posé au bas de l'écran. Point de rencontre remis plus en avant.
+
+**Vérifié** :
+- 133 tests de logique, dont : nom et repères dans les répliques, nom tapé nettoyé.
+- 65 tests navigateur PC et téléphone simulé, sans erreur console, dont :
+  - la voix du joueur sans cadre, centrée en bas ;
+  - l'interface effacée ;
+  - un nom tapé sans déclencher de commande ;
+  - le nom enregistré.
+- Comptages, avant puis après : surface affichée 1,88 → 1,74 écran ; images en mémoire 6,01 → 5,57 Mpx ; le reste inchangé.
+
+**À vérifier par l'auteur** :
+- la fluidité pendant la rencontre (vagues), sur le téléphone ;
+- le gain du rayon du bas, avec le banc d'essai. Sur le téléphone, la moitié haute du rayon coûtait ×0,70 (séances 23 et 25).
+
+**Décisions prises seul** :
+- Police de la voix du joueur : une police à empattements déjà présente sur le téléphone (aucune nouvelle ressource).
+- Dans le remplissage des noms, un nom tapé s'emploie seul (« Sid », sans « mon »).
+
+---
+
 ## Séance 45 — 15/11/2026 — La rencontre : il s'avance au milieu de l'écran, voile flou et violet ; plus de double message pendant l'échange
 
 **Retours de l'auteur** :

@@ -22,7 +22,7 @@ function save() {
 }
 
 function formatValue(t, v) {
-  if (t.type === 'bool' || t.type === 'choice') return '';
+  if (t.type === 'bool' || t.type === 'choice' || t.type === 'text') return '';
   const decimals = t.step < 0.1 ? 2 : t.step < 1 ? 1 : 0;
   return `${Number(v).toFixed(decimals).replace('.', ',')}${t.unit ? ` ${t.unit}` : ''}`;
 }
@@ -135,6 +135,12 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
       input = document.createElement('input');
       input.type = 'checkbox';
       input.addEventListener('change', () => setValue(t.key, input.checked));
+    } else if (t.type === 'text') {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = t.maxLength ?? 20;
+      input.autocomplete = 'off';
+      input.addEventListener('change', () => setValue(t.key, input.value));
     } else if (t.type === 'choice') {
       input = document.createElement('select');
       for (const [value, label] of t.options) input.add(new Option(label, value));

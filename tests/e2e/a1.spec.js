@@ -343,7 +343,7 @@ test('campagne « rayon de devant » n° 2 (version courte) : chaque variante es
   expect(Math.abs(await offset())).toBeGreaterThan(1);
   await at('G4');
   await page.waitForTimeout(250);
-  expect(await state()).toEqual({ opacite: '0.55', hauteur: '150px', coupe: 'hidden' });
+  expect(await state()).toEqual({ opacite: '0.55', hauteur: '75px', coupe: 'hidden' });
   await at('G3');
   await page.waitForTimeout(800);
   expect(await state()).toEqual({ opacite: '0.55', hauteur: '', coupe: '' });
@@ -552,8 +552,8 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   const x0 = (await hero(page)).x;
   await expect.poll(async () => (await narr(page)).voice, { timeout: 10000 }).toBe('marche');
   await expect(page.locator('.aside-veil')).toBeVisible();
-  await expect.poll(async () => (await narr(page)).text, { timeout: 10000 }).toMatch(/Hum/);
-  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-hum.png` });
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-marche.png` });
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.journal())).join(' '), { timeout: 10000 }).toMatch(/pensee: Hum/);
   await expect.poll(async () => (await narr(page)).voice, { timeout: 20000 }).toBe('heros');
   expect(Math.abs((await hero(page)).x - x0)).toBeGreaterThan(50);
   const bubble = page.locator('.hero-bubble');
@@ -580,16 +580,20 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   for (let k = 0; k < 10 && !(await narr(page)).text.includes('Qui es-tu'); k++) await next(bubble);
   expect((await narr(page)).text).toMatch(/Qui es-tu/);
   await next(bubble);
-  // Le joueur répond, sans choix : cadre « Toi » en haut de l'écran.
-  const player = page.locator('.player-voice');
+  // Le joueur répond, sans choix : c'est l'écran qui parle (mots violets, centrés en bas, sans cadre).
+  const player = page.locator('.screen-voice');
   await expect(player).toBeVisible();
   expect((await narr(page)).voice).toBe('epaisseur');
-  await expect(player).toContainText('Toi');
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-toi.png` });
+  await expect(player).not.toContainText('Toi');
+  expect(await player.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
+  const vp = page.viewportSize();
   const pb = await player.boundingBox();
-  const hb = await page.locator('.hud-bar').boundingBox();
-  expect(pb.x + pb.width).toBeLessThanOrEqual(hb.x);
+  expect(pb.y + pb.height).toBeGreaterThan(vp.height * 0.8); // en bas
+  expect(Math.abs(pb.x + pb.width / 2 - vp.width / 2)).toBeLessThan(4); // centré
+  // Pendant la conversation, l'interface (boutons, Panier) s'efface.
+  expect(Number(await page.locator('.hud-bar').evaluate((e) => getComputedStyle(e).opacity))).toBeLessThan(0.05);
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-toi.png` });
   for (let k = 0; k < 12 && !(await narr(page)).waiting; k++) {
     const v = (await narr(page)).voice;
     await next(v === 'epaisseur' ? player : bubble);

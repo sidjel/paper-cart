@@ -36,6 +36,12 @@ export function createKeyboard(onAction) {
   }
 
   window.addEventListener('keydown', (e) => {
+    // Dans un champ de texte (le nom du joueur), les touches écrivent : seuls Échap (fermer) et Entrée
+    // (valider le nom) sortent du champ.
+    if (e.target?.tagName === 'INPUT' && e.target.type === 'text') {
+      if (e.code === 'Enter' || e.code === 'NumpadEnter') e.target.blur();
+      if (e.code !== 'Escape') return;
+    }
     const action = ACTIONS[e.code];
     // Sur un bouton ou un réglage, Entrée et Espace gardent leur rôle habituel (cliquer, cocher).
     if (action === 'action' && e.target && /^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;

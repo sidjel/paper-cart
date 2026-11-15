@@ -1,0 +1,17 @@
+{
+  "comment": "Noms possibles du joueur (comment le héros l'appelle). mon : le possessif qui va avec (« mon Épaisseur », « ma Moitié »). Dans les répliques : {mon nom} → « mon Épaisseur », {Mon… nom} → « Mon… Épaisseur » (le héros hésite), {nom} → « Épaisseur ». Un nom choisi par le joueur s'emploie seul (« Sid », « … Sid »). [TEMP] liste à revoir par l'auteur.",
+  "names": [
+    { "id": "epaisseur", "name": "Épaisseur", "mon": "mon" },
+    { "id": "moitie", "name": "Moitié", "mon": "ma" },
+    { "id": "double", "name": "Double", "mon": "mon" },
+    { "id": "relief", "name": "Relief", "mon": "mon" },
+    { "id": "volonte", "name": "Volonté", "mon": "ma" },
+    { "id": "conscience", "name": "Conscience", "mon": "ma" },
+    { "id": "regard", "name": "Regard", "mon": "mon" },
+    { "id": "ombre", "name": "Ombre", "mon": "mon" },
+    { "id": "subconscient", "name": "Subconscient", "mon": "mon" },
+    { "id": "surmoi", "name": "Sur-moi", "mon": "mon" },
+    { "id": "ange", "name": "Ange gardien", "mon": "mon" },
+    { "id": "decideur", "name": "Décideur", "mon": "mon" }
+  ]
+}

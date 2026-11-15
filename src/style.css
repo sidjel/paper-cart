@@ -596,30 +596,41 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-bottom: 2px solid var(--ink);
   transform: rotate(45deg);
 }
-/* Voix du joueur (son « Épaisseur ») dans une conversation : en haut, d'où il regarde ; nuit et bleu clair,
-   les couleurs de l'écran titre (le monde du joueur, hors du magasin). Placée en largeur par le code. */
-.player-voice {
+/* Voix du joueur (son « Épaisseur ») : c'est l'écran qui parle. Pas de bulle ni de cadre : des mots
+   violets lumineux, centrés en bas, dans la bande violette ; ils apparaissent un à un et ondulent.
+   Animations en transform et opacity seulement (le halo est dessiné une fois, puis seulement déplacé). */
+.screen-voice {
   position: absolute;
-  top: calc(var(--safe-top) + 4px);
-  left: 0;
-  max-width: min(520px, calc(100% - 330px));
-  padding: 8px 14px 10px;
-  background: rgb(21 24 39 / 0.92);
-  color: #e6edf5;
-  border: 2px solid #8fd3ff;
-  border-radius: 10px;
-  box-shadow: 0 0 18px rgb(143 211 255 / 0.25);
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 1.5vh);
+  width: min(86vw, 900px);
+  transform: translateX(-50%);
+  text-align: center;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: calc(19px * var(--ts, 1));
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  color: #e3ccff;
+  text-shadow: 0 0 10px rgb(168 108 255 / 0.95), 0 0 2px rgb(60 20 110 / 1);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
   z-index: 22;
 }
-.player-voice[hidden] { display: none; }
-.player-voice.visible { opacity: 1; }
-.player-voice-label { display: block; margin-bottom: 2px; color: #8fd3ff; font-size: calc(11px * var(--ts, 1)); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
-.player-voice-text { margin: 0; font-size: calc(15px * var(--ts, 1)); line-height: 1.35; }
+.screen-voice span { display: inline-block; margin: 0 0.16em; opacity: 0; transition: opacity 0.45s; }
+.screen-voice span.on { opacity: 1; }
+.screen-voice.fx-vague span { animation: screen-wave 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.22s); }
+.screen-voice.fx-souffle { animation: screen-breath 3.2s ease-in-out infinite; }
+@keyframes screen-wave { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+@keyframes screen-breath { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.025); } }
+.screen-voice.tap::after {
+  content: '▾';
+  display: inline-block;
+  margin-left: 0.3em;
+  color: #e3ccff;
+  animation: tap-blink 0.9s ease-in-out infinite;
+}
+@media (max-height: 460px) { .screen-voice { font-size: calc(16px * var(--ts, 1)); bottom: calc(var(--safe-bottom) + 0.5vh); } }
 /* Réplique écrite qui attend un toucher : petit ▾ qui palpite en bas à droite. */
-.hero-bubble.tap::after, .player-voice.tap::after {
+.hero-bubble.tap::after {
   content: '▾';
   position: absolute;
   right: 8px;
@@ -628,14 +639,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   font-style: normal;
   animation: tap-blink 0.9s ease-in-out infinite;
 }
-.player-voice.tap::after { color: #8fd3ff; }
 .still.tap::after { animation: none; }
 @keyframes tap-blink { 50% { opacity: 0.25; } }
-@media (prefers-reduced-motion: reduce) { .hero-bubble.tap::after, .player-voice.tap::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-bubble.tap::after { animation: none; } }
 @media (max-height: 460px) {
   .narrator { max-width: calc(100% - 300px); padding: 7px 12px 8px 10px; }
-  .narrator-text, .hero-bubble-text, .player-voice-text { font-size: calc(14px * var(--ts, 1)); }
-  .player-voice { max-width: calc(100% - 300px); }
+  .narrator-text, .hero-bubble-text { font-size: calc(14px * var(--ts, 1)); }
 }
 
 /* Ondes sous le haut-parleur qui parle (dans la scène). */
@@ -667,7 +676,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   pointer-events: none;
   will-change: opacity;
 }
-/* Voile de la rencontre : bords flous et vagues violettes ; le centre (le héros) reste net. */
+/* Voile de la rencontre (une autre dimension, le héros hypnotisé) : traits ondulés violets qui défilent
+   sur les quatre bords (sens contraires : l'œil croit voir tourner), lueur qui palpite ; flou réel en
+   option (--veil-blur, 0 = sans). Le centre (le héros) reste net. Transform et opacity seulement. */
 .aside-veil { position: absolute; inset: 0; pointer-events: none; overflow: hidden; will-change: opacity; }
 .aside-veil[hidden], .veil-blur[hidden] { display: none; }
 .veil-blur {
@@ -678,25 +689,45 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 55%, transparent 55%, #000 100%);
   mask-image: radial-gradient(ellipse 62% 66% at 50% 55%, transparent 55%, #000 100%);
 }
-.veil-wave {
+.veil-glow {
   position: absolute;
-  inset: -12%;
-  background: radial-gradient(ellipse 60% 64% at 50% 55%, rgb(120 70 190 / 0) 52%, rgb(150 90 220 / 0.55) 70%, rgb(90 40 150 / 0.75) 100%);
+  inset: 0;
+  background: radial-gradient(ellipse 64% 62% at 50% 52%, rgb(110 50 190 / 0) 50%, rgb(120 60 200 / 0.35) 78%, rgb(70 25 130 / 0.7) 100%);
+  animation: veil-pulse 4.2s ease-in-out infinite;
+  will-change: opacity;
+}
+@keyframes veil-pulse { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
+.veil-band { position: absolute; overflow: hidden; }
+.veil-top, .veil-bottom { left: 0; right: 0; height: 24vh; }
+.veil-top { top: 0; -webkit-mask-image: linear-gradient(#000 35%, transparent); mask-image: linear-gradient(#000 35%, transparent); }
+.veil-bottom { bottom: 0; -webkit-mask-image: linear-gradient(transparent, #000 65%); mask-image: linear-gradient(transparent, #000 65%); }
+.veil-left, .veil-right { top: 0; bottom: 0; width: 13vw; }
+.veil-left { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 30%, transparent); mask-image: linear-gradient(90deg, #000 30%, transparent); }
+.veil-right { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 30%, transparent); mask-image: linear-gradient(270deg, #000 30%, transparent); }
+.veil-lines { position: absolute; will-change: transform; }
+.veil-top .veil-lines, .veil-bottom .veil-lines {
+  left: 0; top: 0; bottom: 0; width: calc(100% + 240px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M0 24C40 6 80 6 120 24S200 42 240 24' stroke='%23c79bff' stroke-width='3' stroke-opacity='.9'/%3E%3Cpath d='M0 60C40 36 80 36 120 60S200 84 240 60' stroke='%239a5cf0' stroke-width='4' stroke-opacity='.75'/%3E%3Cpath d='M0 96C40 82 80 82 120 96S200 110 240 96' stroke='%23e2c8ff' stroke-width='2' stroke-opacity='.6'/%3E%3C/g%3E%3C/svg%3E") repeat-x 0 50% / 240px 100%;
+}
+.veil-left .veil-lines, .veil-right .veil-lines {
+  top: 0; left: 0; right: 0; height: calc(100% + 240px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='240'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M24 0C6 40 6 80 24 120S42 200 24 240' stroke='%23c79bff' stroke-width='3' stroke-opacity='.9'/%3E%3Cpath d='M60 0C36 40 36 80 60 120S84 200 60 240' stroke='%239a5cf0' stroke-width='4' stroke-opacity='.75'/%3E%3Cpath d='M96 0C82 40 82 80 96 120S110 200 96 240' stroke='%23e2c8ff' stroke-width='2' stroke-opacity='.6'/%3E%3C/g%3E%3C/svg%3E") repeat-y 50% 0 / 100% 240px;
+}
+.veil-top .veil-lines { animation: veil-x 6s linear infinite; }
+.veil-bottom .veil-lines { animation: veil-x 7s linear infinite reverse; }
+.veil-left .veil-lines { animation: veil-y 6.5s linear infinite reverse; }
+.veil-right .veil-lines { animation: veil-y 5.5s linear infinite; }
+@keyframes veil-x { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-240px, 0, 0); } }
+@keyframes veil-y { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -240px, 0); } }
+/* « Réduire les animations » (option du jeu) : tout reste immobile. */
+.aside-veil.still .veil-lines, .aside-veil.still .veil-glow { animation: none; }
+/* Pendant le voile, les bandes « cinéma » prennent une teinte violet nuit. */
+.aside-bar.veiled { background: #1a0f2b; }
+/* Conversation avec le joueur : l'interface s'efface (boutons, Panier, version, aide). */
+#ui > .hud-bar, #ui > .panier-button, #ui > .version, #ui > .hint { transition: opacity 0.4s; }
+#ui.scene-mode > .hud-bar, #ui.scene-mode > .panier-button, #ui.scene-mode > .version, #ui.scene-mode > .hint, #ui.scene-mode > .scan-button.visible {
   opacity: 0;
-  animation: veil-wave 3.6s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-.veil-wave-2 { animation-delay: -1.8s; }
-@keyframes veil-wave {
-  0% { transform: scale(1.18); opacity: 0; }
-  45% { opacity: 0.85; }
-  100% { transform: scale(0.96); opacity: 0; }
-}
-.aside-veil.still .veil-wave { animation: none; transform: none; opacity: 0.55; }
-.aside-veil.still .veil-wave-2 { display: none; }
-@media (prefers-reduced-motion: reduce) {
-  .veil-wave { animation: none; transform: none; opacity: 0.55; }
-  .veil-wave-2 { display: none; }
+  pointer-events: none;
 }
 .aside-bar {
   position: absolute;
@@ -844,6 +875,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .po-value { font-size: calc(13px * var(--ts, 1)); color: #b9c7d6; text-align: right; font-variant-numeric: tabular-nums; }
 .player-options input, .player-options select { accent-color: #8fd3ff; }
 .player-options select { background: #141a28; color: #e6edf5; border: 1px solid #8fd3ff; border-radius: 6px; padding: 4px; }
+.player-options input[type='text'] { background: #141a28; color: #e6edf5; border: 1px solid #8fd3ff; border-radius: 6px; padding: 4px 8px; font: inherit; min-width: 0; }
+.player-options input[type='text']::placeholder { color: #6f7f95; }
 .player-options :focus-visible { outline: 2px solid #8fd3ff; outline-offset: 3px; }
 .po-back {
   align-self: center;
