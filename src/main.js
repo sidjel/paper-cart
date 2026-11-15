@@ -12,7 +12,6 @@ import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
 import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from './core/narrator.js';
-import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
 import { createConfirm } from './ui/confirm.js';
@@ -36,17 +35,14 @@ import { createBench, stepBench, placeAtStart } from './core/bench.js';
 import { createBenchUi } from './ui/bench.js';
 import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds, QUICK_SUITES } from './core/quicktest.js';
 import { createQuickTestUi } from './ui/quicktest.js';
-import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
-import { createStage } from './scene/stage.js';
+import { assetStats, computeRasterScale, loadImages, releaseImages } from './scene/assets.js';
+import { createPlaceView } from './scene/placeView.js';
 import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
-import { createDebugMask } from './scene/debugMask.js';
 import { createTargetMarker } from './scene/targetMarker.js';
-import { createProps } from './scene/props.js';
 import { actorLevel } from './scene/depth.js';
 import { createDust } from './scene/dust.js';
 import { createCamera, updateCamera } from './scene/camera.js';
-import { createProducts } from './scene/products.js';
 import { createBasketUi, createFlyingCard } from './ui/cards.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
@@ -55,10 +51,13 @@ import { createDiagnostic } from './ui/diagnostic.js';
 import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
 import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
-import place from './data/places/rayon-essai.json';
+import rayonEssai from './data/places/rayon-essai.json';
 import heroData from './data/characters/heros.json';
 import catalog from './data/products.json';
 
+// Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
+const PLACES = { [rayonEssai.id]: rayonEssai };
+let place = rayonEssai;
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;
 const touch = matchMedia('(pointer: coarse)').matches;
@@ -324,7 +323,6 @@ const namePicker = createNamePicker(uiEl, {
 let choiceFocus = 0; // réponse mise en avant (clavier, manette)
 let arrived = false;
 let endOfAisleX = Infinity;
-const CONSIGNE_X = 900; // s'éloigner de l'accueil sans Scanette : le haut-parleur le rappelle
 let voiceLine = null; // réplique affichée
 let speakerWaves = null; // ondes sous le haut-parleur qui parle
 let speaker = null; // [x, y] du haut-parleur d'où sort l'annonce en cours
@@ -496,7 +494,8 @@ function watchNarrator(dt) {
   // Le tournis : trop de demi-tours, trop vite → étoiles, et il s'en plaint dès qu'il s'arrête.
   if (stepDizzy(dizzy, narrator.t, walker.facing, walker.moving, config.dizzy) && !inScene(narrator)) say('tournis');
   if (walker.x >= endOfAisleX) say('bout_du_rayon');
-  if (!gear.scanette && walker.x > CONSIGNE_X) say('consigne_scanette');
+  // S'éloigner du présentoir sans Scanette (point fixé par les données du lieu) : le haut-parleur le rappelle.
+  if (!gear.scanette && walker.x > (place.accueil?.remindAfterX ?? Infinity)) say('consigne_scanette');
 }
 
 function scanProduct(i) {
@@ -512,8 +511,10 @@ function scanProduct(i) {
 function productScales() {
   const m = new Map();
   const add = (id, k) => m.set(id, Math.max(m.get(id) ?? 0, k));
-  for (const it of place.shelfProducts.items) add(it.product, 1);
-  for (const it of place.looseProducts?.items ?? []) add(it.product, it.scale ?? 1);
+  for (const pl of Object.values(PLACES)) {
+    for (const it of pl.shelfProducts?.items ?? []) add(it.product, 1);
+    for (const it of pl.looseProducts?.items ?? []) add(it.product, it.scale ?? 1);
+  }
   return m;
 }
 
@@ -662,7 +663,7 @@ let quickSavedReduce = false;
 function applyVariant(variant) {
   config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
   stage.applyOpacity(); // rayon de devant comme dans le jeu…
-  if (variant === 'T2') stage.layers['premier-plan'].style.opacity = 0; // … ou invisible (T2)
+  if (variant === 'T2' && stage.layers['premier-plan']) stage.layers['premier-plan'].style.opacity = 0; // … ou invisible (T2)
 }
 
 async function startQuick(params, suite = 'T012') {
@@ -725,8 +726,9 @@ function activeSwitches() {
 let savedDust = true;
 function applySwitches(on) {
   const b = config.bench;
-  stage.layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
-  stage.layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
+  // (un lieu peut ne pas avoir ces calques)
+  if (stage.layers['premier-plan']) stage.layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
+  if (stage.layers.lointain) stage.layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
   sprite.shadowEl.style.display = on && b.noShadow ? 'none' : '';
   if (on) {
     savedDust = config.character.dust;
@@ -1069,6 +1071,7 @@ function frame(now) {
   last = now;
   input.pollDevices();
   audio.update();
+  if (!placeView) return; // changement de lieu en cours : rien ne bouge
   const playing = sm.is('play');
   if (playing) {
     const n = stepper.advance(dt / 1000);
@@ -1118,34 +1121,21 @@ function frame(now) {
   diag.frame(dt, performance.now() - t0, playing);
 }
 
-async function start() {
-  const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
-  const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
+// ---------- Lieux : charger, afficher, quitter ----------
+// Les images communes (héros, poussière, produits) restent chargées ; celles du lieu sont libérées en partant.
+let placeView = null; // vue du lieu affiché (scene/placeView.js)
+let placeImages = null;
+const backstage = document.createElement('div'); // où attendent le héros, la poussière et le repère hors d'un lieu
+
+async function loadPlace(id) {
+  place = PLACES[id];
   const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
   assetStats.rasterScale = rasterScale;
-  const entries = [
-    ...Object.entries(place.images).map(([id, im]) => ({ id, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
-    // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
-    ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
-    { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
-    // Produits à scanner (préparés à leur plus grande taille d'affichage).
-    ...[...productScales()].map(([id, k]) => {
-      const def = catalog.products[id];
-      return { id: def.image, url: BASE + def.image, w: def.size[0], h: def.size[1], scale: rasterScale * k };
-    }),
-  ];
-  const images = await loadImages(entries);
-  loadedImages = images;
-
-  stage = createStage(gameEl, place, images, getValue);
+  // Décodées avant l'affichage.
+  placeImages = await loadImages(Object.entries(place.images).map(([key, im]) => ({ id: key, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })));
   proj = createProjection(place.projection, config.scene);
   mask = compileMask(place.walkMask);
-  walker = createWalker(place.spawn[0], place.spawn[1]);
-  endOfAisleX = Math.max(...place.walkMask.area.map((pt) => pt[0])) - 150; // le narrateur remarque le bout du rayon
-  marker = createTargetMarker(stage.layers.acteurs);
-  props = createProps(place, images, stage.layers.acteurs, proj);
-  stage.el.classList.toggle('props-layered', config.display.propLayers);
-  speakerWaves = createSpeakerWaves(stage.layers.acteurs);
+  endOfAisleX = Math.max(...place.walkMask.area.map((pt) => pt[0])) - 150; // le narrateur remarque le bout du lieu
   // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
   const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
   const here = enterPlace(world, place.id, () => ({
@@ -1154,22 +1144,59 @@ async function start() {
   }));
   productState = here.products;
   pickupState = here.pickups;
-  products = createProducts(productState, images, stage.layers.produits, stage.layers.acteurs, config.scan, config.display, {
-    parent: stage.layers.acteurs,
-    levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
-  });
-  depthRefs = props.map((p) => p.depthRef);
-  dust = createDust(stage.layers.acteurs, images.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
-  sprite = createCharacterSprite(heroData, images, stage.layers.acteurs, config.character, config.display, onFrameEvent);
-  debugMask = createDebugMask(stage.el, place, proj, props);
-  debugMask.setVisible(config.debug.showWalkMask);
+  placeView = createPlaceView(gameEl, place, placeImages, loadedImages, here, proj, config, getValue);
+  ({ stage, props, depthRefs, products, speakerWaves, debugMask } = placeView);
+  // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
+  marker.mount(stage.layers.acteurs);
+  dust.mount(stage.layers.acteurs);
+  sprite.mount(stage.layers.acteurs);
+  highlighted = -2; // le bouton d'action est recalculé
+  pickupReach = -2;
+  pendingScan = -1;
+  camera.ready = false;
+  lastCamTime = -1;
+  layout();
+}
+
+function unloadPlace() {
+  if (!placeView) return;
+  marker.hide();
+  marker.mount(backstage);
+  dust.mount(backstage);
+  sprite.mount(backstage);
+  placeView.destroy();
+  placeView = null;
+  stage = null;
+  releaseImages(placeImages);
+}
+
+async function start() {
+  const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
+  const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
+  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
+  // Images communes à tous les lieux.
+  loadedImages = await loadImages([
+    // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
+    ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
+    { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
+    // Produits à scanner (préparés à leur plus grande taille d'affichage).
+    ...[...productScales()].map(([id, k]) => {
+      const def = catalog.products[id];
+      return { id: def.image, url: BASE + def.image, w: def.size[0], h: def.size[1], scale: rasterScale * k };
+    }),
+  ]);
+  walker = createWalker(place.spawn[0], place.spawn[1]);
+  marker = createTargetMarker(backstage);
+  dust = createDust(backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
+  sprite = createCharacterSprite(heroData, loadedImages, backstage, config.character, config.display, onFrameEvent);
+  await loadPlace(place.id);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
-    if (key === 'debug.showWalkMask') debugMask.setVisible(value);
+    if (key === 'debug.showWalkMask') debugMask?.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
-    if (key === 'display.foregroundOpacity') stage.applyOpacity();
+    if (key === 'display.foregroundOpacity') stage?.applyOpacity();
     if (key === 'display.fullscreenMode') {
       // Le choix se fait d'un geste (dans le panneau) : on peut entrer en plein écran tout de suite.
       if (value === 'oui') enterLandscape();
@@ -1179,7 +1206,7 @@ async function start() {
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') applyScreenFx();
     if (key.startsWith('player.')) applyPlayerName();
-    if (key === 'display.propLayers') stage.el.classList.toggle('props-layered', value);
+    if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
     if (key === 'carry.panier') basketUi.setCapacity(capacity(gear, config.carry));
@@ -1223,6 +1250,13 @@ async function start() {
       narrator.done[trigger] = true;
     },
     flips: () => flips,
+    // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
+    async reloadPlace() {
+      const id = place.id;
+      unloadPlace();
+      await loadPlace(id);
+      render();
+    },
     dizzy: () => ({ count: dizzy.count, times: dizzy.times.length, facing: walker.facing, moving: walker.moving, t: narrator.t }),
     journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
     equip: () => equipAll(),

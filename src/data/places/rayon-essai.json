@@ -1,7 +1,10 @@
 {
   "id": "rayon-essai",
   "name": "[TEMP] Rayon 7 — rayon d'essai (version longue)",
-  "size": [3600, 1080],
+  "size": [
+    3600,
+    1080
+  ],
   "projection": {
     "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond).",
     "floorFrontY": 880,
@@ -11,34 +14,55 @@
   "images": {
     "rayon-fond": {
       "src": "art/placeholder/rayon-fond.svg",
-      "size": [3600, 1080]
+      "size": [
+        3600,
+        1080
+      ]
     },
     "presentoir-crousti": {
       "src": "art/placeholder/presentoir-crousti.svg",
-      "size": [290, 315]
+      "size": [
+        290,
+        315
+      ]
     },
     "caddie": {
       "src": "art/placeholder/caddie.svg",
-      "size": [335, 250]
+      "size": [
+        335,
+        250
+      ]
     },
     "petite-table": {
       "src": "art/placeholder/petite-table.svg",
-      "size": [230, 140]
+      "size": [
+        230,
+        140
+      ]
     },
     "rayon-avant": {
       "src": "art/placeholder/rayon-avant.svg",
-      "size": [4300, 150]
+      "size": [
+        4300,
+        150
+      ]
     },
     "rayon-lointain": {
       "src": "art/placeholder/rayon-lointain.svg",
-      "size": [3600, 470]
+      "size": [
+        3600,
+        470
+      ]
     }
   },
   "layers": [
     {
       "id": "lointain",
       "image": "rayon-lointain",
-      "position": [0, 150],
+      "position": [
+        0,
+        150
+      ],
       "parallax": 0.55,
       "contains": "rayons qui se perdent au loin (magasin sans fin)",
       "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
@@ -62,33 +86,124 @@
     {
       "id": "premier-plan",
       "image": "rayon-avant",
-      "position": [0, 930],
+      "position": [
+        0,
+        930
+      ],
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
       "contains": "rayon d'en face (côté caméra), en transparence ; seulement sa partie haute (produits), deux fois moins haut depuis la séance 46",
       "hiddenBy": "rien"
     }
   ],
-  "spawn": [300, 60],
+  "spawn": [
+    300,
+    60
+  ],
   "walkMask": {
     "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond, -195 = tout en bas de l'écran, derrière le rayon du premier plan). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage.",
-    "area": [[90, -195], [3510, -195], [3510, 264], [90, 264]],
+    "area": [
+      [
+        90,
+        -195
+      ],
+      [
+        3510,
+        -195
+      ],
+      [
+        3510,
+        264
+      ],
+      [
+        90,
+        264
+      ]
+    ],
     "obstacles": [
       {
         "name": "Présentoir Crousti-Gouffre",
-        "points": [[595, 98], [905, 98], [905, 182], [595, 182]]
+        "points": [
+          [
+            595,
+            98
+          ],
+          [
+            905,
+            98
+          ],
+          [
+            905,
+            182
+          ],
+          [
+            595,
+            182
+          ]
+        ]
       },
       {
         "name": "Caddie abandonné",
-        "points": [[1265, 105], [1570, 105], [1570, 150], [1265, 150]]
+        "points": [
+          [
+            1265,
+            105
+          ],
+          [
+            1570,
+            105
+          ],
+          [
+            1570,
+            150
+          ],
+          [
+            1265,
+            150
+          ]
+        ]
       },
       {
         "name": "Présentoir Crousti-Gouffre n°2",
-        "points": [[2495, 98], [2805, 98], [2805, 182], [2495, 182]]
+        "points": [
+          [
+            2495,
+            98
+          ],
+          [
+            2805,
+            98
+          ],
+          [
+            2805,
+            182
+          ],
+          [
+            2495,
+            182
+          ]
+        ]
       },
       {
         "name": "Petite table de dégustation",
-        "points": [[2960, 28], [3140, 28], [3140, 78], [2960, 78]]
+        "points": [
+          [
+            2960,
+            28
+          ],
+          [
+            3140,
+            28
+          ],
+          [
+            3140,
+            78
+          ],
+          [
+            2960,
+            78
+          ]
+        ]
       }
     ]
   },
@@ -96,86 +211,181 @@
     {
       "id": "presentoir-crousti",
       "image": "presentoir-crousti",
-      "at": [750, 110],
-      "anchor": [135, 300],
+      "at": [
+        750,
+        110
+      ],
+      "anchor": [
+        135,
+        300
+      ],
       "depthRef": 140,
       "comment": "at : point du sol sous le bord avant, au milieu. depthRef : profondeur à laquelle le personnage passe de devant à derrière."
     },
     {
       "id": "caddie",
       "image": "caddie",
-      "at": [1417, 120],
-      "anchor": [212, 230],
+      "at": [
+        1417,
+        120
+      ],
+      "anchor": [
+        212,
+        230
+      ],
       "depthRef": 127
     },
     {
       "id": "presentoir-crousti-2",
       "image": "presentoir-crousti",
-      "at": [2650, 110],
-      "anchor": [135, 300],
+      "at": [
+        2650,
+        110
+      ],
+      "anchor": [
+        135,
+        300
+      ],
       "depthRef": 140
     },
     {
       "id": "petite-table",
       "image": "petite-table",
-      "at": [3050, 40],
-      "anchor": [115, 136],
+      "at": [
+        3050,
+        40
+      ],
+      "anchor": [
+        115,
+        136
+      ],
       "depthRef": 56
     }
   ],
   "accueil": {
-    "comment": "Accueil en libre-service (A5a), dessiné dans le décor du fond (rayon-fond.svg) au début du rayon : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). On les prend depuis le pied de l'étagère.",
+    "remindAfterX": 900,
+    "comment": "Accueil en libre-service (A5a), dessiné dans le décor du fond (rayon-fond.svg) au début du rayon : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). On les prend depuis le pied de l'étagère. remindAfterX : s'éloigner au-delà sans Scanette fait réagir le haut-parleur.",
     "items": [
-      { "id": "scanette", "at": [222, 340], "w": 384, "h": 270 },
-      { "id": "panier", "at": [472, 470], "w": 110, "h": 140 }
+      {
+        "id": "scanette",
+        "at": [
+          222,
+          340
+        ],
+        "w": 384,
+        "h": 270
+      },
+      {
+        "id": "panier",
+        "at": [
+          472,
+          470
+        ],
+        "w": 110,
+        "h": 140
+      }
     ]
   },
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
-    "items": [[600, 68], [1300, 68], [1980, 68], [2470, 68], [3340, 68]]
+    "items": [
+      [
+        600,
+        68
+      ],
+      [
+        1300,
+        68
+      ],
+      [
+        1980,
+        68
+      ],
+      [
+        2470,
+        68
+      ],
+      [
+        3340,
+        68
+      ]
+    ]
   },
   "bench": {
     "comment": "Banc d'essai : parcours automatique, toujours le même. Passe derrière les objets, descend derrière le rayon de devant, fait des allers-retours (retournements) et des arrêts (respiration). Revient au départ.",
-    "start": [300, 60],
+    "start": [
+      300,
+      60
+    ],
     "route": [
       {
-        "to": [1100, 60]
+        "to": [
+          1100,
+          60
+        ]
       },
       {
         "wait": 0.8
       },
       {
-        "to": [1100, 240]
+        "to": [
+          1100,
+          240
+        ]
       },
       {
-        "to": [750, 230]
+        "to": [
+          750,
+          230
+        ]
       },
       {
-        "to": [750, 40]
+        "to": [
+          750,
+          40
+        ]
       },
       {
-        "to": [1400, 220]
+        "to": [
+          1400,
+          220
+        ]
       },
       {
-        "to": [2000, -180]
+        "to": [
+          2000,
+          -180
+        ]
       },
       {
         "wait": 0.6
       },
       {
-        "to": [3300, 200]
+        "to": [
+          3300,
+          200
+        ]
       },
       {
         "wait": 1
       },
       {
-        "to": [2650, 230]
+        "to": [
+          2650,
+          230
+        ]
       },
       {
-        "to": [2650, 30]
+        "to": [
+          2650,
+          30
+        ]
       },
       {
-        "to": [300, 60]
+        "to": [
+          300,
+          60
+        ]
       },
       {
         "wait": 0.6
@@ -184,14 +394,62 @@
   },
   "diagnostic": {
     "comment": "Test rapide : aller-retour en ligne droite entre a et b (aucun obstacle). En caméra fixe, la caméra est centrée entre a et b.",
-    "a": [1300, 40],
-    "b": [2300, 40]
+    "a": [
+      1300,
+      40
+    ],
+    "b": [
+      2300,
+      40
+    ]
   },
   "looseProducts": {
     "comment": "[ESSAI] Produits posés ailleurs que sur l'étagère du fond : on les scanne de profil, de face ou de dos selon où l'on se tient. at = [x, z] dans le monde ; lift = hauteur (px de scène) entre le sol en at et le bas du produit ; on = objet du décor qui le porte (le produit est dessiné juste au-dessus de lui) ; scale = taille ; standAt = endroits où se placer pour le scanner (double toucher).",
     "items": [
-      { "product": "pomme", "at": [3050, 50], "lift": 104, "scale": 1.2, "on": "petite-table", "standAt": [[2900, 50], [3200, 50], [3050, 130]] },
-      { "product": "oeufs", "at": [1360, 120], "lift": 160, "scale": 1.1, "on": "caddie", "standAt": [[1205, 120], [1360, 200]] }
+      {
+        "product": "pomme",
+        "at": [
+          3050,
+          50
+        ],
+        "lift": 104,
+        "scale": 1.2,
+        "on": "petite-table",
+        "standAt": [
+          [
+            2900,
+            50
+          ],
+          [
+            3200,
+            50
+          ],
+          [
+            3050,
+            130
+          ]
+        ]
+      },
+      {
+        "product": "oeufs",
+        "at": [
+          1360,
+          120
+        ],
+        "lift": 160,
+        "scale": 1.1,
+        "on": "caddie",
+        "standAt": [
+          [
+            1205,
+            120
+          ],
+          [
+            1360,
+            200
+          ]
+        ]
+      }
     ]
   },
   "shelfProducts": {
@@ -199,43 +457,73 @@
     "items": [
       {
         "product": "banane",
-        "at": [720, 282]
+        "at": [
+          720,
+          282
+        ]
       },
       {
         "product": "lait",
-        "at": [560, 394]
+        "at": [
+          560,
+          394
+        ]
       },
       {
         "product": "cereales",
-        "at": [1000, 506]
+        "at": [
+          1000,
+          506
+        ]
       },
       {
         "product": "baguette",
-        "at": [1180, 282]
+        "at": [
+          1180,
+          282
+        ]
       },
       {
         "product": "steak",
-        "at": [1440, 394]
+        "at": [
+          1440,
+          394
+        ]
       },
       {
         "product": "pile",
-        "at": [1720, 506]
+        "at": [
+          1720,
+          506
+        ]
       },
       {
         "product": "glace",
-        "at": [1940, 282]
+        "at": [
+          1940,
+          282
+        ]
       },
       {
         "product": "biere",
-        "at": [2440, 394]
+        "at": [
+          2440,
+          394
+        ]
       },
       {
         "product": "plante",
-        "at": [2900, 282]
+        "at": [
+          2900,
+          282
+        ]
       },
       {
         "product": "fromage",
-        "at": [3380, 394]
+        "at": [
+          3380,
+          394
+        ]
       }
     ]
   }

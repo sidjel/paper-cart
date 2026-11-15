@@ -96,7 +96,7 @@ Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidit
 
 ## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
 
-Aujourd'hui 🔎 : un seul lieu, importé en dur dans `main.js` et jamais libéré. Ces règles s'appliquent dès le premier changement de lieu.
+Aujourd'hui 🔎 (séance 50) : un seul lieu, mais il se construit, se quitte et se reconstruit (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont libérées en partant (`releaseImages`), celles du héros et des produits restent ; l'état du monde est dans `core/world.js`. ⏳ Restent pour A6 : l'état « transition » et le fondu, les sorties dans les données, le préchargement des voisins, le banc sur plusieurs lieux.
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).
 - **Un seul gestionnaire de lieux**, avec un cycle de vie : préchargement → décodage avant affichage → utilisation → **libération de la mémoire en partant**. Seuls le lieu affiché et au plus ses voisins directs restent chargés.

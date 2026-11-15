@@ -280,5 +280,11 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     lastLevel = level;
   }
 
-  return { el: root, shadowEl: shadow, render, setLevel, setHeld, stats };
+  // Passe sur le calque des acteurs du lieu affiché (l'ombre d'abord, dessinée avant lui).
+  function mount(to) {
+    to.appendChild(shadow);
+    to.appendChild(root);
+  }
+
+  return { el: root, shadowEl: shadow, render, setLevel, setHeld, mount, stats };
 }

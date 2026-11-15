@@ -69,3 +69,14 @@ export async function loadImages(entries) {
   assetStats.loadMs = Math.round(performance.now() - t0);
   return out;
 }
+
+// Libère les images d'un lieu qu'on quitte : mémoire rendue, compteurs mis à jour.
+export function releaseImages(images) {
+  for (const im of images.values()) {
+    im.el.removeAttribute('src');
+    URL.revokeObjectURL(im.url);
+    assetStats.images -= 1;
+    assetStats.pixels -= im.pw * im.ph;
+  }
+  images.clear();
+}

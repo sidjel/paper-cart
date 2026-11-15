@@ -6,6 +6,10 @@ export function createTargetMarker(parent) {
   parent.appendChild(el);
   let visible = false;
   return {
+    // Passe sur le calque des acteurs du lieu affiché.
+    mount(to) {
+      to.appendChild(el);
+    },
     showAt(sx, sy) {
       el.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
       el.classList.add('visible');

@@ -55,3 +55,29 @@ test('⚙ → Départ : choisir « 3 cartes » recharge le jeu à ce point', asy
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   await expect(page.locator('.panier-count')).toHaveText('3/6');
 });
+
+test('lieux : quitter le lieu et y revenir — le monde se souvient, rien ne s’accumule', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'une fois suffit');
+  await page.goto('./?depart=3-cartes');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  const count = () => page.evaluate(() => ({
+    images: window.paperCart.assets().images,
+    pixels: window.paperCart.assets().pixels,
+    stages: document.querySelectorAll('.stage').length,
+    elements: document.querySelectorAll('#game *').length,
+    scanned: window.paperCart.products().filter((p) => p.scanned).length,
+  }));
+  const before = await count();
+  expect(before.scanned).toBe(3);
+  for (let k = 0; k < 3; k++) await page.evaluate(() => window.paperCart.reloadPlace());
+  expect(await count()).toEqual(before); // mêmes images en mémoire, même nombre d'éléments, mêmes produits scannés
+  await expect(page.locator('.product:visible')).toHaveCount(await page.evaluate(() => window.paperCart.products().length) - 3);
+  await expect(page.locator('.actor-frame:visible')).toHaveCount(1); // le héros est toujours là
+  // Et le jeu continue : il marche, puis scanne.
+  const x0 = (await page.evaluate(() => window.paperCart.hero())).x;
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('ArrowRight');
+  expect((await page.evaluate(() => window.paperCart.hero())).x).toBeGreaterThan(x0 + 50);
+  await page.screenshot({ path: `test-results/captures/lieu-recharge-${info.project.name}.png` });
+});

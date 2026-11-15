@@ -28,6 +28,10 @@ export function createDust(parent, image, anchor, settings, display) {
   const counter = { spawns: 0 }; // pour le diagnostic
   return {
     counter,
+    // Passe sur le calque des acteurs du lieu affiché.
+    mount(to) {
+      for (const it of items) to.appendChild(it.el);
+    },
     // (sx, sy) : pieds du personnage sur la scène ; facing : 1 vers la droite, -1 vers la gauche.
     spawn(sx, sy, facing, scale, level, time) {
       if (!settings.dust || display.reduceMotion) return;
