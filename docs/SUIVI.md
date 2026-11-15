@@ -168,7 +168,13 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | Audit de l'architecture, comparaison avec l'ancien ARCHITECTURE.md de Maxi-Gouffre | 29 | ✅ | Organisation validée : docs/ARCHITECTURE.md (créé), docs/PROTOTYPES.md (plan recopié tel quel), ancien document en archive, SUIVI allégé. |
 | Outils de mesure peut-être obsolètes (diagnostic en 4 configurations, campagne DEVANT2) | 29 | ✅ | Séance 30 (choix B) : **diagnostic en 4 configurations retiré** ; DEVANT2 gardée jusqu'à ce qu'on revoie le rayon de devant. |
-| Découper src/main.js (≈ 590 lignes depuis la séance 30) | 29 | 🔧 | À la prochaine séance qui le touche beaucoup (A4 probablement). |
+| Découper src/main.js (≈ 1 250 lignes à la séance 50) | 29 | 🔧 | Repris dans l'audit de la séance 50 (point 11) : en attente de validation. |
+| Nouvel ordre des étapes : A6 l'accueil (lieu séparé), A7 le deuxième rayon, A8 le caddie (ancien A5b, échange au comptoir de l'accueil) | 50 | ✅ | Inscrit dans PROTOTYPES.md et GAME_DESIGN.md. Contenu d'A6 (hall, portiques, agent qui bloque le portique visé, annonce, pensée « Hum… étrange… ») et d'A7 (deux entrées, arrivée du bon côté) noté dans PROTOTYPES.md. |
+| Le caddie ne suit pas le héros d'un lieu à l'autre : il reste garé là où on l'a laissé | 50 | ✅ | GAME_DESIGN.md (pour A8). |
+| Plan du magasin (affiche ou dépliant, dans les Objets) pour retrouver son caddie ; « plan », pas « carte » | 50 | ❓ | GAME_DESIGN.md. Plus tard. |
+| Règles des lieux (données, gestionnaire avec cycle de vie, transition par la machine à états, le monde se souvient, mesures) | 50 | ✅ | Écrites dans ARCHITECTURE.md §11, avant de coder A6. |
+| Audit de l'architecture et de la fluidité avant A6 et A7, sans rien modifier | 50 | ❓ | Fait (rapport dans le JOURNAL, séance 50). 15 points ; **l'auteur valide une correction à la fois**, banc d'essai sur le téléphone avant et après pour la fluidité. |
+| (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | 🔧 | Reproduit en jouant. Correction proposée (point 1 de l'audit), en attente de validation. |
 
 ## Interface
 | Demande | Séance | État | Notes |

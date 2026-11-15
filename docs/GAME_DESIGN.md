@@ -1,6 +1,6 @@
 # Game design (hors combat)
 
-> Lire seulement pour A5 (caddie) et les systèmes hors combat. Balises : ✅ VALIDÉ · 🧪 À TESTER · ❓ À DÉFINIR · [TEMP] provisoire.
+> Lire seulement pour A5 à A8 (accueil, caddie) et les systèmes hors combat. Balises : ✅ VALIDÉ · 🧪 À TESTER · ❓ À DÉFINIR · [TEMP] provisoire.
 > Combat, vieillissement, combos : `REGLES_CARTES_COMBAT.md`. Plan des étapes : `PROTOTYPES.md`.
 
 ## Exploration ✅ VALIDÉ
@@ -20,12 +20,14 @@
 - **Carte reposée** ✅ VALIDÉ (séances 38-39) : une fenêtre demande d'abord « Échanger une carte ? Oui / Non » ; le produit de la carte reposée apparaît **à la place du produit qu'on vient de scanner** (échange) et peut être rescanné.
 - ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ ; [TEMP] panier = 6) ; qui donne le jeton (voir `HISTOIRE.md`).
 
-## Étape A5 en deux temps ✅ VALIDÉ
-- **A5a** : l'accueil au début du rayon (présentoir de Scanettes et de paniers) ; le héros prend les deux ; le panier se porte à la main, capacité limitée.
-- **A5b** : un jeton posé dans le rayon pour l'essai ; retour à l'accueil pour échanger le panier contre le caddie.
+## Ordre des étapes ✅ VALIDÉ (séance 50, détail dans `PROTOTYPES.md`)
+- **A5** (ancien A5a) : accueil provisoire au début du rayon ; le héros prend Scanette et panier ; capacité limitée.
+- **A6** l'accueil (lieu séparé) → **A7** le deuxième rayon → **A8** le caddie (ancien A5b) : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**.
 
-## Le Caddie jouable (A5b) ✅ VALIDÉ
-- **Panier physique** qui suit le personnage.
+## Le Caddie jouable (A8) ✅ VALIDÉ
+- **Panier physique** qui suit le personnage **dans le lieu où il se trouve**.
+- ✅ VALIDÉ (séance 50) : il **ne suit pas le héros d'un lieu à l'autre**. Il reste **garé là où le joueur l'a laissé** : le joueur en est responsable.
+- ❓ À DÉFINIR (séance 50) : plus tard, le joueur trouvera un **plan du magasin** (une affiche ou un dépliant, rangé dans les Objets) qui l'aidera notamment à retrouver son caddie. On dit « **plan** » et non « carte », pour ne pas confondre avec les cartes de jeu.
 - Ne le bloque pas ; pas de physique complexe.
 - Peut être **garé** et **repris**.
 - Change de visuel selon son remplissage.

@@ -84,7 +84,7 @@ Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'au
 
 ## 9. Prévu, pas encore construit ⏳
 
-Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidité) · étape caddie (A5) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅) · lieux chargés à la demande (dès le deuxième lieu ✅).
+Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidité) · A6 l'accueil (lieu séparé), A7 le deuxième rayon, A8 le caddie (règles des lieux : §11) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅) · lieux chargés à la demande (dès le deuxième lieu ✅).
 
 ## 10. Héritage de Maxi-Gouffre
 
@@ -93,3 +93,13 @@ Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidit
 - **Adapté** : canevas permis au chargement (pas d'interdiction absolue) ; Vite au lieu de « pas de bundler » ; réglages modifiables en jouant (pas de constantes gelées) ; scène qui s'adapte à toute forme d'écran (pas de profils fixes) ; repère de 300 lignes, pas une règle.
 - **Pas repris** : branches, demandes de fusion et étiquettes par jalon (ici : travail direct sur `main`) ; Store, EventBus, Session, copie de l'état à chaque action (trop lourds pour une boucle à 60 Hz sur téléphone) ; modèle de combat, cartes à 3 stades nommés, campagne, sauvegarde, Android (Capacitor) et feuille de route : **règles ou projets de l'ancien jeu, à ne pas appliquer sans décision de l'auteur**.
 - **Idées en réserve, à reconsidérer le moment venu** : choix des répliques du narrateur par une fonction pure (A4) ; scénarios de débogage et simulation de combats (B) ; sauvegarde par un seul module avec version des données (quand une partie se sauvegardera).
+
+## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
+
+Aujourd'hui 🔎 : un seul lieu, importé en dur dans `main.js` et jamais libéré. Ces règles s'appliquent dès le premier changement de lieu.
+
+- **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).
+- **Un seul gestionnaire de lieux**, avec un cycle de vie : préchargement → décodage avant affichage → utilisation → **libération de la mémoire en partant**. Seuls le lieu affiché et au plus ses voisins directs restent chargés.
+- **Transition courte (fondu) gérée par la machine à états** : rien ne bouge et rien ne se charge à l'écran pendant le changement de lieu.
+- **Le monde se souvient** : un produit scanné reste scanné au retour, un caddie garé reste garé ; les cartes et les objets suivent le héros.
+- **Mesures** : comptages **par lieu** ; banc d'essai qui traverse les trois lieux et les transitions ; mémoire contrôlée après plusieurs allers-retours (elle ne doit pas grimper) ; temps de transition mesuré sur le téléphone.

@@ -12,6 +12,46 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 50 — 15/11/2026 — Nouvel ordre des étapes ; audit avant les lieux (aucun code modifié)
+
+**Décisions de l'auteur** (inscrites dans les documents) :
+- Ordre : **A6 l'accueil** (lieu séparé), **A7 le deuxième rayon**, **A8 le caddie** (ancien A5b, échange au comptoir de l'accueil) → `PROTOTYPES.md`.
+- Caddie : il ne suit pas le héros d'un lieu à l'autre, il reste garé (✅) ; plan du magasin pour le retrouver (❓) → `GAME_DESIGN.md`.
+- Règles des lieux → `ARCHITECTURE.md` §11.
+
+**Audit** : tout `src/` et `tests/` lus, ainsi que les documents techniques. Aucun fichier de code modifié. Deux défauts soupçonnés à la lecture ont été reproduits en jouant (script hors du projet).
+
+**Priorité 1 — défaut pour le joueur (reproduit)**
+1. La première rencontre peut se dérouler **cachée sous le Panier** (ouvrir le Panier juste après la première carte), et le Panier s'ouvre **pendant** la rencontre (touche I, bouton Y). Cause : sous le Panier, les voix continuent d'avancer. Effort : petit.
+
+**Priorité 2 — ce qui bloque le passage à plusieurs lieux**
+2. Le lieu est câblé en dur : `import place` dans `main.js` (≈ 25 usages), tout est créé une fois sans pouvoir être détruit ; calques nommés en dur dans le banc ; règles propres au rayon dans `main.js` (rappel de la Scanette à x = 900, bout du rayon, présentoir). Effort : gros (c'est le premier pas d'A6).
+3. La mémoire du monde est éparpillée et en double : produits tenus à la fois par la scène et par `main.js`, recopiés à la main en 3 endroits ; une carte retient un numéro de produit valable seulement dans le lieu courant. Effort : moyen.
+4. Les images ne sont jamais libérées (adresses jamais révoquées, compteurs cumulés, héros et lieu chargés ensemble). Effort : petit à moyen.
+5. Machine à états : pas d'état « transition » ; 7 sous-états vivent hors de la machine (question Oui / Non, grande carte, mode du Panier, choix du nom, conversation, fondu d'intro, test rapide), arbitrés par une chaîne de conditions ordonnée. Le défaut n° 1 vient de là. Effort : moyen.
+
+**Priorité 3 — fluidité visible à la lecture (à mesurer sur le téléphone, une chose à la fois)**
+6. Le chemin est recalculé à **chaque mouvement du doigt** maintenu (plusieurs fois par image), lourd quand un objet barre la ligne droite. Effort : petit.
+7. La page est mesurée (`getBoundingClientRect`) à chaque image où une bulle ou les étoiles sont affichées, et à chaque mouvement du doigt. Effort : petit.
+8. Des éléments sont créés en plein jeu au moment du scan (carte du Panier, carte qui vole, icône d'objet) : contraire à la règle, et invisible pour le test des comptages (le banc ne scanne pas). Effort : petit à moyen.
+9. Les animations CSS (voile, étoiles, mots, ▾) continuent en pause et sous les menus. Effort : petit.
+10. La rencontre empile jusqu'à 60 calques animés (un par mot, halo flou), 4 bandes masquées et une lueur plein écran : jamais mesuré sur le téléphone. Mesurer d'abord.
+
+**Priorité 4 — entretien**
+11. `main.js` : 1 247 lignes, 7 rôles (le document dit « ≈ 590, à découper »). Effort : moyen.
+12. Logique hors de `core/` : panier plein et échange, points à prendre, marche de la rencontre, règles de la grande carte (`ui/cards.js`, 488 lignes ; 3 bugs en séance 49, non testables sans navigateur). Effort : petit à moyen.
+13. Code mort : `setTarget`, `playerOptions.open_`, `sprite.stats`, `dust.counter`. Effort : petit.
+14. Écarts documents / code : ARCHITECTURE (modules récents absents, « main.js ≈ 590 », « seule exception au temps de jeu : le double toucher », « rien n'est créé pendant le jeu », état vérifié séance 29) ; SUIVI (« panier plein : scan refusé », périmé) ; tous les tests navigateur dans `a1.spec.js` (969 lignes). Effort : petit.
+15. Une image de plus de 4 096 pixels réels est réduite sans prévenir : le fond du rayon est déjà adouci sur un écran de PC à haute densité ; un hall très large le serait aussi sur téléphone. Règle à décider avant de dessiner A6. Effort : moyen.
+
+**Recommandation** : avant A6, les points 1, 5, 3, 2 + 4 (ensemble, premier pas d'A6, sans changement visible), puis 6. Le reste peut attendre.
+
+**Vérifié** : aucun code modifié (dépôt identique à `0f56835` avant les documents) ; 140 tests de logique relancés, verts. Tests navigateur non relancés (code inchangé depuis leur dernier passage, 76 verts).
+
+**Décision prise seul** : dans PROTOTYPES.md, l'ancien « A5a » est appelé « A5 — Scanette et panier à main ».
+
+---
+
 ## Séance 49 (suite) — Bug du double clic sur une carte
 
 **Retour de l'auteur** : un double clic (ou un double toucher) rapide sur une carte du Panier donne une carte zoomée à fond.
