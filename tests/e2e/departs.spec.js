@@ -81,3 +81,40 @@ test('lieux : quitter le lieu et y revenir — le monde se souvient, rien ne s�
   expect((await page.evaluate(() => window.paperCart.hero())).x).toBeGreaterThan(x0 + 50);
   await page.screenshot({ path: `test-results/captures/lieu-recharge-${info.project.name}.png` });
 });
+
+test('A6 : du rayon à l’accueil et retour — fondu, le rayon se souvient, la mémoire ne grimpe pas', async ({ page }, info) => {
+  await page.goto('./?depart=3-cartes');
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  const place = () => page.evaluate(() => window.paperCart.place());
+  const go = async (key, to) => {
+    await page.keyboard.down(key);
+    await expect.poll(place, { timeout: 15000 }).toBe(to);
+    await page.keyboard.up(key);
+    await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play'); // le fondu est fini
+    await expect(page.locator('.place-fade')).toBeHidden();
+  };
+  const assets = () => page.evaluate(() => window.paperCart.assets());
+  const before = await assets();
+  // Tout à gauche du rayon : fondu, puis l'accueil.
+  await page.keyboard.down('ArrowLeft');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state()), { timeout: 15000 }).toBe('transition');
+  await expect(page.locator('.place-fade')).toBeVisible();
+  await page.keyboard.up('ArrowLeft');
+  await expect.poll(place).toBe('accueil');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
+  await expect(page.locator('.stage')).toHaveCount(1);
+  await expect(page.locator('.actor-frame:visible')).toHaveCount(1);
+  await expect(page.locator('.panier-count')).toHaveText('3/6'); // les cartes suivent le héros
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-accueil.png` });
+  // Retour au rayon par la droite du hall : les produits scannés le sont toujours.
+  await go('ArrowRight', 'rayon-essai');
+  expect((await page.evaluate(() => window.paperCart.products())).filter((p) => p.scanned).length).toBe(3);
+  // Deux allers-retours de plus : mêmes images en mémoire qu'au début.
+  for (let k = 0; k < 2; k++) {
+    await go('ArrowLeft', 'accueil');
+    await go('ArrowRight', 'rayon-essai');
+  }
+  expect(await assets()).toEqual(before);
+  await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-retour.png` });
+});

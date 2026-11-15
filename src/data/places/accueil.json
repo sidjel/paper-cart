@@ -1,0 +1,124 @@
+{
+  "id": "accueil",
+  "name": "[TEMP] Accueil — hall d'entrée",
+  "size": [
+    2400,
+    1080
+  ],
+  "projection": {
+    "floorFrontY": 880,
+    "depthToScreen": 1,
+    "scalePerDepth": 0.0012
+  },
+  "images": {
+    "accueil-fond": {
+      "src": "art/placeholder/accueil-fond.svg",
+      "size": [
+        2400,
+        1080
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "fond",
+      "image": "accueil-fond",
+      "contains": "plafond, mur, portes automatiques, portiques, comptoir, passage vers les rayons, sol",
+      "hiddenBy": "en partie par le personnage"
+    },
+    {
+      "id": "acteurs",
+      "contains": "personnage, ombre, poussière, repère du point visé",
+      "hiddenBy": "rien"
+    }
+  ],
+  "spawn": [
+    1200,
+    60
+  ],
+  "walkMask": {
+    "comment": "Même repère que le rayon : x le long du hall, z la profondeur (264 = au pied du mur).",
+    "area": [
+      [
+        90,
+        -195
+      ],
+      [
+        2310,
+        -195
+      ],
+      [
+        2310,
+        264
+      ],
+      [
+        90,
+        264
+      ]
+    ],
+    "obstacles": []
+  },
+  "props": [],
+  "exits": {
+    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ».",
+    "items": [
+      {
+        "id": "vers-rayon",
+        "zone": [
+          2270,
+          -195,
+          2310,
+          264
+        ],
+        "to": "rayon-essai",
+        "arrive": [
+          220,
+          60
+        ],
+        "facing": 1
+      }
+    ]
+  },
+  "bench": {
+    "start": [
+      1200,
+      60
+    ],
+    "route": [
+      {
+        "to": [
+          600,
+          60
+        ]
+      },
+      {
+        "wait": 1
+      },
+      {
+        "to": [
+          2000,
+          120
+        ]
+      },
+      {
+        "to": [
+          1200,
+          60
+        ]
+      },
+      {
+        "wait": 1
+      }
+    ]
+  },
+  "diagnostic": {
+    "a": [
+      700,
+      40
+    ],
+    "b": [
+      1700,
+      40
+    ]
+  }
+}

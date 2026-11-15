@@ -7,7 +7,8 @@ export const TRANSITIONS = {
   title: ['play', 'menu', 'options', 'intro'], // écran titre : Commencer, Options
   intro: ['play'], // texte d'introduction (noir et blanc), puis la partie
   options: ['title'], // options du joueur (depuis l'écran titre)
-  play: ['pause', 'menu', 'panier'],
+  play: ['pause', 'menu', 'panier', 'transition'],
+  transition: ['play'], // changement de lieu : fondu au noir, rien ne bouge
   panier: ['play'], // écran du Panier (les cartes obtenues)
   pause: ['play', 'menu'],
   menu: ['play', 'pause', 'bench', 'title'],

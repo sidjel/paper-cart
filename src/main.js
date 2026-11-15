@@ -52,11 +52,13 @@ import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
 import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
+import accueilPlace from './data/places/accueil.json';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack } from './core/places.js';
 import heroData from './data/characters/heros.json';
 import catalog from './data/products.json';
 
 // Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
-const PLACES = { [rayonEssai.id]: rayonEssai };
+const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace };
 let place = rayonEssai;
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;
@@ -604,7 +606,7 @@ function updateTip() {
 const diag = createDiagnostic(uiEl, () => ({
   version: VERSION,
   state: sm.get(),
-  place: place.id,
+  place: `${place.id}${lastTransitionMs ? ` (dernier changement de lieu : ${lastTransitionMs} ms dans le noir)` : ''}`,
   renderLine,
   images: assetStats.images,
   pixels: assetStats.pixels,
@@ -1085,7 +1087,11 @@ function frame(now) {
   last = now;
   input.pollDevices();
   audio.update();
-  if (!placeView) return; // changement de lieu en cours : rien ne bouge
+  if (transition) {
+    updateTransition(Math.min(dt / 1000, 0.1)); // changement de lieu : seul le fondu avance, rien ne bouge
+    return;
+  }
+  if (!placeView) return;
   const playing = sm.is('play');
   if (playing) {
     if (dragPending) onTarget(dragX, dragY);
@@ -1104,6 +1110,7 @@ function frame(now) {
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
+    watchExits();
     const sec = Math.min(dt / 1000, 0.1);
     updateIntro(sec); // fondu final de l'intro, s'il est en cours
     watchNarrator(sec);
@@ -1150,7 +1157,7 @@ async function loadPlace(id) {
   placeImages = await loadImages(Object.entries(place.images).map(([key, im]) => ({ id: key, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })));
   proj = createProjection(place.projection, config.scene);
   mask = compileMask(place.walkMask);
-  endOfAisleX = Math.max(...place.walkMask.area.map((pt) => pt[0])) - 150; // le narrateur remarque le bout du lieu
+  endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
   // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
   const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
   const here = enterPlace(world, place.id, () => ({
@@ -1171,6 +1178,56 @@ async function loadPlace(id) {
   camera.ready = false;
   lastCamTime = -1;
   layout();
+}
+
+// ---------- Changement de lieu : fondu au noir géré par la machine à états ----------
+// En jeu, héros libre : entrer dans une zone de sortie lance le fondu. Dans le noir, on quitte le lieu
+// (images libérées), on charge le suivant, on y pose le héros ; puis le noir s'efface et le jeu reprend.
+const fadeEl = document.createElement('div');
+fadeEl.className = 'place-fade';
+fadeEl.hidden = true;
+uiEl.appendChild(fadeEl);
+let transition = null;
+let lastTransitionMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
+
+function watchExits() {
+  if (transition || scan.active || heroAside() || pendingScan >= 0) return;
+  const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
+  if (!exit || !PLACES[exit.to]) return;
+  transition = createTransition(exit);
+  fadeEl.hidden = false;
+  sm.go('transition');
+}
+
+async function changePlace(exit) {
+  const t0 = performance.now();
+  unloadPlace();
+  await loadPlace(exit.to);
+  walker.x = walker.prevX = exit.arrive[0];
+  walker.z = walker.prevZ = exit.arrive[1];
+  walker.vx = walker.vz = 0;
+  walker.facing = exit.facing ?? walker.facing;
+  walker.away = false;
+  clearTarget(walker);
+  // Une annonce en cours continue : elle sort du haut-parleur du nouveau lieu (ou du haut de l'écran).
+  if (voiceLine && speaker) {
+    const sp = place.speakers?.items ?? [];
+    speaker = sp.length ? sp[nearestSpeaker(sp, walker.x)] : null;
+    if (speaker) speakerWaves.show(speaker[0], speaker[1]);
+  }
+  render();
+  lastTransitionMs = Math.round(performance.now() - t0);
+  placeReady(transition);
+}
+
+function updateTransition(dt) {
+  if (stepTransition(transition, dt, config.places) === 'load') changePlace(transition.exit);
+  fadeEl.style.opacity = transitionBlack(transition, config.places);
+  if (transition.phase === 'done') {
+    transition = null;
+    fadeEl.hidden = true;
+    sm.go('play');
+  }
 }
 
 function unloadPlace() {
@@ -1265,6 +1322,8 @@ async function start() {
       narrator.done[trigger] = true;
     },
     flips: () => flips,
+    place: () => place.id,
+    lastTransitionMs: () => lastTransitionMs,
     paths: () => pathCount,
     // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
     async reloadPlace() {

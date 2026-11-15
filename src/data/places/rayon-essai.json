@@ -526,5 +526,26 @@
         ]
       }
     ]
+  },
+  "aisleEndX": 3360,
+  "exits": {
+    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ».",
+    "items": [
+      {
+        "id": "vers-accueil",
+        "zone": [
+          90,
+          -195,
+          128,
+          264
+        ],
+        "to": "accueil",
+        "arrive": [
+          2180,
+          60
+        ],
+        "facing": -1
+      }
+    ]
   }
 }

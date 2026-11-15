@@ -178,12 +178,26 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Audit, point 3 : un seul état du monde (le monde se souvient) | 50 | ✅ | `core/world.js` (testé) ; `scene/products.js` ne fait plus qu'afficher. |
 | Audit, points 2 et 4 : construire / quitter / reconstruire un lieu ; images du lieu libérées | 50 | 👀 | `scene/placeView.js`, `loadPlace` / `unloadPlace`, `releaseImages`. Testé par 3 allers-retours (rien ne s'accumule). Banc d'essai à refaire sur le téléphone (comparer à `2aa4b77`). Transition, sorties et préchargement : avec A6. |
 | Audit, point 6 : chemin recalculé à chaque mouvement du doigt | 50 | 👀 | Au plus un calcul par image. Testé. À mesurer sur le téléphone plus tard (décision de l'auteur). Points 7 à 15 : peuvent attendre. |
+| A6 (1/3) : l'accueil, lieu séparé ; aller-retour rayon ↔ accueil avec fondu | 51 | 👀 | Hall provisoire, sorties dans les données, état « transition », lieu chargé dans le noir et ancien lieu libéré. À mesurer sur le téléphone : temps du changement (rapport DBG). Restent : présentoir déplacé et départ à l'accueil (2/3) ; agent et portiques (3/3) ; comptages et banc de l'accueil. |
 | (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | 👀 | Corrigé (validé par l'auteur) : pas de Panier pendant un aparté ou une conversation ; hors du jeu (Panier, menus), le héros ne prend pas la parole, la rencontre attend le retour. Testé. |
 
 ## Interface
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Menu des réglages rangé en onglets par thème | 7 | ✅ | Validé (séance 8). Garder toutes les options dans le menu. |
+
+## À rappeler à l'auteur : points 7 à 15 de l'audit (séance 50), pas encore traités
+| Point | État | Notes |
+|---|---|---|
+| 7. La page est mesurée à chaque image (bulle, étoiles, doigt) | 🔧 | `scene/stage.js` : retenir la mesure une fois. Petit. |
+| 8. Éléments créés en plein jeu au moment du scan (carte du Panier, carte qui vole, icône d'objet) | 🔧 | Préparer les cartes au chargement ; ajouter un scan au banc. Petit à moyen. |
+| 9. Animations CSS qui continuent en pause et sous les menus | 🔧 | Les figer hors du jeu. Petit. |
+| 10. La rencontre est chargée en effets (un calque par mot, 4 bandes, lueur) | 🔧 | Mesurer d'abord sur le téléphone (DBG pendant la rencontre). |
+| 11. `main.js` trop gros, 7 rôles | 🔧 | Trois déplacements sans changer le comportement. Moyen. |
+| 12. Logique de jeu hors de `core/` (échange du panier plein, marche de la rencontre, règles de la grande carte) | 🔧 | Petit à moyen. |
+| 13. Code mort (`setTarget`, `open_`, `sprite.stats`, `dust.counter`) | 🔧 | Petit. |
+| 14. Écarts documents / code (ARCHITECTURE, SUIVI, tests dans un seul fichier) | 🔧 | Petit. |
+| 15. Images de plus de 4 096 pixels réels réduites sans prévenir | ❓ | Règle à décider avant de dessiner le vrai hall. |
 
 ## Règles de travail ajoutées par l'auteur
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).

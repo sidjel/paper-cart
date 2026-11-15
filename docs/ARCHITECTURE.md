@@ -33,7 +33,7 @@
 ## 3. Boucle, temps et états 🔎
 
 - `requestAnimationFrame` → `stepper` avance la logique par pas fixes, l'affichage interpole entre deux pas.
-- États : `loading`, `title` (écran titre), `options` (options du joueur), `intro` (texte sur noir après « Commencer » : `core/intro`, `ui/intro`, `data/intro.json`), `play`, `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Ce qui s'ouvre **dans** un état (question Oui / Non, grande carte, choix du nom, conversation) est arbitré par une seule règle : `core/focus.js` (« qui a la main ? »). Sous un menu, la scène n'est pas redessinée.
+- États : `loading`, `title` (écran titre), `options` (options du joueur), `intro` (texte sur noir après « Commencer » : `core/intro`, `ui/intro`, `data/intro.json`), `play`, `transition` (changement de lieu), `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Ce qui s'ouvre **dans** un état (question Oui / Non, grande carte, choix du nom, conversation) est arbitré par une seule règle : `core/focus.js` (« qui a la main ? »). Sous un menu, la scène n'est pas redessinée.
 - Délais (scan…) : comptés en pas de jeu, donc figés en pause. Seule exception : le délai du double toucher (geste du joueur, temps réel).
 - La logique renvoie de petits événements (ex. `stepScan` → `'bip'`) que `main.js` traduit en son et affichage. Pas de bus d'événements : inutile à cette taille.
 
@@ -96,7 +96,7 @@ Suite du narrateur (A4 : finitions, réglages complets, vérification de fluidit
 
 ## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
 
-Aujourd'hui 🔎 (séance 50) : un seul lieu, mais il se construit, se quitte et se reconstruit (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont libérées en partant (`releaseImages`), celles du héros et des produits restent ; l'état du monde est dans `core/world.js`. ⏳ Restent pour A6 : l'état « transition » et le fondu, les sorties dans les données, le préchargement des voisins, le banc sur plusieurs lieux.
+Aujourd'hui 🔎 (séance 50) : un seul lieu, mais il se construit, se quitte et se reconstruit (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont libérées en partant (`releaseImages`), celles du héros et des produits restent ; l'état du monde est dans `core/world.js`. Séance 51 : deux lieux (`rayon-essai`, `accueil`) ; sorties dans les données (`exits`) ; `core/places.js` (sorties, fondu) ; état `transition` (rien ne bouge, le lieu suivant est chargé dans le noir). ⏳ Restent : le préchargement des voisins (à décider après mesure du temps de transition sur le téléphone), les comptages et le banc par lieu, le banc qui traverse les lieux.
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).
 - **Un seul gestionnaire de lieux**, avec un cycle de vie : préchargement → décodage avant affichage → utilisation → **libération de la mémoire en partant**. Seuls le lieu affiché et au plus ses voisins directs restent chargés.

@@ -1193,3 +1193,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 /* Panier : pas de zoom du navigateur sur un double toucher (cartes, grande carte). */
 .panier-grid .card { touch-action: manipulation; }
 .card-detail { touch-action: none; }
+/* Changement de lieu : fondu au noir (au-dessus du jeu et des voix, sous les menus). */
+.place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; will-change: opacity; }
+.place-fade[hidden] { display: none; }
