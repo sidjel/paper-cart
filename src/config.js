@@ -53,6 +53,7 @@ export const config = {
     asideZoomTime: 0.6, // durée du zoom (entrée et sortie) (s)
     asideDim: 0.5, // assombrissement des bords de l'écran pendant un aparté (0 à 1)
     breath: 4, // silence minimal avant un aparté (s), sauf enchaîné à une réplique
+    glanceGap: 25, // petits regards caméra (sans texte) : au plus un toutes les N secondes
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
   scan: {
@@ -196,6 +197,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.asideZoom', label: 'Aparté : zoom sur le héros', min: 1, max: 2, step: 0.05, unit: '×' },
   { group: 'Narrateur', key: 'narrator.asideZoomTime', label: 'Aparté : durée du zoom', min: 0.1, max: 2, step: 0.05, unit: 's' },
   { group: 'Narrateur', key: 'narrator.asideDim', label: 'Aparté : assombrissement des bords', min: 0, max: 1, step: 0.05 },
+  { group: 'Narrateur', key: 'narrator.glanceGap', label: 'Petits regards caméra : au plus un toutes les', min: 5, max: 300, step: 5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.breath', label: 'Silence avant un aparté', min: 0, max: 30, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },

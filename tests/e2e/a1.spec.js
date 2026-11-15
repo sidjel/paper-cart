@@ -520,9 +520,19 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   await page.waitForTimeout(1000);
   expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeLessThan(viewW0 * 0.9);
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-aparte.png` });
+  // Le héros attend une réponse (deux choix) : le joueur répond, la confiance monte, le héros répond.
+  await expect.poll(async () => (await narr(page)).waiting, { timeout: 8000 }).toBe(true);
+  const choice = page.locator('.hero-choices.ready .hero-choice').first();
+  await expect(choice).toBeVisible();
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-reponses.png` });
+  if (info.project.name === 'telephone') await choice.tap();
+  else await choice.click();
+  await expect.poll(async () => (await narr(page)).trust).toBe(1);
+  expect((await narr(page)).text).toMatch(/ensemble/);
   // Puis le haut-parleur croit qu'un client parle au mur.
   await expect.poll(async () => (await narr(page)).voice, { timeout: 12000 }).toBe('narrateur');
   expect((await narr(page)).text).toMatch(/mur|plafond/);
+  expect((await page.evaluate(() => window.paperCart.camera())).viewW).toBeGreaterThan(viewW0 * 0.95); // fin du zoom
   await expect(bubble).toBeHidden();
   await expect(band).toBeVisible();
 });
@@ -631,6 +641,9 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   await expect(page.locator('.panier')).toBeHidden();
   await expect.poll(async () => (await state(page)).cards, { timeout: 5000 }).toEqual(['Lait']);
   await expect(page.locator('.panier-count')).toHaveText('1/1');
+  // Choix B : la banane reposée est revenue sur l'étagère, on peut la rescanner.
+  expect((await page.evaluate(() => window.paperCart.products()))[0].scanned).toBe(false);
+  await expect(page.locator('.product').nth(0)).toBeVisible();
 });
 
 test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }, info) => {
@@ -645,8 +658,13 @@ test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }
   await expect(panel.locator('.panier-objects')).toContainText('Panier à main');
   await expect(panel.locator('.panier-grid')).toBeHidden();
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-objets.png` });
-  await panel.locator('.settings-tab', { hasText: 'Cartes' }).click();
+  await panel.locator('.settings-tab', { hasText: 'Courses' }).click();
   await expect(panel.locator('.panier-objects')).toBeHidden();
+  // Au clavier : flèche droite ou gauche change d'onglet.
+  await page.keyboard.press('ArrowRight');
+  await expect(panel.locator('.panier-objects')).toBeVisible();
+  await page.keyboard.press('ArrowLeft');
+  await expect(panel.locator('.panier-grid')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(panel).toBeHidden();
 });

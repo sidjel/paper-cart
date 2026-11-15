@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle } from '../../src/core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, stepIdle, answer, waitingAnswer } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
-const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8 };
+const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25 };
 const DATA = {
   triggers: { arrivee: { once: true, strong: true }, scan: { every: 3 }, idle: {} },
   lines: [
@@ -95,16 +95,49 @@ describe('deux voix : haut-parleur et apartés du héros', () => {
     expect(n.voice).toBe('narrateur');
     expect(n.line.id).toBe('r');
   });
-  it('une seule voix à la fois : l’aparté ne coupe jamais, l’annonce passe avant l’aparté', () => {
+  it('une seule voix à la fois ; pendant un aparté, le magasin se fige : le haut-parleur se tait', () => {
     const n = createNarrator();
     narrate(n, D, 'vide', P); // annonce en cours
-    expect(narrate(n, D, 'aparte_vide', P)).toBe(null);
+    expect(narrate(n, D, 'aparte_vide', P)).toBe(null); // l'aparté ne coupe pas
     const m = createNarrator();
     m.t = 100;
     narrate(m, D, 'aparte_vide', P); // aparté en cours…
+    expect(narrate(m, D, 'vide', P)).toBe(null); // … le haut-parleur se tait
+    expect(narrate(m, D, 'arrivee', P)).toBe(null); // même pour un moment fort
     expect(m.voice).toBe('heros');
-    expect(narrate(m, D, 'vide', P).id).toBe('v'); // … coupé par l'annonce
-    expect(m.voice).toBe('narrateur');
+  });
+  it('petits regards caméra : sans texte, après une annonce, coupés par une annonce, au plus un toutes les 25 s', () => {
+    const G = {
+      triggers: { annonce: {}, regard: { voice: 'regard', follows: '@narrateur', cooldown: 0 } },
+      lines: [{ id: 'a', trigger: 'annonce', text: 'Promo' }, { id: 'r', trigger: 'regard', text: '', emotion: 'blase' }],
+    };
+    const n = createNarrator();
+    const run2 = (s) => {
+      for (let t = 0; t < s; t += 1 / 60) stepNarrator(n, G, 1 / 60, P);
+    };
+    narrate(n, G, 'annonce', P);
+    run2(3.5); // annonce finie, puis regard enchaîné
+    expect(n.voice).toBe('regard');
+    expect(narrate(n, G, 'annonce', { ...P, minGap: 0, lineCooldown: 0 }).id).toBe('a'); // une annonce coupe le regard
+    run2(4);
+    expect(n.line).toBe(null); // le regard suivant attend 25 s
+  });
+  it('deux réponses : la réplique attend, la confiance évolue, puis le héros répond', () => {
+    const Q = {
+      triggers: { q: { voice: 'heros' } },
+      lines: [{ id: 'q', trigger: 'q', text: 'Tu es là ?', choices: [{ text: 'Oui', trust: 1, reply: 'Ouf.' }, { text: '…', trust: -1, reply: 'Bon.' }] }],
+    };
+    const n = createNarrator();
+    n.t = 100;
+    narrate(n, Q, 'q', P);
+    for (let t = 0; t < 10; t += 1 / 60) stepNarrator(n, Q, 1 / 60, P);
+    expect(waitingAnswer(n)).toBe(true); // elle attend, même après 10 s
+    skipNarrator(n, Q, P);
+    expect(n.line.id).toBe('q'); // toucher ne fait pas disparaître une question
+    answer(n, 0);
+    expect(n.trust).toBe(1);
+    expect(n.line.text).toBe('Ouf.');
+    expect(waitingAnswer(n)).toBe(false);
   });
   it('apartés rares : écart minimal entre deux, et silence avant', () => {
     const n = createNarrator();
@@ -177,7 +210,13 @@ describe('répliques du narrateur (données)', () => {
       expect(file.triggers[l.trigger], l.id).toBeDefined();
       expect(ids.has(l.id), l.id).toBe(false);
       ids.add(l.id);
-      expect(l.text.startsWith('[TEMP] '), l.id).toBe(true);
+      if (file.triggers[l.trigger].voice === 'regard') expect(l.text, l.id).toBe(''); // regard : sans texte
+      else expect(l.text.startsWith('[TEMP] '), l.id).toBe(true);
+      for (const c of l.choices ?? []) {
+        expect(c.text.startsWith('[TEMP] ') && c.reply.startsWith('[TEMP] '), l.id).toBe(true);
+        expect(typeof c.trust, l.id).toBe('number');
+      }
+      if (l.choices) expect(l.choices.length, l.id).toBe(2);
     }
   });
   it('chaque moment a au moins une réplique', () => {
@@ -194,7 +233,7 @@ describe('répliques du narrateur (données)', () => {
   it('chaque aparté a une émotion qui a son dessin (tête de face)', async () => {
     const hero = (await import('../../src/data/characters/heros.json')).default;
     for (const l of file.lines) {
-      if (file.triggers[l.trigger].voice !== 'heros') continue;
+      if (!['heros', 'regard'].includes(file.triggers[l.trigger].voice)) continue;
       expect(hero.views.face[`aparte_${l.emotion}`], `${l.id} : ${l.emotion}`).toBeDefined();
     }
   });

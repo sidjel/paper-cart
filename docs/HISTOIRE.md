@@ -27,7 +27,8 @@
 
 ## Le 4ᵉ mur 🧪 À TESTER (séance 33)
 - **Seul le héros brise le 4ᵉ mur**, rarement : il se tourne vers l'écran et **tutoie** le joueur (« mon Épaisseur », « toi, là-haut »), complice, inquiet ou blasé.
-- ✅ VALIDÉ (séance 36) : un aparté est un **moment rare et marquant**, une prise de conscience entre eux : le héros se tourne **face caméra** (nouveau dessin de face, émotion visible selon ce qu'il dit), la caméra **zoome** sur lui, effet visuel et sonore dramatique.
+- ✅ VALIDÉ (séances 36, 38) : un aparté est **rare et important**, une prise de conscience entre eux : tête **face caméra** (émotion selon ce qu'il dit), **zoom**, **changement de musique**. Le joueur peut **parfois répondre** (deux choix), ce qui fait évoluer leur **confiance**, avec des conséquences possibles plus tard (Révélation, fin). Détails et essais : `PERSONNAGES.md`.
+- 🧪 À TESTER : pendant l'aparté **le temps du magasin se fige** (il ne voit pas l'Épaisseur) : néons et sons figés, narrateur silencieux ; il peut réagir après coup au client « planté devant le mur ».
 - **Le narrateur ne sait pas qu'il y a un joueur** : l'ordinateur central, au haut-parleur, **vouvoie** le « client » avec une politesse commerciale hypocrite et odieuse. Quand le héros parle à l'écran, il croit voir un client qui parle au mur.
 
 ## Pourquoi le héros est en papier 🧪 À TESTER

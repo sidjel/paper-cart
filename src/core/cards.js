@@ -19,8 +19,10 @@ export function createBasket() {
   return { cards: [], serial: 0 };
 }
 
-export function addToBasket(basket, productId, def) {
+// slot : produit d'origine dans le lieu (une carte reposée y retourne).
+export function addToBasket(basket, productId, def, slot = -1) {
   const card = createCard(productId, def, ++basket.serial);
+  card.slot = slot;
   basket.cards.push(card);
   return card;
 }

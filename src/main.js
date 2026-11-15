@@ -11,7 +11,7 @@ import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, creat
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker } from './core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, answer } from './core/narrator.js';
 import { createSpeakerWaves } from './scene/speakers.js';
 import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
@@ -118,8 +118,13 @@ function chooseCardToDrop(i) {
   say('panier_plein');
   sm.go('panier');
   basketUi.open((uid) => {
-    removeFromBasket(basket, uid);
+    const dropped = removeFromBasket(basket, uid);
     basketUi.remove(uid);
+    // Choix B de l'auteur : le produit retourne sur l'étagère et peut être rescanné.
+    if (dropped && dropped.slot >= 0) {
+      productState[dropped.slot].scanned = false;
+      products.restore(dropped.slot);
+    }
     basketUi.setCount(basket.cards.length);
     const target = dropFor;
     dropFor = -1;
@@ -149,10 +154,15 @@ function takePickup(k) {
 const frenchSpaces = (t) => t.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
 const narratorData = {
   triggers: narratorFile.triggers,
-  lines: narratorFile.lines.map((l) => ({ ...l, text: frenchSpaces(l.text.replace(/^\[TEMP\]\s*/, '')) })),
+  lines: narratorFile.lines.map((l) => ({
+    ...l,
+    text: frenchSpaces(l.text.replace(/^\[TEMP\]\s*/, '')),
+    choices: l.choices?.map((c) => ({ ...c, text: frenchSpaces(c.text.replace(/^\[TEMP\]\s*/, '')), reply: frenchSpaces(c.reply.replace(/^\[TEMP\]\s*/, '')) })),
+  })),
 };
 const narrator = createNarrator();
-const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator) });
+const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator), onChoose: (k) => answer(narrator, k) });
+let choiceFocus = 0; // réponse mise en avant (clavier, manette)
 let arrived = false;
 let endOfAisleX = Infinity;
 const CONSIGNE_X = 900; // s'éloigner de l'accueil sans Scanette : le haut-parleur le rappelle
@@ -165,6 +175,7 @@ let playerActed = false;
 // Aparté : un moment rare et marquant (tête de face, zoom, bandes « cinéma », musique baissée).
 const asideFx = createAsideFx(uiEl);
 let asideP = 0; // avancement de la mise en scène (0 à 1), en temps de jeu
+let storeTime = 0; // temps du magasin (figé pendant un aparté)
 const heroAside = () => narrator.line !== null && narrator.voice === 'heros';
 const ease = (p) => p * p * (3 - 2 * p); // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
 const head = { x: 0, y: 0 };
@@ -179,8 +190,12 @@ function say(trigger) {
 // (s'il est à l'arrêt et ne scanne pas).
 function voiceStarted() {
   const hero = narrator.voice === 'heros';
-  narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion);
-  audio.play(hero ? 'aparte' : 'annonce');
+  const glance = narrator.voice === 'regard';
+  const reply = hero && asideP > 0; // le héros répond à la réponse du joueur : l'aparté continue
+  narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion, voiceLine.choices?.map((c) => c.text) ?? null);
+  choiceFocus = 0;
+  if (!reply && !glance) audio.play(hero ? 'aparte' : 'annonce');
+  if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
   // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
   const sp = place.speakers?.items ?? [];
   speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
@@ -198,7 +213,7 @@ function updateAside(dt) {
   const still = config.display.reduceMotion;
   asideFx.set(asideP, config.narrator.asideDim, still);
   stage.setZoom(still ? 1 : 1 + (config.narrator.asideZoom - 1) * ease(asideP));
-  audio.setDucked(asideP > 0);
+  audio.setFrozen(asideP > 0);
 }
 
 // À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
@@ -216,6 +231,7 @@ function updateNarrator(dt) {
   if (!voiceLine) return;
   const n = Math.floor(narrator.shown);
   narratorUi.setShown(n);
+  if (waitingAnswer(narrator)) narratorUi.choicesReady(choiceFocus);
   const hero = narrator.voice === 'heros';
   const every = config.narrator.blipEvery;
   if (letters > 0 && every > 0 && n % every === 0) audio.play(hero ? 'blipHeros' : 'blip');
@@ -274,7 +290,7 @@ function onScanEvent(ev) {
     const it = products.items[scan.index];
     products.remove(scan.index);
     productState[scan.index].scanned = true;
-    const card = addToBasket(basket, it.id, it.def);
+    const card = addToBasket(basket, it.id, it.def, scan.index);
     const url = imageUrlOf(it.def);
     basketUi.add(card, url);
     flyingCard.show(card, url);
@@ -473,8 +489,21 @@ function handleAction(action) {
       setValue('audio.muted', !config.audio.muted);
       break;
     case 'action':
-      if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
+      if (waitingAnswer(narrator)) answer(narrator, choiceFocus);
+      else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
       else tryScan();
+      break;
+    case 'choice1':
+    case 'choice2':
+      if (waitingAnswer(narrator)) answer(narrator, action === 'choice1' ? 0 : 1);
+      break;
+    case 'left':
+    case 'right':
+      if (sm.is('panier')) basketUi.switchTab();
+      else if (waitingAnswer(narrator)) {
+        choiceFocus = action === 'left' ? 0 : 1;
+        narratorUi.focusChoice(choiceFocus);
+      }
       break;
     case 'panier':
       if (sm.is('panier')) sm.go('play');
@@ -513,7 +542,7 @@ sm.onChange((now, before) => {
     asideP = 0;
     asideFx.set(0, 0, true);
     stage.setZoom(1);
-    audio.setDucked(false);
+    audio.setFrozen(false);
   }
   if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
@@ -608,7 +637,8 @@ function render() {
   shown.scale = scaleAt(proj, z);
   shown.level = actorLevel(depthRefs, z);
   shown.time = time;
-  const emotion = heroAside() ? narrator.line.emotion ?? '' : '';
+  const looking = heroAside() || (narrator.voice === 'regard' && !walker.moving);
+  const emotion = looking ? narrator.line?.emotion ?? '' : '';
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
   dust.update(time);
@@ -617,8 +647,9 @@ function render() {
   const free = sm.is('play') && !scan.active;
   const pk = free ? nearestProduct(pickupState, walker, config.scan) : -1;
   const reach = free && pk < 0 ? nearestProduct(productState, walker, config.scan) : -1;
-  if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, time);
-  else products.setMarker(reach, time);
+  if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
+  if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, storeTime);
+  else products.setMarker(reach, storeTime);
   if (reach !== highlighted || pk !== pickupReach) {
     hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : '');
     highlighted = reach;
@@ -797,7 +828,7 @@ async function start() {
       });
       basketUi.setCapacity(capacity(gear, config.carry));
     },
-    narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
+    narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, trust: narrator.trust, waiting: waitingAnswer(narrator), shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
     products: () => products.items.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),

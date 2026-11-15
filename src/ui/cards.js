@@ -62,7 +62,7 @@ export function createBasketUi(root, { onOpen, onClose, objects }) {
   tabs.setAttribute('role', 'tablist');
   const tabCards = document.createElement('button');
   const tabObjects = document.createElement('button');
-  for (const [t, label] of [[tabCards, 'Cartes'], [tabObjects, 'Objets']]) {
+  for (const [t, label] of [[tabCards, 'Courses'], [tabObjects, 'Objets']]) {
     t.className = 'settings-tab';
     t.textContent = label;
     t.setAttribute('role', 'tab');
@@ -162,6 +162,10 @@ export function createBasketUi(root, { onOpen, onClose, objects }) {
       button.classList.remove('bump');
       void button.offsetWidth; // relance la petite animation
       button.classList.add('bump');
+    },
+    // Onglet précédent ou suivant (clavier, manette) ; pas en mode « reposer ».
+    switchTab() {
+      if (!panel.hidden && !choose) showTab(tab === 'cards' ? 'objects' : 'cards');
     },
     // onChoose(uid) : mode « reposer une carte » (panier plein) ; sans : consultation.
     open(onChoose = null) {

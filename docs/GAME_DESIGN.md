@@ -12,8 +12,11 @@
 - **Le contenant fixe le nombre de cartes portées** : peu dans le panier, plus dans le caddie. On ne peut pas tout garder : il faut choisir.
 - Avec une **pièce ou un jeton de caddie**, on retourne à l'accueil échanger son panier contre un **caddie**, plus grand, qui le remplace. Le jeton est un **objet d'histoire unique**, pas une monnaie (le troc reste en Papier Toilette).
 - **Panier plein** ✅ VALIDÉ (séance 37, choix B) : un petit écran propose de **reposer une carte** pour faire de la place, ou d'annuler.
-- **Le menu du panier a deux onglets** ✅ VALIDÉ (séance 37, noms provisoires) : **les cartes** (la « liste de courses ») et **les objets** (de vrais objets, pas des cartes : Scanette, panier, plus tard le jeton…).
-- ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ ; [TEMP] panier = 6) ; où va une carte reposée ([TEMP] elle est abandonnée) ; qui donne le jeton (voir `HISTOIRE.md`).
+- **Le menu du contenant a deux onglets** ✅ VALIDÉ (séances 37-38) : les cartes (« **Courses** », nom provisoire) et « **Objets** ».
+- 🧪 À TESTER (séance 38) : un **objet** est unique et sert à l'histoire, on n'en extrait pas l'essence (la Scanette et son niveau, le jeton de caddie, plus tard la Glacière, des clés…) ; il ne pourrit pas, n'occupe pas de place dans le contenant, ne peut pas être jeté ; pas de monnaie ni de coffres ; le menu porte le nom du contenant (« Panier », puis « Caddie ») ; on change d'onglet au doigt, au clavier et à la manette.
+- ❓ À DÉFINIR : certains objets pourront-ils servir en combat ?
+- **Carte reposée** ✅ VALIDÉ (séance 38, choix B) : le produit retourne sur l'étagère et peut être rescanné.
+- ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ ; [TEMP] panier = 6) ; qui donne le jeton (voir `HISTOIRE.md`).
 
 ## Étape A5 en deux temps ✅ VALIDÉ
 - **A5a** : l'accueil au début du rayon (présentoir de Scanettes et de paniers) ; le héros prend les deux ; le panier se porte à la main, capacité limitée.

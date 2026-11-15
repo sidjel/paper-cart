@@ -17,7 +17,8 @@ function textParts(el) {
   return [el.firstChild, el.lastChild];
 }
 
-export function createNarratorUi(root, { onSkip }) {
+// onSkip() : toucher la réplique ; onChoose(k) : le joueur choisit la réponse k (0 ou 1).
+export function createNarratorUi(root, { onSkip, onChoose }) {
   const band = document.createElement('div');
   band.className = 'narrator';
   band.hidden = true;
@@ -30,9 +31,19 @@ export function createNarratorUi(root, { onSkip }) {
   bubble.className = 'hero-bubble';
   bubble.hidden = true;
   bubble.setAttribute('role', 'status');
-  bubble.innerHTML = '<p class="hero-bubble-text"></p><span class="hero-bubble-tail"></span>';
+  bubble.innerHTML = '<p class="hero-bubble-text"></p><div class="hero-choices" hidden><button class="hero-choice"></button><button class="hero-choice"></button></div><span class="hero-bubble-tail"></span>';
   const bubbleParts = textParts(bubble.querySelector('.hero-bubble-text'));
   const tail = bubble.querySelector('.hero-bubble-tail');
+  // Deux réponses possibles (créées une fois, réutilisées).
+  const choiceBox = bubble.querySelector('.hero-choices');
+  const choiceBtns = [...bubble.querySelectorAll('.hero-choice')];
+  choiceBtns.forEach((b, k) => {
+    b.addEventListener('pointerdown', (e) => e.stopPropagation());
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onChoose(k);
+    });
+  });
 
   for (const el of [band, bubble]) {
     el.addEventListener('pointerdown', (e) => {
@@ -53,8 +64,13 @@ export function createNarratorUi(root, { onSkip }) {
   let lastY = NaN;
 
   return {
-    // voice : 'heros' (bulle) ou autre (bande) ; still : « réduire les animations ».
-    show(t, voice, still) {
+    // voice : 'heros' (bulle), 'regard' (rien : un regard sans texte) ou autre (bande) ;
+    // still : « réduire les animations » ; choices : deux réponses (le texte de chacune) ou null.
+    show(t, voice, still, choices = null) {
+      if (voice === 'regard') {
+        this.hide();
+        return;
+      }
       const el = voice === 'heros' ? bubble : band;
       if (current && current !== el) current.hidden = true;
       current = el;
@@ -65,6 +81,10 @@ export function createNarratorUi(root, { onSkip }) {
       el.setAttribute('aria-label', t);
       parts[0].textContent = '';
       parts[1].textContent = t; // place réservée pour le texte entier
+      // Réponses : place réservée dès le début (invisibles tant que la question n'est pas écrite).
+      choiceBox.hidden = !choices;
+      choiceBox.classList.remove('ready');
+      if (choices) choiceBtns.forEach((b, k) => (b.textContent = `${k + 1}. ${choices[k]}`));
       el.hidden = false;
       el.classList.remove('visible');
       bw = el.offsetWidth; // mesuré une fois par réplique (relance aussi l'apparition)
@@ -90,6 +110,16 @@ export function createNarratorUi(root, { onSkip }) {
       lastY = top;
       bubble.style.transform = `translate3d(${left}px, ${top}px, 0)`;
       tail.style.left = `${Math.max(16, Math.min(bw - 16, x - left))}px`;
+    },
+    // La question est écrite : les réponses deviennent utilisables ; k : réponse mise en avant.
+    choicesReady(k) {
+      if (!choiceBox.classList.contains('ready')) {
+        choiceBox.classList.add('ready');
+        choiceBtns[k].focus({ preventScroll: true });
+      }
+    },
+    focusChoice(k) {
+      choiceBtns[k]?.focus({ preventScroll: true });
     },
     // Bande : (x, y) = bouche du haut-parleur, en pixels d'écran ; maxRight : bord gauche des boutons du haut.
     placeBand(x, y, maxRight) {

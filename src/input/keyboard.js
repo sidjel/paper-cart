@@ -19,7 +19,13 @@ const ACTIONS = {
   NumpadEnter: 'action',
   Space: 'action',
   KeyI: 'panier',
+  Digit1: 'choice1',
+  Numpad1: 'choice1',
+  Digit2: 'choice2',
+  Numpad2: 'choice2',
 };
+// Gauche et droite servent aussi dans les menus et les réponses (onglets, choix) : une action à l'appui.
+const SIDE = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
 
 export function createKeyboard(onAction) {
   const down = new Set();
@@ -41,6 +47,7 @@ export function createKeyboard(onAction) {
     if (MOVE.has(e.code) && !isTyping(e)) {
       e.preventDefault();
       down.add(e.code);
+      if (SIDE[e.code] && !e.repeat) onAction(SIDE[e.code]);
     }
   });
   window.addEventListener('keyup', (e) => down.delete(e.code));

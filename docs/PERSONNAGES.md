@@ -12,6 +12,12 @@
 - ✅ VALIDÉ : héros de papier privé de son **Épaisseur** (le joueur) ; il garde cœur, voix, souvenirs, émotions, réflexes (voir `HISTOIRE.md`).
 - ✅ VALIDÉ : se souvient de tout jusqu'aux portes automatiques, mais pas du moment où il a été aplati (il perdait son regard) ; pas d'amnésie complète (voir `HISTOIRE.md`).
 - 🧪 À TESTER : apartés rares où il se tourne vers l'écran et tutoie le joueur (« mon Épaisseur », « toi, là-haut »).
+- ✅ VALIDÉ : apartés rares et importants, effet dramatique (zoom, changement de musique) ; le joueur peut parfois **répondre** (deux choix) : la **confiance** entre eux évolue (conséquences possibles : Révélation, fin).
+- 🧪 À TESTER (séance 38) :
+  - le **temps du magasin se fige** pendant l'aparté (néons, sons, narrateur silencieux) ; le narrateur peut réagir après coup au client « planté devant le mur » ;
+  - un **motif musical de l'Épaisseur**, qui revient à chaque aparté ;
+  - de **petits regards caméra sans texte**, plus fréquents, pour l'humour entre deux grands apartés ;
+  - avec « réduire les animations », pas de zoom brusque ; un toucher fait passer l'aparté.
 
 ## Le Narrateur
 - ✅ VALIDÉ : haut-parleur du magasin (ordinateur central), odieux.

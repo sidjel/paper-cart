@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), sinon le haut-parleur (il vouvoie le « client »). once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face.",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face.",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -80,6 +80,13 @@
     "consigne_scanette": {
       "once": true,
       "comment": "le héros s'éloigne de l'accueil sans Scanette"
+    },
+    "regard": {
+      "voice": "regard",
+      "follows": "@narrateur",
+      "every": 2,
+      "cooldown": 0,
+      "comment": "petit regard caméra sans texte, après une annonce sur deux (humour) ; au plus un toutes les 25 s (réglable)"
     }
   },
   "lines": [
@@ -147,7 +154,21 @@
       "id": "aparte_accueil_1",
       "trigger": "aparte_accueil",
       "text": "[TEMP] Psst… mon Épaisseur ? Tu es là, là-haut ? Ne me laisse pas tout seul ici.",
-      "emotion": "inquiet"
+      "emotion": "inquiet",
+      "choices": [
+        {
+          "text": "[TEMP] Je suis là.",
+          "trust": 1,
+          "reply": "[TEMP] Ouf. Alors on avance ensemble : toi, tu regardes, moi, je marche.",
+          "emotion": "complice"
+        },
+        {
+          "text": "[TEMP] …",
+          "trust": -1,
+          "reply": "[TEMP] D'accord. Le silence. C'est… rassurant. Pas du tout.",
+          "emotion": "blase"
+        }
+      ]
     },
     {
       "id": "aparte_vide_1",
@@ -165,7 +186,21 @@
       "id": "aparte_inactif_2",
       "trigger": "aparte_inactivite",
       "text": "[TEMP] Toi, là-haut : c'est par où, la sortie ? Tu vois mieux que moi.",
-      "emotion": "complice"
+      "emotion": "complice",
+      "choices": [
+        {
+          "text": "[TEMP] Par là, fais-moi confiance.",
+          "trust": 1,
+          "reply": "[TEMP] Si tu le dis. De toute façon, je n'ai pas vraiment le choix.",
+          "emotion": "complice"
+        },
+        {
+          "text": "[TEMP] Aucune idée.",
+          "trust": 0,
+          "reply": "[TEMP] Génial. Un regard d'en haut qui ne voit rien.",
+          "emotion": "blase"
+        }
+      ]
     },
     {
       "id": "aparte_panier_1",
@@ -176,7 +211,7 @@
     {
       "id": "parle_seul_1",
       "trigger": "parle_seul",
-      "text": "[TEMP] Information clientèle : l'article non référencé du rayon 7 est prié de cesser de parler au mur."
+      "text": "[TEMP] Information clientèle : un article non référencé est planté devant le mur du rayon 7 depuis un moment. Merci de circuler."
     },
     {
       "id": "parle_seul_2",
@@ -212,6 +247,18 @@
       "id": "consigne_1",
       "trigger": "consigne_scanette",
       "text": "[TEMP] Cher Client, vous oubliez votre Scanette. Elles sont à l'accueil, au début du rayon. Gratuites. Pour l'instant."
+    },
+    {
+      "id": "regard_1",
+      "trigger": "regard",
+      "text": "",
+      "emotion": "blase"
+    },
+    {
+      "id": "regard_2",
+      "trigger": "regard",
+      "text": "",
+      "emotion": "complice"
     }
   ]
 }

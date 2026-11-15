@@ -12,6 +12,34 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 38 — 15/11/2026 — Publication, carte reposée sur l'étagère, apartés enrichis
+
+**Décisions de l'auteur** :
+- limites des comptages validées (88 éléments, 40 images ; priorité au PC) ;
+- carte reposée : le produit retourne sur l'étagère (B) ;
+- émotions validées pour l'essai ;
+- précisions sur les apartés (✅ rares et importants, réponses à deux choix et confiance ; 🧪 magasin figé, motif de l'Épaisseur, regards caméra, « réduire les animations ») et sur l'onglet « Objets » (✅ deux onglets ; 🧪 nature des objets ; ❓ objets en combat).
+
+**Publié d'abord** : la séance 37 (7b5b843), avec les nouvelles limites.
+
+**Jouable maintenant**
+- **Panier plein** : la carte reposée fait **revenir le produit sur l'étagère**, on peut le rescanner.
+- **Onglets « Courses » et « Objets »**, à changer au doigt, au clavier (flèches gauche/droite) et à la manette (croix, LB/RB).
+- **Apartés** :
+  - le **temps du magasin se fige** (sa musique se tait, le haut-parleur se tait, le repère s'arrête), puis le haut-parleur réagit au client « planté devant le mur » ;
+  - un **motif de l'Épaisseur** (4 notes [TEMP]) revient à chaque aparté ;
+  - **deux réponses** sur l'aparté d'accueil et sur « c'est par où, la sortie ? » : la **confiance** évolue (+1, −1 ou 0) et le héros répond (doigt, souris, 1 et 2, flèches + Entrée, manette).
+- **Petits regards caméra sans texte** : après une annonce sur deux, le héros regarde le joueur (blasé ou complice), au plus un toutes les 25 s.
+
+**Vérifié** : 114 passed tests de logique (voix, réponses, confiance, regards, données) et 51 tests navigateur PC et téléphone simulé, sans erreur console ; comptages dans les limites ; captures PC et téléphone simulé.
+
+**Décisions prises seul** :
+- Réponses [TEMP] sur 2 apartés seulement (« parfois »).
+- La confiance n'est pas affichée : elle se lit dans le diagnostic de test.
+- Pendant une question, toucher ailleurs ne la fait pas disparaître : il faut répondre.
+
+---
+
 ## Séance 37 — 15/11/2026 — Panier à deux onglets, reposer une carte, aparté refait (A4)
 
 **Décisions de l'auteur** :

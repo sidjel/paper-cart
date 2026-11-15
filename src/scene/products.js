@@ -169,5 +169,14 @@ export function createProducts(place, catalog, images, parent, effectsParent, se
     dissolving = -1;
   }
 
-  return { items, setMarker, markAt, update, remove };
+  // Une carte reposée : le produit retourne à sa place, tel qu'au début.
+  function restore(index) {
+    const it = items[index];
+    it.scanned = false;
+    it.el.style.opacity = '';
+    it.el.style.transform = `translate(${it.x - it.w / 2}px, ${it.y - it.h}px)`;
+    it.el.hidden = false;
+  }
+
+  return { items, setMarker, markAt, update, remove, restore };
 }

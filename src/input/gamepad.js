@@ -1,17 +1,18 @@
 // Manette (API Gamepad, disposition standard) → actions abstraites.
-// Stick gauche ou croix pour marcher ; A : scanner ; B : retour ; Y : Panier ; Start : pause.
+// Stick gauche ou croix pour marcher ; A : scanner ; B : retour ; Y : Panier ; Start : pause ;
+// croix gauche/droite et LB/RB : gauche/droite dans les menus (onglets) et les réponses.
 // On n'interroge la manette que si une manette est branchée.
 
 const START = 9;
-const BUTTON_A = 0, BUTTON_B = 1, BUTTON_Y = 3;
-const BUTTON_ACTIONS = ['action', 'back', 'panier'];
-const buttons = [false, false, false];
+const BUTTON_A = 0, BUTTON_B = 1, BUTTON_Y = 3, BUTTON_LB = 4, BUTTON_RB = 5;
+const BUTTON_ACTIONS = ['action', 'back', 'panier', 'left', 'right'];
+const buttons = [false, false, false, false, false];
 const DPAD_UP = 12, DPAD_DOWN = 13, DPAD_LEFT = 14, DPAD_RIGHT = 15;
 
 export function createGamepad(onAction, settings) {
   let connected = 0;
   let startWasDown = false;
-  const wasDown = [false, false, false]; // A, B, Y
+  const wasDown = [false, false, false, false, false]; // A, B, Y, gauche, droite
   let x = 0;
   let z = 0;
 
@@ -50,11 +51,13 @@ export function createGamepad(onAction, settings) {
         if (pressed(pad, BUTTON_A)) buttons[0] = true;
         if (pressed(pad, BUTTON_B)) buttons[1] = true;
         if (pressed(pad, BUTTON_Y)) buttons[2] = true;
+        if (pressed(pad, BUTTON_LB) || pressed(pad, DPAD_LEFT)) buttons[3] = true;
+        if (pressed(pad, BUTTON_RB) || pressed(pad, DPAD_RIGHT)) buttons[4] = true;
       }
       if (startDown && !startWasDown) onAction('pause');
       startWasDown = startDown;
       // Un appui (et non un maintien) déclenche l'action.
-      for (let k = 0; k < 3; k++) {
+      for (let k = 0; k < BUTTON_ACTIONS.length; k++) {
         if (buttons[k] && !wasDown[k]) onAction(BUTTON_ACTIONS[k]);
         wasDown[k] = buttons[k];
         buttons[k] = false;

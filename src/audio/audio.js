@@ -8,7 +8,7 @@ export function createAudio(settings, song) {
   let ctx = null;
   let master, musicBus, sfxBus, scanBus, voiceBus, heroBus, noise, music;
   let paused = false;
-  let ducked = false; // musique baissée pendant un aparté
+  let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
   let foot = 0;
 
@@ -64,7 +64,7 @@ export function createAudio(settings, song) {
     if (!ctx) return;
     const t = ctx.currentTime;
     master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, 0.03);
-    musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1) * (ducked ? 0.3 : 1), t, 0.15);
+    musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1) * (frozen ? 0 : 1), t, frozen ? 0.08 : 0.4);
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
     scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
     voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
@@ -176,6 +176,12 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
     src.connect(lp).connect(g).connect(heroBus);
     src.start(t, 0.2, 0.85);
+    // [TEMP] Motif de l'Épaisseur : quatre notes de cloche douce, toujours les mêmes à chaque aparté.
+    const notes = [659, 784, 988, 880];
+    notes.forEach((f, i) => {
+      tone('sine', f, f, t + 0.35 + i * 0.26, 0.9, 0.13, heroBus);
+      tone('triangle', f * 2, f * 2, t + 0.35 + i * 0.26, 0.4, 0.03, heroBus);
+    });
   }
 
   // [TEMP] Petit bip de lettre du héros : plus grave et plus doux que celui du haut-parleur.
@@ -226,10 +232,10 @@ export function createAudio(settings, song) {
       return `${ctx.state} · ${ctx.sampleRate} Hz · réserve « ${settings.latency} » · latence ${ms(ctx.baseLatency)} + sortie ${ms(ctx.outputLatency)}`;
     },
     applyVolumes,
-    // Pendant un aparté, la musique baisse.
-    setDucked(d) {
-      if (d === ducked) return;
-      ducked = d;
+    // Pendant un aparté, le magasin est figé : sa musique se tait (et reprend doucement après).
+    setFrozen(f) {
+      if (f === frozen) return;
+      frozen = f;
       applyVolumes();
     },
     setState(state) {

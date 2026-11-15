@@ -616,3 +616,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 .aside-bar-top { top: 0; }
 .aside-bar-bottom { bottom: 0; }
+
+/* Deux réponses du joueur dans la bulle du héros (place réservée, visibles une fois la question écrite). */
+.hero-choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; visibility: hidden; }
+.hero-choices.ready { visibility: visible; }
+.hero-choice {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--card);
+  font-style: normal;
+  cursor: pointer;
+}
+.hero-choice:focus-visible, .hero-choice:hover { background: var(--accent); }
