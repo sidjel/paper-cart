@@ -4,7 +4,8 @@
 
 export const TRANSITIONS = {
   loading: ['title', 'play'],
-  title: ['play', 'menu'], // écran titre : Commencer, Options
+  title: ['play', 'menu', 'options'], // écran titre : Commencer, Options
+  options: ['title'], // options du joueur (depuis l'écran titre)
   play: ['pause', 'menu', 'panier'],
   panier: ['play'], // écran du Panier (les cartes obtenues)
   pause: ['play', 'menu'],

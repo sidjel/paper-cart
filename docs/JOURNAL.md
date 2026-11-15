@@ -12,6 +12,28 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
+## Séance 42 — 15/11/2026 — Accueil dégagé, Options du joueur assorties au titre, Scanette du scan corrigée
+
+**Retours de l'auteur** :
+- pas d'article au-dessus ni à gauche du mur de Scanettes ; mur agrandi à gauche ; panneau vert de la même largeur que le mur ;
+- des Options de l'écran titre distinctes du panneau de développement, assorties au titre (noir, bleu clair) ;
+- la Scanette apparaît sous les pieds pendant un scan.
+
+**Jouable maintenant** :
+- **Accueil** : un pan de mur dégagé au début du rayon (plus d'étagère ni de produits au-dessus ou à gauche), un **mur de 32 Scanettes** élargi à gauche, le **panneau vert de la même largeur**, la pile de paniers à droite. La banane est déplacée plus loin sur l'étagère.
+- **Options de l'écran titre** : un menu à part, **noir avec des touches de bleu clair**, avec seulement les réglages du joueur :
+  - Son (volumes en %) ;
+  - Affichage (plein écran, filtre cathodique) ;
+  - Accessibilité (taille et vitesse du texte, vibrations, luminosité, contraste, réduire les animations) ;
+  - Jeu (narrateur, joystick virtuel).
+
+  Il se commande au doigt, à la souris, au clavier (haut/bas, gauche/droite, Échap) et à la manette (croix, A, B). Le panneau ⚙ en jeu reste celui de développement.
+- **Scanette pendant le scan** : elle suit maintenant la main levée. Cause : l'image tenue pivotait autour de son centre et non de l'épaule ; sans rotation (marche) ça ne se voyait pas.
+
+**Vérifié** : 118 tests de logique et 61 tests navigateur PC et téléphone simulé, sans erreur console (dont : options du joueur au doigt et au clavier, aucun réglage de développement, accueil, panier plein avec la banane déplacée) ; comptages inchangés ; captures de l'accueil, des options, de la Scanette pendant le scan.
+
+---
+
 ## Séance 41 — 15/11/2026 — Menus au-dessus des voix, pas de déplacement pendant une action, accueil agrandi, accessibilité
 
 **Retours de l'auteur** (avec une capture du téléphone) :

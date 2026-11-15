@@ -25,7 +25,7 @@ const ACTIONS = {
   Numpad2: 'choice2',
 };
 // Gauche et droite servent aussi dans les menus et les réponses (onglets, choix) : une action à l'appui.
-const SIDE = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
+const SIDE = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down' };
 
 export function createKeyboard(onAction) {
   const down = new Set();

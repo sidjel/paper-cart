@@ -126,8 +126,8 @@
   "accueil": {
     "comment": "Accueil en libre-service (A5a), dessiné dans le décor du fond (rayon-fond.svg) au début du rayon : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). On les prend depuis le pied de l'étagère.",
     "items": [
-      { "id": "scanette", "at": [254, 330], "w": 320, "h": 280 },
-      { "id": "panier", "at": [470, 470], "w": 110, "h": 140 }
+      { "id": "scanette", "at": [222, 340], "w": 384, "h": 270 },
+      { "id": "panier", "at": [472, 470], "w": 110, "h": 140 }
     ]
   },
   "speakers": {
@@ -199,7 +199,7 @@
     "items": [
       {
         "product": "banane",
-        "at": [320, 282]
+        "at": [720, 282]
       },
       {
         "product": "lait",

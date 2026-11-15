@@ -17,6 +17,7 @@ import { createNarratorUi } from './ui/narrator.js';
 import { createAsideFx } from './ui/aside.js';
 import { createConfirm } from './ui/confirm.js';
 import { createTitleScreen } from './ui/title.js';
+import { createPlayerOptions } from './ui/playerOptions.js';
 import narratorFile from './data/narrator.json';
 import { findPath } from './core/pathfinding.js';
 import { createBench, stepBench, placeAtStart } from './core/bench.js';
@@ -124,8 +125,10 @@ applyCrt();
 const titleUi = createTitleScreen(uiEl, {
   image: `${BASE}art/placeholder/titre/titre.svg`,
   onStart: () => startGame(true),
-  onOptions: () => sm.go('menu'),
+  onOptions: () => sm.go('options'),
 });
+// Options du joueur (écran titre) : assorties au titre, sans réglages de développement.
+const playerOptions = createPlayerOptions(uiEl, { onClose: () => handleAction('back') });
 function startGame(fromPlayer) {
   if (sm.is('menu') && titleUi.visible) sm.back(); // les Options étaient ouvertes : on les ferme d'abord
   if (!sm.is('title')) return;
@@ -551,6 +554,7 @@ function handleAction(action) {
       if (quick) endQuick('annulé par le joueur (résultats partiels)');
       else if (sm.is('bench')) endBench('annulé par le joueur (résultats partiels)');
       else if (sm.is('menu')) sm.back();
+      else if (sm.is('options')) sm.go('title');
       else if (sm.is('panier')) {
         if (confirm.open) confirm.no();
         else sm.go('play');
@@ -583,8 +587,13 @@ function handleAction(action) {
     case 'landscape':
       enterLandscape();
       break;
+    case 'up':
+    case 'down':
+      if (sm.is('options')) playerOptions.move(action === 'up' ? -1 : 1);
+      break;
     case 'action':
-      if (sm.is('title')) titleUi.press();
+      if (sm.is('options')) playerOptions.press();
+      else if (sm.is('title')) titleUi.press();
       else if (confirm.open) confirm.yes(); // manette : A = oui
       else if (waitingAnswer(narrator)) answer(narrator, choiceFocus);
       else if (heroAside()) skipNarrator(narrator, narratorData, config.narrator);
@@ -596,7 +605,8 @@ function handleAction(action) {
       break;
     case 'left':
     case 'right':
-      if (sm.is('title')) titleUi.move(action === 'left' ? -1 : 1);
+      if (sm.is('options')) playerOptions.adjust(action === 'left' ? -1 : 1);
+      else if (sm.is('title')) titleUi.move(action === 'left' ? -1 : 1);
       else if (confirm.open) confirm.focus(action === 'right');
       else if (sm.is('panier')) basketUi.switchTab();
       else if (waitingAnswer(narrator)) {
@@ -651,6 +661,8 @@ sm.onChange((now, before) => {
   if (now === 'menu') settings.open();
   if (before === 'menu') settings.close();
   if (now === 'title') titleUi.show();
+  if (now === 'options') playerOptions.open();
+  if (before === 'options') playerOptions.close();
   if (now === 'panier' && panierMode === 'consult') {
     basketUi.open();
     say('panier');
