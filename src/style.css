@@ -1156,3 +1156,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 @keyframes card-fold { to { transform: scaleX(0.02); } }
 @keyframes card-unfold { from { transform: scaleX(0.02); } }
+/* La carte ouverte en grand n'est plus dans le Panier (une seule carte à l'écran). */
+.card-mini.lifted { visibility: hidden; }
+/* Refermer : le chemin inverse (elle se replie de profil, puis redevient petite, à sa place). */
+.card-flip.anim-back1 { animation: card-out 0.2s ease-in reverse forwards; }
+.card-flip.anim-back2 { animation: card-in 0.22s ease-out reverse forwards; }
+.card-detail.closing { background: rgb(30 22 14 / 0); transition: background 0.4s; pointer-events: none; }

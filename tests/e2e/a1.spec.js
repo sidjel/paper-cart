@@ -394,6 +394,7 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
   const detail = page.locator('.card-detail');
   await expect(detail).toBeVisible();
   await expect(detail.locator('button')).toHaveCount(0); // pas de bouton : on touche à côté pour refermer
+  await expect(mini).toHaveCSS('visibility', 'hidden'); // pas de carte en double : elle a quitté le Panier
   await expect(page.locator('.card-flip')).toHaveClass(/show-back/);
   await expect.poll(() => page.locator('.card-flip').getAttribute('class')).not.toMatch(/anim-/); // animation finie
   const backCard = page.locator('.card-flip .card-back');
@@ -418,6 +419,7 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
   if (phone) await page.touchscreen.tap(8, vp.height / 2);
   else await page.mouse.click(8, vp.height / 2);
   await expect(detail).toBeHidden();
+  await expect(mini).toHaveCSS('visibility', 'visible'); // revenue à sa place
   expect(await page.evaluate(() => window.paperCart.state())).toBe('panier');
   if (!phone) {
     // Clavier : Entrée sur la carte l'ouvre, Échap la referme, puis Échap ferme le Panier.

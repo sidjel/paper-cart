@@ -178,7 +178,7 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
       mid();
       return;
     }
-    flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold');
+    flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold', 'anim-back1', 'anim-back2');
     void flipper.offsetWidth;
     flipper.classList.add(first);
     flipper.onanimationend = () => {
@@ -190,6 +190,14 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
         flipper.onanimationend = null;
       };
     };
+  }
+  // Départ (ou arrivée) de l'animation : là où est la petite carte (mesuré à l'ouverture et à la fermeture).
+  function measureFrom(el) {
+    const a = el.getBoundingClientRect();
+    const b = flipper.getBoundingClientRect();
+    flipper.style.setProperty('--fx', `${a.left + a.width / 2 - (b.left + b.width / 2)}px`);
+    flipper.style.setProperty('--fy', `${a.top + a.height / 2 - (b.top + b.height / 2)}px`);
+    flipper.style.setProperty('--fs', String(a.width / b.width));
   }
   function openDetail(el) {
     const card = cards.get(Number(el.dataset.uid));
@@ -208,25 +216,44 @@ export function createBasketUi(root, { onOpen, onClose, objects, base = '' }) {
     back.querySelector('.card-back-stage').textContent = `Stade : ${(STAGE_INFO[card.card.stage] ?? STAGE_INFO.frais).label}`;
     setFace(false);
     detail.hidden = false;
-    // Départ de l'animation : là où est la petite carte (mesuré une fois, à l'ouverture).
-    const a = el.getBoundingClientRect();
-    const b = flipper.getBoundingClientRect();
-    flipper.style.setProperty('--fx', `${a.left + a.width / 2 - (b.left + b.width / 2)}px`);
-    flipper.style.setProperty('--fy', `${a.top + a.height / 2 - (b.top + b.height / 2)}px`);
-    flipper.style.setProperty('--fs', String(a.width / b.width));
+    measureFrom(el);
+    el.classList.add('lifted'); // la petite carte quitte le Panier : une seule carte à l'écran
     animate('anim-in', 'anim-out', () => setFace(true));
     detail.focus({ preventScroll: true });
   }
+  // Refermer : la carte se retourne dans l'autre sens et revient à sa place dans le Panier.
+  let closing = false;
   function closeDetail() {
-    if (detail.hidden) return;
-    detail.hidden = true;
-    flipper.onanimationend = null;
-    flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold');
-    detailCard?.focus({ preventScroll: true });
-    detailCard = null;
+    if (detail.hidden || closing) return;
+    const el = detailCard;
+    const done = () => {
+      closing = false;
+      detail.hidden = true;
+      detail.classList.remove('closing');
+      flipper.onanimationend = null;
+      flipper.classList.remove('anim-in', 'anim-out', 'anim-fold', 'anim-unfold', 'anim-back1', 'anim-back2');
+      el?.classList.remove('lifted');
+      el?.focus({ preventScroll: true });
+      if (detailCard === el) detailCard = null;
+    };
+    if (reduce() || !el || el.offsetParent === null) {
+      done();
+      return;
+    }
+    closing = true;
+    detail.classList.add('closing');
+    measureFrom(el);
+    animate('anim-back1', 'anim-back2', () => setFace(false));
+    // fin du second temps : la carte est revenue à sa place
+    const second = flipper.onanimationend;
+    flipper.onanimationend = () => {
+      second();
+      flipper.onanimationend = () => done();
+    };
   }
   // Toucher la grande carte : elle se retourne (recto, verso).
   function flipDetail() {
+    if (closing) return;
     animate('anim-fold', 'anim-unfold', () => setFace(!backShown));
   }
   flipper.addEventListener('click', (e) => {

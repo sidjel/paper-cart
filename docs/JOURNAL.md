@@ -40,7 +40,8 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Comptages inchangés.
 - Captures des petites cartes et de la grande carte (PC, téléphone).
 
-**Correction demandée dans la même séance** :
+**Corrections demandées dans la même séance** :
+- Plus de carte en double : la petite carte quitte le Panier pendant qu'elle est affichée en grand. En refermant, elle se retourne dans l'autre sens, rapetisse et revient à sa place.
 - La grande carte n'a plus de boutons : elle se referme en touchant à côté (ou Échap, B).
 - Les boutons Fermer/Annuler du Panier sont seulement en haut à droite et en bas à droite du menu (celui du bas est poussé en bas). Ils sont en kraft marron clair, texte foncé.
 
