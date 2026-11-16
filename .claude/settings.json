@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git rebase:*)",
+      "Bash(git commit --amend:*)",
+      "Bash(git filter-branch:*)"
+    ],
+    "ask": [
+      "Edit(/docs/VISION.md)",
+      "Write(/docs/VISION.md)",
+      "Edit(/tests/e2e/comptages-limites.json)",
+      "Write(/tests/e2e/comptages-limites.json)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/garde-git.mjs\"" }]
+      }
+    ]
+  }
+}
