@@ -2,7 +2,7 @@
 // Aucune règle de jeu ici : la logique vit dans core/, l'affichage dans scene/ et ui/.
 
 import './style.css';
-import { config, onConfigChange, setValue, getValue, overrides } from './config.js';
+import { config, onConfigChange, setValue, getValue } from './config.js';
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { compileMask, clampToBounds } from './core/walkmask.js';
@@ -26,15 +26,9 @@ import { playerName, fillName, OTHER, MAX_NAME } from './core/names.js';
 import { createNamePicker } from './ui/namePicker.js';
 import { createDizzy, stepDizzy, dizzyActive } from './core/dizzy.js';
 import { createDizzyStars } from './ui/dizzyStars.js';
-import departsFile from './data/departs.json';
-import { findDepart, cardCount, pickProducts, saidFor } from './core/departs.js';
 import { findPath } from './core/pathfinding.js';
 import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
-import { createBench, stepBench, placeAtStart } from './core/bench.js';
-import { createBenchUi } from './ui/bench.js';
-import { createQuickTest, stepQuickTest, startQuickTest, quickCondition, quickConditionDef, quickElapsed, quickTotalSeconds, QUICK_SUITES } from './core/quicktest.js';
-import { createQuickTestUi } from './ui/quicktest.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from './scene/assets.js';
 import { createPlaceView } from './scene/placeView.js';
 import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
@@ -47,8 +41,9 @@ import { createBasketUi, createFlyingCard } from './ui/cards.js';
 import { createInput } from './input/input.js';
 import { createHud } from './ui/hud.js';
 import { createJournal } from './ui/journal.js';
-import { createDiagnostic } from './ui/diagnostic.js';
 import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
+import { createMeasureTools } from './debug/measure.js';
+import { createDepartTools } from './debug/departs.js';
 import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
@@ -531,31 +526,12 @@ function equipAll() {
   basketUi.setCapacity(capacity(gear, config.carry));
 }
 
-// ---------- Points de départ (tests rapides) ----------
-// ⚙ → Départ, ou lien ?depart=<id> : le jeu se recharge, puis se met dans l'état choisi (data/departs.json).
-// Recalculé à partir du jeu actuel : reste valable après une mise à jour (ce n'est pas une sauvegarde).
-const departId = new URLSearchParams(location.search).get('depart');
-function goToDepart(id) {
-  const url = new URL(location.href);
-  if (id === 'debut') url.searchParams.delete('depart');
-  else url.searchParams.set('depart', id);
-  location.replace(url.href); // rechargement : on part d'un jeu propre
-}
-function applyDepart(def) {
-  sm.go('play'); // sans écran titre ni intro
-  if (def.equip) equipAll();
-  for (const t of saidFor(def)) narrator.done[t] = true;
-  if (def.equip) arrived = true; // pas d'annonce d'arrivée ni de premières pensées
-  // Cartes déjà dans le panier : des produits du rayon, retirés de l'étagère (sans effet de scan).
-  const free = productState.map((it, i) => ({ i, category: it.def.category ?? 'alimentaire', ok: !it.scanned })).filter((x) => x.ok);
-  for (const k of pickProducts(free, cardCount(def, capacity(gear, config.carry)))) {
-    const i = free[k].i;
-    const it = productState[i];
-    it.scanned = true;
-    products.remove(i);
-    basketUi.add(addToBasket(basket, it.id, it.def, i, place.id), imageUrlOf(it.def));
-  }
-  if (basket.cards.length) basketUi.setCount(basket.cards.length);
+// Donner une carte sans scanner (points de départ pour tester) : le produit quitte l'étagère, sans effet.
+function giveCard(i) {
+  const it = productState[i];
+  it.scanned = true;
+  products.remove(i);
+  basketUi.add(addToBasket(basket, it.id, it.def, i, place.id), imageUrlOf(it.def));
 }
 
 function imageUrlOf(def) {
@@ -603,163 +579,44 @@ function updateTip() {
   tip.x = shown.x + walker.facing * (tx - heroData.anchor[0]) * s;
   tip.y = shown.y + (ty - heroData.anchor[1] + config.character.footSink) * s;
 }
-const diag = createDiagnostic(uiEl, () => ({
+// ---------- Outils de mesure et points de départ (src/debug/) ----------
+const measure = createMeasureTools(uiEl, {
   version: VERSION,
-  state: sm.get(),
-  place: `${place.id}${lastTransitionMs ? ` (dernier changement de lieu : ${lastTransitionMs} ms dans le noir)` : ''}`,
-  renderLine,
-  images: assetStats.images,
-  pixels: assetStats.pixels,
-  loadMs: assetStats.loadMs,
-  slowest: [...assetStats.perImage].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([n, ms]) => `${n} ${ms} ms`).join(', '),
-  audio: audio.describe(),
-  gamepad: input?.gamepad.connected ?? false,
-  overrides: overrides(),
+  sm,
+  stepper,
+  hud,
+  camera: () => camera,
   errors: errorLog,
-}));
-const benchUi = createBenchUi(uiEl, {
-  onStart: () => startBench(config.bench.passes, config.bench.warmup),
-  getContext: () => ({
-    version: VERSION,
-    renderLine,
-    images: assetStats.images,
-    pixels: assetStats.pixels,
-    loadMs: assetStats.loadMs,
-    slowest: [...assetStats.perImage].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([nm, ms]) => `${nm} ${ms} ms`).join(', '),
-    place: place.id,
-    switches: activeSwitches(),
-    overrides: overrides(),
-  }),
+  place: () => place,
+  stage: () => stage,
+  walker: () => walker,
+  mask: () => mask,
+  sprite: () => sprite,
+  marker: () => marker,
+  render: () => render(),
+  resetCamera() {
+    camera.ready = false;
+    lastCamTime = -1;
+  },
+  renderLine: () => renderLine,
+  placeNote: () => `${place.id}${lastTransitionMs ? ` (dernier changement de lieu : ${lastTransitionMs} ms dans le noir)` : ''}`,
+  audioInfo: () => audio.describe(),
+  gamepad: () => input?.gamepad.connected ?? false,
 });
-const quickUi = createQuickTestUi(uiEl, {
-  // La campagne fixe son propre nombre de tours ; le reste vient des réglages.
-  onStart: (suite) => startQuick({ ...config.quick, rounds: QUICK_SUITES[suite].rounds ?? config.quick.rounds }, suite),
-  getContext: () => ({ version: VERSION, renderLine, overrides: overrides() }),
+const diag = measure.diag;
+const departs = createDepartTools({
+  sm,
+  equipAll: () => equipAll(),
+  markSaid: (t) => (narrator.done[t] = true),
+  skipArrival: () => (arrived = true),
+  products: () => productState,
+  capacity: () => capacity(gear, config.carry),
+  giveCard,
+  refreshCount() {
+    if (basket.cards.length) basketUi.setCount(basket.cards.length);
+  },
 });
-const diagTools = document.createElement('div');
-diagTools.append(quickUi.launcher, benchUi.launcher);
-// Onglet « Départ » : choisir où commencer (le jeu se recharge).
-const departTools = document.createElement('div');
-departTools.className = 'depart-tools';
-{
-  const note = document.createElement('p');
-  note.className = 'settings-note';
-  note.textContent = 'Pour tester vite : le jeu se recharge et commence à ce point. Lien direct : ajouter ?depart=<nom> à l’adresse.';
-  departTools.appendChild(note);
-  for (const d of departsFile.departs) {
-    const b = document.createElement('button');
-    b.textContent = d.label;
-    b.dataset.depart = d.id;
-    if (d.id === (departId ?? 'debut')) b.classList.add('current');
-    b.addEventListener('click', () => goToDepart(d.id));
-    departTools.appendChild(b);
-  }
-}
-const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: diagTools, Départ: departTools } });
-
-// ---------- Test rapide T0 / T1 / T2 ----------
-// Les variantes sont appliquées en mémoire seulement (rien n'est enregistré) et annulées à la fin.
-let quick = null;
-let quickSavedReduce = false;
-
-function applyVariant(variant) {
-  config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
-  stage.applyOpacity(); // rayon de devant comme dans le jeu…
-  if (variant === 'T2' && stage.layers['premier-plan']) stage.layers['premier-plan'].style.opacity = 0; // … ou invisible (T2)
-}
-
-async function startQuick(params, suite = 'T012') {
-  if (!sm.is('menu')) return;
-  quick = createQuickTest(place.diagnostic, params, suite);
-  startQuickTest(quick, walker);
-  quickSavedReduce = config.display.reduceMotion;
-  applyVariant(quickConditionDef(quick).variant);
-  camera.ready = false;
-  lastCamTime = -1;
-  marker.hide();
-  hud.playerMoved();
-  sm.go('bench');
-  await quickUi.begin(params, suite);
-}
-
-function endQuick(status) {
-  if (!quick) return;
-  quick = null;
-  config.display.reduceMotion = quickSavedReduce;
-  stage.applyOpacity();
-  sm.go('play');
-  quickUi.finish(status);
-}
-
-function quickStep(dt, t0) {
-  const n = stepper.advance(dt / 1000);
-  for (let i = 0; i < n && quick.phase !== 'done'; i++) {
-    stepQuickTest(quick, walker, stepper.step);
-    if (quick.changed && quick.phase === 'block') {
-      quickUi.nextBlock();
-      applyVariant(quickConditionDef(quick).variant);
-    }
-    stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
-  }
-  if (quick.phase === 'done') {
-    endQuick('terminé');
-    return;
-  }
-  render();
-  if (quick.measuring) quickUi.record(dt, performance.now() - t0, quickCondition(quick));
-  const c = quickConditionDef(quick);
-  const left = Math.ceil((quickTotalSeconds(quick) - quickElapsed(quick)) / 60);
-  const what = quick.phase === 'warmup' ? 'chauffe' : `tour ${quick.round + 1}/${quick.rounds} · ${c.id}`;
-  quickUi.progress(`Test rapide : ${what} · reste ≈ ${left} min`);
-}
-
-// ---------- Banc d'essai ----------
-let bench = null;
-const NO_INPUT = { moveX: 0, moveZ: 0 };
-
-function activeSwitches() {
-  const b = config.bench;
-  return [b.noForeground && 'sans rayon de devant', b.noFarLayer && 'sans rayons lointains', b.noDust && 'sans poussière', b.noShadow && 'sans ombre', b.fixedCamera && 'caméra immobile']
-    .filter(Boolean)
-    .join(', ');
-}
-
-// Interrupteurs d'essai : appliqués seulement pendant le parcours, sans toucher aux réglages enregistrés.
-let savedDust = true;
-function applySwitches(on) {
-  const b = config.bench;
-  // (un lieu peut ne pas avoir ces calques)
-  if (stage.layers['premier-plan']) stage.layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
-  if (stage.layers.lointain) stage.layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
-  sprite.shadowEl.style.display = on && b.noShadow ? 'none' : '';
-  if (on) {
-    savedDust = config.character.dust;
-    if (b.noDust) config.character.dust = false;
-  } else {
-    config.character.dust = savedDust;
-  }
-}
-
-function startBench(passes, warmup) {
-  if (!sm.is('menu')) return;
-  bench = createBench(place.bench, passes, warmup);
-  placeAtStart(bench, walker);
-  camera.ready = false;
-  lastCamTime = -1;
-  marker.hide();
-  hud.playerMoved(); // l'aide aux contrôles n'a plus lieu d'être
-  applySwitches(true);
-  benchUi.begin();
-  sm.go('bench');
-}
-
-function endBench(status) {
-  if (!bench) return;
-  applySwitches(false);
-  benchUi.finish(status, bench);
-  bench = null;
-  sm.go('play');
-}
+const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back'), extras: { Diagnostic: measure.launcher, Départ: departs.el } });
 
 // Qui a la main ? (core/focus.js) : une seule règle de priorité pour toutes les commandes.
 function owner() {
@@ -776,11 +633,10 @@ function handleAction(action) {
   playerActed = true;
   const who = owner();
   const dir = action === 'up' || action === 'left' ? -1 : 1;
-  const stopBench = () => (quick ? endQuick : endBench)('annulé par le joueur (résultats partiels)');
   switch (action) {
     case 'back':
       if (who === 'intro') skipAll(introRun);
-      else if (who === 'bench') stopBench();
+      else if (who === 'bench') measure.cancel();
       else if (who === 'menu') sm.back();
       else if (who === 'options') sm.go('title');
       else if (who === 'confirm') confirm.no();
@@ -789,7 +645,7 @@ function handleAction(action) {
       else if (inGame(who)) sm.go('pause');
       break;
     case 'pause':
-      if (who === 'bench') stopBench();
+      if (who === 'bench') measure.cancel();
       else if (who === 'pause') sm.go('play');
       else if (inGame(who)) sm.go('pause');
       break;
@@ -1057,12 +913,10 @@ function render() {
   const v = stage.view;
   const camDt = lastCamTime < 0 ? 0 : Math.min(0.1, time - lastCamTime);
   lastCamTime = time;
-  const camFrozen = bench && config.bench.fixedCamera && camera.ready;
-  const pc = quick ? quickConditionDef(quick) : null;
-  if (pc && pc.camera === 'fixed') {
-    // Diagnostic : caméra fixe, centrée sur l'aller-retour.
-    const mid = (place.diagnostic.a[0] + place.diagnostic.b[0]) / 2;
-    camera.x = Math.min(Math.max(0, place.size[0] - v.viewW), Math.max(0, mid - v.viewW / 2));
+  const fixedX = measure.fixedCameraX(v.viewW);
+  if (fixedX !== null) {
+    // Test rapide : caméra fixe, centrée sur l'aller-retour.
+    camera.x = fixedX;
     camera.y = 0;
     camera.ready = true;
   } else if (inScene(narrator) && asideP === 0) {
@@ -1074,7 +928,7 @@ function render() {
     const gy = Math.min(Math.max(0, place.size[1] - v.viewH), Math.max(0, shown.y - 170 * shown.scale - v.viewH * 0.5));
     camera.x += (gx - camera.x) * k;
     camera.y += (gy - camera.y) * k;
-  } else if (!camFrozen) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
+  } else if (!measure.cameraFrozen()) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   stage.setCamera(camera.x, camera.y);
   if (!walker.hasTarget) marker.hide();
 }
@@ -1122,22 +976,8 @@ function frame(now) {
     updateIntro(Math.min(dt / 1000, 0.1));
   } else if (sm.is('panier')) {
     updateNarrator(Math.min(dt / 1000, 0.1));
-  } else if (quick) {
-    quickStep(dt, t0);
   } else if (sm.is('bench')) {
-    // Banc d'essai : le parcours remplace les commandes du joueur.
-    const n = stepper.advance(dt / 1000);
-    const segBefore = bench.segStarts;
-    const camBefore = camera.x;
-    for (let i = 0; i < n && bench.phase !== 'done'; i++) {
-      stepBench(bench, walker, mask, stepper.step);
-      stepWalker(walker, NO_INPUT, mask, config.walk, stepper.step);
-    }
-    render();
-    // Contexte de l'image, pour savoir à quel moment les images lentes arrivent.
-    if (bench.measuring) benchUi.record(dt, performance.now() - t0, Math.abs(camera.x - camBefore) > 0.05, bench.segStarts !== segBefore, walker.moving);
-    benchUi.progress(bench);
-    if (bench.phase === 'done') endBench('terminé');
+    measure.frame(dt, t0); // banc d'essai ou test rapide : le parcours remplace les commandes du joueur
   }
   // Sous un menu ou en pause, la scène n'est pas redessinée.
   diag.frame(dt, performance.now() - t0, playing);
@@ -1289,8 +1129,7 @@ async function start() {
   window.visualViewport?.addEventListener('resize', layout);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sm.is('play')) sm.go('pause');
-    if (document.hidden && quick) endQuick('interrompu : le jeu est passé en arrière-plan (écran éteint ?)');
-    if (document.hidden && sm.is('bench')) endBench("interrompu : le jeu est passé en arrière-plan");
+    if (document.hidden) measure.interrupted();
     audio.setHidden(document.hidden);
   });
   // Le son ne peut démarrer qu'après un premier geste du joueur.
@@ -1302,10 +1141,10 @@ async function start() {
   render();
   hud.ready();
   sm.go('title');
-  const depart = departId && findDepart(departsFile.departs, departId);
+  const depart = departs.requested();
   if (depart) {
     titleUi.hide();
-    applyDepart(depart);
+    departs.apply(depart);
   }
   requestAnimationFrame(frame);
 
@@ -1358,14 +1197,14 @@ async function start() {
     // Banc d'essai pour les tests automatiques (ouvre le menu puis lance le parcours).
     startBench(passes = 1, warmup = 0) {
       if (sm.is('play')) sm.go('menu');
-      startBench(passes, warmup);
+      measure.startBench(passes, warmup);
     },
-    benchReport: () => benchUi.lastReport,
+    benchReport: () => measure.benchReport(),
     startQuick(warmup = 1, block = 2, settle = 0.5, rounds = 1, suite = 'T012') {
       if (sm.is('play')) sm.go('menu');
-      startQuick({ warmup, block, settle, rounds }, suite);
+      measure.startQuick({ warmup, block, settle, rounds }, suite);
     },
-    quickReport: () => quickUi.lastReport,
+    quickReport: () => measure.quickReport(),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
     audioStarted: () => audio.started,
     // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).
