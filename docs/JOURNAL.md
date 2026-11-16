@@ -16,6 +16,40 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 57 — 16/11/2026 — Le hall refait en profondeur, d'après l'image de référence
+
+**Demande de l'auteur** : refondre le hall en vraie 2.5D avec une ambiance pluvieuse, et un agent qui interpelle le héros, le fige et le repousse. Image de référence fournie en cours de séance.
+
+**Corrections signalées** :
+- Pas de « Canvas » : interdit par les règles et changement de technique. Tout est en dessins SVG, calques et animations CSS légères.
+- Le flou du parking est dessiné dans l'image : le flou CSS est interdit.
+- La logique de l'agent est dans `src/core/guard.js`, pas dans `src/core/places.js`.
+
+**Jouable maintenant** :
+- Le héros commence **à droite** d'une **barrière de 4 portiques en diagonale**, rangés en profondeur : le héros passe devant ou derrière chacun. Il ne passe jamais à gauche.
+- À gauche, un **mur vitré de côté, en perspective**. Derrière, un parking de nuit : arbres et voitures flous, lampadaire avec son halo, flaques. Il glisse moins vite que le mur (parallaxe).
+- **La pluie** : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), du ruissellement, des ronds dans les flaques. **Le tapis d'entrée** noir, mouillé, suit le mur, avec un reflet qui glisse.
+- **L'agent**, redessiné dans le style du héros (grosse tête, contour épais), longe la barrière pour faire face au héros.
+  - Quand le héros va vers la gauche, l'agent lève le bras et parle dans **une bulle au-dessus de lui** : « Vous ne pouvez pas ressortir par ici !… » [TEMP]. Le héros est **figé** le temps de la bulle. Puis le héros pense « Hum… étrange… ».
+  - S'il force contre les portiques, l'agent le **repousse d'un petit pas** vers la droite.
+- Premier plan : une plante en pot et une file de caddies. Panneau d'affichage, caméras au plafond.
+
+**Vérifié** :
+- 166 tests de logique et Knip.
+- 85 essais navigateur sur PC et téléphone simulé, sans erreur console. Nouvel essai de l'agent : interpellation, bulle, héros figé, poussée, jamais à gauche, retour au poste.
+- Comptages du hall : 83 éléments, 4 calques, 38 images, 4,5 Mpx, rien créé en jeu. Le rayon est inchangé. Mémoire stable après 5 allers-retours.
+
+**À vérifier par l'auteur** : la fluidité dans le hall sur le téléphone (pluie, parallaxe ; DBG), et le ressenti de la poussée.
+
+**Décisions prises seul** (détails) :
+- L'opacité du premier plan du hall est réglable : ⚙ → Affichage.
+- Le texte de la bulle de l'agent est droit et centré.
+- Le panneau d'affichage est placé du côté de l'agent.
+
+**Suite proposée** : vos réponses aux questions (hôtesse, « !! », pensée), puis la validation d'A6.
+
+---
+
 ## Séance 56 — 16/11/2026 — A6 (3/3) : l'agent de sécurité, les portiques, la pluie derrière les vitres
 
 **Demande de l'auteur** : « 1,a. 2, oui. 3, Oui. 4, … la petite animation de pluie au niveau des baies vitrées. » On peut toujours entrer dans le rayon sans Scanette (A). Mesurer les comptages du hall et proposer des limites. Faire A6 (3/3). Ajouter la pluie.
@@ -128,31 +162,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Vérifié** :
 - 159 tests de logique ; 82 tests navigateur PC et téléphone simulé, sans erreur console ; comptages du rayon inchangés.
 - Aucun changement visible pour le joueur, hors la fuite corrigée.
-
----
-
-## Séance 52 — 15/11/2026 — Remise en ordre (1/2) : la documentation
-
-**Demande de l'auteur** : A4 et A5 validées ; puis séance 1 de remise en ordre (documents seulement, un commit par point).
-
-**Fait** :
-- **A4 et A5 validées : `c32eedd`** (dernière version avant le début d'A6), inscrites dans le tableau ci-dessus et dans PROTOTYPES.md.
-- `ARCHITECTURE.md` : état vérifié séance 51 ; modules et données ajoutés ; taille réelle de `main.js` (1 370 lignes) ; §9 nettoyé ; §11 = état réel des lieux.
-- `HISTOIRE.md` : accueil « en construction (A6) » ; première rencontre résumée en 2 lignes (79 lignes au total, aucune décision perdue).
-- `REGLES_CARTES_COMBAT.md` : ❓ « 12 cartes en combat » contre la capacité du panier, à régler avant B.
-- `DIRECTION_ARTISTIQUE.md` : reçoit, mot pour mot, le détail du style de `VISION.md`. **`VISION.md` pas encore modifié : en attente de l'accord de l'auteur.**
-- `SUIVI.md` : section « Ouvert » seule, et liste numérotée des 59 points 👀 à trancher ; les points ✅ sont dans `SUIVI-archive.md` (tels quels).
-- `JOURNAL.md` : tableau des étapes validées et 5 derniers rapports ; les anciens dans `docs/journal/anciens-rapports.md` (tels quels).
-- `CLAUDE.md` : 68 lignes (au lieu de 84), carte des documents rangée par sujet.
-- Skills `.claude/skills/` : `fin-seance`, `valider` et `mesures`, avec le texte déplacé mot pour mot.
-- `src/core/CLAUDE.md` et `src/scene/CLAUDE.md` : règles propres à ces dossiers.
-
-**Le flou réel des bords pendant la rencontre** :
-- Il est **désactivé par défaut** (`narrator.veilBlur = 0` ; à 0, l'élément flou est retiré de l'affichage, donc il ne coûte rien).
-- Réglable de 0 à 16 px dans ⚙ → Narrateur.
-- Activé, il recalcule le flou de tout l'écran derrière le voile à chaque image, pendant toute la rencontre (zoom, vagues) : c'est le plus coûteux des effets du jeu. Coût jamais mesuré sur le téléphone.
-- Autre `filter` présent : luminosité / contraste (Accessibilité), seulement si on les change. Décision de l'auteur attendue.
-
-**Vérifié** : aucun code de jeu modifié ; 151 tests de logique verts ; chaque ligne de tableau du suivi retrouvée (165 lignes de tableau avant, toutes présentes après, dans SUIVI ou SUIVI-archive).
 
 ---

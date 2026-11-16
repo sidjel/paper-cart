@@ -95,6 +95,15 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | A6 (3/3) : agent de sécurité devant le portique visé, annonce d'interdiction, pensée « Hum… étrange… » | 56 | 👀 | Construit, à tester par l'auteur, puis validation d'A6. |
 | Pluie animée derrière les baies vitrées du hall | 56 | 👀 | Construite. Figée avec « réduire les animations ». Fluidité à vérifier sur le téléphone. |
 
+### Séance 57
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Hall refait d'après l'image de référence (mur vitré en perspective, portiques en diagonale, premier plan, départ à droite) | 57 | 👀 | Construit, à tester par l'auteur. |
+| Agent : style du héros, bulle, héros figé, poussée s'il force | 57 | 👀 | Construit. Réplique [TEMP] de l'auteur. |
+| Pluie, ruissellement, ronds dans les flaques, tapis mouillé, parking de nuit | 57 | 👀 | Sans Canvas : SVG et CSS. Fluidité à vérifier sur le téléphone. |
+| Hôtesse au comptoir, « !! » du héros, pensée « Hum… étrange… » | 57 | ❓ | Vus sur l'image de référence ou hérités : décision de l'auteur. |
+| Limites des comptages du hall | 57 | ❓ | Nouvelles mesures (83 éléments, 38 images, 4,5 Mpx) : à proposer de nouveau. |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 

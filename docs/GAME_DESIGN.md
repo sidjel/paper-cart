@@ -24,6 +24,13 @@
 - **A5** (ancien A5a) : le héros prend Scanette et panier au présentoir en libre-service ; capacité limitée. Le présentoir est dans le **hall d'accueil** depuis la séance 55 (A6), où la partie commence.
 - **A6** l'accueil (lieu séparé) → **A7** le deuxième rayon → **A8** le caddie (ancien A5b) : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**.
 
+## Le hall d'accueil (A6) ✅ VALIDÉ (demande de l'auteur, séance 57 ; image de référence)
+- Le héros commence **à droite des portiques**, sans souvenir ; il ne peut **jamais** revenir à gauche (entrée, mur vitré).
+- Trois plans triés par profondeur : fond (mur vitré de côté en perspective, présentoir, comptoir), milieu (tapis d'entrée noir, **barrière de 4 portiques en diagonale**, agent de sécurité à gauche des portiques, tourné vers la droite), premier plan (plante en pot, file de caddies).
+- L'agent (même style que le héros) interpelle le héros qui va vers les portiques : bras tendu, **le héros est figé le temps de la bulle** : « Vous ne pouvez pas ressortir par ici ! Pour sortir, il faut traverser tout le magasin et passer par les caisses de l'autre côté. » [TEMP]. S'il force, l'agent le **repousse d'un petit pas** vers la droite.
+- Dehors : parking de nuit, pluie, ruissellement, ronds dans les flaques ; tapis mouillé.
+- ❓ À DÉFINIR : une hôtesse derrière le comptoir (sur l'image de référence) ; le « !! » de surprise du héros ; garder ou non la pensée « Hum… étrange… » après l'agent.
+
 ## Le Caddie jouable (A8) ✅ VALIDÉ
 - **Panier physique** qui suit le personnage **dans le lieu où il se trouve**.
 - ✅ VALIDÉ (séance 50) : il **ne suit pas le héros d'un lieu à l'autre**. Il reste **garé là où le joueur l'a laissé** : le joueur en est responsable.
