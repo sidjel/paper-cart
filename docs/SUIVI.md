@@ -130,7 +130,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | Règles inscrites (affichage, parallaxe, lumière, boucle, entrées, son, sauvegarde, appareils, menus, dialogues, chargements, méthode, index) | 64 | ✅ | Liste et emplacements : rapport de la séance 64 (JOURNAL). |
 | Profils d'appareils (PC modeste, PC rapide, smartphone) | 64 | ❓ | Options proposées ; à construire après accord (séance B). |
-| Chantier son (diagnostic, essai long, corrections) | 64 | 🔧 | Séance B, avec comparaison sur le téléphone. |
+| Chantier son (diagnostic, essai long, corrections) | 64 | 🔧 | Séance 65 : mesure en place (diagnostic : sons joués, notes, nœuds actifs effets / musique, changements d'état ; ⚙ → Diagnostic → « Essai son long »). Constat dans le navigateur de test : en 2 s de marche, 85 nœuds d'effets et 96 de musique créés, aucun libéré. En attente de la mesure « avant » sur le téléphone, puis corrections une à la fois. |
 | Entrées : pas d'essai automatique à la manette | 64 | ❓ | Clavier, souris et doigt ont leurs essais ; la manette se simule dans le navigateur de test (faux `getGamepads`). |
 | Entrées : les aides à l'écran ne suivent pas le dernier appareil utilisé | 64 | ❓ | Choisies une fois au démarrage (doigt ou clavier) ; rien pour la manette. |
 | Entrées : pas de pause automatique si la manette est débranchée | 64 | ❓ | Le branchement et le débranchement sont bien détectés. |
