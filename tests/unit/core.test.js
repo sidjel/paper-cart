@@ -39,6 +39,37 @@ describe('boucle à pas fixe', () => {
     expect(s.advance(2)).toBe(5);
     expect(s.acc).toBe(0);
   });
+  // Séance 64 (règle « Boucle de jeu », docs/ARCHITECTURE.md §3) : un écran à 90, 120 ou 144 Hz ne change
+  // pas la vitesse du jeu, et le mouvement affiché reste régulier (interpolation entre deux pas).
+  for (const hz of [60, 90, 120, 144]) {
+    it(`écran à ${hz} Hz : même distance par seconde, et pas d'à-coups d'une image à l'autre`, () => {
+      const s = createStepper(60, 5);
+      const speed = 300; // px/s, mouvement constant
+      let prev = 0;
+      let cur = 0;
+      const shown = [];
+      for (let f = 0; f < hz * 2; f++) {
+        const n = s.advance(1 / hz);
+        for (let k = 0; k < n; k++) {
+          prev = cur;
+          cur += speed * s.step;
+        }
+        shown.push(prev + (cur - prev) * s.alpha); // ce que l'écran affiche
+      }
+      // Même distance en 2 s, quelle que soit la fréquence (à un pas près : l'affichage a un pas de retard).
+      expect(shown[shown.length - 1]).toBeGreaterThan(speed * 2 - speed / 60 - 1);
+      expect(shown[shown.length - 1]).toBeLessThanOrEqual(speed * 2);
+      // Chaque image avance de la même longueur (sans interpolation, à 144 Hz : 0, 5, 0, 5…).
+      const steps = shown.slice(hz).map((x, i) => x - shown[hz + i - 1]);
+      for (const d of steps) expect(d).toBeCloseTo(speed / hz, 6);
+    });
+  }
+  it('un appareil qui rame (images de 100 ms) : le jeu ralentit un peu au lieu de se figer ou de sauter', () => {
+    const s = createStepper(60, 5);
+    let steps = 0;
+    for (let f = 0; f < 10; f++) steps += s.advance(0.1); // 1 s réelle
+    expect(steps).toBe(50); // 5 pas par image au plus : 50 pas joués au lieu de 60
+  });
 });
 
 describe('machine à états', () => {
