@@ -20,5 +20,10 @@ Inspirée de Paper Mario et de Baten Kaitos.
 ## Lisibilité des cartes ✅ VALIDÉ
 - Les 3 stades (Frais, Mûr, Pourri) se distinguent par une **icône de forme différente** en plus de la couleur (déjà en place : cercle, triangle, carré).
 
+## Lumière ✅ VALIDÉ (séance 64)
+- **Pas d'éclairage calculé** : la lumière est **dessinée dans les images** ou posée en calques de lumière et d'obscurité préparés (halo de néon, pénombre). Règles techniques : `src/scene/CLAUDE.md`.
+- Chaque lieu a une **direction de lumière**, notée ici et dans ses données, que suivent les dessins et les ombres. ❓ À DÉFINIR : hall d'accueil, rayon d'essai.
+- Néons qui clignotent : **3 éclairs par seconde au plus**, figés par l'option « Réduire les clignotements » (personnes sensibles).
+
 ## Questions ouvertes ❓ À DÉFINIR
 - Résultat de l'essai crayon de couleur (lieu d'essai du prototype D).

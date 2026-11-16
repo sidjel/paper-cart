@@ -75,7 +75,7 @@ describe('garde-fous : règles du code', () => {
 
 describe('garde-fous : liens entre documents', () => {
   it('chaque chemin de fichier cité dans docs/, CLAUDE.md et les skills existe (sauf documents prévus)', () => {
-    const docs = ['CLAUDE.md', 'src/core/CLAUDE.md', 'src/scene/CLAUDE.md']
+    const docs = ['CLAUDE.md', ...readdirSync('src').map((d) => `src/${d}/CLAUDE.md`).filter((f) => existsSync(f))]
       .concat(files('docs', ['.md']).filter((f) => !/docs[\\/](journal|archive)[\\/]/.test(f))) // anciens rapports : historique, tel quel
       .concat(existsSync('.claude/skills') ? files('.claude/skills', ['.md']) : []);
     const path = /(?<![\w./-])((?:docs|src|tests|public|tools|\.claude|\.github)\/[\w./-]*[\w/]|[A-Z][A-Z_]+\.md)/g;
