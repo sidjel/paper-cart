@@ -5,7 +5,7 @@ import './style.css';
 import { config, onConfigChange, setValue, getValue } from './config.js';
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
-import { compileMask, clampToBounds } from './core/walkmask.js';
+import { clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, clearTarget, faceProduct, faceScreen } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
@@ -27,11 +27,11 @@ import { createNamePicker } from './ui/namePicker.js';
 import { createDizzy, stepDizzy, dizzyActive } from './core/dizzy.js';
 import { createDizzyStars } from './ui/dizzyStars.js';
 import { findPath } from './core/pathfinding.js';
-import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct } from './core/world.js';
+import { createWorld, moveProduct } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
-import { assetStats, computeRasterScale, loadImages, releaseImages } from './scene/assets.js';
-import { createPlaceView } from './scene/placeView.js';
-import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
+import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
+import { createPlaces } from './game/places.js';
+import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
 import { createTargetMarker } from './scene/targetMarker.js';
 import { actorLevel } from './scene/depth.js';
@@ -48,7 +48,6 @@ import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
 import accueilPlace from './data/places/accueil.json';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack } from './core/places.js';
 import heroData from './data/characters/heros.json';
 import catalog from './data/products.json';
 
@@ -599,7 +598,7 @@ const measure = createMeasureTools(uiEl, {
     lastCamTime = -1;
   },
   renderLine: () => renderLine,
-  placeNote: () => `${place.id}${lastTransitionMs ? ` (dernier changement de lieu : ${lastTransitionMs} ms dans le noir)` : ''}`,
+  placeNote: () => `${place.id}${places.lastTransitionMs() ? ` (dernier changement de lieu : ${places.lastTransitionMs()} ms dans le noir)` : ''}`,
   audioInfo: () => audio.describe(),
   gamepad: () => input?.gamepad.connected ?? false,
 });
@@ -941,11 +940,11 @@ function frame(now) {
   last = now;
   input.pollDevices();
   audio.update();
-  if (transition) {
-    updateTransition(Math.min(dt / 1000, 0.1)); // changement de lieu : seul le fondu avance, rien ne bouge
+  if (places.busy) {
+    places.update(Math.min(dt / 1000, 0.1)); // changement de lieu : seul le fondu avance, rien ne bouge
     return;
   }
-  if (!placeView) return;
+  if (!places.ready) return;
   const playing = sm.is('play');
   if (playing) {
     if (dragPending) onTarget(dragX, dragY);
@@ -964,7 +963,7 @@ function frame(now) {
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
-    watchExits();
+    places.watchExits();
     const sec = Math.min(dt / 1000, 0.1);
     updateIntro(sec); // fondu final de l'intro, s'il est en cours
     watchNarrator(sec);
@@ -983,104 +982,50 @@ function frame(now) {
   diag.frame(dt, performance.now() - t0, playing);
 }
 
-// ---------- Lieux : charger, afficher, quitter ----------
-// Les images communes (héros, poussière, produits) restent chargées ; celles du lieu sont libérées en partant.
-let placeView = null; // vue du lieu affiché (scene/placeView.js)
-let placeImages = null;
-const backstage = document.createElement('div'); // où attendent le héros, la poussière et le repère hors d'un lieu
-
-async function loadPlace(id) {
-  place = PLACES[id];
-  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
-  assetStats.rasterScale = rasterScale;
-  // Décodées avant l'affichage.
-  placeImages = await loadImages(Object.entries(place.images).map(([key, im]) => ({ id: key, url: BASE + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })));
-  proj = createProjection(place.projection, config.scene);
-  mask = compileMask(place.walkMask);
-  endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
-  // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
-  const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
-  const here = enterPlace(world, place.id, () => ({
-    products: buildProducts(place, catalog, (z) => worldToStageY(proj, z)),
-    pickups: buildPickups(place, back),
-  }));
-  productState = here.products;
-  pickupState = here.pickups;
-  placeView = createPlaceView(gameEl, place, placeImages, loadedImages, here, proj, config, getValue);
-  ({ stage, props, depthRefs, products, speakerWaves, debugMask } = placeView);
-  // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
-  marker.mount(stage.layers.acteurs);
-  dust.mount(stage.layers.acteurs);
-  sprite.mount(stage.layers.acteurs);
-  highlighted = -2; // le bouton d'action est recalculé
-  pickupReach = -2;
-  pendingScan = -1;
-  camera.ready = false;
-  lastCamTime = -1;
-  layout();
-}
-
-// ---------- Changement de lieu : fondu au noir géré par la machine à états ----------
-// En jeu, héros libre : entrer dans une zone de sortie lance le fondu. Dans le noir, on quitte le lieu
-// (images libérées), on charge le suivant, on y pose le héros ; puis le noir s'efface et le jeu reprend.
-const fadeEl = document.createElement('div');
-fadeEl.className = 'place-fade';
-fadeEl.hidden = true;
-uiEl.appendChild(fadeEl);
-let transition = null;
-let lastTransitionMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
-
-function watchExits() {
-  if (transition || scan.active || heroAside() || pendingScan >= 0) return;
-  const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
-  if (!exit || !PLACES[exit.to]) return;
-  transition = createTransition(exit);
-  fadeEl.hidden = false;
-  sm.go('transition');
-}
-
-async function changePlace(exit) {
-  const t0 = performance.now();
-  unloadPlace();
-  await loadPlace(exit.to);
-  walker.x = walker.prevX = exit.arrive[0];
-  walker.z = walker.prevZ = exit.arrive[1];
-  walker.vx = walker.vz = 0;
-  walker.facing = exit.facing ?? walker.facing;
-  walker.away = false;
-  clearTarget(walker);
-  // Une annonce en cours continue : elle sort du haut-parleur du nouveau lieu (ou du haut de l'écran).
-  if (voiceLine && speaker) {
-    const sp = place.speakers?.items ?? [];
-    speaker = sp.length ? sp[nearestSpeaker(sp, walker.x)] : null;
-    if (speaker) speakerWaves.show(speaker[0], speaker[1]);
-  }
-  render();
-  lastTransitionMs = Math.round(performance.now() - t0);
-  placeReady(transition);
-}
-
-function updateTransition(dt) {
-  if (stepTransition(transition, dt, config.places) === 'load') changePlace(transition.exit);
-  fadeEl.style.opacity = transitionBlack(transition, config.places);
-  if (transition.phase === 'done') {
-    transition = null;
-    fadeEl.hidden = true;
-    sm.go('play');
-  }
-}
-
-function unloadPlace() {
-  if (!placeView) return;
-  marker.hide();
-  marker.mount(backstage);
-  dust.mount(backstage);
-  sprite.mount(backstage);
-  placeView.destroy();
-  placeView = null;
-  stage = null;
-  releaseImages(placeImages);
-}
+// ---------- Lieux (src/game/places.js) : charger, afficher, quitter, changer de lieu ----------
+const places = createPlaces(uiEl, gameEl, {
+  places: PLACES,
+  base: BASE,
+  sm,
+  world,
+  catalog,
+  getValue,
+  commonImages: () => loadedImages,
+  actors: () => [marker, dust, sprite],
+  walker: () => walker,
+  // On ne quitte un lieu que héros libre : ni scan, ni aparté, ni approche en cours.
+  canLeave: () => !scan.active && !heroAside() && pendingScan < 0,
+  // Un lieu vient d'être construit : le jeu s'y branche.
+  onLoaded({ place: pl, proj: pr, mask: mk, here, view }) {
+    place = pl;
+    proj = pr;
+    mask = mk;
+    endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
+    productState = here.products;
+    pickupState = here.pickups;
+    ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
+    highlighted = -2; // le bouton d'action est recalculé
+    pickupReach = -2;
+    pendingScan = -1;
+    camera.ready = false;
+    lastCamTime = -1;
+    layout();
+  },
+  onLeaving() {
+    marker.hide();
+    stage = null;
+  },
+  // Le héros vient d'être posé dans le nouveau lieu : une annonce en cours continue, elle sort du
+  // haut-parleur de ce lieu (ou du haut de l'écran).
+  onArrived() {
+    if (voiceLine && speaker) {
+      const sp = place.speakers?.items ?? [];
+      speaker = sp.length ? sp[nearestSpeaker(sp, walker.x)] : null;
+      if (speaker) speakerWaves.show(speaker[0], speaker[1]);
+    }
+  },
+  render: () => render(),
+});
 
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
@@ -1098,10 +1043,10 @@ async function start() {
     }),
   ]);
   walker = createWalker(place.spawn[0], place.spawn[1]);
-  marker = createTargetMarker(backstage);
-  dust = createDust(backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
-  sprite = createCharacterSprite(heroData, loadedImages, backstage, config.character, config.display, onFrameEvent);
-  await loadPlace(place.id);
+  marker = createTargetMarker(places.backstage);
+  dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
+  sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
+  await places.load(place.id);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag });
 
   onConfigChange((key, value) => {
@@ -1162,24 +1107,10 @@ async function start() {
     },
     flips: () => flips,
     place: () => place.id,
-    // Tests : prendre la sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
-    useExit(id) {
-      const exit = (place.exits?.items ?? []).find((e) => !id || e.id === id);
-      if (!exit || transition || !sm.is('play')) return false;
-      transition = createTransition(exit);
-      fadeEl.hidden = false;
-      sm.go('transition');
-      return true;
-    },
-    lastTransitionMs: () => lastTransitionMs,
+    useExit: (id) => places.useExit(id),
+    lastTransitionMs: () => places.lastTransitionMs(),
     paths: () => pathCount,
-    // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
-    async reloadPlace() {
-      const id = place.id;
-      unloadPlace();
-      await loadPlace(id);
-      render();
-    },
+    reloadPlace: () => places.reload(),
     dizzy: () => ({ count: dizzy.count, times: dizzy.times.length, facing: walker.facing, moving: walker.moving, t: narrator.t }),
     journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
     equip: () => equipAll(),
