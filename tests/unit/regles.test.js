@@ -74,6 +74,14 @@ describe('garde-fous : règles du code', () => {
 });
 
 describe('garde-fous : liens entre documents', () => {
+  it('l’index « Où sont les règles » de CLAUDE.md cite des fichiers qui existent, et tous les src/*/CLAUDE.md', () => {
+    const index = read('CLAUDE.md').split('## Où sont les règles')[1] ?? '';
+    expect(index, 'section « Où sont les règles » présente').not.toBe('');
+    const cited = [...index.matchAll(/`([\w./-]+\.md)`/g)].map((m) => m[1]);
+    expect(cited.filter((p) => !existsSync(p))).toEqual([]);
+    const folders = readdirSync('src').map((d) => `src/${d}/CLAUDE.md`).filter((p) => existsSync(p));
+    expect(folders.filter((p) => !cited.includes(p))).toEqual([]);
+  });
   it('chaque chemin de fichier cité dans docs/, CLAUDE.md et les skills existe (sauf documents prévus)', () => {
     const docs = ['CLAUDE.md', ...readdirSync('src').map((d) => `src/${d}/CLAUDE.md`).filter((f) => existsSync(f))]
       .concat(files('docs', ['.md']).filter((f) => !/docs[\\/](journal|archive)[\\/]/.test(f))) // anciens rapports : historique, tel quel
