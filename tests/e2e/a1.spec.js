@@ -1072,5 +1072,5 @@ test('A6 : l’agent de sécurité interpelle le héros qui va vers les portique
   await page.keyboard.down('ArrowRight');
   await page.waitForFunction(() => window.paperCart.hero().x > 1500);
   await page.keyboard.up('ArrowRight');
-  await expect.poll(async () => Math.round((await guard()).x), { timeout: 4000 }).toBe(760); // son poste (données du hall)
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 4000 }).toBe(800); // son poste (données du hall)
 });

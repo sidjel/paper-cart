@@ -15,7 +15,7 @@
       "src": "art/placeholder/accueil-dehors.svg",
       "size": [
         1100,
-        460
+        800
       ]
     },
     "accueil-fond": {
@@ -35,8 +35,8 @@
     "portique": {
       "src": "art/placeholder/portique.svg",
       "size": [
-        90,
-        240
+        80,
+        270
       ]
     },
     "agent-securite": {
@@ -60,16 +60,16 @@
       "image": "accueil-dehors",
       "position": [
         -300,
-        160
+        90
       ],
       "parallax": 0.6,
-      "contains": "dehors, vu par la baie vitrée : parking de nuit sous la pluie",
-      "hiddenBy": "le fond, sauf par la baie vitrée (x 90–720, y 170–606)"
+      "contains": "dehors, vu par le mur vitré : parking de nuit sous la pluie (pluie, ruissellement et ronds dans les flaques animés)",
+      "hiddenBy": "le fond, sauf par les vitres du mur de côté (quadrilatère (0,100)-(700,172)-(700,600)-(0,860))"
     },
     {
       "id": "fond",
       "image": "accueil-fond",
-      "contains": "plafond, mur, baie vitrée (vitre transparente), tapis d'entrée, panneau d'affichage, présentoir de Scanettes et de paniers, comptoir, passage vers les rayons, haut-parleurs, sol",
+      "contains": "plafond (caméras), mur du fond, mur de côté vitré en perspective (vitres transparentes), tapis d'entrée le long des vitres, panneau d'affichage, présentoir de Scanettes et de paniers, comptoir, passage vers les rayons, haut-parleurs, sol",
       "hiddenBy": "en partie par les portiques, l'agent et le personnage"
     },
     {
@@ -98,7 +98,7 @@
     "comment": "Même repère que le rayon : x le long du hall, z la profondeur (264 = au pied du mur). Bord gauche : juste à droite de la barrière de portiques, en biais comme elle (le héros bute dessus ; la baie et le tapis sont hors d'atteinte).",
     "area": [
       [
-        872,
+        799,
         -195
       ],
       [
@@ -110,7 +110,7 @@
         264
       ],
       [
-        933,
+        1098,
         264
       ]
     ],
@@ -121,58 +121,58 @@
       "id": "portique-1",
       "image": "portique",
       "at": [
-        884,
-        240
+        1030,
+        230
       ],
       "anchor": [
-        45,
-        234
+        40,
+        262
       ],
-      "scale": 0.78,
-      "depthRef": 240,
+      "scale": 0.8,
+      "depthRef": 230,
       "comment": "Barrière de portiques (séance 57) : du fond (1) au premier plan (4). at : pied au sol ; scale : plus petit au fond. Le héros ne passe jamais à gauche (bord de la zone de marche)."
     },
     {
       "id": "portique-2",
       "image": "portique",
       "at": [
-        868,
-        120
+        945,
+        100
       ],
       "anchor": [
-        45,
-        234
+        40,
+        262
       ],
-      "scale": 0.88,
-      "depthRef": 120
+      "scale": 0.9,
+      "depthRef": 100
     },
     {
       "id": "portique-3",
       "image": "portique",
       "at": [
-        852,
-        0
+        867,
+        -20
       ],
       "anchor": [
-        45,
-        234
+        40,
+        262
       ],
       "scale": 1.0,
-      "depthRef": 0
+      "depthRef": -20
     },
     {
       "id": "portique-4",
       "image": "portique",
       "at": [
-        836,
-        -120
+        789,
+        -140
       ],
       "anchor": [
-        45,
-        234
+        40,
+        262
       ],
-      "scale": 1.12,
-      "depthRef": -120
+      "scale": 1.1,
+      "depthRef": -140
     }
   ],
   "exits": {
@@ -290,16 +290,16 @@
     ],
     "scale": 0.85,
     "post": [
-      760,
-      60
+      800,
+      150
     ],
     "barrier": {
-      "x0": 852,
-      "slope": 0.1333
+      "x0": 880,
+      "slope": 0.65
     },
-    "offset": 95,
+    "offset": 120,
     "zRange": [
-      -120,
+      -140,
       240
     ],
     "watch": 420,
@@ -311,12 +311,68 @@
     "stopTime": 0.8
   },
   "rain": {
-    "comment": "Pluie derrière les portes vitrées (rectangle dans l'image du fond : x, y, largeur, hauteur).",
+    "comment": "Pluie derrière le mur vitré (séance 57), sur le calque « dehors » : le mur la découpe à la forme des vitres. rect = zone de pluie (x, y, largeur, hauteur, dans le calque, qui glisse avec la parallaxe) : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), ruissellement, ronds dans les flaques (ripples : [x, y] dans le calque, au pied des vitres). mat = tapis d'entrée (dans le fond) : un reflet mouillé qui glisse lentement. Animations CSS, transform et opacité seulement ; figées avec « réduire les animations ».",
+    "layer": "dehors",
     "rect": [
-      108,
-      188,
-      594,
-      400
-    ]
+      -300,
+      90,
+      1020,
+      780
+    ],
+    "ripples": [
+      [
+        60,
+        803
+      ],
+      [
+        140,
+        745
+      ],
+      [
+        220,
+        687
+      ],
+      [
+        300,
+        714
+      ],
+      [
+        380,
+        656
+      ],
+      [
+        460,
+        598
+      ],
+      [
+        540,
+        624
+      ],
+      [
+        620,
+        567
+      ]
+    ],
+    "mat": {
+      "layer": "fond",
+      "points": [
+        [
+          640,
+          650
+        ],
+        [
+          880,
+          650
+        ],
+        [
+          490,
+          800
+        ],
+        [
+          250,
+          800
+        ]
+      ]
+    }
   }
 }

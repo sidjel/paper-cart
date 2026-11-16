@@ -25,7 +25,10 @@ export function createPlaceView(container, place, images, common, here, proj, co
   const g = place.guard;
   const guard = g ? { idle: guardImage(images.get(g.image), g.anchor, acteurs), stop: guardImage(images.get(g.stopImage), g.anchor, acteurs) } : null;
   if (guard) guard.stop.hidden = true;
-  if (place.rain) addRain(stage.layers.fond, place.rain.rect);
+  if (place.rain) {
+    addRain(stage.layers[place.rain.layer], place.rain);
+    if (place.rain.mat) addMatSheen(stage.layers[place.rain.mat.layer], place.rain.mat.points);
+  }
   const debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
   return {
@@ -59,18 +62,42 @@ function guardImage(img, anchor, parent) {
   return el;
 }
 
-// Pluie derrière les portes vitrées : deux voiles de traits qui glissent vers le bas (animation CSS,
-// transform seulement), découpés au rectangle des vitres. Figée avec « réduire les animations ».
-function addRain(layer, [x, y, w, h]) {
+// Pluie (calque du dehors, découpée par le mur vitré) : deux voiles de gouttes qui glissent en biais,
+// un voile de ruissellement plus lent, des ronds dans les flaques. Animations CSS, transform et opacité
+// seulement ; figées avec « réduire les animations ». rain : { rect: [x, y, w, h], ripples: [[x, y]…] }.
+function addRain(layer, { rect: [x, y, w, h], ripples = [] }) {
   const box = document.createElement('div');
   box.className = 'rain';
   box.style.transform = `translate(${x}px, ${y}px)`;
   box.style.width = `${w}px`;
   box.style.height = `${h}px`;
-  for (const k of ['near', 'far']) {
+  for (const k of ['far', 'near', 'streams']) {
     const sheet = document.createElement('div');
     sheet.className = `rain-sheet rain-${k}`;
     box.appendChild(sheet);
   }
+  ripples.forEach(([rx, ry], i) => {
+    const r = document.createElement('span');
+    r.className = 'rain-ripple';
+    r.style.left = `${rx - x}px`;
+    r.style.top = `${ry - y}px`;
+    r.style.animationDelay = `${-((i * 0.618) % 1) * 1.6}s`; // décalés, sans hasard
+    box.appendChild(r);
+  });
+  layer.appendChild(box);
+}
+
+// Reflet mouillé qui glisse lentement sur le tapis d'entrée. Le tapis est un parallélogramme (bords haut
+// et bas horizontaux) : une boîte penchée (skewX) qui coupe ce qui dépasse.
+function addMatSheen(layer, [tl, tr, , bl]) {
+  const h = bl[1] - tl[1];
+  const box = document.createElement('div');
+  box.className = 'mat-sheen';
+  box.style.width = `${tr[0] - tl[0]}px`;
+  box.style.height = `${h}px`;
+  const angle = (Math.atan((bl[0] - tl[0]) / h) * 180) / Math.PI;
+  box.style.transform = `translate(${tl[0]}px, ${tl[1]}px) skewX(${-angle}deg)`;
+  const band = document.createElement('span');
+  box.appendChild(band);
   layer.appendChild(box);
 }

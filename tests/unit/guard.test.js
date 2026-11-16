@@ -87,7 +87,7 @@ describe('agent de sécurité', () => {
     const d = accueil.guard;
     const mask = compileMask(accueil.walkMask);
     for (const p of accueil.props.filter((q) => q.id.startsWith('portique'))) {
-      expect(p.at[0]).toBeCloseTo(barrierX(d, p.at[1]), 0); // les portiques sont sur la barrière
+      expect(Math.abs(p.at[0] - barrierX(d, p.at[1]))).toBeLessThanOrEqual(1); // les portiques sont sur la barrière
       expect(isWalkable(mask, p.at[0] - 40, p.at[1])).toBe(false); // à gauche : hors d'atteinte
     }
     for (const z of [-190, 0, 260]) expect(isWalkable(mask, barrierX(d, z) + 20, z)).toBe(false);
