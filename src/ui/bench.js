@@ -15,7 +15,7 @@ function percentile(sorted, n, q) {
 // Rappel affiché pendant l'essai : comment l'arrêter (résultats partiels gardés).
 export const STOP_HINT = '· arrêter : bouton II, Échap ou B';
 
-export function createBenchUi(root, { onStart, getContext }) {
+export function createBenchUi(root, { onStart, onStartSound, getContext }) {
   const frames = new Float32Array(MAX);
   const js = new Float32Array(MAX);
   const ctx = new Uint8Array(MAX); // bit 1 : caméra en mouvement ; bit 2 : chemin calculé ; bit 4 : personnage en marche
@@ -32,8 +32,16 @@ export function createBenchUi(root, { onStart, getContext }) {
   help.className = 'settings-note';
   help.textContent =
     "Le personnage parcourt seul le rayon, toujours de la même façon (chauffe, puis plusieurs tours). Ne touche à rien ; à la fin, copie le rapport. Échap ou ⏸ pour annuler.";
-  launcher.append(startBtn, help);
+  // Essai son long (séance 65) : le même parcours, beaucoup plus de tours (plusieurs minutes de pas et de
+  // musique) ; le rapport note l'état du son et les nœuds audio encore actifs.
+  const soundBtn = document.createElement('button');
+  soundBtn.textContent = 'Essai son long';
+  const soundHelp = document.createElement('p');
+  soundHelp.className = 'settings-note';
+  soundHelp.textContent = "Même parcours pendant plusieurs minutes, son activé (coupe « Son coupé » avant). Écoute si les pas et la musique se dégradent, puis copie le rapport.";
+  launcher.append(startBtn, help, soundBtn, soundHelp);
   startBtn.addEventListener('click', () => onStart());
+  soundBtn.addEventListener('click', () => onStartSound());
 
   // Panneau de résultats.
   const panel = document.createElement('div');
@@ -101,13 +109,14 @@ export function createBenchUi(root, { onStart, getContext }) {
       } else run = 0;
     }
     return [
-      "Paper Cart — banc d'essai",
+      b.kind === 'son' ? 'Paper Cart — essai son long' : "Paper Cart — banc d'essai",
       `Résultat : ${status}`,
       `Version : ${c.version}`,
       `Date : ${new Date().toLocaleString('fr-FR')}`,
       `Navigateur : ${navigator.userAgent}`,
       `Écran : ${screen.width}×${screen.height} (CSS) · densité ${fmt(window.devicePixelRatio, 3)} · fenêtre ${window.innerWidth}×${window.innerHeight} · plein écran ${document.fullscreenElement ? 'oui' : 'non'}`,
       `Rendu : ${c.renderLine}`,
+      `Son : ${c.audio}`,
       `Images : ${c.images} chargées, ${fmt(c.pixels / 1e6, 2)} Mpx · chargement ${c.loadMs} ms`,
       `Lieu : ${c.place} · ${b.passes} tour(s) mesuré(s) · chauffe ${b.warmup} s · interrupteurs : ${c.switches || 'aucun'}`,
       `Mesures : ${n} images en ${fmt(duration)} s`,

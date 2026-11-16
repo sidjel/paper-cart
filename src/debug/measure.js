@@ -38,6 +38,7 @@ export function createMeasureTools(ui, game) {
   }));
   const benchUi = createBenchUi(ui, {
     onStart: () => startBench(config.bench.passes, config.bench.warmup),
+    onStartSound: () => startBench(config.bench.soundPasses, config.bench.warmup, 'son'),
     getContext: () => ({
       version: game.version,
       renderLine: game.renderLine(),
@@ -48,6 +49,7 @@ export function createMeasureTools(ui, game) {
       place: game.place().id,
       switches: activeSwitches(),
       overrides: overrides(),
+      audio: game.audioInfo(),
     }),
   });
   const quickUi = createQuickTestUi(ui, {
@@ -143,9 +145,11 @@ export function createMeasureTools(ui, game) {
     }
   }
 
-  function startBench(passes, warmup) {
+  // kind : 'son' pour l'essai son long (même parcours, rapport titré autrement).
+  function startBench(passes, warmup, kind = 'images') {
     if (!sm.is('menu')) return;
     bench = createBench(game.place().bench, passes, warmup);
+    bench.kind = kind;
     placeAtStart(bench, game.walker());
     game.resetCamera();
     game.marker().hide();

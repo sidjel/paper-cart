@@ -430,7 +430,11 @@ const measure = createMeasureTools(uiEl, {
   },
   renderLine: () => renderLine,
   placeNote: () => `${place.id}${places.lastTransitionMs() ? ` (dernier changement de lieu : ${places.lastTransitionMs()} ms dans le noir)` : ''}`,
-  audioInfo: () => audio.describe(),
+  audioInfo() {
+    const c = audio.counters();
+    const states = c.states.length ? ` · changements d'état : ${c.states.join(', ')}` : '';
+    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music}${states}`;
+  },
   gamepad: () => input?.gamepad.connected ?? false,
 });
 const diag = measure.diag;
@@ -964,6 +968,7 @@ async function start() {
     },
     quickReport: () => measure.quickReport(),
     errors: () => [...errorLog],
+    audio: () => audio.counters(),
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels, timings: assetStats.perImage.length }),
     audioStarted: () => audio.started,
     // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).

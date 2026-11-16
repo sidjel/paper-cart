@@ -24,6 +24,7 @@ export function compileSong(song) {
 export function createMusic(song) {
   const s = compileSong(song);
   let start = -1;
+  let created = () => {}; // mesure : nœuds audio créés (voir update)
   let idx = 0;
   let loop = 0;
 
@@ -44,6 +45,7 @@ export function createMusic(song) {
     o.connect(g).connect(out);
     o.start(t);
     o.stop(t + attack + decay + 0.05);
+    created(2);
   }
 
   function play(ctx, out, noise, e, t) {
@@ -69,12 +71,16 @@ export function createMusic(song) {
       env(ctx, g, t, 0.03 * e.vel, 0.004, 0.05);
       src.connect(hp).connect(g).connect(out);
       src.start(t, (idx % 7) * 0.1, 0.1);
+      created(3);
     }
   }
 
   return {
     // À chaque image : programme les notes des prochaines LOOKAHEAD secondes.
-    update(ctx, out, noise) {
+    // counted(n) : n nœuds audio créés (mesure). Renvoie le nombre de notes programmées.
+    update(ctx, out, noise, counted = () => {}) {
+      created = counted;
+      let notes = 0;
       const now = ctx.currentTime;
       if (start < 0) start = now + 0.15;
       // Retard (onglet en veille…) : on recale le morceau au lieu de tout jouer d'un coup.
@@ -82,13 +88,17 @@ export function createMusic(song) {
       let t;
       while ((t = timeOf(idx)) < now + LOOKAHEAD) {
         const e = s.events[idx];
-        if (e.kind !== 'melody' || s.melodyLoops[loop % s.melodyLoops.length]) play(ctx, out, noise, e, t);
+        if (e.kind !== 'melody' || s.melodyLoops[loop % s.melodyLoops.length]) {
+          play(ctx, out, noise, e, t);
+          notes++;
+        }
         idx++;
         if (idx === s.events.length) {
           idx = 0;
           loop++;
         }
       }
+      return notes;
     },
   };
 }

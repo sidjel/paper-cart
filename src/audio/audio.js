@@ -11,6 +11,11 @@ export function createAudio(settings, song) {
   let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
   let foot = 0;
+  // Mesure (séance 65, avant correction) : nœuds créés et libérés, par catégorie (effets, musique).
+  // Le navigateur ne permet pas de compter les nœuds : on les compte nous-mêmes. Aujourd'hui aucun
+  // n'est libéré (aucun disconnect) : « actifs » = créés. Ce compteur doit retomber à zéro après correction.
+  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [] };
+  const count = (n) => (stats.sfx.created += n);
 
   function init() {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -57,6 +62,8 @@ export function createAudio(settings, song) {
       data[i] = (x / 0x3fffffff) - 1;
     }
     music = createMusic(song);
+    // Chaque changement d'état du son est noté (une interruption par un appel, une autre application…).
+    ctx.onstatechange = () => stats.states.push(`${new Date().toLocaleTimeString('fr-FR')} ${ctx.state}${hidden ? ' (onglet caché)' : ''}`);
     applyVolumes();
   }
 
@@ -84,6 +91,7 @@ export function createAudio(settings, song) {
     o.connect(g).connect(bus);
     o.start(t);
     o.stop(t + dur + 0.02);
+    count(2);
   }
 
   // [TEMP] Bip de caisse : deux notes courtes et nettes.
@@ -109,6 +117,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
     src.connect(bp).connect(g).connect(scanBus);
     src.start(t, 0.3, 0.6);
+    count(3);
   }
 
   // [TEMP] La carte apparaît : petit « pop » qui monte, puis une note claire.
@@ -134,6 +143,7 @@ export function createAudio(settings, song) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.16, t + 1.5);
     src.connect(bp).connect(g).connect(sfxBus);
+    count(3);
     src.start(t);
     rain = { src, g };
   }
@@ -161,6 +171,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
     src.connect(bp).connect(g).connect(sfxBus);
     src.start(t, 0.4, 1.2);
+    count(3);
   }
 
   // [TEMP] Ding (une seule note claire, un peu réverbérée).
@@ -208,6 +219,7 @@ export function createAudio(settings, song) {
       g.gain.exponentialRampToValueAtTime(0.0001, at + 0.06);
       src.connect(bp).connect(g).connect(heroBus);
       src.start(at, 0.1 + k * 0.2, 0.08);
+      count(3);
     }
   }
 
@@ -228,6 +240,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
     src.connect(bp).connect(g).connect(scanBus);
     src.start(t, 0.37, 0.16);
+    count(3);
     // claquement : très court, plus aigu
     const c = ctx.createBufferSource();
     c.buffer = noise;
@@ -241,6 +254,7 @@ export function createAudio(settings, song) {
     cg.gain.exponentialRampToValueAtTime(0.0001, at + 0.035);
     c.connect(hp).connect(cg).connect(scanBus);
     c.start(at, 0.61, 0.04);
+    count(3);
   }
 
   // [TEMP] Aparté : souffle grave qui monte (le temps s'arrête), puis une note basse tenue.
@@ -260,6 +274,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
     src.connect(lp).connect(g).connect(heroBus);
     src.start(t, 0.2, 0.85);
+    count(3);
     // [TEMP] Motif de l'Épaisseur : quatre notes de cloche douce, toujours les mêmes à chaque aparté.
     const notes = [659, 784, 988, 880];
     notes.forEach((f, i) => {
@@ -296,6 +311,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
     src.connect(lp).connect(g).connect(sfxBus);
     src.start(t, foot ? 0.2 : 0.6, 0.12);
+    count(3);
   }
 
   const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
@@ -314,6 +330,18 @@ export function createAudio(settings, song) {
       if (!ctx) return 'pas encore démarré';
       const ms = (v) => (v ? `${Math.round(v * 1000)} ms` : '?');
       return `${ctx.state} · ${ctx.sampleRate} Hz · réserve « ${settings.latency} » · latence ${ms(ctx.baseLatency)} + sortie ${ms(ctx.outputLatency)}`;
+    },
+    // Compteurs (diagnostic, banc d'essai, tests) : sons joués, notes de musique, nœuds actifs par
+    // catégorie (créés − libérés), changements d'état du contexte (suspendu, interrompu…).
+    counters() {
+      return {
+        state: ctx ? ctx.state : 'pas démarré',
+        played: stats.played,
+        notes: stats.notes,
+        sfx: stats.sfx.created - stats.sfx.freed,
+        music: stats.music.created - stats.music.freed,
+        states: stats.states.slice(-4),
+      };
     },
     applyVolumes,
     stopRain() {
@@ -336,11 +364,13 @@ export function createAudio(settings, song) {
       else ctx.resume();
     },
     play(name) {
-      if (running()) SOUNDS[name]?.();
+      if (!running() || !SOUNDS[name]) return;
+      stats.played++;
+      SOUNDS[name]();
     },
     // À chaque image affichée.
     update() {
-      if (running()) music.update(ctx, musicBus, noise);
+      if (running()) stats.notes += music.update(ctx, musicBus, noise, (n) => (stats.music.created += n));
     },
   };
 }
