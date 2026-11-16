@@ -27,7 +27,8 @@ export function createPlaces(ui, container, game) {
     place = game.places[id];
     const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
     assetStats.rasterScale = rasterScale;
-    // Décodées avant l'affichage.
+    // Décodées avant l'affichage. L'historique des temps d'image repart de zéro à chaque lieu (il ne grossit plus).
+    assetStats.perImage.length = 0;
     images = await loadImages(Object.entries(place.images).map(([key, im]) => ({ id: key, url: game.base + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })));
     const proj = createProjection(place.projection, config.scene);
     const mask = compileMask(place.walkMask);

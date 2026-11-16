@@ -148,7 +148,7 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
     const dom = await cdp.send('Memory.getDOMCounters');
     const heap = await cdp.send('Runtime.getHeapUsage');
     const assets = await page.evaluate(() => window.paperCart.assets());
-    return { nodes: dom.nodes, listeners: dom.jsEventListeners, heapMb: heap.usedSize / 1048576, images: assets.images, pixels: assets.pixels };
+    return { nodes: dom.nodes, listeners: dom.jsEventListeners, heapMb: heap.usedSize / 1048576, images: assets.images, pixels: assets.pixels, timings: assets.timings };
   };
   const travel = async (to) => {
     await page.evaluate(() => window.paperCart.useExit());
@@ -168,6 +168,7 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
   console.log('Mémoire après 5 allers-retours :', JSON.stringify({ start, end }));
   test.info().annotations.push({ type: 'mémoire', description: JSON.stringify({ start, end }) });
   expect(end.images).toBe(start.images);
+  expect(end.timings).toBe(start.timings); // l'historique des temps d'image ne grossit plus (séance 62)
   expect(end.pixels).toBe(start.pixels);
   expect(end.listeners).toBeLessThanOrEqual(start.listeners + 5);
   expect(end.nodes).toBeLessThanOrEqual(start.nodes + 30); // séance 53 : une fuite de +58 éléments par changement de lieu a été trouvée ainsi

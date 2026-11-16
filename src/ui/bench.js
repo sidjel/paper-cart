@@ -122,7 +122,7 @@ export function createBenchUi(root, { onStart, getContext }) {
       `  image où un chemin est calculé : ${cat(2, 2)}`,
       `  en ${bursts} épisode(s), le plus long : ${longestRun} image(s) de suite`,
       `  calcul JS le plus long : ${fmt(worstJsAt < 0 ? NaN : js[worstJsAt], 2)} ms (${where(worstJsAt)})`,
-      `Images les plus lentes à préparer au chargement : ${c.slowest}`,
+      `Images les plus lentes à préparer (dernier chargement de lieu) : ${c.slowest}`,
       `Réglages modifiés : ${JSON.stringify(c.overrides)}`,
       `Objectifs (60 i/s, aucune image > 33 ms, calcul ≤ 8 ms) : ${ok ? 'atteints' : 'non atteints'}`,
     ].join('\n');

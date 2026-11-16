@@ -960,7 +960,7 @@ async function start() {
       measure.startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => measure.quickReport(),
-    assets: () => ({ images: assetStats.images, pixels: assetStats.pixels }),
+    assets: () => ({ images: assetStats.images, pixels: assetStats.pixels, timings: assetStats.perImage.length }),
     audioStarted: () => audio.started,
     // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).
     set: (key, value) => setValue(key, value),

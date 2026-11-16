@@ -9,7 +9,7 @@ export const assetStats = {
   images: 0,
   pixels: 0, // pixels d'images gardés en mémoire (≈ 4 octets chacun)
   loadMs: 0,
-  perImage: [], // [nom, ms] : temps de préparation de chaque image (pour trouver les plus lentes)
+  perImage: [], // [nom, ms] : temps de préparation de chaque image du dernier chargement de lieu (les plus lentes)
   rasterScale: 1,
 };
 
