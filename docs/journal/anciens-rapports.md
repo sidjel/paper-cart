@@ -2,6 +2,23 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 58 — 16/11/2026 — Hall : clignotements, pluie, haut de la vitre ; le « !! » du héros
+
+**Demande de l'auteur** : corriger le clignotement des personnages et des portiques, la pluie qui bascule de côté, le haut du mur vitré mal couvert. Réponses : hôtesse plus tard (1 B), « !! » oui (2 A), pensée gardée (3 A).
+
+**Fait** :
+- **Haut de la vitre** : le plafond était dessiné par-dessus. Il est maintenant découpé le long du mur de côté.
+- **Pluie** : elle était sur le calque du dehors, qui glisse moins vite que le mur. Elle a maintenant son propre calque, qui suit le mur.
+- **Clignotement** : sur ta capture, des morceaux du fond manquaient aussi (des Scanettes). C'est le signe d'une mémoire graphique saturée. Le dehors et la pluie réservaient chacun une surface grande comme tout le hall ; ils sont réduits à la taille de leur contenu. Surface totale : 13,8 → 10,5 millions de pixels (le rayon : 14,2). Cause **probable, pas prouvée** : seul le téléphone le dira.
+- Nouveau réglage ⚙ → Affichage → « Pluie animée du hall », pour vérifier la cause si ça clignote encore.
+- Le héros **sursaute** quand l'agent l'interpelle : « !! » et gouttes de sueur.
+
+**Vérifié** : 166 tests de logique, Knip, 85 essais navigateur (PC et téléphone simulé), sans erreur console. Captures du haut de la vitre en téléphone simulé.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il reste, éteindre la pluie dans ⚙ et dire si ça change.
+
+---
+
 ## Séance 57 — 16/11/2026 — Le hall refait en profondeur, d'après l'image de référence
 
 **Demande de l'auteur** : refondre le hall en vraie 2.5D avec une ambiance pluvieuse, et un agent qui interpelle le héros, le fige et le repousse. Image de référence fournie en cours de séance.

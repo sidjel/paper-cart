@@ -24,6 +24,10 @@
 - **A5** (ancien A5a) : le héros prend Scanette et panier au présentoir en libre-service ; capacité limitée. Le présentoir est dans le **hall d'accueil** depuis la séance 55 (A6), où la partie commence.
 - **A6** l'accueil (lieu séparé) → **A7** le deuxième rayon → **A8** le caddie (ancien A5b) : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**.
 
+## Reposer une carte ✅ VALIDÉ (séance 63)
+- **Échange** (panier plein) : le produit de la carte reposée **remplace le produit scanné, sur le rayon où se fait l'échange**, même si la carte vient d'un autre lieu (à construire avec A7, quand deux lieux auront des produits).
+- **Abandon** (pas encore dans le jeu) : une carte abandonnée **retourne dans son lieu et à sa place d'origine**.
+
 ## Le hall d'accueil (A6) ✅ VALIDÉ (demande de l'auteur, séance 57 ; image de référence)
 - Le héros commence **à droite des portiques**, sans souvenir ; il ne peut **jamais** revenir à gauche (entrée, mur vitré).
 - Trois plans triés par profondeur : fond (mur vitré de côté en perspective, présentoir, comptoir), milieu (tapis d'entrée noir, **barrière de 4 portiques en diagonale**, agent de sécurité à gauche des portiques, tourné vers la droite), premier plan (plante en pot, file de caddies).

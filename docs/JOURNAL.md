@@ -16,6 +16,25 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 63 — 16/11/2026 — Reposer une carte (décision) ; moins de créations pendant le jeu
+
+**Demande de l'auteur** :
+- Point 5 : une carte **abandonnée** retourne dans son lieu et à sa place d'origine ; une carte **échangée** voit son produit remplacé sur le rayon de l'échange, comme aujourd'hui.
+- Point 6 : « on corrige si ce n'est pas risqué ».
+
+**Fait** :
+- Décisions inscrites (GAME_DESIGN). L'abandon n'existe pas encore dans le jeu. L'échange d'une carte venue d'un autre lieu se construira avec A7 : aujourd'hui seul le rayon a des produits.
+- **Texte du haut-parleur** : la machine à écrire change le contenu de deux morceaux de texte préparés, au lieu d'en créer à chaque lettre (~230 par réplique avant).
+- **Carte qui vole vers le Panier** : préparée une fois et remplie à chaque scan, au lieu d'être construite au moment où elle s'envole.
+- **Textes et symbole de stade des cartes** : mis à jour sur place (les trois symboles sont dessinés d'avance).
+- **Nouvel essai** : pendant un scan, seule la petite carte du Panier est créée (1 élément).
+
+**Non corrigé (plus risqué)** : la petite carte du Panier, ajoutée à chaque scan dans le panneau caché. Il faudrait des cases préparées d'avance, ce qui touche la liste, les onglets et le choix au clavier. Coût faible : le panneau est caché, rien n'est dessiné.
+
+**Vérifié** : 171 tests de logique, Knip, 92 essais navigateur (PC et téléphone simulé), sans erreur console. Capture du Panier : la carte et son symbole de stade s'affichent bien.
+
+---
+
 ## Séance 62 — 16/11/2026 — Robustesse des changements de lieu
 
 **Demande de l'auteur** : 7 points (fichier SEANCE_ROBUSTESSE), un commit par point, avant A7. Rien de visible quand tout va bien, jamais d'écran noir bloqué.
@@ -93,22 +112,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Vérifié** : 165 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
 
 **À vérifier par l'auteur** : le clignotement sur le téléphone. L'essai prouve que les calques ne bougent plus, mais seul le téléphone dit si c'était toute la cause.
-
----
-
-## Séance 58 — 16/11/2026 — Hall : clignotements, pluie, haut de la vitre ; le « !! » du héros
-
-**Demande de l'auteur** : corriger le clignotement des personnages et des portiques, la pluie qui bascule de côté, le haut du mur vitré mal couvert. Réponses : hôtesse plus tard (1 B), « !! » oui (2 A), pensée gardée (3 A).
-
-**Fait** :
-- **Haut de la vitre** : le plafond était dessiné par-dessus. Il est maintenant découpé le long du mur de côté.
-- **Pluie** : elle était sur le calque du dehors, qui glisse moins vite que le mur. Elle a maintenant son propre calque, qui suit le mur.
-- **Clignotement** : sur ta capture, des morceaux du fond manquaient aussi (des Scanettes). C'est le signe d'une mémoire graphique saturée. Le dehors et la pluie réservaient chacun une surface grande comme tout le hall ; ils sont réduits à la taille de leur contenu. Surface totale : 13,8 → 10,5 millions de pixels (le rayon : 14,2). Cause **probable, pas prouvée** : seul le téléphone le dira.
-- Nouveau réglage ⚙ → Affichage → « Pluie animée du hall », pour vérifier la cause si ça clignote encore.
-- Le héros **sursaute** quand l'agent l'interpelle : « !! » et gouttes de sueur.
-
-**Vérifié** : 166 tests de logique, Knip, 85 essais navigateur (PC et téléphone simulé), sans erreur console. Captures du haut de la vitre en téléphone simulé.
-
-**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il reste, éteindre la pluie dans ⚙ et dire si ça change.
 
 ---

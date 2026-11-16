@@ -118,8 +118,10 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | 2. Rien ne reste en mémoire après un échec (`loadImages`) | 62 | ✅ | Test unitaire. |
 | 3. Historique des temps d'image remis à zéro à chaque lieu | 62 | ✅ | |
 | 4. Règle d'échange du panier dans `core/world.js` | 62 | ✅ | Sans changement de comportement. |
-| 5. Carte reposée qui vient d'un autre lieu : où va son produit ? | 62 | ❓ | Options proposées à l'auteur ; à trancher avant A7. |
-| 6. Éléments créés pendant le jeu par les cartes | 62 | ❓ | Vrai écart : 2 cartes construites à chaque scan (~28 éléments), et le texte du haut-parleur remplace ses morceaux de texte à chaque lettre. Le test des comptages ne le voit pas (le banc ne scanne pas). Correction à décider avec l'auteur, après mesure sur le téléphone. |
+| 5. Carte reposée qui vient d'un autre lieu : où va son produit ? | 62 | ✅ | Séance 63 : échange → le produit remplace le produit scanné, sur ce rayon-ci ; abandon (à venir) → retour au lieu et à la place d'origine (GAME_DESIGN). L'échange entre lieux se construit avec A7. |
+| Échange d'une carte venue d'un autre lieu | 63 | 🔧 | Avec A7 (aujourd'hui seul le rayon a des produits). |
+| 6. Éléments créés pendant le jeu par les cartes | 62 | ✅ | Séance 63 (« on corrige si ce n'est pas risqué ») : carte volante préparée une fois ; textes du haut-parleur et des cartes mis à jour sans nouveaux nœuds. Reste la petite carte ajoutée au Panier à chaque scan (panneau caché ; correction plus risquée : liste, onglets, clavier). Essai : un scan ne crée qu'elle. |
+| Petite carte du Panier créée à chaque scan | 63 | ❓ | Écart restant, faible coût (panneau caché). À corriger plus tard si l'auteur le souhaite (cases préparées d'avance). |
 | 7. Test de mémoire, aussi avec un échec au milieu | 62 | ✅ | |
 
 ## Points 👀 restants (à revoir avec A6)
