@@ -10,7 +10,7 @@ const STAGE_INFO = {
 const MAX_PROPS = 4; // propriétés affichées au plus (éléments préparés à l'avance)
 
 // card : { name, power, stage, properties } ; imageUrl : illustration du produit.
-export function buildCard(card, imageUrl) {
+function buildCard(card, imageUrl) {
   const el = document.createElement('div');
   el.innerHTML = `
     <div class="card-top">

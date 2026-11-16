@@ -4,7 +4,7 @@
 export const STAGES = ['frais', 'mur', 'pourri'];
 
 // def : fiche du produit (catalogue) ; productId : sa clé ; serial : numéro unique de la carte.
-export function createCard(productId, def, serial) {
+function createCard(productId, def, serial) {
   return {
     uid: serial,
     productId,

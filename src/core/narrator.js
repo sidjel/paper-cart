@@ -35,7 +35,7 @@
 const HERO = 'heros';
 const GLANCE = 'regard';
 const THOUGHT = 'pensee'; // le héros se parle à lui-même (pas au joueur) : une bulle, sans mise en scène
-export const PLAYER = 'epaisseur'; // le joueur (son Épaisseur) répond, dans une conversation
+const PLAYER = 'epaisseur'; // le joueur (son Épaisseur) répond, dans une conversation
 
 export function createNarrator() {
   return {

@@ -20,7 +20,7 @@ const noComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`]
 const SIZE_LIMIT = 600;
 const SIZE_EXCEPTIONS = {
   'src/main.js': "approuvée par l'auteur (séance 52) jusqu'à son découpage, prévu avant A7",
-  'src/style.css': "proposée à la séance 53, en attente de l'accord de l'auteur",
+  'src/style.css': "approuvée par l'auteur (séance 54) jusqu'au découpage de main.js ; ensuite, découpage du CSS par sujet",
 };
 // CSS : flou et filtres interdits, sauf ici.
 const FILTER_EXCEPTIONS = {

@@ -12,12 +12,13 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview --host",
-    "test": "vitest run",
+    "test": "vitest run && knip",
     "test:watch": "vitest",
     "test:e2e": "playwright test --trace off"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "knip": "^6.45.1",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
   }
