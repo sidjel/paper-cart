@@ -17,9 +17,15 @@ const MARGIN = 8; // marge au bord de l'écran (px)
 const WORDS = 60; // mots au plus dans une réplique du joueur
 const TAIL = 14; // hauteur de la pointe de la bulle (px)
 
+// Renvoie les deux morceaux de texte (déjà écrit, et le reste, invisible : il réserve la place).
+// Ce sont des nœuds de texte préparés une fois : la machine à écrire change leur contenu (data) sans
+// en créer de nouveaux à chaque lettre (séance 63 : ~230 créés par réplique avant).
 function textParts(el) {
   el.innerHTML = '<span class="voice-shown"></span><span class="voice-rest" aria-hidden="true"></span>';
-  return [el.firstChild, el.lastChild];
+  const parts = [document.createTextNode(''), document.createTextNode('')];
+  el.firstChild.appendChild(parts[0]);
+  el.lastChild.appendChild(parts[1]);
+  return parts;
 }
 
 // onSkip() : toucher la réplique ; onChoose(k) : le joueur choisit la réponse k (0 ou 1).
@@ -125,8 +131,8 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
       count = -1;
       el.classList.toggle('still', still);
       el.setAttribute('aria-label', t);
-      parts[0].textContent = '';
-      parts[1].textContent = t; // place réservée pour le texte entier
+      parts[0].data = '';
+      parts[1].data = t; // place réservée pour le texte entier
       // Réponses : place réservée dès le début (invisibles tant que la question n'est pas écrite).
       choiceBox.hidden = !choices;
       choiceBox.classList.remove('ready');
@@ -146,8 +152,8 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
         while (wordsOn < wordCount && wordStart[wordsOn] < n) words[wordsOn++].classList.add('on');
         return;
       }
-      parts[0].textContent = text.slice(0, n);
-      parts[1].textContent = text.slice(n);
+      parts[0].data = text.slice(0, n);
+      parts[1].data = text.slice(n);
     },
     // Bulle : (x, y) = au-dessus de la tête du héros, en pixels d'écran. Reste dans l'écran.
     placeBubble(x, y) {

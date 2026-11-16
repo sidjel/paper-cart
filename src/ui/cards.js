@@ -11,6 +11,21 @@ const MAX_PROPS = 4; // propriétés affichées au plus (éléments préparés �
 
 // card : { name, power, stage, properties } ; imageUrl : illustration du produit.
 function buildCard(card, imageUrl) {
+  const el = cardShell();
+  fillCard(el, card, imageUrl);
+  return el;
+}
+
+// Change un texte sans recréer son nœud (sinon un nouveau nœud de texte à chaque fois : séance 63).
+function setText(el, v) {
+  const t = el.firstChild;
+  if (t && t.nodeType === 3 && !t.nextSibling) {
+    if (t.data !== v) t.data = v;
+  } else el.textContent = v;
+}
+
+// Une carte vide (structure seulement), à remplir avec fillCard.
+function cardShell() {
   const el = document.createElement('div');
   el.innerHTML = `
     <div class="card-top">
@@ -20,7 +35,10 @@ function buildCard(card, imageUrl) {
     <img class="card-img" alt="" draggable="false">
     <div class="card-name"></div>
     <div class="card-props">${'<span></span>'.repeat(MAX_PROPS)}</div>`;
-  fillCard(el, card, imageUrl);
+  // Les trois formes de stade, dessinées d'avance : on montre la bonne (rien n'est recréé).
+  el.querySelector('.card-stage svg').innerHTML = Object.entries(STAGE_INFO)
+    .map(([k, i]) => `<g data-stage="${k}">${i.shape}</g>`)
+    .join('');
   return el;
 }
 
@@ -29,15 +47,16 @@ function buildCard(card, imageUrl) {
 function fillCard(el, card, imageUrl, extra = '') {
   const info = STAGE_INFO[card.stage] ?? STAGE_INFO.frais;
   el.className = `card stage-${card.stage}${extra}`;
-  el.querySelector('.card-power').textContent = card.power;
-  el.querySelector('.card-stage svg').innerHTML = info.shape;
-  el.querySelector('.card-stage-label').textContent = info.label;
+  setText(el.querySelector('.card-power'), String(card.power));
+  const stage = STAGE_INFO[card.stage] ? card.stage : 'frais';
+  for (const g of el.querySelectorAll('.card-stage g')) g.style.display = g.dataset.stage === stage ? '' : 'none';
+  setText(el.querySelector('.card-stage-label'), info.label);
   const img = el.querySelector('.card-img');
   if (imageUrl) img.src = imageUrl;
-  el.querySelector('.card-name').textContent = card.name;
+  setText(el.querySelector('.card-name'), card.name);
   const spans = el.querySelectorAll('.card-props span');
   spans.forEach((sp, k) => {
-    sp.textContent = card.properties[k] ?? '';
+    setText(sp, card.properties[k] ?? '');
     sp.hidden = k >= card.properties.length;
   });
 }
@@ -328,7 +347,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     setCapacity(c) {
       cap = c;
       button.hidden = c <= 0;
-      count.textContent = `${shown}/${cap}`;
+      setText(count, `${shown}/${cap}`);
     },
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {
@@ -372,7 +391,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
       objList.appendChild(li);
     },
     setCount(n) {
-      count.textContent = `${n}/${cap}`;
+      setText(count, `${n}/${cap}`);
       button.classList.remove('bump');
       void button.offsetWidth; // relance la petite animation
       button.classList.add('bump');
@@ -436,13 +455,15 @@ export function createFlyingCard(root) {
   holder.className = 'flying-card';
   holder.hidden = true;
   root.appendChild(holder);
-  let current = null;
+  // Une seule carte, préparée une fois et remplie à chaque scan (séance 63 : avant, une carte était
+  // construite à chaque scan, au moment même où elle s'envole).
+  const flying = cardShell();
+  fillCard(flying, { stage: 'frais', power: 0, name: ' ', properties: Array(MAX_PROPS).fill(' ') }, ''); // ses textes existent dès le chargement
+  holder.appendChild(flying);
 
   return {
     show(card, imageUrl) {
-      if (current) current.remove();
-      current = buildCard(card, imageUrl);
-      holder.appendChild(current);
+      fillCard(flying, card, imageUrl);
       holder.hidden = false;
     },
     // p : 0 → 1 ; from : position d'apparition (écran) ; to : bouton du Panier (écran).
@@ -479,10 +500,6 @@ export function createFlyingCard(root) {
     },
     hide() {
       holder.hidden = true;
-      if (current) {
-        current.remove();
-        current = null;
-      }
     },
   };
 }

@@ -249,3 +249,51 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
   expect(changes).toBe(0);
   expect(poseLayers).toBe(0);
 });
+
+// Pendant un scan (séance 63) : la carte qui vole est préparée une fois (remplie à chaque scan), et le
+// texte du haut-parleur ne crée plus de morceaux de texte à chaque lettre. Seule reste la petite carte
+// ajoutée au Panier (dans le panneau caché) : un élément et son contenu. Écart connu, accepté pour
+// l'instant (correction plus risquée : la liste du Panier, ses onglets et le choix au clavier).
+test('un scan ne crée que la petite carte du Panier', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
+  await page.addInitScript(() => {
+    const c = (window.__scan = { on: false, created: 0, added: {} });
+    const ce = Document.prototype.createElement;
+    Document.prototype.createElement = function (t, ...r) {
+      if (c.on) c.created++;
+      return ce.call(this, t, ...r);
+    };
+  });
+  await page.goto('./?lieu=rayon-essai');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  await page.evaluate(() => {
+    window.paperCart.equip();
+    window.paperCart.markSaid('rencontre');
+  });
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.scanState().reach === 0, null, { timeout: 8000 });
+  await page.keyboard.up('ArrowRight');
+  await page.evaluate(() => {
+    const c = window.__scan;
+    new MutationObserver((list) => {
+      if (!c.on) return;
+      for (const m of list) {
+        const where = m.target.nodeType === 1 ? m.target.className || m.target.tagName : 'texte';
+        for (const n of m.addedNodes) c.added[where] = (c.added[where] ?? 0) + 1;
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+    c.on = true;
+  });
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => window.paperCart.journal().length > 0, null, { timeout: 8000 }); // le haut-parleur commente
+  await page.waitForTimeout(2500);
+  const c = await page.evaluate(() => window.__scan);
+  console.log('Pendant un scan :', JSON.stringify(c));
+  expect(c.created).toBe(1); // la petite carte du Panier
+  expect(c.added).toEqual({ 'panier-grid': 1 });
+});
