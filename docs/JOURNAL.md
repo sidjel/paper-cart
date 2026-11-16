@@ -16,6 +16,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 62 — 16/11/2026 — Robustesse des changements de lieu
+
+**Demande de l'auteur** : 7 points (fichier SEANCE_ROBUSTESSE), un commit par point, avant A7. Rien de visible quand tout va bien, jamais d'écran noir bloqué.
+
+**Fait** :
+1. **Un lieu qui ne se charge pas** : retour au lieu de départ, le héros là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti). Annonce [TEMP] « Cher Client, ce rayon est momentanément inaccessible. Merci de votre compréhension. », et l'erreur est notée au diagnostic (F3). Si même le lieu de départ échoue : écran « Réessayer » (doigt, souris, Entrée, manette A), qui ramène au jeu. L'état « transition » se termine toujours.
+2. **`loadImages`** libère ce qu'il avait préparé (mémoire, adresses temporaires, compteurs) avant de relancer l'erreur. Test unitaire : un échec à la 3ᵉ image.
+3. **L'historique des temps d'image** repart de zéro à chaque lieu ; le diagnostic l'indique. Vérifié dans le test de mémoire.
+4. **La règle d'échange du panier** est dans `core/world.js` (`planSwap`, `applySwap`), sans changer le comportement. Tests.
+5. Une question pour l'auteur (ci-dessous).
+6. Une mesure, sans correction (ci-dessous).
+7. **Test de mémoire** : il existait ; ajout du cas avec un échec de chargement au milieu des 5 allers-retours. Images, pixels et écouteurs reviennent exactement au départ ; +12 éléments de page (marge : 30).
+
+**Vérifié** : 171 tests de logique, Knip, 91 essais navigateur (PC et téléphone simulé). Nouveaux essais avec une image bloquée (retour au hall ; écran « Réessayer »).
+
+**Point 6 (mesuré dans le navigateur de test, sans correction)** : oui, il y a un vrai écart à la règle « rien n'est créé pendant le jeu ».
+- À chaque scan, **2 cartes sont construites** : la petite carte du Panier (dans le panneau caché) et la carte qui vole vers le Panier (visible). Cela fait environ 28 éléments.
+- Le texte du haut-parleur **remplace ses morceaux de texte à chaque lettre** (~230 par réplique). Ce ne sont pas des éléments, mais du travail pour le ramasse-miettes.
+- Le test des comptages ne le voit pas : le banc d'essai ne scanne pas.
+- Coût probable : faible pour la carte cachée ; la carte qui vole est construite au moment où elle part, d'où un risque de petit à-coup. À mesurer sur le téléphone (DBG pendant un scan) avant toute correction.
+
+**Point 5, à trancher** : voir les options dans la réponse de la séance et dans SUIVI.
+
+---
+
 ## Séance 61 — 16/11/2026 — Un seul mécanisme de poses ; règle « un personnage = un calque »
 
 **Demande de l'auteur** : l'agent clignote encore. Son diagnostic : le héros a un seul calque et ses poses sont cachées ou montrées à l'intérieur ; l'agent (séance 60) avait un calque par pose, que Chrome ne prépare pas quand il est invisible. Corriger avec le même code que le héros, remplacer l'essai, écrire la règle. Et le demi-tour du héros seulement après la fin de la bulle de l'agent.
@@ -85,39 +110,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Vérifié** : 166 tests de logique, Knip, 85 essais navigateur (PC et téléphone simulé), sans erreur console. Captures du haut de la vitre en téléphone simulé.
 
 **À vérifier par l'auteur** : le clignotement sur le téléphone. S'il reste, éteindre la pluie dans ⚙ et dire si ça change.
-
----
-
-## Séance 57 — 16/11/2026 — Le hall refait en profondeur, d'après l'image de référence
-
-**Demande de l'auteur** : refondre le hall en vraie 2.5D avec une ambiance pluvieuse, et un agent qui interpelle le héros, le fige et le repousse. Image de référence fournie en cours de séance.
-
-**Corrections signalées** :
-- Pas de « Canvas » : interdit par les règles et changement de technique. Tout est en dessins SVG, calques et animations CSS légères.
-- Le flou du parking est dessiné dans l'image : le flou CSS est interdit.
-- La logique de l'agent est dans `src/core/guard.js`, pas dans `src/core/places.js`.
-
-**Jouable maintenant** :
-- Le héros commence **à droite** d'une **barrière de 4 portiques en diagonale**, rangés en profondeur : le héros passe devant ou derrière chacun. Il ne passe jamais à gauche.
-- À gauche, un **mur vitré de côté, en perspective**. Derrière, un parking de nuit : arbres et voitures flous, lampadaire avec son halo, flaques. Il glisse moins vite que le mur (parallaxe).
-- **La pluie** : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), du ruissellement, des ronds dans les flaques. **Le tapis d'entrée** noir, mouillé, suit le mur, avec un reflet qui glisse.
-- **L'agent**, redessiné dans le style du héros (grosse tête, contour épais), longe la barrière pour faire face au héros.
-  - Quand le héros va vers la gauche, l'agent lève le bras et parle dans **une bulle au-dessus de lui** : « Vous ne pouvez pas ressortir par ici !… » [TEMP]. Le héros est **figé** le temps de la bulle. Puis le héros pense « Hum… étrange… ».
-  - S'il force contre les portiques, l'agent le **repousse d'un petit pas** vers la droite.
-- Premier plan : une plante en pot et une file de caddies. Panneau d'affichage, caméras au plafond.
-
-**Vérifié** :
-- 166 tests de logique et Knip.
-- 85 essais navigateur sur PC et téléphone simulé, sans erreur console. Nouvel essai de l'agent : interpellation, bulle, héros figé, poussée, jamais à gauche, retour au poste.
-- Comptages du hall : 83 éléments, 4 calques, 38 images, 4,5 Mpx, rien créé en jeu. Le rayon est inchangé. Mémoire stable après 5 allers-retours.
-
-**À vérifier par l'auteur** : la fluidité dans le hall sur le téléphone (pluie, parallaxe ; DBG), et le ressenti de la poussée.
-
-**Décisions prises seul** (détails) :
-- L'opacité du premier plan du hall est réglable : ⚙ → Affichage.
-- Le texte de la bulle de l'agent est droit et centré.
-- Le panneau d'affichage est placé du côté de l'agent.
-
-**Suite proposée** : vos réponses aux questions (hôtesse, « !! », pensée), puis la validation d'A6.
 
 ---

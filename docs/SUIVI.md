@@ -111,6 +111,17 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Pluie qui glisse de côté ; haut de la vitre clair | 58 | 👀 | Corrigés : pluie sur un calque qui suit le mur ; plafond découpé le long du mur de côté. |
 | Limites des comptages du hall | 57 | ❓ | Nouvelles mesures (83 éléments, 38 images, 4,5 Mpx) : à proposer de nouveau. |
 
+### Séance 62 (robustesse des changements de lieu)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| 1. Chargement de lieu qui échoue : retour au départ, annonce, diagnostic, « Réessayer » | 62 | ✅ | Testé (image bloquée). |
+| 2. Rien ne reste en mémoire après un échec (`loadImages`) | 62 | ✅ | Test unitaire. |
+| 3. Historique des temps d'image remis à zéro à chaque lieu | 62 | ✅ | |
+| 4. Règle d'échange du panier dans `core/world.js` | 62 | ✅ | Sans changement de comportement. |
+| 5. Carte reposée qui vient d'un autre lieu : où va son produit ? | 62 | ❓ | Options proposées à l'auteur ; à trancher avant A7. |
+| 6. Éléments créés pendant le jeu par les cartes | 62 | ❓ | Vrai écart : 2 cartes construites à chaque scan (~28 éléments), et le texte du haut-parleur remplace ses morceaux de texte à chaque lettre. Le test des comptages ne le voit pas (le banc ne scanne pas). Correction à décider avec l'auteur, après mesure sur le téléphone. |
+| 7. Test de mémoire, aussi avec un échec au milieu | 62 | ✅ | |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 
