@@ -35,6 +35,9 @@
 ## 3. Boucle, temps et états 🔎
 
 - `requestAnimationFrame` → `stepper` avance la logique par pas fixes, l'affichage interpole entre deux pas.
+- **Règles de la boucle** ✅ (séance 64, vérifiées par `tests/unit/core.test.js`) :
+  - un **nombre maximum de pas de rattrapage** par image (`loop.maxStepsPerFrame`) : si l'appareil rame (onglet repris, téléphone chaud), le jeu ralentit un instant au lieu de se figer ou de sauter ;
+  - un écran à 90, 120 ou 144 Hz ne change pas la vitesse du jeu, et le mouvement reste régulier grâce à l'interpolation entre deux pas (testé : même distance par seconde, chaque image avance de la même longueur).
 - États : `loading`, `title` (écran titre), `options` (options du joueur), `intro` (texte sur noir après « Commencer » : `core/intro`, `ui/intro`, `data/intro.json`), `play`, `transition` (changement de lieu), `pause`, `menu`, `bench`, `panier` (`core/state.js`, passages autorisés listés). Une nouvelle fenêtre **déclare un état** ✅. Ce qui s'ouvre **dans** un état (question Oui / Non, grande carte, choix du nom, conversation) est arbitré par une seule règle : `core/focus.js` (« qui a la main ? »). Sous un menu, la scène n'est pas redessinée.
 - Délais (scan…) : comptés en pas de jeu, donc figés en pause. Exceptions, en temps réel (gestes du joueur dans l'interface) : le délai du double toucher, et les courtes protections contre un double appui (grande carte du Panier, choix du nom).
 - La logique renvoie de petits événements (ex. `stepScan` → `'bip'`) que `main.js` traduit en son et affichage. Pas de bus d'événements : inutile à cette taille.
@@ -52,9 +55,9 @@
 
 ## 5. Entrées, son, données 🔎
 
-- Entrées → **actions abstraites** (`action`, `back`, `pause`, `panier`, `settings`…) et une intention de déplacement ; le reste du jeu ne lit jamais une touche. Manette : disposition standard, **pas encore testée sur une vraie manette**.
-- Son : Web Audio, tout synthétisé (aucun fichier son), débloqué au premier geste, coupé en arrière-plan.
-- Réglages modifiés gardés dans le navigateur (`localStorage`, seulement par `ui/settings.js`). **Pas de sauvegarde de partie** (pas encore de besoin).
+- Entrées → **actions abstraites** (`action`, `back`, `pause`, `panier`, `settings`…) et une intention de déplacement ; le reste du jeu ne lit jamais une touche. Manette : disposition standard, **pas encore testée sur une vraie manette**. **Règles des entrées** ✅ (séance 64) : **`src/input/CLAUDE.md`** (clavier, souris, manette, doigt ; écarts constatés : `docs/SUIVI.md`).
+- Son : Web Audio, tout synthétisé (aucun fichier son), débloqué au premier geste, coupé en arrière-plan. Règles : §12.
+- Réglages modifiés gardés dans le navigateur (`localStorage`, seulement par `ui/settings.js`). **Pas de sauvegarde de partie** (pas encore de besoin ; règles prêtes : §13).
 - Textes venant des données insérés avec `textContent` ; `innerHTML` seulement pour du balisage fixe.
 - Les données se citent entre elles : `tests/unit/data.test.js` vérifie que chaque référence existe.
 
