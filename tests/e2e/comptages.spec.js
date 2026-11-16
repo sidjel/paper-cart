@@ -131,9 +131,11 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
 });
 
 // Mémoire après les changements de lieu : des comptages (pas des temps), fiables sans carte graphique.
-// Après 5 allers-retours rayon ↔ accueil, les éléments de page, les écouteurs d'événements et la mémoire
-// JavaScript reviennent à leur niveau de départ (petite marge).
-test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', async ({ page }, info) => {
+// Après 5 allers-retours rayon ↔ accueil, les éléments de page, les écouteurs d'événements, les images
+// chargées et la mémoire JavaScript reviennent à leur niveau de départ (petite marge). Séance 62 : aussi
+// avec un chargement qui échoue au milieu (l'image du hall bloquée une fois : retour au rayon).
+for (const withFailure of [false, true])
+test(`mémoire : 5 allers-retours rayon ↔ accueil${withFailure ? ', avec un échec de chargement au milieu' : ''}, rien ne s’accumule`, async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(90_000);
   const errors = [];
@@ -160,16 +162,24 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
   await page.waitForTimeout(500);
   const start = await measure();
   for (let k = 0; k < 5; k++) {
+    if (withFailure && k === 2) {
+      // L'image du hall ne se charge pas : retour au rayon, là où le héros est sorti.
+      await page.route('**/accueil-fond.svg', (r) => r.abort());
+      await page.evaluate(() => window.paperCart.useExit());
+      await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.journal().some((l) => l.includes('momentanément inaccessible')), null, { timeout: 15_000 });
+      expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
+      await page.unroute('**/accueil-fond.svg');
+    }
     await travel('accueil');
     await travel('rayon-essai');
   }
   await page.waitForTimeout(500);
   const end = await measure();
-  console.log('Mémoire après 5 allers-retours :', JSON.stringify({ start, end }));
+  console.log(`Mémoire après 5 allers-retours${withFailure ? ' (avec un échec)' : ''} :`, JSON.stringify({ start, end }));
   test.info().annotations.push({ type: 'mémoire', description: JSON.stringify({ start, end }) });
   expect(end.images).toBe(start.images);
-  expect(end.timings).toBe(start.timings); // l'historique des temps d'image ne grossit plus (séance 62)
   expect(end.pixels).toBe(start.pixels);
+  expect(end.timings).toBe(start.timings); // l'historique des temps d'image ne grossit plus (séance 62)
   expect(end.listeners).toBeLessThanOrEqual(start.listeners + 5);
   expect(end.nodes).toBeLessThanOrEqual(start.nodes + 30); // séance 53 : une fuite de +58 éléments par changement de lieu a été trouvée ainsi
   expect(end.heapMb).toBeLessThanOrEqual(start.heapMb * 1.15 + 1);
