@@ -36,6 +36,8 @@ function canvasToBlob(canvas) {
 
 // entries : [{ id, url, w, h, scale }] — w×h = taille logique, scale = échelle de rendu.
 // Renvoie Map id → { el, url, w, h, pw, ph } : `el` est un élément <img> déjà décodé, prêt à afficher.
+// Si une image échoue : tout ce qui a déjà été préparé est libéré (mémoire, adresses temporaires,
+// compteurs), puis l'erreur est relancée.
 export async function loadImages(entries) {
   const t0 = performance.now();
   const out = new Map();
@@ -56,12 +58,21 @@ export async function loadImages(entries) {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(src, 0, 0, pw, ph);
       const url = URL.createObjectURL(await canvasToBlob(canvas));
-      const el = await loadImage(url); // décodé avant affichage
+      let el;
+      try {
+        el = await loadImage(url); // décodé avant affichage
+      } catch (err) {
+        URL.revokeObjectURL(url);
+        throw err;
+      }
       out.set(e.id, { el, url, w: e.w, h: e.h, pw, ph });
       assetStats.images += 1;
       assetStats.pixels += pw * ph;
       assetStats.perImage.push([e.url.split('/').pop(), Math.round(performance.now() - t1)]);
     }
+  } catch (err) {
+    releaseImages(out);
+    throw err;
   } finally {
     canvas.width = 0;
     canvas.height = 0;
