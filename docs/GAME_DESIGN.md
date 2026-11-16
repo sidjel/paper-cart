@@ -5,6 +5,22 @@
 
 ## Exploration ✅ VALIDÉ
 - Marche 2.5D (A1, A2), scan en rayon et Panier (A3), Narrateur (A4).
+- ✅ (séance 64) Le joueur sait **toujours** pourquoi il ne peut pas faire quelque chose (message, réaction courte du héros ou du narrateur).
+- ✅ **Test du gris** : avant de valider un lieu ou un dessin, une capture en noir et blanc ; le héros, les produits à scanner et les sorties restent lisibles.
+- ✅ **Faire jouer quelqu'un d'autre**, sans explication, à chaque fin de prototype ; noter ce qui bloque.
+
+## Interface, menus, dialogues ✅ VALIDÉ (séance 64 ; règles de code : `src/ui/CLAUDE.md`)
+- **Un menu ouvert fige le monde derrière** (héros, temps, compteurs de scène, sons du monde), sauf décision contraire notée. Un seul menu à la fois, au plus deux niveaux.
+- **Fermer marche partout pareil** : le bouton qui l'a ouvert, Échap, B à la manette, toucher à côté. La dernière position est gardée ; au clavier et à la manette, la sélection est toujours visible.
+- **Confirmation** (Oui / Non) seulement pour une action **irréversible** (recommencer, écraser, quitter une partie) ; la fermer annule et rend la sélection au bouton qui l'a ouverte.
+- Sur téléphone : boutons importants **à portée de pouce** (bas et côtés) ; aucun texte de menu sous la taille minimale réglée.
+- **Chargements** : jamais d'écran noir muet ; au-delà d'environ 0,3 s, un petit signe d'attente dans le style du jeu ; en cas d'échec, un message clair et « Réessayer ».
+- **Une seule voix à la fois.** Une parole déclenchée par le joueur (l'agent qui bloque, un objet examiné) passe avant une remarque d'ambiance, coupée ou mise en attente ; les **moments importants** (apartés, première rencontre) ne sont jamais coupés ni perdus.
+- **Tout texte s'accélère d'un toucher** (touche, bouton) et se ferme d'un second, même geste partout, avec un court délai anti-faux-clic.
+- Une bulle qui se ferme seule reste ouverte **selon la longueur de son texte**, jamais une durée fixe : [TEMP] 2,5 s au moins et environ 50 ms par caractère, réglables dans ⚙.
+- Une bulle **reste dans l'écran**, ne cache pas le visage de celui qui parle, sa pointe tournée vers lui.
+- Le héros n'est figé par une bulle **que si la situation l'impose** (l'agent qui le repousse, une introduction) ; les remarques du narrateur laissent marcher. Les **apartés** gardent leur règle (temps du magasin figé).
+- Les dialogues restent relisibles dans l'historique.
 
 ## Accueil, panier et deck ✅ VALIDÉ (séance 36)
 - **L'accueil** propose en libre-service des **Scanettes** et des **paniers à main**, côte à côte. Le héros prend une Scanette (obligatoire pour scanner) et un panier. Ni pièce ni jeton : pas de caddie au début.
@@ -31,18 +47,14 @@
 ## Le hall d'accueil (A6) ✅ VALIDÉ (demande de l'auteur, séance 57 ; image de référence)
 - Le héros commence **à droite des portiques**, sans souvenir ; il ne peut **jamais** revenir à gauche (entrée, mur vitré).
 - Trois plans triés par profondeur : fond (mur vitré de côté en perspective, présentoir, comptoir), milieu (tapis d'entrée noir, **barrière de 4 portiques en diagonale**, agent de sécurité à gauche des portiques, tourné vers la droite), premier plan (plante en pot, file de caddies).
-- L'agent (même style que le héros) va **une seule fois**, au début, du côté au milieu (en retrait des portiques), puis ne bouge plus (séance 59). La première fois que le héros va vers les portiques : bras tendu, **le héros est figé le temps de la bulle** : « Vous ne pouvez pas ressortir par ici ! Pour sortir, il faut traverser tout le magasin et passer par les caisses de l'autre côté. » [TEMP]. Ensuite, s'il force : « Stop ! De l'autre côté, je vous ai dit ! » [TEMP], et, **une fois la bulle fermée**, le héros **fait demi-tour de quelques pas** (séance 61). Tant que la bulle de l'agent est ouverte, le héros ne bouge pas (clavier, manette, doigt) ; elle se ferme **seule au bout de 3 s** (séance 60).
-- Dehors : parking de nuit, pluie, ruissellement, ronds dans les flaques ; tapis mouillé.
-- ✅ VALIDÉ (séance 58) : le héros sursaute (« !! » et gouttes) quand l'agent l'interpelle ; la pensée « Hum… étrange… » est gardée. L'hôtesse derrière le comptoir viendra avec A8 (échange du caddie).
+- L'agent (même style que le héros) va **une seule fois**, au début, du côté au milieu (en retrait des portiques), puis ne bouge plus (séance 59). La première fois que le héros va vers les portiques : bras tendu, **le héros est figé le temps de la bulle** : « Vous ne pouvez pas ressortir par ici ! Pour sortir, il faut traverser tout le magasin et passer par les caisses de l'autre côté. » [TEMP]. Ensuite, s'il force : « Stop ! De l'autre côté, je vous ai dit ! » [TEMP], et, **une fois la bulle fermée**, le héros **fait demi-tour de quelques pas** (séance 61). Tant que la bulle de l'agent est ouverte, le héros ne bouge pas ; elle se ferme seule (séance 60 : 3 s ; séance 64 : selon la longueur du texte, règle générale ci-dessus).
+- Dehors : parking de nuit sous la pluie ; tapis mouillé. ✅ (séance 58) Le héros sursaute (« !! ») quand l'agent l'interpelle, puis pense « Hum… étrange… ». L'hôtesse du comptoir viendra avec A8.
 
 ## Le Caddie jouable (A8) ✅ VALIDÉ
 - **Panier physique** qui suit le personnage **dans le lieu où il se trouve**.
 - ✅ VALIDÉ (séance 50) : il **ne suit pas le héros d'un lieu à l'autre**. Il reste **garé là où le joueur l'a laissé** : le joueur en est responsable.
 - ❓ À DÉFINIR (séance 50) : plus tard, le joueur trouvera un **plan du magasin** (une affiche ou un dépliant, rangé dans les Objets) qui l'aidera notamment à retrouver son caddie. On dit « **plan** » et non « carte », pour ne pas confondre avec les cartes de jeu.
-- Ne le bloque pas ; pas de physique complexe.
-- Peut être **garé** et **repris**.
-- Change de visuel selon son remplissage.
-- Accueillera plus tard la Glacière.
+- Ne le bloque pas ; pas de physique complexe. Peut être **garé** et **repris** ; change de visuel selon son remplissage ; accueillera plus tard la Glacière.
 - 🧪 À TESTER plus tard : interactions avec le décor (présentoirs, étagères hautes).
 
 ## Systèmes repris de l'ancien jeu 🧪 À TESTER (prototype C et suite)

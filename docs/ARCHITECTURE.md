@@ -106,9 +106,42 @@ A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des 
 - ✅ construit : deux lieux (`accueil`, où la partie commence et où se trouve le présentoir, et `rayon-essai`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, gestionnaire dans `src/game/places.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG ; mémoire contrôlée après 5 allers-retours (test des comptages) ; comptages mesurés par lieu (le hall : mesuré, limites à valider par l'auteur) ; effets propres à un lieu dans ses données (`guard` : agent de sécurité ; `rain` : pluie posée sur le calque « dehors », que le mur vitré découpe, animations CSS en `transform` et opacité seulement, figées avec « réduire les animations ») ; objets du décor avec une taille par objet (`scale`, séance 57) ; voix « agent » : bulle au-dessus de l'agent.
 - ✅ séance 62 : **un chargement de lieu qui échoue ne bloque jamais le jeu** : retour au lieu de départ (héros là où il est sorti, annonce, erreur notée au diagnostic) ; si même ce lieu échoue, état `erreur` avec « Réessayer » ; `loadImages` libère ce qu'il avait préparé avant de relancer l'erreur ; l'historique des temps d'image repart de zéro à chaque lieu. Testé (image bloquée) ; mémoire testée aussi avec un échec au milieu.
 - ⏳ pas encore : préchargement des voisins (à décider après mesure sur le téléphone) ; banc qui traverse les lieux.
+- **Chargements** ✅ (séance 64) : jamais d'écran noir muet (au-delà d'environ 0,3 s, un petit signe d'attente dans le style du jeu ; en cas d'échec, message et « Réessayer ») ; temps de chargement mesurés dans le diagnostic et jugés sur le téléphone (premier lancement, retour au jeu, changement de lieu ; objectifs à fixer après mesure) ; pendant un moment calme (héros immobile, hors dialogue), le jeu peut **télécharger** à l'avance les fichiers du lieu voisin probable, **sans les décoder ni créer leurs calques** (seul le lieu actif est en mémoire). Écart : pas encore de signe d'attente (`docs/SUIVI.md`).
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).
 - **Un seul gestionnaire de lieux**, avec un cycle de vie : préchargement → décodage avant affichage → utilisation → **libération de la mémoire en partant**. Seuls le lieu affiché et au plus ses voisins directs restent chargés.
 - **Transition courte (fondu) gérée par la machine à états** : rien ne bouge et rien ne se charge à l'écran pendant le changement de lieu.
 - **Le monde se souvient** : un produit scanné reste scanné au retour, un caddie garé reste garé ; les cartes et les objets suivent le héros.
 - **Mesures** : comptages **par lieu** ; banc d'essai qui traverse les trois lieux et les transitions ; mémoire contrôlée après plusieurs allers-retours (elle ne doit pas grimper) ; temps de transition mesuré sur le téléphone.
+
+## 12. Son ✅ (règles décidées par l'auteur, séance 64)
+
+Vue d'ensemble : un seul accès au son (`src/audio/audio.js`), tout synthétisé, la musique jouée depuis un JSON. **Les règles de code sont dans `src/audio/CLAUDE.md`** : un seul contexte audio repris au geste du joueur ; aucun nœud qui s'accumule (compteur interne, nettoyage idempotent) ; sons courts préparés une fois au démarrage ; musique programmée en avance sur l'horloge audio ; nombre maximum de sons par catégorie et priorité. Chantier pour les appliquer : séance B (bug constaté : sur le téléphone, les pas et la musique se dégradent au bout d'un moment).
+
+## 13. Sauvegarde ✅ (règles à appliquer dès qu'elle sera construite ; rien à construire maintenant)
+
+- **Un seul module** lit et écrit la sauvegarde ; le reste du jeu ne touche jamais au stockage.
+- On sauvegarde **l'état du monde et du joueur** (`core/`), jamais des éléments de page ni des images.
+- Chaque sauvegarde porte un **numéro de version** ; une ancienne est **convertie** à l'ouverture, jamais perdue.
+- **Écriture sûre** : la nouvelle sauvegarde est écrite à côté, puis remplace l'ancienne ; la précédente est gardée. Une sauvegarde abîmée est ignorée avec un message clair, et la précédente est proposée.
+- Sauvegarde automatique à des **moments calmes** (entrée dans un lieu, fin de combat), jamais pendant une transition ou un dialogue.
+- Les **réglages** restent séparés de la partie.
+- Essais automatiques : aller-retour sauvegarder/relire identique, conversion d'une ancienne version, sauvegarde abîmée refusée sans planter.
+
+## 14. Appareils : PC et smartphone ✅ (séance 64)
+
+- Le jeu se joue **sur PC et sur smartphone**, dans le navigateur. Il vise **60 images par seconde partout**, avec un **profil de qualité** par appareil : densité de pixels plafonnée, effets coûteux (pluie animée, poussière, parallaxe lointaine) activés ou non.
+- Le profil initial est choisi au démarrage d'après les **capacités estimées** de l'appareil, pas seulement l'étiquette « PC / smartphone » (un PC modeste ne doit pas recevoir un profil plus lourd qu'un bon téléphone). Les indices du navigateur (mémoire, cœurs) sont approximatifs : le choix s'appuie surtout sur un **court test de vitesse au premier lancement** (l'indice de vitesse du diagnostic), gardé dans le navigateur. Pas de WebGL juste pour lire le nom de la carte graphique. Le profil reste modifiable dans les options du joueur, **sans changement automatique en pleine partie**.
+- **Appareils de référence** : PC (Core i3-8145U, 4 Go de mémoire) et Oppo Reno 2 (8 Go). Les objectifs se jugent sur chacun, dans son profil.
+- ⏳ Profils : proposés à l'auteur (séance 64), à construire après son accord.
+
+## 15. Leçons (un bug corrigé = un test qui échoue s'il revient + une ligne ici)
+
+| Symptôme observé | Cause identifiée | Règle qui l'évite · test |
+|---|---|---|
+| Présentoirs qui clignotent sur le téléphone quand le héros passe derrière (séance 27) | Le navigateur les faisait changer de calque à chaque passage | Un calque fixe par objet que l'on contourne · comptages (`propLayerSwitches = 0`) |
+| +58 éléments de page à chaque changement de lieu (séance 53) | Les images du lieu quitté restaient suivies par le navigateur (taille de l'écran) | Retirer la source des images en défaisant un lieu · test de mémoire (5 allers-retours) |
+| Pluie qui glisse de côté derrière la vitre (séance 58) | Elle était posée sur un calque de parallaxe | Un effet suit le calque de ce qu'il décore · capture |
+| L'agent clignote, puis clignote à chaque pose (séances 59 à 61) | Ses poses étaient montrées et cachées comme calques à part (séance 59), puis chacune avait son calque, passé de l'opacité 0 à 1 (séance 60) ; sa boîte sans taille donnait aussi un calque à chaque pose | Un calque par élément animé, poses comme le héros (`scene/poses.js`), conteneur à la taille du dessin · comptages (« les changements de pose ne créent ni ne changent aucun calque ») |
+| Écran noir bloqué si une image du lieu d'arrivée ne se charge pas (séance 62) | Le changement de lieu n'interceptait pas l'échec | Retour au lieu de départ, sinon « Réessayer » ; la transition se termine toujours · `tests/e2e/robustesse.spec.js` |
+

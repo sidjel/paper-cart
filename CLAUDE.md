@@ -41,7 +41,7 @@
 - Si une vérification est impossible ici, le dire clairement dans le rapport.
 
 ## Fluidité
-- Les objectifs (60 images/s, aucune image > 33 ms, 8 ms de calcul) sont vérifiés à chaque étape, pas en fin de projet.
+- Le jeu se joue **sur PC et smartphone** (navigateur). Les objectifs (60 images/s, aucune image > 33 ms, 8 ms de calcul) sont vérifiés à chaque étape, pas en fin de projet, sur les **appareils de référence** (PC Core i3-8145U 4 Go, Oppo Reno 2), chacun dans son **profil de qualité** (`docs/ARCHITECTURE.md` §14).
 - **Ils se jugent sur le téléphone en bon état** (décision de l'auteur, séance 24) : batterie au-dessus de 50 %, débranché, refroidi, mode normal, plein écran, et un indice de vitesse du téléphone comparable aux essais de référence. Un essai fait dans un autre état sert à comparer des variantes entre elles, pas à juger l'objectif.
 - Détail du diagnostic, du banc d'essai, des comptages et du traçage Android : skill **`mesures`**.
 - Le navigateur de test tourne sans carte graphique : ses **temps sont faux** et ne servent **jamais** à décider d'un correctif. Il sert à vérifier que le jeu marche, et à compter (voir plus bas). Seuls les chiffres du vrai téléphone comptent.
@@ -63,7 +63,15 @@
 - Contenu (cartes, combos, répliques, lieux) en JSON. Textes provisoires préfixés [TEMP].
 - Visuels provisoires : formes simples et sobres en papier découpé, couleurs ternes de magasin, étiquettes lisibles. Ils seront remplacés par les dessins de l'auteur sans changer le code (chaque image référencée dans les données).
 - Bug qui résiste à 2 tentatives : s'arrêter, expliquer, proposer des pistes.
+- **Chaque bug corrigé laisse un test** qui échoue s'il revient, et une ligne dans les « Leçons » (`docs/ARCHITECTURE.md` §15 : symptôme, cause, règle). Un bug visuel ou sonore qui n'apparaît que sur l'appareil : **interrupteurs d'essai enchaînés** depuis le diagnostic (nom de la variante affiché), puis débogage Chrome par USB si besoin (skill `mesures`).
 - Ne jamais modifier du code qui fonctionne hors du périmètre de la séance sans le dire.
 - Aucune dépendance nouvelle ni ressource externe sans accord.
 - Accessibilité : contrôles complets au clavier/souris, à la manette et au doigt ; option « réduire les animations » ; textes lisibles sur téléphone.
 - docs/VISION.md ne change qu'à la demande de l'auteur.
+
+## Où sont les règles (index)
+Chaque règle n'est écrite **qu'à un seul endroit**, près de ce qu'elle concerne (deux copies finissent toujours par se contredire).
+- Code d'un dossier (lu automatiquement quand on y travaille) : `src/core/CLAUDE.md`, `src/scene/CLAUDE.md` (affichage, parallaxe, lumière), `src/input/CLAUDE.md` (entrées), `src/audio/CLAUDE.md` (son), `src/ui/CLAUDE.md` (menus, bulles : code).
+- Vue d'ensemble technique : `docs/ARCHITECTURE.md` (boucle §3, rendu §4, lieux et chargements §11, son §12, sauvegarde §13, appareils §14, leçons §15).
+- Expérience de jeu (menus, dialogues, chargements, test du gris) : `docs/GAME_DESIGN.md`.
+
