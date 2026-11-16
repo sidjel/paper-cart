@@ -2,6 +2,32 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 55 — 16/11/2026 — A6 (2/3) : la partie commence dans le hall, le présentoir y est
+
+**Demande de l'auteur** : « Reprends là où tu en étais » → option recommandée, A6 (2/3).
+
+**Jouable maintenant** :
+- Après l'intro, le héros apparaît dans le **hall d'accueil**, près des portes vitrées. Le haut-parleur l'accueille (le hall a deux haut-parleurs).
+- Le **présentoir de Scanettes et de paniers** est dans le hall, entre les portiques et le comptoir. Le hall a été agrandi (2 800 px).
+- Le rayon n'a plus de présentoir : un panneau « ← ACCUEIL » sur le mur et la flèche au sol.
+- Près du passage « RAYONS → » sans Scanette : le haut-parleur le rappelle. On peut quand même entrer, comme avant.
+
+**Vérifié** :
+- 159 tests de logique et Knip.
+- 82 tests navigateur PC et téléphone simulé, sans erreur console. Les tests du présentoir se jouent dans le hall : prendre la Scanette puis le panier ; au doigt ; puis passage au rayon, scan refusé sans Scanette, pensée sans panier.
+- Comptages du rayon inchangés.
+- Captures du hall et du début du rayon.
+
+**À vérifier par l'auteur** : sur le téléphone, le début de partie (intro → hall), le temps du changement de lieu (rapport DBG).
+
+**Décisions prises seul** :
+- Les points de départ « équipés » (⚙ → Départ) commencent dans le rayon, là où l'on teste le scan. Nouveau lien `?lieu=rayon-essai` pour commencer directement dans le rayon.
+- Les objets déjà portés ne sont plus à prendre au présentoir.
+
+**Suite proposée** : A6 (3/3), l'agent de sécurité qui vient se placer devant le portique visé, l'annonce d'interdiction, la pensée « Hum… étrange… ».
+
+---
+
 ## Séance 54 — 16/11/2026 — Knip, puis découpage de main.js en 3 étapes
 
 **Décisions de l'auteur** : Knip accepté (1.a) ; exception de taille pour `style.css` (2.a) ; découpage de `main.js` en 3 étapes (3 : ok).

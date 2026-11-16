@@ -16,6 +16,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 60 — 16/11/2026 — Agent : plus de clignotement à la bulle ; héros immobile ; bulle de 3 s
+
+**Demande de l'auteur** : l'agent clignote quand sa bulle apparaît et quand elle disparaît ; le héros ne doit pas bouger tant que la bulle est ouverte ; la bulle se ferme seule au bout de 3 s.
+
+**Fait** :
+- **Clignotement** : à chaque changement de pose (bras levé pendant la bulle), l'image de l'agent était redessinée. Chaque pose a maintenant son propre calque, qui reste ; on passe de l'une à l'autre par l'opacité, sans rien redessiner.
+  - L'essai automatique compte maintenant les redessins de l'agent et des portiques (0) en plus des changements de calque.
+  - Vérifié : avec l'ancienne façon de faire, l'essai échoue.
+- **Héros immobile** tant que l'agent parle : clavier et manette l'étaient déjà ; le toucher et le clic aussi maintenant.
+- **Bulle de l'agent fermée seule au bout de 3 s** (⚙ → Narrateur). Ses répliques s'écrivent assez vite (en 1,2 s au plus) pour être lues avant.
+
+**Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone ; si 3 s suffisent pour lire la première phrase (longue).
+
+---
+
 ## Séance 59 — 16/11/2026 — Hall : la cause du clignotement, l'agent refait
 
 **Demande de l'auteur** : l'agent et les portiques clignotent encore (éteindre la pluie ne change rien). L'agent ne se déplace qu'une fois au début (du côté au milieu), un peu plus en retrait. Si le héros force : « Stop ! De l'autre côté je vous ai dit ! », et le héros fait demi-tour de quelques pas.
@@ -119,31 +136,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - L'ordre devant/derrière entre l'agent et le héros se fait sans déplacer d'élément dans la page (le comptage l'a demandé).
 
 **Suite proposée** : faire valider A6 (après votre test), puis A7.
-
----
-
-## Séance 55 — 16/11/2026 — A6 (2/3) : la partie commence dans le hall, le présentoir y est
-
-**Demande de l'auteur** : « Reprends là où tu en étais » → option recommandée, A6 (2/3).
-
-**Jouable maintenant** :
-- Après l'intro, le héros apparaît dans le **hall d'accueil**, près des portes vitrées. Le haut-parleur l'accueille (le hall a deux haut-parleurs).
-- Le **présentoir de Scanettes et de paniers** est dans le hall, entre les portiques et le comptoir. Le hall a été agrandi (2 800 px).
-- Le rayon n'a plus de présentoir : un panneau « ← ACCUEIL » sur le mur et la flèche au sol.
-- Près du passage « RAYONS → » sans Scanette : le haut-parleur le rappelle. On peut quand même entrer, comme avant.
-
-**Vérifié** :
-- 159 tests de logique et Knip.
-- 82 tests navigateur PC et téléphone simulé, sans erreur console. Les tests du présentoir se jouent dans le hall : prendre la Scanette puis le panier ; au doigt ; puis passage au rayon, scan refusé sans Scanette, pensée sans panier.
-- Comptages du rayon inchangés.
-- Captures du hall et du début du rayon.
-
-**À vérifier par l'auteur** : sur le téléphone, le début de partie (intro → hall), le temps du changement de lieu (rapport DBG).
-
-**Décisions prises seul** :
-- Les points de départ « équipés » (⚙ → Départ) commencent dans le rayon, là où l'on teste le scan. Nouveau lien `?lieu=rayon-essai` pour commencer directement dans le rayon.
-- Les objets déjà portés ne sont plus à prendre au présentoir.
-
-**Suite proposée** : A6 (3/3), l'agent de sécurité qui vient se placer devant le portique visé, l'annonce d'interdiction, la pensée « Hum… étrange… ».
 
 ---

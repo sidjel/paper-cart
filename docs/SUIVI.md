@@ -105,6 +105,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Hôtesse derrière le comptoir | 58 | 🔧 | Avec A8 (échange du caddie au comptoir). |
 | Personnages et portiques qui clignotent dans le hall (téléphone) | 58 | 👀 | Séance 59 : pas la pluie (essai de l'auteur). Causes mesurées : l'agent gagnait et perdait son calque graphique à chaque pose ; il prenait le même niveau d'affichage qu'un portique. Corrigé ; un essai vérifie que ni l'agent ni les portiques ne changent de calque. À confirmer sur le téléphone. |
 | Agent : une seule fois au milieu, en retrait ; « Stop ! » et demi-tour du héros | 59 | 👀 | Construit, à tester. |
+| L'agent clignote à l'ouverture et à la fermeture de sa bulle | 60 | 👀 | Cause : redessiné à chaque changement de pose. Corrigé (opacité de deux calques qui restent) ; l'essai compte aussi les redessins (0). À confirmer sur le téléphone. |
+| Héros immobile tant que la bulle de l'agent est ouverte ; bulle fermée seule au bout de 3 s | 60 | 👀 | Fait. Ses répliques s'écrivent plus vite (en 1,2 s au plus) pour être lues avant. Durée : ⚙ → Narrateur. |
 | Pluie qui glisse de côté ; haut de la vitre clair | 58 | 👀 | Corrigés : pluie sur un calque qui suit le mur ; plafond découpé le long du mur de côté. |
 | Limites des comptages du hall | 57 | ❓ | Nouvelles mesures (83 éléments, 38 images, 4,5 Mpx) : à proposer de nouveau. |
 
