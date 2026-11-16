@@ -52,3 +52,19 @@ export function moveProduct(products, from, to) {
   a.on = b.on;
   a.scanned = false;
 }
+
+// Panier plein : une carte est reposée pour faire de la place au produit `target`, dans le lieu `placeId`.
+// Échange seulement si la carte reposée vient d'un produit de ce lieu-ci ; sinon rien (son produit ne
+// réapparaît nulle part : question ouverte, docs/SUIVI.md). Renvoie l'échange prévu { from, to }, ou null.
+// (Sorti de main.js à la séance 62, sans changer le comportement.)
+export function planSwap(dropped, placeId, target) {
+  return dropped && dropped.slot >= 0 && dropped.place === placeId ? { from: dropped.slot, to: target } : null;
+}
+
+// La carte du produit `scanned` arrive : si l'échange prévu l'attendait, le produit reposé prend sa place.
+// Renvoie l'indice du produit déplacé, ou -1.
+export function applySwap(pending, products, scanned) {
+  if (!pending || pending.to !== scanned) return -1;
+  moveProduct(products, pending.from, pending.to);
+  return pending.from;
+}

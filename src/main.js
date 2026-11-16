@@ -18,7 +18,7 @@ import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } 
 import { createIntroUi } from './ui/intro.js';
 import introFile from './data/intro.json';
 import { findPath } from './core/pathfinding.js';
-import { createWorld, moveProduct } from './core/world.js';
+import { createWorld, planSwap, applySwap } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
@@ -246,7 +246,8 @@ function chooseCardToDrop(i) {
       basketUi.setCount(basket.cards.length);
       const target = dropFor;
       dropFor = -1;
-      if (dropped && dropped.slot >= 0 && dropped.place === place.id) pendingSwap = { from: dropped.slot, to: target };
+      const swap = planSwap(dropped, place.id, target); // règle : core/world.js
+      if (swap) pendingSwap = swap;
       panierMode = 'consult';
       sm.go('play');
       scanProduct(target);
@@ -376,12 +377,11 @@ function onScanEvent(ev) {
     const it = productState[scan.index];
     it.scanned = true;
     products.remove(scan.index);
-    if (pendingSwap && pendingSwap.to === scan.index) {
-      // Échange : le produit reposé apparaît à la place de celui qu'on vient de scanner.
-      const { from, to } = pendingSwap;
+    // Échange : le produit reposé apparaît à la place de celui qu'on vient de scanner (core/world.js).
+    const moved = applySwap(pendingSwap, productState, scan.index);
+    if (moved >= 0) {
       pendingSwap = null;
-      moveProduct(productState, from, to);
-      products.sync(from);
+      products.sync(moved);
     }
     const card = addToBasket(basket, it.id, it.def, scan.index, place.id);
     const url = imageUrlOf(it.def);

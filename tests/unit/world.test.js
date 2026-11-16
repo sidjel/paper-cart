@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct } from '../../src/core/world.js';
+import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct, planSwap, applySwap } from '../../src/core/world.js';
 import { nearestProduct } from '../../src/core/scan.js';
 import place from '../../src/data/places/rayon-essai.json';
 import catalog from '../../src/data/products.json';
@@ -43,5 +43,24 @@ describe('état du monde', () => {
     moveProduct(products, 0, 1);
     expect(products[0]).toMatchObject({ id: 'banane', x: lait.x, y: lait.y, scanned: false });
     expect(nearestProduct(products, { x: lait.x, z: 200 }, { range: 150, minDepth: 150 })).toBe(0);
+  });
+
+  it('échange prévu seulement si la carte reposée vient d’un produit de ce lieu', () => {
+    expect(planSwap({ slot: 2, place: 'rayon-essai' }, 'rayon-essai', 5)).toEqual({ from: 2, to: 5 });
+    expect(planSwap({ slot: 2, place: 'accueil' }, 'rayon-essai', 5)).toBe(null); // d'un autre lieu : rien
+    expect(planSwap({ slot: -1, place: 'rayon-essai' }, 'rayon-essai', 5)).toBe(null); // sans produit d'origine
+    expect(planSwap(null, 'rayon-essai', 5)).toBe(null); // rien de reposé
+  });
+
+  it('l’échange prévu se fait à l’arrivée de la carte du bon produit, pas d’un autre', () => {
+    const { products } = build();
+    products[2].scanned = true;
+    const at5 = { x: products[5].x, z: products[5].z };
+    expect(applySwap({ from: 2, to: 5 }, products, 4)).toBe(-1); // un autre produit : rien
+    expect(products[2].scanned).toBe(true);
+    expect(applySwap(null, products, 5)).toBe(-1);
+    expect(applySwap({ from: 2, to: 5 }, products, 5)).toBe(2);
+    expect({ x: products[2].x, z: products[2].z }).toEqual(at5);
+    expect(products[2].scanned).toBe(false); // de nouveau scannable, à la place du produit scanné
   });
 });
