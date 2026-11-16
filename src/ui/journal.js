@@ -2,7 +2,7 @@
 // dites (haut-parleur, héros, pensées, et les réponses du joueur), la plus récente en bas.
 // Les lignes sont créées une fois au chargement (rows) et seulement remplies à l'ouverture.
 
-const WHO = { narrateur: 'Haut-parleur', heros: 'Lui', pensee: 'Lui (pensée)', epaisseur: 'Toi' };
+const WHO = { narrateur: 'Haut-parleur', heros: 'Lui', pensee: 'Lui (pensée)', agent: 'Agent de sécurité', epaisseur: 'Toi' };
 
 export function createJournal(card, rows, { onFirstButton }) {
   const toggle = document.createElement('button');

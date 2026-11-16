@@ -294,10 +294,20 @@ const voices = createVoices(uiEl, {
   aisleEndX: () => endOfAisleX,
   walkTo: (pt) => walkTo(pt),
   hideMarker: () => marker.hide(),
+  guardHead: () => guard.head(),
 });
 const say = voices.say;
 // Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
-const guard = createGuardWiring({ onBlocked: () => say('sortie_interdite') });
+const guard = createGuardWiring({
+  // L'agent interpelle le héros : il s'arrête, le temps de la bulle.
+  onWarn() {
+    clearTarget(walker);
+    say('agent_sortie');
+  },
+  talking: () => voices.narrator.line !== null && voices.narrator.voice === 'agent',
+  // Il force : un petit pas forcé vers la droite.
+  push: (dx) => setPath(walker, [[walker.x + dx, walker.z]]),
+});
 const heroAside = voices.heroAside;
 
 function scanProduct(i) {
@@ -760,6 +770,11 @@ function frame(now) {
         intent.moveZ = 0;
         if (!voices.walking()) clearTarget(walker);
       }
+      if (guard.holding()) {
+        // L'agent parle, ou repousse le héros : les commandes attendent.
+        intent.moveX = 0;
+        intent.moveZ = 0;
+      }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
       guard.step(walker, intent, stepper.step);
       stepPendingScan();
@@ -851,7 +866,7 @@ async function start() {
     if (key === 'camera.zoom') layout();
     if (key === 'debug.showWalkMask') debugMask?.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
-    if (key === 'display.foregroundOpacity') stage?.applyOpacity();
+    if (key === 'display.foregroundOpacity' || key === 'display.hallForegroundOpacity') stage?.applyOpacity();
     if (key === 'display.fullscreenMode') {
       // Le choix se fait d'un geste (dans le panneau) : on peut entrer en plein écran tout de suite.
       if (value === 'oui') enterLandscape();

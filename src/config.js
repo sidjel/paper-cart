@@ -121,6 +121,7 @@ export const config = {
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
     foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
+    hallForegroundOpacity: 0.9, // opacité du premier plan du hall (plante, caddies)
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
     // Objets du décor (caddie, présentoirs) sur leur propre calque, en permanence. Sans cela, le
     // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
@@ -217,6 +218,7 @@ export const TUNABLES = [
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
+  { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },

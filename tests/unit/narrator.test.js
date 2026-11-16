@@ -403,7 +403,7 @@ describe('répliques du narrateur (données)', () => {
         if (st.voice === 'regard') expect(st.text ?? '', l.id).toBe(''); // regard : sans texte
         else if (st.voice === 'marche') expect(st.walk > 0 && st.walk <= 1 && !st.text, l.id).toBe(true); // marche : une part du chemin
         else expect(st.text.startsWith('[TEMP] '), l.id).toBe(true);
-        expect(['heros', 'epaisseur', 'regard', 'pensee', 'narrateur', 'marche', undefined], l.id).toContain(st.voice);
+        expect(['heros', 'epaisseur', 'regard', 'pensee', 'agent', 'narrateur', 'marche', undefined], l.id).toContain(st.voice);
         for (const c of st.choices ?? []) {
           expect(c.text.startsWith('[TEMP] ') && c.reply.startsWith('[TEMP] '), l.id).toBe(true);
           expect(typeof c.trust, l.id).toBe('number');

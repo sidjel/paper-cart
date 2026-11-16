@@ -1,85 +1,99 @@
 import { describe, it, expect } from 'vitest';
-import { createGuard, nearestGate, stepGuard } from '../../src/core/guard.js';
+import { barrierX, createGuard, stepGuard } from '../../src/core/guard.js';
+import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import accueil from '../../src/data/places/accueil.json';
 
-const g = { post: [560, 210], gates: [710, 850, 990], zone: [620, 1080], watchZ: 60, holdZ: 130, standZ: 235, releaseZ: 20 };
-const hero = (x, z, extra = {}) => ({ x, z, tx: 0, tz: 0, ...extra });
+const g = {
+  post: [760, 60],
+  barrier: { x0: 852, slope: 0.1333 },
+  offset: 95,
+  zRange: [-120, 240],
+  watch: 420,
+  warn: 200,
+  touch: 70,
+  release: 520,
+  pushEvery: 1.2,
+  stopTime: 0.8,
+};
+const hero = (x, z, extra = {}) => ({ x, z, hasTarget: false, tx: 0, ...extra });
 const still = { moveX: 0, moveZ: 0 };
-const up = { moveX: 0, moveZ: 1 };
-const right = { moveX: 1, moveZ: 0 };
-const run = (s, h, sec, input = still, speed = 700) => {
-  let ev = null;
-  for (let t = 0; t < sec; t += 1 / 60) ev = stepGuard(s, g, h, input, speed, 1 / 60) ?? ev;
-  return ev;
+const left = { moveX: -1, moveZ: 0 };
+const run = (s, h, sec, input = still) => {
+  const evs = [];
+  for (let t = 0; t < sec; t += 1 / 60) {
+    const e = stepGuard(s, g, h, input, 700, 1 / 60);
+    if (e) evs.push(e);
+  }
+  return evs;
 };
 
 describe('agent de sécurité', () => {
-  it('le portique le plus proche', () => {
-    expect(nearestGate(g.gates, 600)).toBe(0);
-    expect(nearestGate(g.gates, 900)).toBe(1);
-    expect(nearestGate(g.gates, 2000)).toBe(2);
-  });
-
-  it('reste à son poste tant que le héros est loin des portiques', () => {
+  it('reste à son poste tant que le héros est loin de la barrière', () => {
     const s = createGuard(g);
-    run(s, hero(1500, 240), 1);
-    run(s, hero(850, 10), 1);
+    run(s, hero(2000, 200), 1);
     expect([s.x, s.z]).toEqual(g.post);
   });
 
-  it('va devant le portique que le héros approche, et le suit', () => {
+  it('longe la barrière pour se mettre en face du héros', () => {
     const s = createGuard(g);
-    const h = hero(980, 100);
+    const h = hero(1100, 200);
     run(s, h, 2);
-    expect([s.x, s.z]).toEqual([990, 235]);
-    h.x = 700;
+    expect(s.z).toBe(200);
+    expect(s.x).toBeCloseTo(barrierX(g, 200) - g.offset, 5);
+    h.z = -170; // plus bas que la barrière : il s'arrête au bout
     run(s, h, 2);
-    expect(s.x).toBe(710);
+    expect(s.z).toBe(-120);
   });
 
-  it('prévient quand le héros pousse contre les portiques, une fois par approche', () => {
+  it('interpelle le héros qui va vers la gauche près de la barrière, une fois par approche', () => {
     const s = createGuard(g);
-    const h = hero(850, 125);
-    expect(run(s, h, 0.1, up)).toBe('blocked');
-    expect(run(s, h, 1, up)).toBe(null);
-    // Il s'éloigne, puis revient : nouvel avertissement.
-    h.z = 10;
+    const h = hero(1000, 40);
+    expect(run(s, h, 0.5)).toEqual([]); // immobile : rien
+    expect(run(s, h, 0.1, left)).toEqual(['warn']);
+    h.x = 2000; // il s'éloigne…
     run(s, h, 0.1);
-    h.z = 125;
-    expect(run(s, h, 0.1, up)).toBe('blocked');
+    h.x = 1000; // … et revient : nouvelle interpellation
+    expect(run(s, h, 0.1, left)).toEqual(['warn']);
   });
 
-  it('au doigt : viser un point des portiques compte comme une tentative', () => {
+  it('au doigt : viser un point à gauche compte aussi', () => {
     const s = createGuard(g);
-    expect(run(s, hero(850, 126, { tx: 850, tz: 126 }), 0.1)).toBe('blocked');
+    expect(run(s, hero(1000, 40, { hasTarget: true, tx: 700 }), 0.1)).toEqual(['warn']);
   });
 
-  it('longer les portiques vers le présentoir ne déclenche rien', () => {
+  it('repousse le héros qui force contre la barrière, pas plus d’une fois toutes les pushEvery secondes', () => {
     const s = createGuard(g);
-    expect(run(s, hero(800, 126, { tx: 1352, tz: 240 }), 0.5)).toBe(null);
-    expect(run(s, hero(800, 126), 0.5, right)).toBe(null);
+    const h = hero(barrierX(g, 40) + 50, 40);
+    expect(run(s, h, 0.01, left)).toEqual(['warn']); // (dans le jeu, le héros est figé pendant la bulle)
+    expect(run(s, h, 1, left)).toEqual(['push']);
+    expect(run(s, h, 1.3, left)).toEqual(['push']);
+    stepGuard(s, g, h, still, 700, 1 / 60);
+    expect(run(s, h, 1.2, still)).toEqual([]); // il ne force plus : rien
+    s.pushCool = 0;
+    stepGuard(s, g, h, left, 700, 1 / 60);
+    expect(s.stopT).toBeGreaterThan(0); // geste d'arrêt
   });
 
   it('retourne à son poste quand le héros s’éloigne', () => {
     const s = createGuard(g);
-    const h = hero(850, 120);
+    const h = hero(1000, 200);
     run(s, h, 2);
-    h.z = 10;
+    h.x = 2000;
     run(s, h, 2);
     expect([s.x, s.z]).toEqual(g.post);
   });
 
-  it('le hall a un agent ; les portiques sont un obstacle qui commence à holdZ, sur la largeur de la zone', () => {
+  it('le hall : la barrière de portiques ferme la gauche, l’agent est derrière, le héros commence à droite', () => {
     const d = accueil.guard;
-    expect(d).toBeTruthy();
-    for (const x of d.gates) expect(x > d.zone[0] && x < d.zone[1]).toBe(true);
-    const o = accueil.walkMask.obstacles.find((ob) => ob.name.startsWith('Portiques'));
-    const xs = o.points.map((p) => p[0]);
-    const zs = o.points.map((p) => p[1]);
-    expect([Math.min(...xs), Math.max(...xs)]).toEqual(d.zone);
-    expect(Math.min(...zs)).toBe(d.holdZ);
-    expect(d.releaseZ).toBeLessThan(d.watchZ);
-    expect(d.watchZ).toBeLessThan(d.holdZ);
-    expect(accueil.images[d.image]).toBeTruthy();
+    const mask = compileMask(accueil.walkMask);
+    for (const p of accueil.props.filter((q) => q.id.startsWith('portique'))) {
+      expect(p.at[0]).toBeCloseTo(barrierX(d, p.at[1]), 0); // les portiques sont sur la barrière
+      expect(isWalkable(mask, p.at[0] - 40, p.at[1])).toBe(false); // à gauche : hors d'atteinte
+    }
+    for (const z of [-190, 0, 260]) expect(isWalkable(mask, barrierX(d, z) + 20, z)).toBe(false);
+    expect(d.post[0]).toBeLessThan(barrierX(d, d.post[1]));
+    expect(accueil.spawn[0]).toBeGreaterThan(barrierX(d, accueil.spawn[1]));
+    expect(isWalkable(mask, ...accueil.spawn)).toBe(true);
+    expect(accueil.images[d.image] && accueil.images[d.stopImage]).toBeTruthy();
   });
 });

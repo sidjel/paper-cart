@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="220" height="320" viewBox="0 0 220 320">
+  <!-- [TEMP] Agent de sécurité du hall (séance 57), même style que le héros (grosse tête, contour épais, papier découpé) : uniforme bleu marine, casquette à visière, badge. Tourné vers la droite, bras gauche tendu vers la droite, paume ouverte (geste d’arrêt), bouche ouverte. Pieds en (110, 312). Généré, provisoire. -->
+  <defs>
+    <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="9"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+    <g id="silhouette">
+<path d="M80 236 L104 236 L105 300 L79 300 z" fill="#1f2738"/>
+<path d="M74 302 q2 -10 16 -10 h14 q12 2 14 12 q0 4 -4 4 h-38 q-4 0 -2 -6 z" fill="#2a2622"/>
+<path d="M116 236 L140 236 L143 300 L117 300 z" fill="#232c3f"/>
+<path d="M112 302 q2 -10 16 -10 h14 q12 2 14 12 q0 4 -4 4 h-38 q-4 0 -2 -6 z" fill="#2a2622"/>
+<path d="M58 228 q-10 -44 12 -68 q16 -12 34 -12 h28 q24 2 32 24 q8 24 2 54 q-2 14 -12 16 h-82 q-12 -2 -14 -14 z" fill="#2d3a55"/>
+<path d="M72 222 h84 v18 h-84 z" fill="#1f2738"/>
+<path d="M66 172 q-14 28 -8 58 q2 8 10 6 q6 -2 4 -10 q-4 -24 6 -44 z" fill="#25304a"/><circle cx="66" cy="236" r="10" fill="#e8c29e"/>
+<path d="M140 168 q30 -6 60 -16 q8 -2 10 6 q2 8 -6 10 q-30 12 -62 18 z" fill="#2d3a55"/><path d="M200 128 q10 -4 12 6 l2 24 q0 8 -8 8 h-6 q-6 0 -8 -6 l-4 -22 q-2 -8 12 -10 z" fill="#e8c29e"/><path d="M202 132 v-10 M208 132 v-12 M214 134 v-8" stroke="#e8c29e" stroke-width="6" stroke-linecap="round"/>
+<circle cx="112" cy="94" r="60" fill="#e8c29e"/>
+<path d="M50 78 q4 -46 62 -50 q56 2 62 48 z" fill="#232c3f"/>
+<path d="M150 70 q30 0 40 10 q-14 6 -42 4 z" fill="#1b2232"/>
+<ellipse cx="66" cy="104" rx="9" ry="13" fill="#d9b18c"/>
+    </g>
+  </defs>
+  <ellipse cx="110" cy="312" rx="56" ry="9" fill="#3b3428" opacity="0.25"/>
+  <g filter="url(#crayon)">
+    <use href="#silhouette" xlink:href="#silhouette" stroke="#fbf8ee" stroke-width="10" stroke-linejoin="round"/>
+    <use href="#silhouette" xlink:href="#silhouette" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/>
+    <path d="M122 84 l18 6 M150 88 l16 -4" stroke="#2f2820" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="132" cy="100" rx="5" ry="7" fill="#2f2820"/><ellipse cx="158" cy="98" rx="4.5" ry="6.5" fill="#2f2820"/><path d="M128 122 q14 -6 30 0 q-6 6 -15 6 q-9 0 -15 -6 z" fill="#5b4433"/><ellipse cx="146" cy="134" rx="7" ry="5" fill="#4a2a24"/><path d="M110 66 l8 -10 l8 10 l-8 8 z" fill="#d8b44a" stroke="#4a4236" stroke-width="2"/><path d="M128 178 l12 -4 l4 12 l-10 8 l-10 -6 z" fill="#d8b44a" stroke="#4a4236" stroke-width="2"/><rect x="76" y="184" width="30" height="13" rx="2" fill="#fbf8ee" stroke="#4a4236" stroke-width="2"/><text x="91" y="194" font-family="Trebuchet MS, Arial, sans-serif" font-size="8" font-weight="700" fill="#2d3a55" text-anchor="middle">SÉCU</text>
+  </g>
+</svg>

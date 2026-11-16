@@ -210,6 +210,10 @@ export function createVoices(ui, game) {
     } else if (hero) {
       game.stage().stageToClient(shown.x, shown.y - game.headHeight * shown.scale * game.heroScale, head);
       narratorUi.placeBubble(head.x, head.y);
+    } else if (narrator.voice === 'agent') {
+      const g = game.guardHead(); // l'agent de sécurité : bulle au-dessus de sa tête
+      game.stage().stageToClient(g.x, g.y, head);
+      narratorUi.placeBubble(head.x, head.y);
     } else if (speaker) {
       game.stage().stageToClient(speaker[0], speaker[1], mouth);
       narratorUi.placeBand(mouth.x, mouth.y + 18, hudLeft);

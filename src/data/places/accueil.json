@@ -11,11 +11,32 @@
     "scalePerDepth": 0.0012
   },
   "images": {
+    "accueil-dehors": {
+      "src": "art/placeholder/accueil-dehors.svg",
+      "size": [
+        1100,
+        460
+      ]
+    },
     "accueil-fond": {
       "src": "art/placeholder/accueil-fond.svg",
       "size": [
         2800,
         1080
+      ]
+    },
+    "accueil-avant": {
+      "src": "art/placeholder/accueil-avant.svg",
+      "size": [
+        2800,
+        300
+      ]
+    },
+    "portique": {
+      "src": "art/placeholder/portique.svg",
+      "size": [
+        90,
+        240
       ]
     },
     "agent-securite": {
@@ -24,30 +45,60 @@
         220,
         320
       ]
+    },
+    "agent-securite-stop": {
+      "src": "art/placeholder/agent-securite-stop.svg",
+      "size": [
+        220,
+        320
+      ]
     }
   },
   "layers": [
     {
+      "id": "dehors",
+      "image": "accueil-dehors",
+      "position": [
+        -300,
+        160
+      ],
+      "parallax": 0.6,
+      "contains": "dehors, vu par la baie vitrée : parking de nuit sous la pluie",
+      "hiddenBy": "le fond, sauf par la baie vitrée (x 90–720, y 170–606)"
+    },
+    {
       "id": "fond",
       "image": "accueil-fond",
-      "contains": "plafond, mur, portes automatiques, portiques, présentoir de Scanettes et de paniers, comptoir, passage vers les rayons, haut-parleurs, sol",
-      "hiddenBy": "en partie par le personnage"
+      "contains": "plafond, mur, baie vitrée (vitre transparente), tapis d'entrée, panneau d'affichage, présentoir de Scanettes et de paniers, comptoir, passage vers les rayons, haut-parleurs, sol",
+      "hiddenBy": "en partie par les portiques, l'agent et le personnage"
     },
     {
       "id": "acteurs",
-      "contains": "personnage, ombre, poussière, repère du point visé",
+      "contains": "personnage, ombre, poussière, portiques, agent de sécurité, repère du point visé — triés par profondeur",
+      "hiddenBy": "le premier plan, en bas"
+    },
+    {
+      "id": "premier-plan",
+      "image": "accueil-avant",
+      "position": [
+        0,
+        820
+      ],
+      "parallax": 1.25,
+      "opacity": "display.hallForegroundOpacity",
+      "contains": "plante verte en pot, file de caddies emboîtés (sentiment d'enfermement)",
       "hiddenBy": "rien"
     }
   ],
   "spawn": [
-    420,
-    60
+    1060,
+    40
   ],
   "walkMask": {
-    "comment": "Même repère que le rayon : x le long du hall, z la profondeur (264 = au pied du mur).",
+    "comment": "Même repère que le rayon : x le long du hall, z la profondeur (264 = au pied du mur). Bord gauche : juste à droite de la barrière de portiques, en biais comme elle (le héros bute dessus ; la baie et le tapis sont hors d'atteinte).",
     "area": [
       [
-        90,
+        872,
         -195
       ],
       [
@@ -59,35 +110,71 @@
         264
       ],
       [
-        90,
+        933,
         264
       ]
     ],
-    "obstacles": [
-      {
-        "name": "Portiques de sécurité (A6) : on ne passe pas ; l'agent de sécurité se place devant (guard.holdZ = bord avant, guard.zone = largeur)",
-        "points": [
-          [
-            620,
-            130
-          ],
-          [
-            1080,
-            130
-          ],
-          [
-            1080,
-            270
-          ],
-          [
-            620,
-            270
-          ]
-        ]
-      }
-    ]
+    "obstacles": []
   },
-  "props": [],
+  "props": [
+    {
+      "id": "portique-1",
+      "image": "portique",
+      "at": [
+        884,
+        240
+      ],
+      "anchor": [
+        45,
+        234
+      ],
+      "scale": 0.78,
+      "depthRef": 240,
+      "comment": "Barrière de portiques (séance 57) : du fond (1) au premier plan (4). at : pied au sol ; scale : plus petit au fond. Le héros ne passe jamais à gauche (bord de la zone de marche)."
+    },
+    {
+      "id": "portique-2",
+      "image": "portique",
+      "at": [
+        868,
+        120
+      ],
+      "anchor": [
+        45,
+        234
+      ],
+      "scale": 0.88,
+      "depthRef": 120
+    },
+    {
+      "id": "portique-3",
+      "image": "portique",
+      "at": [
+        852,
+        0
+      ],
+      "anchor": [
+        45,
+        234
+      ],
+      "scale": 1.0,
+      "depthRef": 0
+    },
+    {
+      "id": "portique-4",
+      "image": "portique",
+      "at": [
+        836,
+        -120
+      ],
+      "anchor": [
+        45,
+        234
+      ],
+      "scale": 1.12,
+      "depthRef": -120
+    }
+  ],
   "exits": {
     "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ».",
     "items": [
@@ -110,8 +197,8 @@
   },
   "bench": {
     "start": [
-      420,
-      60
+      1060,
+      40
     ],
     "route": [
       {
@@ -131,14 +218,14 @@
       },
       {
         "to": [
-          900,
+          1000,
           -100
         ]
       },
       {
         "to": [
-          420,
-          60
+          1060,
+          40
         ]
       },
       {
@@ -148,7 +235,7 @@
   },
   "diagnostic": {
     "a": [
-      900,
+      1000,
       40
     ],
     "b": [
@@ -194,38 +281,42 @@
     ]
   },
   "guard": {
-    "comment": "Agent de sécurité (A6) : garde les portiques (gates : x de chaque passage). Les portiques sont un obstacle de la zone de marche (bord avant en z = holdZ, de zone[0] à zone[1]). L'agent attend à son poste (post) ; quand le héros entre dans la zone (x) plus au fond que watchZ, il va se placer devant le portique le plus proche (standZ). Quand le héros pousse contre les portiques, le haut-parleur prévient. Il repart au poste quand le héros revient en deçà de releaseZ ou quitte la zone. [TEMP] forme provisoire.",
+    "comment": "Agent de sécurité (A6, refait séance 57) : à gauche de la barrière de portiques, tourné vers la droite. barrier : x de la barrière = x0 + z × slope (comme les portiques). Distances comptées depuis la barrière : watch (il se met en face du héros), warn (il l'interpelle s'il va vers la gauche), touch (contre la barrière : il le repousse de pushDist vers la droite, au plus une fois toutes les pushEvery s), release (assez loin : il pourra l'interpeller de nouveau). offset : distance de l'agent à la barrière. stopTime : durée du geste d'arrêt. [TEMP] forme provisoire. Règle : src/core/guard.js.",
     "image": "agent-securite",
+    "stopImage": "agent-securite-stop",
     "anchor": [
       110,
       312
     ],
-    "scale": 0.95,
+    "scale": 0.85,
     "post": [
-      560,
-      210
+      760,
+      60
     ],
-    "gates": [
-      710,
-      850,
-      990
+    "barrier": {
+      "x0": 852,
+      "slope": 0.1333
+    },
+    "offset": 95,
+    "zRange": [
+      -120,
+      240
     ],
-    "zone": [
-      620,
-      1080
-    ],
-    "watchZ": 60,
-    "holdZ": 130,
-    "standZ": 235,
-    "releaseZ": 20
+    "watch": 420,
+    "warn": 200,
+    "touch": 70,
+    "release": 520,
+    "pushEvery": 1.2,
+    "pushDist": 90,
+    "stopTime": 0.8
   },
   "rain": {
     "comment": "Pluie derrière les portes vitrées (rectangle dans l'image du fond : x, y, largeur, hauteur).",
     "rect": [
-      110,
-      190,
-      420,
-      418
+      108,
+      188,
+      594,
+      400
     ]
   }
 }

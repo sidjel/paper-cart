@@ -1037,31 +1037,40 @@ test('doigt qui glisse : le héros suit, et le chemin n’est calculé qu’une 
   expect(h.x).toBeGreaterThan(600); // il a suivi le doigt
 });
 
-test('A6 : l’agent de sécurité barre le portique visé ; le haut-parleur interdit la sortie, le héros trouve ça étrange', async ({ page }, info) => {
+test('A6 : l’agent de sécurité interpelle le héros qui va vers les portiques, le fige, puis le repousse s’il force', async ({ page }, info) => {
   test.setTimeout(40_000);
   await page.evaluate(() => {
     window.paperCart.markSaid('arrivee'); // l'accueil du haut-parleur et ses pensées ont leurs propres tests
-    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1], ['narrator.enabled', false], ['narrator.enabled', true]]) window.paperCart.set(k, v);
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.6], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1], ['narrator.enabled', false], ['narrator.enabled', true]]) window.paperCart.set(k, v);
   });
   const guard = () => page.evaluate(() => window.paperCart.guard());
-  const post = await guard();
-  // Vers le portique du milieu (x 850), puis vers le fond.
-  await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => window.paperCart.hero().x > 830);
-  await page.keyboard.up('ArrowRight');
-  await page.keyboard.down('ArrowUp');
-  await expect.poll(async () => (await guard()).gate, { timeout: 5000 }).toBe(1);
-  await page.waitForTimeout(1200);
-  expect((await hero(page)).z).toBeLessThanOrEqual(130); // il ne passe pas
-  await page.keyboard.up('ArrowUp');
-  await expect.poll(async () => Math.round((await guard()).x), { timeout: 3000 }).toBe(850);
   const said = async () => (await page.evaluate(() => window.paperCart.journal())).join(' ');
-  await expect.poll(said, { timeout: 8000 }).toMatch(/narrateur: Les sorties sont réservées/);
-  await expect.poll(said, { timeout: 8000 }).toMatch(/pensee: Hum… étrange…/);
+  expect((await hero(page)).x).toBeGreaterThan(1000); // la partie commence à droite des portiques
+  // Vers la gauche : l'agent se met en face, lève le bras et parle (bulle au-dessus de lui) ; le héros s'arrête.
+  await page.keyboard.down('ArrowLeft');
+  await expect.poll(said, { timeout: 5000 }).toMatch(/agent: Vous ne pouvez pas ressortir par ici/);
+  await expect(page.locator('.hero-bubble.agent')).toBeVisible();
+  expect((await guard()).pose).toBe('stop');
+  const frozen = (await hero(page)).x;
+  await page.waitForTimeout(300);
+  expect((await hero(page)).x).toBe(frozen); // figé pendant la bulle, même en appuyant
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
-  // Il repart vers l'avant : l'agent retourne à son poste.
-  await page.keyboard.down('ArrowDown');
-  await page.waitForFunction(() => window.paperCart.hero().z < 10);
-  await page.keyboard.up('ArrowDown');
-  await expect.poll(async () => Math.round((await guard()).x), { timeout: 4000 }).toBe(post.x);
+  await expect.poll(said, { timeout: 8000 }).toMatch(/pensee: Hum… étrange…/);
+  // Il force contre la barrière : l'agent le repousse vers la droite, il ne passe jamais.
+  let minX = Infinity;
+  let pushed = false;
+  for (let k = 0; k < 40 && !pushed; k++) {
+    const x = (await hero(page)).x;
+    if (x > minX + 40) pushed = true;
+    minX = Math.min(minX, x);
+    await page.waitForTimeout(100);
+  }
+  await page.keyboard.up('ArrowLeft');
+  expect(pushed, 'repoussé vers la droite').toBe(true);
+  expect(minX).toBeGreaterThan(860); // jamais à gauche de la barrière
+  // Il repart vers la droite : l'agent retourne à son poste.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 1500);
+  await page.keyboard.up('ArrowRight');
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 4000 }).toBe(760); // son poste (données du hall)
 });

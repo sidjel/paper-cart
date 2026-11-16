@@ -23,7 +23,9 @@ export function createProps(place, images, parent, proj) {
     el.dataset.prop = def.id;
     const sx = worldToStageX(proj, def.at[0]) - def.anchor[0];
     const sy = worldToStageY(proj, def.at[1]) - def.anchor[1];
-    el.style.transform = `translate(${sx}px, ${sy}px)`;
+    // scale (facultatif) : plus petit au fond, plus grand devant, autour du point d'ancrage.
+    if (def.scale) el.style.transformOrigin = `${def.anchor[0]}px ${def.anchor[1]}px`;
+    el.style.transform = `translate(${sx}px, ${sy}px)${def.scale ? ` scale(${def.scale})` : ''}`;
     el.style.zIndex = levels[i];
     parent.appendChild(el);
     return { id: def.id, el, depthRef: def.depthRef, left: sx, width: img.w };

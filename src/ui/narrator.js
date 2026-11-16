@@ -84,15 +84,16 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
   let lastY = NaN;
 
   return {
-    // voice : 'heros' (bulle), 'regard' (rien : un regard sans texte) ou autre (bande) ;
+    // voice : 'heros', 'pensee' ou 'agent' (bulle), 'regard' (rien : un regard sans texte) ou autre (bande) ;
     // still : « réduire les animations » ; choices : deux réponses (le texte de chacune) ou null.
     show(t, voice, still, choices = null) {
       if (voice === 'regard' || voice === 'marche') {
         this.hide();
         return;
       }
-      const el = voice === 'heros' || voice === 'pensee' ? bubble : voice === 'epaisseur' ? player : band;
+      const el = voice === 'heros' || voice === 'pensee' || voice === 'agent' ? bubble : voice === 'epaisseur' ? player : band;
       bubble.classList.toggle('thought', voice === 'pensee');
+      bubble.classList.toggle('agent', voice === 'agent'); // l'agent de sécurité parle (bulle au-dessus de lui)
       if (current && current !== el) current.hidden = true;
       current = el;
       el.classList.remove('tap');
