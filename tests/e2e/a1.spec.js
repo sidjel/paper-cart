@@ -1050,6 +1050,7 @@ test('A6 : l’agent de sécurité interpelle le héros qui va vers les portique
   await page.keyboard.down('ArrowLeft');
   await expect.poll(said, { timeout: 5000 }).toMatch(/agent: Vous ne pouvez pas ressortir par ici/);
   await expect(page.locator('.hero-bubble.agent')).toBeVisible();
+  await expect(page.locator('.hero-surprise')).toBeVisible(); // le héros sursaute : « !! »
   expect((await guard()).pose).toBe('stop');
   const frozen = (await hero(page)).x;
   await page.waitForTimeout(300);

@@ -64,7 +64,20 @@
       ],
       "parallax": 0.6,
       "contains": "dehors, vu par le mur vitré : parking de nuit sous la pluie (pluie, ruissellement et ronds dans les flaques animés)",
-      "hiddenBy": "le fond, sauf par les vitres du mur de côté (quadrilatère (0,100)-(700,172)-(700,600)-(0,860))"
+      "hiddenBy": "le fond, sauf par les vitres du mur de côté (quadrilatère (0,100)-(700,172)-(700,600)-(0,860))",
+      "size": [
+        800,
+        900
+      ]
+    },
+    {
+      "id": "pluie",
+      "size": [
+        720,
+        880
+      ],
+      "contains": "pluie, ruissellement, ronds dans les flaques (animés), devant le dehors ; suit le mur (pas de parallaxe)",
+      "hiddenBy": "le fond, sauf par les vitres"
     },
     {
       "id": "fond",
@@ -311,13 +324,13 @@
     "stopTime": 0.8
   },
   "rain": {
-    "comment": "Pluie derrière le mur vitré (séance 57), sur le calque « dehors » : le mur la découpe à la forme des vitres. rect = zone de pluie (x, y, largeur, hauteur, dans le calque, qui glisse avec la parallaxe) : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), ruissellement, ronds dans les flaques (ripples : [x, y] dans le calque, au pied des vitres). mat = tapis d'entrée (dans le fond) : un reflet mouillé qui glisse lentement. Animations CSS, transform et opacité seulement ; figées avec « réduire les animations ».",
-    "layer": "dehors",
+    "comment": "Pluie derrière le mur vitré (séance 57), sur son propre calque, derrière le fond et qui suit le mur (séance 58 : sur le calque du dehors, elle glissait de côté) : le mur la découpe à la forme des vitres. rect = zone de pluie (x, y, largeur, hauteur) : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), ruissellement, ronds dans les flaques (ripples : [x, y] dans le calque, au pied des vitres). mat = tapis d'entrée (dans le fond) : un reflet mouillé qui glisse lentement. Animations CSS, transform et opacité seulement ; figées avec « réduire les animations ».",
+    "layer": "pluie",
     "rect": [
-      -300,
-      90,
-      1020,
-      780
+      0,
+      96,
+      710,
+      770
     ],
     "ripples": [
       [

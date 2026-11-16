@@ -19,6 +19,12 @@ export function createStage(container, place, images, getValue) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
     layer.dataset.contains = def.contains;
+    // size (facultatif) : un calque presque vide (le dehors, la pluie) ne prend que la place de son contenu,
+    // pour ne pas réserver dans la mémoire graphique une surface grande comme tout le lieu.
+    if (def.size) {
+      layer.style.width = `${def.size[0]}px`;
+      layer.style.height = `${def.size[1]}px`;
+    }
     const pos = def.position ?? [0, 0];
     if (def.image) {
       const img = images.get(def.image);

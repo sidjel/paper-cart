@@ -298,7 +298,13 @@ const voices = createVoices(uiEl, {
 });
 const say = voices.say;
 // Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
+const guardHeadPt = { x: 0, y: 0 };
 const guard = createGuardWiring({
+  ui: uiEl,
+  heroHead() {
+    stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, guardHeadPt);
+    return guardHeadPt;
+  },
   // L'agent interpelle le héros : il s'arrête, le temps de la bulle.
   onWarn() {
     clearTarget(walker);
@@ -876,6 +882,7 @@ async function start() {
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
+    if (key === 'display.hallRain') stage?.el.classList.toggle('no-rain', !value);
     if (key.startsWith('player.')) voices.applyPlayerName();
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
