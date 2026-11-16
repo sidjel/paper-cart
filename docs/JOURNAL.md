@@ -16,6 +16,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 58 — 16/11/2026 — Hall : clignotements, pluie, haut de la vitre ; le « !! » du héros
+
+**Demande de l'auteur** : corriger le clignotement des personnages et des portiques, la pluie qui bascule de côté, le haut du mur vitré mal couvert. Réponses : hôtesse plus tard (1 B), « !! » oui (2 A), pensée gardée (3 A).
+
+**Fait** :
+- **Haut de la vitre** : le plafond était dessiné par-dessus. Il est maintenant découpé le long du mur de côté.
+- **Pluie** : elle était sur le calque du dehors, qui glisse moins vite que le mur. Elle a maintenant son propre calque, qui suit le mur.
+- **Clignotement** : sur ta capture, des morceaux du fond manquaient aussi (des Scanettes). C'est le signe d'une mémoire graphique saturée. Le dehors et la pluie réservaient chacun une surface grande comme tout le hall ; ils sont réduits à la taille de leur contenu. Surface totale : 13,8 → 10,5 millions de pixels (le rayon : 14,2). Cause **probable, pas prouvée** : seul le téléphone le dira.
+- Nouveau réglage ⚙ → Affichage → « Pluie animée du hall », pour vérifier la cause si ça clignote encore.
+- Le héros **sursaute** quand l'agent l'interpelle : « !! » et gouttes de sueur.
+
+**Vérifié** : 166 tests de logique, Knip, 85 essais navigateur (PC et téléphone simulé), sans erreur console. Captures du haut de la vitre en téléphone simulé.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il reste, éteindre la pluie dans ⚙ et dire si ça change.
+
+---
+
 ## Séance 57 — 16/11/2026 — Le hall refait en profondeur, d'après l'image de référence
 
 **Demande de l'auteur** : refondre le hall en vraie 2.5D avec une ambiance pluvieuse, et un agent qui interpelle le héros, le fige et le repousse. Image de référence fournie en cours de séance.
@@ -131,36 +148,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **À vérifier par l'auteur** : banc d'essai sur le téléphone, avant (`74cb80b`) et après, s'il le souhaite. Le code a été déplacé, pas changé.
 
 **Suite proposée** : reprendre A6 (2/3), le présentoir déplacé dans le hall et le départ à l'accueil. La suite du découpage de `main.js` peut attendre.
-
----
-
-## Séance 53 — 16/11/2026 — Remise en ordre (2/2) : des garde-fous qui se vérifient tout seuls
-
-**Décisions de l'auteur** : VISION.md modifié (direction visuelle → renvoi à DIRECTION_ARTISTIQUE.md) ; flou optionnel gardé, seule exception (choix A) ; les 59 points 👀 : « je te laisse trancher ».
-
-**Fait** :
-- **Les 59 points 👀** :
-  - 53 validés (étapes validées A1 à A5, ou acceptés ensuite) → archive ;
-  - 3 à mesurer sur le téléphone (temps de chargement, latence du son) → 🔧 ;
-  - 3 restent 👀 avec A6.
-- **Garde-fous dans `npm test`** (`tests/unit/regles.test.js`) :
-  - fichiers de `src/` de 600 lignes au plus, sauf exceptions datées : `main.js` approuvé, `style.css` en attente d'accord ;
-  - `src/core/` sans `setTimeout`, `setInterval`, `Math.random`, `document`, `window` ;
-  - CSS sans `filter`, `backdrop-filter` ni `blur`, sauf `.veil-blur` ;
-  - chaque chemin cité dans les documents existe (sauf documents prévus : `docs/IMAGES.md`, `tools/`).
-  - Vérifié en y glissant des erreurs volontaires (retirées) : elles sont attrapées.
-- **Mémoire après les changements de lieu** (test des comptages) : 5 allers-retours rayon ↔ accueil → éléments de page, écouteurs, mémoire JS et images reviennent au niveau de départ.
-  - **Une vraie fuite trouvée et corrigée** : chaque changement de lieu gardait environ 58 éléments en mémoire. Cause : le navigateur gardait chaque image d'un lieu quitté inscrite pour suivre la taille de l'écran, et avec elle tout l'ancien décor.
-  - Correction : en quittant un lieu, les images perdent leur source. Après correction : 3 077 éléments avant, 3 077 après.
-- **Sécurités de Claude Code** (`.claude/settings.json` + `.claude/hooks/garde-git.mjs`, testé) :
-  - push forcé, `reset --hard`, `rebase`, `commit --amend`, `filter-branch` bloqués, où que soit l'option dans la commande ;
-  - accord demandé avant de modifier `docs/VISION.md` ou `tests/e2e/comptages-limites.json`, y compris par une commande.
-- **Skill `audit`** : relecteur à froid en lecture seule, lancé par l'auteur à la fin d'une étape importante.
-
-**Pas fait (accord nécessaire)** : Knip (nouvelle dépendance) ; découpage de `main.js` (proposé, en attente).
-
-**Vérifié** :
-- 159 tests de logique ; 82 tests navigateur PC et téléphone simulé, sans erreur console ; comptages du rayon inchangés.
-- Aucun changement visible pour le joueur, hors la fuite corrigée.
 
 ---

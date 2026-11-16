@@ -2,6 +2,37 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 53 — 16/11/2026 — Remise en ordre (2/2) : des garde-fous qui se vérifient tout seuls
+
+**Décisions de l'auteur** : VISION.md modifié (direction visuelle → renvoi à DIRECTION_ARTISTIQUE.md) ; flou optionnel gardé, seule exception (choix A) ; les 59 points 👀 : « je te laisse trancher ».
+
+**Fait** :
+- **Les 59 points 👀** :
+  - 53 validés (étapes validées A1 à A5, ou acceptés ensuite) → archive ;
+  - 3 à mesurer sur le téléphone (temps de chargement, latence du son) → 🔧 ;
+  - 3 restent 👀 avec A6.
+- **Garde-fous dans `npm test`** (`tests/unit/regles.test.js`) :
+  - fichiers de `src/` de 600 lignes au plus, sauf exceptions datées : `main.js` approuvé, `style.css` en attente d'accord ;
+  - `src/core/` sans `setTimeout`, `setInterval`, `Math.random`, `document`, `window` ;
+  - CSS sans `filter`, `backdrop-filter` ni `blur`, sauf `.veil-blur` ;
+  - chaque chemin cité dans les documents existe (sauf documents prévus : `docs/IMAGES.md`, `tools/`).
+  - Vérifié en y glissant des erreurs volontaires (retirées) : elles sont attrapées.
+- **Mémoire après les changements de lieu** (test des comptages) : 5 allers-retours rayon ↔ accueil → éléments de page, écouteurs, mémoire JS et images reviennent au niveau de départ.
+  - **Une vraie fuite trouvée et corrigée** : chaque changement de lieu gardait environ 58 éléments en mémoire. Cause : le navigateur gardait chaque image d'un lieu quitté inscrite pour suivre la taille de l'écran, et avec elle tout l'ancien décor.
+  - Correction : en quittant un lieu, les images perdent leur source. Après correction : 3 077 éléments avant, 3 077 après.
+- **Sécurités de Claude Code** (`.claude/settings.json` + `.claude/hooks/garde-git.mjs`, testé) :
+  - push forcé, `reset --hard`, `rebase`, `commit --amend`, `filter-branch` bloqués, où que soit l'option dans la commande ;
+  - accord demandé avant de modifier `docs/VISION.md` ou `tests/e2e/comptages-limites.json`, y compris par une commande.
+- **Skill `audit`** : relecteur à froid en lecture seule, lancé par l'auteur à la fin d'une étape importante.
+
+**Pas fait (accord nécessaire)** : Knip (nouvelle dépendance) ; découpage de `main.js` (proposé, en attente).
+
+**Vérifié** :
+- 159 tests de logique ; 82 tests navigateur PC et téléphone simulé, sans erreur console ; comptages du rayon inchangés.
+- Aucun changement visible pour le joueur, hors la fuite corrigée.
+
+---
+
 ## Séance 52 — 15/11/2026 — Remise en ordre (1/2) : la documentation
 
 **Demande de l'auteur** : A4 et A5 validées ; puis séance 1 de remise en ordre (documents seulement, un commit par point).
