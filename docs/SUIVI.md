@@ -75,9 +75,10 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 ### Remise en ordre (séances 52 et 53)
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| VISION.md : remplacer le détail du style par une phrase qui renvoie à DIRECTION_ARTISTIQUE.md | 52 | ❓ | Détail déjà recopié dans DIRECTION_ARTISTIQUE.md. Modification de VISION.md proposée à l'auteur, pas enregistrée. |
-| Flou réel optionnel des bords (rencontre) : le garder ? | 52 | ❓ | Désactivé par défaut (0 px), coût jamais mesuré sur le téléphone. Décision de l'auteur. |
-| Séance 2 de remise en ordre (garde-fous automatiques), puis découpage de main.js | 52 | 🔧 | Dans cet ordre (demande de l'auteur). |
+| Séance 2 de remise en ordre (garde-fous automatiques) | 52 | ✅ | Séance 53 : garde-fous dans npm test, mémoire après changements de lieu (fuite corrigée), sécurités Claude Code, skill audit. |
+| Exception de taille pour `src/style.css` (1 198 lignes > 600) | 53 | ❓ | Proposée, en attente de l'accord de l'auteur (ou découper le CSS par sujet). |
+| Knip (repérer le code mort) : nouvelle dépendance de développement | 53 | ❓ | Accord de l'auteur demandé. |
+| Découpage de `main.js` en 2 ou 3 étapes, avant A7 | 53 | ❓ | Proposé (JOURNAL, séance 53), en attente de l'accord de l'auteur. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.

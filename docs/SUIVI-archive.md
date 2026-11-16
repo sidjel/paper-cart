@@ -179,3 +179,11 @@ Déplacés tels quels depuis `docs/SUIVI.md` à la séance 51, sans rien perdre.
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | (constaté à l'audit) La première rencontre peut se dérouler cachée sous le Panier ; le Panier s'ouvre pendant la rencontre (touche I, bouton Y) | 50 | ✅ | Corrigé (validé par l'auteur) : pas de Panier pendant un aparté ou une conversation ; hors du jeu (Panier, menus), le héros ne prend pas la parole, la rencontre attend le retour. Testé. Séance 53 : validé (fait partie d'une étape validée ou accepté ensuite par l'auteur). |
+
+### Remise en ordre (séance 53)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| VISION.md : la direction visuelle renvoie à DIRECTION_ARTISTIQUE.md | 52 | ✅ | Accord de l'auteur (séance 53). |
+| Flou réel optionnel des bords (rencontre) | 52 | ✅ | Gardé, désactivé par défaut, seule exception des garde-fous (choix A, séance 53). |
+| Les 59 points 👀 : l'auteur m'a laissé trancher | 53 | ✅ | 53 validés, 3 à mesurer (🔧), 3 restent avec A6. |
+
