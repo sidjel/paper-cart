@@ -1,5 +1,5 @@
 {
-  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), « agent » pour l'agent de sécurité du hall (bulle au-dessus de lui), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai). steps (conversation) : répliques à la suite, voice « heros », « epaisseur » (le joueur répond, sans choix) ou « regard » ; la dernière peut proposer deux réponses. must : moment important, jamais perdu (il attend son tour). Dans une conversation : voice « marche » (walk : part du chemin vers le milieu de l'écran, un peu en avant ; 1 = arrivé), auto : la réplique passe seule (sans toucher). veil (moment) : bords de l'écran flous, vagues violettes. pickName (conversation) : la réplique attend que le joueur choisisse son nom (propositions de data/joueur.json, ou le sien) ; les répliques suivantes l'emploient.",
+  "comment": "Voix du jeu (A4). triggers : moments qui peuvent faire parler une voix. voice : « heros » pour un aparté du héros (il tutoie le joueur, son « Épaisseur »), « regard » pour un petit regard caméra sans texte, « pensee » quand le héros se parle à lui-même (bulle, sans mise en scène), « agent » pour l'agent de sécurité du hall (bulle au-dessus de lui), sinon le haut-parleur (il vouvoie le « client »). cooldown : délai avant qu'une même réplique revienne, pour ce moment. choices (apartés) : deux réponses du joueur { text, trust, reply, emotion } : la confiance évolue, puis le héros répond. once = une seule fois ; every = une fois toutes les N occurrences, à partir de la from-ième ; strong = passe même s'il a parlé il y a peu ; timed = se ferme seule au bout de narrator.timedLine s ; follows = suit la fin d'une réplique d'un autre moment, ou de n'importe quel aparté (@heros). lines : répliques [TEMP], à réécrire par l'auteur (docs/HISTOIRE.md, docs/PERSONNAGES.md). emotion (apartés) : inquiet, complice ou blase — choisit le dessin du héros, tête de face. minTrust / maxTrust : la réplique n'existe qu'à partir de (ou jusqu'à) ce niveau de confiance (essai). steps (conversation) : répliques à la suite, voice « heros », « epaisseur » (le joueur répond, sans choix) ou « regard » ; la dernière peut proposer deux réponses. must : moment important, jamais perdu (il attend son tour). Dans une conversation : voice « marche » (walk : part du chemin vers le milieu de l'écran, un peu en avant ; 1 = arrivé), auto : la réplique passe seule (sans toucher). veil (moment) : bords de l'écran flous, vagues violettes. pickName (conversation) : la réplique attend que le joueur choisisse son nom (propositions de data/joueur.json, ou le sien) ; les répliques suivantes l'emploient.",
   "triggers": {
     "arrivee": {
       "once": true,
@@ -107,12 +107,14 @@
     },
     "agent_sortie": {
       "voice": "agent",
+      "timed": true,
       "strong": true,
       "cooldown": 20,
       "comment": "le héros va vers la barrière de portiques du hall : l'agent de sécurité l'interpelle (bulle au-dessus de l'agent ; le héros s'arrête le temps de la bulle). Voix « agent » (séance 57)."
     },
     "agent_stop": {
       "voice": "agent",
+      "timed": true,
       "strong": true,
       "cooldown": 0,
       "comment": "après la première interpellation, le héros force contre les portiques : l'agent n'est pas content ; le héros fait demi-tour de quelques pas (séance 59)"

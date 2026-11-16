@@ -73,6 +73,7 @@ export const config = {
     enabled: true, // le narrateur parle
     speed: 38, // lettres par seconde (effet machine à écrire)
     hold: 1.8, // temps affiché une fois le texte complet (s)…
+    timedLine: 3, // bulle de l'agent de sécurité : se ferme seule au bout de ce temps (s)
     holdPerChar: 0.035, // … plus ce temps par lettre (les longues répliques restent plus longtemps)
     minGap: 20, // écart minimal entre deux prises de parole (s), sauf moments forts
     lineCooldown: 600, // une même réplique ne revient pas avant (s)
@@ -247,6 +248,7 @@ export const TUNABLES = [
   { group: 'Accessibilité', key: 'access.brightness', label: 'Luminosité', min: 0.6, max: 1.4, step: 0.05, unit: '×' },
   { group: 'Accessibilité', key: 'access.contrast', label: 'Contraste', min: 0.6, max: 1.4, step: 0.05, unit: '×' },
   { group: 'Accessibilité', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
+  { group: 'Narrateur', key: 'narrator.timedLine', label: 'Bulle de l’agent : fermeture après', min: 1, max: 10, step: 0.5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.hold', label: 'Temps affiché après le texte', min: 0.5, max: 6, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.holdPerChar', label: '… plus, par lettre', min: 0, max: 0.1, step: 0.005, unit: 's' },
   { group: 'Narrateur', key: 'narrator.minGap', label: 'Écart minimal entre deux répliques', min: 0, max: 120, step: 5, unit: 's' },

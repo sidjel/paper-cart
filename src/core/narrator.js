@@ -136,6 +136,8 @@ export function narrate(n, data, trigger, p, force = false) {
     return n.line;
   }
   begin(n, best, voice, p);
+  // timed : la réplique se ferme seule au bout de p.timedLine s (écrite assez vite pour être lue avant).
+  if (tr.timed) n.timed = p.timedLine;
   return best;
 }
 
@@ -143,6 +145,8 @@ export function narrate(n, data, trigger, p, force = false) {
 function begin(n, line, voice, p) {
   n.answered = -1;
   n.line = line;
+  n.age = 0; // depuis le début de la réplique (s)
+  n.timed = 0;
   n.voice = voice;
   n.shown = 0;
   // Regard sans texte : seulement le temps affiché ; marche : jusqu'à l'arrivée (signalée par le jeu).
@@ -234,9 +238,15 @@ export function stepNarrator(n, data, dt, p) {
     return 0;
   }
   const len = n.line.text.length;
+  n.age += dt;
+  if (n.timed && n.age >= n.timed) {
+    end(n, data, p);
+    return 0;
+  }
   if (n.shown < len) {
     const before = Math.floor(n.shown);
-    n.shown = Math.min(len, n.shown + dt * p.speed);
+    const speed = n.timed ? Math.max(p.speed, len / (n.timed * 0.4)) : p.speed; // écrite en 40 % du temps au plus
+    n.shown = Math.min(len, n.shown + dt * speed);
     if (n.shown >= len) n.hold = holdFor(n.line.text, p);
     return Math.floor(n.shown) - before;
   }

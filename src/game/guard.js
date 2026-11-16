@@ -87,8 +87,9 @@ export function createGuardWiring(game) {
       head.y = fy - HEAD * s;
       const p = state.stopT > 0 || game.talking() ? 'stop' : 'idle';
       if (p !== pose) {
-        view.idle.hidden = p !== 'idle';
-        view.stop.hidden = p !== 'stop';
+        // Par l'opacité de deux calques qui restent : rien n'est redessiné (sinon il clignote sur téléphone).
+        view.idle.style.opacity = p === 'idle' ? '1' : '0';
+        view.stop.style.opacity = p === 'stop' ? '1' : '0';
         pose = p;
       }
       view.box.style.transform = `translate3d(${fx - data.anchor[0]}px, ${fy - data.anchor[1]}px, 0) scale(${s})`;

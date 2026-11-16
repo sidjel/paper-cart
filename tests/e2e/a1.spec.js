@@ -1058,6 +1058,14 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   const frozen = (await hero(page)).x;
   await page.waitForTimeout(300);
   expect((await hero(page)).x).toBe(frozen); // figé pendant la bulle, même en appuyant
+  await page.mouse.click(200, 300); // un toucher dans la scène ne le fait pas marcher non plus
+  await page.waitForTimeout(300);
+  expect((await hero(page)).x).toBe(frozen);
+  await page.keyboard.up('ArrowLeft');
+  const t0 = Date.now();
+  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 4000 }); // fermée seule, sans toucher
+  expect(Date.now() - t0).toBeLessThan(3500);
+  await page.keyboard.down('ArrowLeft');
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
   // Il force contre la barrière : « Stop ! », et il fait demi-tour de quelques pas. Il ne passe jamais.
   await expect.poll(said, { timeout: 10000 }).toMatch(/agent: Stop\s?! De l.autre côté/);

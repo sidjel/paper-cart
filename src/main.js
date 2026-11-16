@@ -607,6 +607,7 @@ function onTarget(cx, cy) {
   if (!sm.is('play')) return;
   voices.acted();
   if (scan.active) return; // pendant une action (scan), le héros ne se déplace pas
+  if (guard.holding()) return; // l'agent de sécurité parle (ou le héros fait demi-tour) : il ne bouge pas
   if (heroAside()) {
     voices.skip(); // toucher : la réplique passe
     return;
@@ -643,7 +644,7 @@ function walkTo(target) {
 // Double toucher (ou double clic) sur un produit : le personnage va se placer et le scanne à
 // l'arrivée (logique dans core/scan.js). Ailleurs : rien de plus que « aller là ».
 function onDoubleTap(cx, cy) {
-  if (!sm.is('play') || scan.active || heroAside()) return;
+  if (!sm.is('play') || scan.active || heroAside() || guard.holding()) return;
   stage.clientToStage(cx, cy, tmpStage);
   const wx = stageToWorldX(proj, tmpStage.x);
   const margin = config.input.doubleTapMargin;

@@ -24,9 +24,9 @@ export function createPlaceView(container, place, images, common, here, proj, co
     parent: acteurs,
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
-  // L'agent de sécurité : ses deux poses (repos, geste d'arrêt) dans une seule boîte, qui garde son calque
-  // (montrer une image et cacher l'autre ne crée ni ne défait de calque : sinon, clignotement sur téléphone,
-  // mesuré séance 59). Il ne change pas de profondeur : il est rangé avec les objets du décor (pas d'égalité
+  // L'agent de sécurité : ses deux poses (repos, geste d'arrêt) dans une seule boîte. Chaque pose a son
+  // propre calque, qui reste : on passe de l'une à l'autre par l'opacité, sans rien redessiner (sinon il
+  // clignote sur téléphone : séances 59 et 60). Il ne change pas de profondeur : il est rangé avec les objets du décor (pas d'égalité
   // de niveau avec un portique).
   const g = place.guard;
   const guard = g ? createGuardBox(images, g, acteurs) : null;
@@ -80,7 +80,7 @@ function createGuardBox(images, g, parent) {
   };
   const idle = pose(g.image);
   const stop = pose(g.stopImage);
-  stop.hidden = true;
+  stop.style.opacity = '0';
   parent.appendChild(box);
   return { box, idle, stop };
 }

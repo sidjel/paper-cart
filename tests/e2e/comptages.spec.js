@@ -177,7 +177,8 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
 
 // Clignotement sur téléphone (séance 59) : un élément qui gagne ou perd son calque graphique est
 // redessiné. Pendant la scène de l'agent (interpellation, « Stop ! », poses), ni l'agent ni les
-// portiques ne doivent gagner ou perdre leur calque.
+// portiques ne doivent gagner ou perdre leur calque, ni être redessinés (séance 60 : l'agent était
+// redessiné à chaque changement de pose, quand sa bulle s'ouvrait et se fermait).
 test('hall : l’agent et les portiques gardent leur calque pendant la scène de l’agent', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(60_000);
@@ -193,11 +194,11 @@ test('hall : l’agent et les portiques gardent leur calque pendant la scène de
   await cdp.send('DOM.enable');
   const { root } = await cdp.send('DOM.getDocument');
   const watched = new Set();
-  for (const sel of ['.guard', '.prop']) {
+  for (const sel of ['.guard', '.guard-pose', '.prop']) {
     const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
     for (const nodeId of nodeIds) watched.add((await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId);
   }
-  expect(watched.size).toBe(5); // l'agent et les 4 portiques
+  expect(watched.size).toBe(7); // l'agent (boîte et deux poses) et les 4 portiques
   let sig = null;
   let switches = 0;
   let tracking = false;
@@ -206,6 +207,14 @@ test('hall : l’agent et les portiques gardent leur calque pendant la scène de
     const s = e.layers.filter((l) => watched.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
     if (tracking && s !== sig) switches++;
     sig = s;
+  });
+  const layerOf = new Map(); // calque → élément
+  let repaints = 0;
+  cdp.on('LayerTree.layerTreeDidChange', (e) => {
+    for (const l of e.layers ?? []) if (watched.has(l.backendNodeId)) layerOf.set(l.layerId, l.backendNodeId);
+  });
+  cdp.on('LayerTree.layerPainted', (e) => {
+    if (tracking && layerOf.has(e.layerId)) repaints++;
   });
   await cdp.send('LayerTree.enable');
   await page.waitForTimeout(2500); // l'agent va à sa place
@@ -219,6 +228,7 @@ test('hall : l’agent et les portiques gardent leur calque pendant la scène de
     await page.waitForTimeout(700);
     await page.keyboard.up(k);
   }
-  console.log('Hall, changements de calque (agent, portiques) :', switches);
+  console.log('Hall, agent et portiques : changements de calque', switches, ', redessins', repaints);
   expect(switches).toBe(0);
+  expect(repaints).toBe(0);
 });

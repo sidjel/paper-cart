@@ -390,6 +390,22 @@ describe('narrateur : machine à écrire', () => {
   });
 });
 
+describe('réplique qui se ferme seule (timed)', () => {
+  it('une longue réplique est écrite en entier puis se ferme au bout de timedLine s, sans toucher', () => {
+    const p = { ...P, timedLine: 3 };
+    const text = 'x'.repeat(126); // à 40 lettres/s, il faudrait 3,2 s rien que pour l'écrire
+    const data = { triggers: { a: { voice: 'agent', timed: true } }, lines: [{ id: 'a1', trigger: 'a', text }] };
+    const n = createNarrator();
+    expect(narrate(n, data, 'a', p)).not.toBe(null);
+    for (let t = 0; t < 1.3; t += 0.05) stepNarrator(n, data, 0.05, p);
+    expect(n.shown).toBe(text.length); // écrite en 40 % du temps
+    for (let t = 1.3; t < 2.9; t += 0.05) stepNarrator(n, data, 0.05, p);
+    expect(n.line).not.toBe(null);
+    for (let t = 2.9; t < 3.1; t += 0.05) stepNarrator(n, data, 0.05, p);
+    expect(n.line).toBe(null); // fermée
+  });
+});
+
 describe('répliques du narrateur (données)', () => {
   it('chaque réplique a un moment connu, un identifiant unique et le préfixe [TEMP]', () => {
     const ids = new Set();
