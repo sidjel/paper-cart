@@ -4,8 +4,11 @@ import limites from './comptages-limites.json' with { type: 'json' };
 // Test des comptages : on compte ce qui ne dépend pas de la machine (le navigateur de test
 // n'a pas de carte graphique, ses temps ne veulent rien dire), pendant un tour du banc d'essai.
 // Le test échoue si une modification dépasse une limite du lieu (tests/e2e/comptages-limites.json).
+// Un lieu sans limites inscrites (le hall, séance 56) est seulement mesuré : les valeurs sont proposées
+// à l'auteur, qui décide des limites.
 
-test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, info) => {
+for (const lieu of ['rayon-essai', 'accueil'])
+test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(120_000);
   // Compteurs installés avant le chargement du jeu.
@@ -35,7 +38,7 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await page.goto('./?lieu=rayon-essai'); // les limites sont celles du rayon (la partie commence dans le hall)
+  await page.goto(`./?lieu=${lieu}`);
   // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
@@ -115,10 +118,10 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
     pixelReads: c.pixelReads,
     propLayerSwitches,
   };
-  console.log('Comptages mesurés :', JSON.stringify(mesures));
+  console.log(`Comptages mesurés (${lieu}) :`, JSON.stringify(mesures));
   test.info().annotations.push({ type: 'comptages', description: JSON.stringify(mesures) });
 
-  const lim = limites['rayon-essai'];
+  const lim = limites[lieu] ?? {};
   for (const [k, v] of Object.entries(lim)) {
     if (k === 'comment') continue;
     expect.soft(mesures[k], `${k} : ${mesures[k]} (limite ${v})`).toBeLessThanOrEqual(v);
