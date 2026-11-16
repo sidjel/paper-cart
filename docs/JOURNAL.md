@@ -39,7 +39,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - « Une règle à un seul endroit » : les règles de code sont dans le `CLAUDE.md` du dossier (lu automatiquement) ; `ARCHITECTURE.md` les résume et y renvoie.
 - La bulle de l'agent (3 s, séance 60) suit désormais la règle générale (durée selon le texte). Le code est à changer.
 
-**Vérifié** : 172 tests de logique (dont 5 nouveaux pour la boucle et 1 pour l'index des règles), Knip. Aucun code de jeu modifié. Écarts aux nouvelles règles : `SUIVI.md` (séance 64).
+**Vérifié** : 177 tests de logique (dont 5 nouveaux pour la boucle et 1 pour l’index des règles), Knip. Aucun code de jeu modifié. Écarts aux nouvelles règles : `SUIVI.md` (séance 64).
 
 **Suite** : séance B, le chantier son, puis les profils validés.
 
