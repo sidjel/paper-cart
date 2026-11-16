@@ -16,6 +16,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 61 — 16/11/2026 — Un seul mécanisme de poses ; règle « un personnage = un calque »
+
+**Demande de l'auteur** : l'agent clignote encore. Son diagnostic : le héros a un seul calque et ses poses sont cachées ou montrées à l'intérieur ; l'agent (séance 60) avait un calque par pose, que Chrome ne prépare pas quand il est invisible. Corriger avec le même code que le héros, remplacer l'essai, écrire la règle. Et le demi-tour du héros seulement après la fin de la bulle de l'agent.
+
+**Fait** :
+- **`scene/poses.js`** : un seul mécanisme de poses pour tous les personnages (le héros l'utilise, l'agent aussi). Une image par pose, à l'intérieur du conteneur, une seule visible (`hidden`), sans calque propre.
+- **Trouvé en mesurant** : la boîte de l'agent n'avait pas de taille, et le navigateur donnait alors **un calque à chaque pose**. C'était probablement déjà la cause à la séance 59. Elle a maintenant la taille du dessin, comme le héros : 0 calque de pose.
+- **Essai remplacé** : pendant la scène de l'agent (le héros marche, l'agent lève puis baisse le bras), aucun changement de pose ne crée de calque ni n'en change, pour le héros comme pour l'agent. L'essai de la séance 60 (« zéro redessin ») est retiré : il visait le mauvais objectif.
+- **Règle écrite** (décision de l'auteur) dans `docs/ARCHITECTURE.md` §4 et `src/scene/CLAUDE.md`.
+- Le héros fait demi-tour **une fois la bulle « Stop ! » fermée**.
+
+**Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il a disparu, l'auteur valide.
+
+---
+
 ## Séance 60 — 16/11/2026 — Agent : plus de clignotement à la bulle ; héros immobile ; bulle de 3 s
 
 **Demande de l'auteur** : l'agent clignote quand sa bulle apparaît et quand elle disparaît ; le héros ne doit pas bouger tant que la bulle est ouverte ; la bulle se ferme seule au bout de 3 s.
@@ -102,39 +119,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Le panneau d'affichage est placé du côté de l'agent.
 
 **Suite proposée** : vos réponses aux questions (hôtesse, « !! », pensée), puis la validation d'A6.
-
----
-
-## Séance 56 — 16/11/2026 — A6 (3/3) : l'agent de sécurité, les portiques, la pluie derrière les vitres
-
-**Demande de l'auteur** : « 1,a. 2, oui. 3, Oui. 4, … la petite animation de pluie au niveau des baies vitrées. » On peut toujours entrer dans le rayon sans Scanette (A). Mesurer les comptages du hall et proposer des limites. Faire A6 (3/3). Ajouter la pluie.
-
-**Jouable maintenant** :
-- Dans le hall, un **agent de sécurité** (forme provisoire, uniforme bleu marine) attend près des portes. Quand le héros va vers le fond, du côté des portiques, l'agent se place devant **le portique le plus proche** et suit le héros d'un portique à l'autre. Le héros ne passe pas.
-- À la première tentative, le haut-parleur annonce « Les sorties sont réservées aux clients ayant réglé leurs achats. » [TEMP]. Le héros pense ensuite « Hum… étrange… » [TEMP], dans une bulle, sans mise en scène.
-- Quand le héros s'éloigne, l'agent retourne à son poste. Après un retour, une nouvelle tentative fait revenir l'annonce, au plus une fois toutes les 25 s.
-- Les portiques sont un **obstacle**, comme un présentoir : le héros les contourne ou glisse le long, sans saut. Il les longe vers le présentoir sans déclencher l'annonce : seule une poussée vers le fond (clavier, manette) ou un toucher sur les portiques compte comme une tentative.
-- **De la pluie** tombe derrière les portes vitrées : deux voiles de traits en biais, à deux vitesses. Elle s'arrête avec « réduire les animations ».
-
-**Vérifié** :
-- Tests de logique : 167 (dont 8 nouveaux pour l'agent), avec Knip.
-- Tests navigateur sur PC et en téléphone simulé, sans erreur console : nouveau test A6 (l'agent va au portique du milieu, le héros est retenu, l'annonce puis la pensée, le retour au poste).
-- Captures `a6-pc-agent.png` et `a6-telephone-agent.png`.
-- Comptages du rayon inchangés. Hall mesuré pour la première fois (voir les limites proposées). Mémoire stable après 5 allers-retours.
-
-**À vérifier par l'auteur** :
-- sur le téléphone, la fluidité dans le hall avec la pluie (DBG) ;
-- si l'agent se voit assez derrière le héros ;
-- au doigt, un toucher sur un portique.
-
-**Décisions prises seul** (détails) :
-- L'obstacle des portiques avance un peu dans le hall, pour que l'agent ne soit pas caché par le héros. On ne peut donc plus longer le mur du fond des portes jusqu'au présentoir : on passe devant les portiques. Deux essais du présentoir ont été adaptés en conséquence.
-- Si le héros fonce aux portiques pendant l'accueil du haut-parleur, la pensée « Hum… étrange… » peut être sautée (l'accueil et ses pensées passent avant).
-- L'agent est un peu plus grand que le héros.
-- Sa vitesse est réglable : ⚙ → Marche → « Agent de sécurité : vitesse ».
-- La pluie figée du décor est remplacée par la pluie animée.
-- L'ordre devant/derrière entre l'agent et le héros se fait sans déplacer d'élément dans la page (le comptage l'a demandé).
-
-**Suite proposée** : faire valider A6 (après votre test), puis A7.
 
 ---

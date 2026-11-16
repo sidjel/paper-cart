@@ -45,6 +45,12 @@
 - **Trois systèmes indépendants** ✅ : position (`core/movement`), projection (`scene/projection`), animation (`scene/character`, `animation`).
 - **Calques déclarés** dans le lieu (`contains`, `hiddenBy`), parallaxe par calque. Objets contournables : **point de référence de profondeur** (`depthRef`) → ordre d'affichage.
 - **Les objets que l'on contourne ont leur propre calque en permanence** (`.props-layered .prop`) : sinon le navigateur les change de calque quand le personnage passe derrière et ils clignotent (mesuré, séance 27). Vérifié par le test des comptages (`propLayerSwitches = 0`).
+- **Règle stricte : un personnage ou un objet animé = un seul calque**, sur son conteneur (séance 61, décision de l'auteur) :
+  - ses poses ou images sont **à l'intérieur**, une seule visible à la fois (`hidden`), **sans `will-change` ni calque propre** ; le conteneur a **la taille du dessin** (sans taille, le navigateur donnait un calque à chaque pose de l'agent : mesuré) ; un seul mécanisme pour tous les personnages : `scene/poses.js` ;
+  - **jamais un calque par pose**, et **jamais un calque séparé qui passe de l'opacité 0 à 1** (un calque caché n'est pas préparé : le téléphone le dessine à froid quand il apparaît, d'où un trou d'une image ; l'agent clignotait ainsi, séances 59 et 60) ;
+  - un fondu d'un personnage entier reste permis, sur son propre calque ;
+  - les objets que l'on contourne gardent leur calque fixe (ci-dessus) : c'est la même règle, un calque par objet.
+  - Vérifié par le test des comptages (« les changements de pose ne créent ni ne changent aucun calque »).
 - Caméra : toute la hauteur toujours visible, un écran plus allongé montre plus de largeur (séance 6, validé séance 7). *Remplace le choix « remplir / tout montrer » du plan initial.*
 - Images : SVG préparés **une fois au chargement** à la taille d'affichage (densité plafonnée, réglable), décodés avant l'affichage. Animations décrites dans les données (1 image comme 10).
 - Pas de `filter`, flou ou grande ombre CSS sur ce qui bouge ✅.

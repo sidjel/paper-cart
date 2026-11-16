@@ -2,6 +2,40 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 56 — 16/11/2026 — A6 (3/3) : l'agent de sécurité, les portiques, la pluie derrière les vitres
+
+**Demande de l'auteur** : « 1,a. 2, oui. 3, Oui. 4, … la petite animation de pluie au niveau des baies vitrées. » On peut toujours entrer dans le rayon sans Scanette (A). Mesurer les comptages du hall et proposer des limites. Faire A6 (3/3). Ajouter la pluie.
+
+**Jouable maintenant** :
+- Dans le hall, un **agent de sécurité** (forme provisoire, uniforme bleu marine) attend près des portes. Quand le héros va vers le fond, du côté des portiques, l'agent se place devant **le portique le plus proche** et suit le héros d'un portique à l'autre. Le héros ne passe pas.
+- À la première tentative, le haut-parleur annonce « Les sorties sont réservées aux clients ayant réglé leurs achats. » [TEMP]. Le héros pense ensuite « Hum… étrange… » [TEMP], dans une bulle, sans mise en scène.
+- Quand le héros s'éloigne, l'agent retourne à son poste. Après un retour, une nouvelle tentative fait revenir l'annonce, au plus une fois toutes les 25 s.
+- Les portiques sont un **obstacle**, comme un présentoir : le héros les contourne ou glisse le long, sans saut. Il les longe vers le présentoir sans déclencher l'annonce : seule une poussée vers le fond (clavier, manette) ou un toucher sur les portiques compte comme une tentative.
+- **De la pluie** tombe derrière les portes vitrées : deux voiles de traits en biais, à deux vitesses. Elle s'arrête avec « réduire les animations ».
+
+**Vérifié** :
+- Tests de logique : 167 (dont 8 nouveaux pour l'agent), avec Knip.
+- Tests navigateur sur PC et en téléphone simulé, sans erreur console : nouveau test A6 (l'agent va au portique du milieu, le héros est retenu, l'annonce puis la pensée, le retour au poste).
+- Captures `a6-pc-agent.png` et `a6-telephone-agent.png`.
+- Comptages du rayon inchangés. Hall mesuré pour la première fois (voir les limites proposées). Mémoire stable après 5 allers-retours.
+
+**À vérifier par l'auteur** :
+- sur le téléphone, la fluidité dans le hall avec la pluie (DBG) ;
+- si l'agent se voit assez derrière le héros ;
+- au doigt, un toucher sur un portique.
+
+**Décisions prises seul** (détails) :
+- L'obstacle des portiques avance un peu dans le hall, pour que l'agent ne soit pas caché par le héros. On ne peut donc plus longer le mur du fond des portes jusqu'au présentoir : on passe devant les portiques. Deux essais du présentoir ont été adaptés en conséquence.
+- Si le héros fonce aux portiques pendant l'accueil du haut-parleur, la pensée « Hum… étrange… » peut être sautée (l'accueil et ses pensées passent avant).
+- L'agent est un peu plus grand que le héros.
+- Sa vitesse est réglable : ⚙ → Marche → « Agent de sécurité : vitesse ».
+- La pluie figée du décor est remplacée par la pluie animée.
+- L'ordre devant/derrière entre l'agent et le héros se fait sans déplacer d'élément dans la page (le comptage l'a demandé).
+
+**Suite proposée** : faire valider A6 (après votre test), puis A7.
+
+---
+
 ## Séance 55 — 16/11/2026 — A6 (2/3) : la partie commence dans le hall, le présentoir y est
 
 **Demande de l'auteur** : « Reprends là où tu en étais » → option recommandée, A6 (2/3).
