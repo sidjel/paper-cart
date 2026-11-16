@@ -7,12 +7,12 @@
 
 ## 1. Résumé (à lire à chaque fois)
 
-- **Trois couches, sens unique** : `src/core/` (logique pure, sans page web, testée sous Node) ← `scene/`, `ui/`, `input/`, `audio/` (affichage, entrées, son) ← `src/main.js` (assemblage, boucle, rendu).
+- **Trois couches, sens unique** : `src/core/` (logique pure, sans page web, testée sous Node) ← `scene/`, `ui/`, `input/`, `audio/` (affichage, entrées, son) ← `src/main.js` avec `src/game/` et `src/debug/` (assemblage, boucle, rendu).
 - **Rendu** en éléments de page (DOM + CSS), seulement `transform` et `opacity` animés. Canevas **au chargement** seulement.
 - **Une boucle**, logique à **pas fixe** (60 Hz), délais liés au temps de jeu (jamais `setTimeout`), une **seule machine à états**.
 - **Toutes** les valeurs réglables dans `src/config.js` et le panneau ⚙ ; tout le contenu en JSON dans `src/data/`.
 - **Rien n'est créé pendant le jeu** (éléments, images, canevas) ; tout est préparé au chargement. *Exception connue, à corriger : les cartes créées au moment du scan (audit séance 50, point 8).*
-- Aucune dépendance au jeu ; outils de développement : Vite, Vitest, Playwright ✅. Aucun appel réseau.
+- Aucune dépendance au jeu ; outils de développement : Vite, Vitest, Playwright, Knip ✅. Aucun appel réseau.
 - Une logique de jeu, même petite, va dans `core/` avec ses tests.
 - Ne rien construire « pour plus tard » ✅ ; un fichier d'environ 300 lignes est un **repère** : découper quand il mélange plusieurs rôles ✅.
 
@@ -23,6 +23,8 @@
 | `src/core/` | Logique pure : `state` (machine à états), `stepper` (pas fixe), `walkmask`, `pathfinding`, `movement` (marche), `scan` (scanner, double toucher), `cards` (cartes, Panier), `gear` (Scanette, panier, capacité ; A5), `world` (état du monde par lieu : produits, objets à prendre — seule source, la scène l'affiche), `focus` (qui a la main), `places` (sorties d'un lieu, fondu du changement de lieu), `intro` (texte sur noir après « Commencer »), `names` (nom du joueur dans les répliques), `dizzy` (le tournis), `narrator` (les voix — haut-parleur, apartés du héros avec réponses et confiance, petits regards caméra, pensées, conversations avec le joueur que rien n'interrompt, moments importants jamais perdus, historique : quand parler, priorités, enchaînements, machine à écrire, inactivité ; sans hasard). **Diagnostic seulement** : `bench`, `quicktest`, `departs` (points de départ pour tester vite). |
 | `src/scene/` | `placeView` (tout ce qui affiche un lieu, et de quoi le défaire), scène et calques (`stage`), `camera`, `projection` (monde → scène), `depth` (ordre d'affichage), `character` + `animation` (personnage, objets tenus en main dessinés à part : données `held` et `hands`), `props` (objets du décor), `products` (produits, effets du scan), `dust`, `speakers` (ondes sous le haut-parleur qui parle), `assets` (préparation des images, libération en quittant un lieu), `targetMarker`, `debugMask` |
 | `src/ui/` | `hud` (boutons, aide, pause), `settings` (panneau ⚙), `cards` (cartes, Panier, carte qui vole), `narrator` (bande sous le haut-parleur qui parle, bulle du héros qui le suit, deux réponses), `aside` (mise en scène de l'aparté : bandes, bords assombris), `journal` (historique des dialogues, dans la Pause), `title` (écran titre), `playerOptions` (options du joueur depuis le titre : sous-ensemble de TUNABLES, sans réglages de développement), `confirm` (fenêtre Oui / Non), `intro` (texte sur noir), `namePicker` (choix du nom pendant la rencontre), `dizzyStars` (étoiles du tournis). **Diagnostic seulement** : `diagnostic`, `bench`, `quicktest`, `speedindex` |
+| `src/game/` | Assemblage, par sujet (sortis de `main.js`, séance 54) : `places` (gestionnaire de lieux : charger, quitter, sorties, fondu), `voices` (haut-parleur, pensées, apartés, rencontre, choix du nom, tournis : relie `core/narrator` à l'affichage et au jeu). Chacun reçoit un objet `game` qui liste ce qu'il a le droit de voir et de faire. |
+| `src/debug/` | **Diagnostic seulement** : `measure` (DBG, banc d'essai, test rapide), `departs` (points de départ). |
 | `src/input/` | `keyboard`, `pointer` (souris et doigt, double toucher), `gamepad` → `input` (une intention de déplacement + des actions abstraites) |
 | `src/audio/` | `audio` (seul accès au son : bus, volumes, sons synthétisés), `music` (musique jouée depuis un JSON) |
 | `src/data/` | `places/rayon-essai.json`, `places/accueil.json` (lieux : images, calques, zone de marche, objets, produits, sorties, parcours de mesure), `characters/heros.json`, `products.json`, `objects.json` (objets portés : Scanette, panier), `narrator.json` (moments et répliques), `intro.json`, `joueur.json` (noms du joueur), `departs.json` (points de départ), `music/` |
@@ -57,7 +59,7 @@
 
 ## 6. Vérifications 🔎
 
-- `npm test` : logique et données (Vitest, sous Node). `npm run test:e2e` : navigateur, tailles PC et téléphone simulé (Oppo Reno 2, 20:9), **aucune erreur ni alerte console**.
+- `npm test` : logique, données et garde-fous (Vitest, sous Node : `tests/unit/regles.test.js`), puis Knip (code jamais utilisé). `npm run test:e2e` : navigateur, tailles PC et téléphone simulé (Oppo Reno 2, 20:9), **aucune erreur ni alerte console**.
 - **Test des comptages** (`tests/e2e/comptages.spec.js`, limites dans `comptages-limites.json`) : éléments, calques, images, surface affichée, éléments et canevas créés en jeu, lectures de pixels, bascules de calque des objets. Une limite ne se relève qu'avec l'accord de l'auteur.
 - Publication (`.github/workflows/deploy.yml`) : tous les tests, puis GitHub Pages. Un test qui échoue bloque la publication.
 - Le navigateur de test n'a pas de carte graphique : **ses temps ne décident rien**. Seul le téléphone compte (CLAUDE.md, « Fluidité »).
@@ -68,17 +70,17 @@ Ils ne changent rien au jeu normal. Aujourd'hui (≈ 20 % du code) :
 
 | Outil | Fichiers | Statut |
 |---|---|---|
-| Diagnostic DBG (F3), rapport copiable | `ui/diagnostic.js` | Exigé par CLAUDE.md |
+| Diagnostic DBG (F3), rapport copiable | `ui/diagnostic.js`, `debug/measure.js` | Exigé par CLAUDE.md |
 | Banc d'essai + interrupteurs d'essai | `core/bench.js`, `ui/bench.js` | Exigé par CLAUDE.md |
 | Test rapide (variantes alternées, verdict) | `core/quicktest.js`, `ui/quicktest.js`, `ui/speedindex.js` | Sert à comparer deux versions sur le téléphone |
-| Points de départ (tests rapides : ⚙ → Départ, lien `?depart=<id>`) | `core/departs.js`, `data/departs.json`, `main.js` | Demandé par l'auteur (séance 48) ; recalculés à chaque chargement, pas une sauvegarde |
+| Points de départ (tests rapides : ⚙ → Départ, lien `?depart=<id>`) | `core/departs.js`, `data/departs.json`, `debug/departs.js` | Demandé par l'auteur (séance 48) ; recalculés à chaque chargement, pas une sauvegarde |
 | Fonctions d'essai `window.paperCart` | `main.js` | Présentes aussi en ligne (utiles au diagnostic et aux tests), sans danger |
 
 Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'auteur) : le test rapide le remplace. La campagne « rayon de devant » (DEVANT2) aussi (séance 47, décision de l'auteur) : le rayon de devant est désormais réduit à sa moitié haute.
 
 ## 8. Points connus à reprendre (quand on y travaille)
 
-- `src/main.js` (≈ 1370 lignes) mélange l'assemblage, le rendu, les lieux et le branchement des outils de mesure : découpage prévu après les deux séances de remise en ordre, avant A7 (accord de l'auteur requis).
+- `src/main.js` : 932 lignes après le découpage en 3 étapes de la séance 54 (1 370 avant). Il garde l'assemblage, les règles de scan et de panier plein, le traitement des commandes, le rendu, la boucle et les fonctions de test. Encore au-dessus de la limite de 600 lignes (exception datée dans `tests/unit/regles.test.js`) : la suite du découpage est à décider avec l'auteur.
 - Les chaînes de texte créées à chaque image pour placer les éléments sont un coût accepté du rendu en éléments de page (calcul mesuré : 0,67 ms par image en moyenne sur le téléphone).
 - Les dessins provisoires SVG ont été produits par des scripts non gardés : ils seront remplacés par ceux de l'auteur (prototype D).
 
@@ -97,7 +99,7 @@ A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des 
 ## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
 
 État réel 🔎 (séance 51) :
-- ✅ construit : deux lieux (`rayon-essai`, `accueil`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, `loadPlace` / `unloadPlace` dans `main.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG.
+- ✅ construit : deux lieux (`rayon-essai`, `accueil`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, gestionnaire dans `src/game/places.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG.
 - ⏳ pas encore : préchargement des voisins (à décider après mesure sur le téléphone) ; comptages et banc par lieu ; banc qui traverse les lieux ; contrôle de la mémoire après plusieurs allers-retours dans le test des comptages (séance 2 de remise en ordre). Un test navigateur vérifie déjà que le nombre d'images ne grimpe pas après 3 allers-retours.
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).

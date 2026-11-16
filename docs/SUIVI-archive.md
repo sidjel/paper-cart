@@ -187,3 +187,10 @@ Déplacés tels quels depuis `docs/SUIVI.md` à la séance 51, sans rien perdre.
 | Flou réel optionnel des bords (rencontre) | 52 | ✅ | Gardé, désactivé par défaut, seule exception des garde-fous (choix A, séance 53). |
 | Les 59 points 👀 : l'auteur m'a laissé trancher | 53 | ✅ | 53 validés, 3 à mesurer (🔧), 3 restent avec A6. |
 
+### Séance 54
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Knip (code jamais utilisé) | 53 | ✅ | Installé (accord de l'auteur), liste vidée (4 « export » inutiles), ajouté à `npm test`. |
+| Exception de taille pour `style.css` | 53 | ✅ | Approuvée par l'auteur (choix A). |
+| Découpage de `main.js` en 3 étapes | 53 | ✅ | `src/debug/` (mesures, départs), `src/game/places.js`, `src/game/voices.js` ; 1 370 → 932 lignes ; aucun changement de comportement. |
+

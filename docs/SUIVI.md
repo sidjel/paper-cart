@@ -66,9 +66,9 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | 8. Éléments créés en plein jeu au moment du scan (carte du Panier, carte qui vole, icône d'objet) | 🔧 | Préparer les cartes au chargement ; ajouter un scan au banc. Petit à moyen. |
 | 9. Animations CSS qui continuent en pause et sous les menus | 🔧 | Les figer hors du jeu. Petit. |
 | 10. La rencontre est chargée en effets (un calque par mot, 4 bandes, lueur) | 🔧 | Mesurer d'abord sur le téléphone (DBG pendant la rencontre). |
-| 11. `main.js` trop gros, 7 rôles | 🔧 | Trois déplacements sans changer le comportement. Moyen. |
+| 11. `main.js` trop gros | 🔧 | Séance 54 : découpé en 3 étapes (1 370 → 932 lignes). Reste au-dessus de 600 : suite à décider (règles de scan et de panier plein, traitement des commandes, fonctions de test). |
 | 12. Logique de jeu hors de `core/` (échange du panier plein, marche de la rencontre, règles de la grande carte) | 🔧 | Petit à moyen. |
-| 13. Code mort (`setTarget`, `open_`, `sprite.stats`, `dust.counter`) | 🔧 | Petit. |
+| 13. Code mort (`setTarget`, `open_`, `sprite.stats`, `dust.counter`) | 🔧 | Séance 54 : Knip installé, aucune fonction partagée inutilisée. Ces 4 restes ne sont pas vus par Knip (membres d'objets, ou utilisés par les tests seulement). Petit. |
 | 14. Écarts documents / code (ARCHITECTURE, SUIVI, tests dans un seul fichier) | 🔧 | Petit. |
 | 15. Images de plus de 4 096 pixels réels réduites sans prévenir | ❓ | Règle à décider avant de dessiner le vrai hall. |
 
@@ -76,9 +76,12 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Séance 2 de remise en ordre (garde-fous automatiques) | 52 | ✅ | Séance 53 : garde-fous dans npm test, mémoire après changements de lieu (fuite corrigée), sécurités Claude Code, skill audit. |
-| Exception de taille pour `src/style.css` (1 198 lignes > 600) | 53 | ❓ | Proposée, en attente de l'accord de l'auteur (ou découper le CSS par sujet). |
-| Knip (repérer le code mort) : nouvelle dépendance de développement | 53 | ❓ | Accord de l'auteur demandé. |
-| Découpage de `main.js` en 2 ou 3 étapes, avant A7 | 53 | ❓ | Proposé (JOURNAL, séance 53), en attente de l'accord de l'auteur. |
+
+### Séance 54
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Découper le CSS par sujet (`style.css`, 1 198 lignes) | 54 | 🔧 | Exception de taille approuvée par l'auteur en attendant. |
+| Suite du découpage de `main.js` (932 lignes, limite 600) | 54 | ❓ | Proposition : règles de scan et de panier plein dans un fichier à part de `src/game/`, puis traitement des commandes. Accord de l'auteur requis. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.

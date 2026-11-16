@@ -2,6 +2,55 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 50 (suite) — Audit, points 2 et 4 : construire, quitter et reconstruire un lieu ; images libérées
+
+**Fait** (aucun changement visible pour le joueur ; premier pas d'A6) :
+- `scene/placeView.js` : tout ce qui est construit pour afficher un lieu (scène, objets, produits, effets), et de quoi le défaire.
+- `main.js` : `loadPlace` / `unloadPlace`. Le héros, sa poussière et le repère passent d'un lieu à l'autre.
+- Images : celles du lieu sont libérées en partant (`releaseImages`) ; celles du héros et des produits restent chargées.
+- Le rappel de la Scanette (x = 900) est passé dans les données du lieu. Un lieu sans étagère ni rayon de devant ne fait plus planter le banc.
+
+**Vérifié** :
+- 147 tests de logique, 78 tests navigateur, sans erreur console.
+- Nouveau test : quitter le lieu et y revenir 3 fois → mêmes images en mémoire, même nombre d'éléments, produits scannés toujours scannés, le héros marche.
+- Comptages inchangés (84 éléments, 38 images, 5,57 Mpx).
+
+**À vérifier par l'auteur** : banc d'essai sur le téléphone, comparé à la version `2aa4b77` (la construction de la scène a été réorganisée ; le résultat doit être le même).
+
+**Pas encore fait (avec A6)** : l'état « transition » et le fondu, les sorties dans les données, le préchargement des lieux voisins, le banc qui traverse plusieurs lieux.
+
+**Reste de l'audit** : point 6 (chemin au doigt).
+
+---
+
+## Séance 50 (suite) — Audit, point 3 : un seul état du monde
+
+**Fait** (aucun changement visible pour le joueur) :
+- `core/world.js` (testé) : l'état de chaque lieu (produits : place, scanné ; objets à prendre) est créé à la première visite et retrouvé tel quel ensuite.
+- L'affichage des produits (`scene/products.js`) ne garde plus sa propre copie : il montre cet état.
+- L'échange du panier plein passe par une fonction testée (`moveProduct`).
+- Une carte retient son lieu d'origine.
+
+**Vérifié** : 147 tests de logique (dont : « en revenant dans un lieu, un produit scanné est toujours scanné ») ; 77 tests navigateur, sans erreur console ; comptages inchangés.
+
+**Reste de l'audit** : points 2 + 4 (premier pas d'A6), puis 6.
+
+---
+
+## Séance 50 (suite) — Audit, point 5 : « qui a la main ? »
+
+**Fait** (aucun changement visible pour le joueur) :
+- La règle de priorité des commandes est écrite une seule fois, dans `core/focus.js`, avec ses tests : question Oui / Non, puis grande carte, puis Panier ; choix du nom, puis réponse attendue, puis conversation, puis héros libre.
+- Le traitement des touches (`main.js`) s'en sert au lieu de conditions répétées.
+
+**Reporté** : l'état « transition » sera ajouté avec A6, quand il servira (règle : rien de construit pour plus tard).
+
+**Vérifié** : 144 tests de logique, 77 tests navigateur, sans erreur console.
+
+**Reste de l'audit** : points 3, 2 + 4, 6.
+
+---
+
 ## Séance 50 (suite) — Correction n° 1 de l'audit : la rencontre ne se cache plus sous le Panier
 
 **Validé par l'auteur** : point 1 de l'audit.

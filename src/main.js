@@ -6,31 +6,23 @@ import { config, onConfigChange, setValue, getValue } from './config.js';
 import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { clampToBounds } from './core/walkmask.js';
-import { createWalker, setPath, stepWalker, clearTarget, faceProduct, faceScreen } from './core/movement.js';
+import { createWalker, setPath, stepWalker, clearTarget, faceProduct } from './core/movement.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from './core/narrator.js';
-import { createNarratorUi } from './ui/narrator.js';
-import { createAsideFx } from './ui/aside.js';
 import { createConfirm } from './ui/confirm.js';
 import { createTitleScreen } from './ui/title.js';
 import { createPlayerOptions } from './ui/playerOptions.js';
 import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } from './core/intro.js';
 import { createIntroUi } from './ui/intro.js';
 import introFile from './data/intro.json';
-import narratorFile from './data/narrator.json';
-import playerFile from './data/joueur.json';
-import { playerName, fillName, OTHER, MAX_NAME } from './core/names.js';
-import { createNamePicker } from './ui/namePicker.js';
-import { createDizzy, stepDizzy, dizzyActive } from './core/dizzy.js';
-import { createDizzyStars } from './ui/dizzyStars.js';
 import { findPath } from './core/pathfinding.js';
 import { createWorld, moveProduct } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
+import { createVoices } from './game/voices.js';
 import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
 import { createTargetMarker } from './scene/targetMarker.js';
@@ -112,11 +104,6 @@ crt.hidden = true;
 uiEl.appendChild(crt);
 // Accessibilité : taille du texte, luminosité et contraste (un filtre seulement s'ils ne valent pas 1).
 const TEXT_SCALE = { petite: 0.85, normale: 1, grande: 1.2, 'tres-grande': 1.4 };
-// Effet des mots du joueur (l'écran qui parle) ; « réduire les animations » : aucun.
-function applyScreenFx() {
-  narratorUi.setScreenFx(config.display.reduceMotion ? 'aucun' : config.narrator.screenFx);
-}
-
 function applyAccess() {
   document.documentElement.style.setProperty('--ts', TEXT_SCALE[config.access.textSize] ?? 1);
   document.documentElement.style.setProperty('--narrator-alpha', config.display.narratorAlpha);
@@ -282,217 +269,33 @@ function takePickup(k) {
   hud.playerMoved();
 }
 
-// ---------- Voix : haut-parleur et apartés du héros ----------
-// Logique dans core/narrator.js, répliques dans data/narrator.json. Les [TEMP] s'affichent sans préfixe,
-// avec des espaces insécables à la française (jamais un « ? » seul en début de ligne).
-const frenchSpaces = (t) => t.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
-// Le nom du joueur (« mon Épaisseur », ou celui choisi dans les options) remplace ses repères.
-let who = playerName(playerFile.names, config.player.name, config.player.customName);
-const clean = (t) => frenchSpaces(fillName((t ?? '').replace(/^\[TEMP\]\s*/, ''), who));
-const cleanLine = (l) => ({
-  ...l,
-  text: clean(l.text),
-  choices: l.choices?.map((c) => ({ ...c, text: clean(c.text), reply: clean(c.reply) })),
-  steps: l.steps?.map(cleanLine), // conversation : chaque réplique
-});
-const narratorData = { triggers: narratorFile.triggers, lines: narratorFile.lines.map(cleanLine) };
-// Nom changé dans les options : les répliques sont refaites (les prochaines l'emploient).
-function applyPlayerName() {
-  who = playerName(playerFile.names, config.player.name, config.player.customName);
-  narratorData.lines = narratorFile.lines.map(cleanLine);
-}
-const narrator = createNarrator();
-const narratorUi = createNarratorUi(uiEl, { onSkip: () => skipNarrator(narrator, narratorData, config.narrator), onChoose: (k) => answer(narrator, k, config.narrator) });
-applyScreenFx();
-// Pendant la rencontre, le héros propose au joueur de choisir son nom (changeable ensuite dans les options).
-const namePicker = createNamePicker(uiEl, {
-  names: playerFile.names,
-  other: OTHER,
-  maxLength: MAX_NAME,
-  onPick(id, custom, label) {
-    if (id === OTHER) setValue('player.customName', custom);
-    setValue('player.name', id); // enregistré, et les répliques sont refaites avec ce nom
-    namePicker.hide();
-    answerName(narrator, narratorData, label, config.narrator);
-  },
-});
-let choiceFocus = 0; // réponse mise en avant (clavier, manette)
-let arrived = false;
+// ---------- Voix (src/game/voices.js) : haut-parleur, pensées, apartés, rencontre, tournis ----------
 let endOfAisleX = Infinity;
-let voiceLine = null; // réplique affichée
-let speakerWaves = null; // ondes sous le haut-parleur qui parle
-let speaker = null; // [x, y] du haut-parleur d'où sort l'annonce en cours
-let hudLeft = Infinity; // bord gauche des boutons du haut (la bande ne passe pas dessous)
-const mouth = { x: 0, y: 0 };
-let playerActed = false;
-// Aparté : un moment rare et marquant (tête de face, zoom, bandes « cinéma », musique baissée).
-const asideFx = createAsideFx(uiEl);
-let asideP = 0; // avancement de la mise en scène (0 à 1), en temps de jeu
+let speakerWaves = null; // ondes sous le haut-parleur qui parle (propres au lieu affiché)
 let storeTime = 0; // temps du magasin (figé pendant un aparté)
-// Aparté ou conversation (le héros tourné vers le joueur, rien ne l'interrompt).
-const heroAside = () => narrator.line !== null && (narrator.voice === 'heros' || inScene(narrator));
-const ease = (p) => p * p * (3 - 2 * p); // une touche, un toucher ou un bouton depuis la dernière image (inactivité)
-const head = { x: 0, y: 0 };
 const HEAD_HEIGHT = 330; // hauteur de la tête du héros au-dessus de ses pieds (px du dessin)
-
-// Un moment du jeu : renvoie true si une voix prend la parole.
-function say(trigger) {
-  return narrate(narrator, narratorData, trigger, config.narrator) !== null;
-}
-
-// Une réplique commence : bande ou bulle, son, et pour un aparté le héros se tourne vers l'écran
-// (s'il est à l'arrêt et ne scanne pas).
-function voiceStarted() {
-  const scene = inScene(narrator);
-  const hero = narrator.voice === 'heros' || scene; // conversation : héros, joueur, regard, marche
-  const glance = narrator.voice === 'regard';
-  const thought = narrator.voice === 'pensee';
-  // Conversation : le son d'aparté au premier regard vers le joueur ; aparté : à son début seulement
-  // (le héros répond à la réponse du joueur : l'aparté continue).
-  const reply = scene ? !glance : hero && asideP > 0;
-  if (voiceLine.walk !== undefined) startSceneWalk(voiceLine.walk);
-  narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion, voiceLine.choices?.map((c) => c.text) ?? null);
-  choiceFocus = 0;
-  if (thought) audio.play('froissement');
-  else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
-  if (hero && !reply && !thought) vibrate('fort');
-  if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
-  if (narrator.voice === 'epaisseur') audio.play('froissement'); // le joueur répond (sans voix : ses pensées)
-  // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
-  const sp = place.speakers?.items ?? [];
-  speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
-  if (speaker) speakerWaves.show(speaker[0], speaker[1]);
-  else speakerWaves.hide();
-  hudLeft = hud.bar.getBoundingClientRect().left; // lu une fois par réplique
-  if (hero && !thought && voiceLine.walk === undefined && sm.is('play') && !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0) faceScreen(walker);
-}
-
-// Conversation : le héros s'avance vers le milieu de l'écran (un peu en avant), en plusieurs fois.
-// part : part du chemin depuis l'endroit où la conversation a commencé (1 = arrivé).
-const sceneFrom = { x: 0, z: 0 };
-const sceneMeet = { x: 0, z: 0 };
-let sceneWalkT = -1; // temps de jeu au début de la marche en cours (-1 : pas de marche)
-function startSceneWalk(part) {
-  if (narrator.scene.i === 0) {
-    // Première marche : point de départ, et point de rencontre au milieu de l'image actuelle.
-    sceneFrom.x = walker.x;
-    sceneFrom.z = walker.z;
-    const v = stage.view;
-    sceneMeet.x = stageToWorldX(proj, camera.x + v.viewW / 2);
-    sceneMeet.z = config.narrator.meetZ;
-  }
-  tmpWorld.x = sceneFrom.x + (sceneMeet.x - sceneFrom.x) * part;
-  tmpWorld.z = sceneFrom.z + (sceneMeet.z - sceneFrom.z) * part;
-  walkTo(tmpWorld);
-  marker.hide(); // une marche du héros, pas un ordre du joueur
-  sceneWalkT = narrator.t;
-}
-
-// Fin d'une marche de conversation : arrivé (ou bloqué trop longtemps).
-function watchSceneWalk() {
-  if (sceneWalkT < 0 || narrator.line?.walk === undefined) return;
-  const late = narrator.t - sceneWalkT > config.narrator.walkTimeout;
-  if ((narrator.t - sceneWalkT > 0.1 && !walker.hasTarget && !walker.moving) || late) {
-    if (late) clearTarget(walker);
-    sceneWalkT = -1;
-    endLine(narrator, narratorData, config.narrator);
-  }
-}
-
-// Mise en scène de l'aparté : avance vers 1 pendant l'aparté, revient à 0 après (temps de jeu).
-const dizzy = createDizzy();
-const dizzyStars = createDizzyStars(uiEl);
-const starHead = { x: 0, y: 0 };
-// Étoiles du tournis : pendant leur durée, et tant qu'il s'en plaint.
-function updateDizzyStars() {
-  const on = dizzyActive(dizzy, narrator.t) || narrator.line?.trigger === 'tournis';
-  if (!on) {
-    if (dizzyStars.visible) dizzyStars.hide();
-    return;
-  }
-  const k = shown.scale * heroData.scale;
-  stage.stageToClient(shown.x, shown.y - (HEAD_HEIGHT - 30) * k, starHead);
-  dizzyStars.show(starHead.x, starHead.y, k * stage.view.scale * 1.5, config.display.reduceMotion);
-}
-let veilP = 0; // voile d'une rencontre importante (0 à 1)
-let sceneMode = false; // interface effacée (conversation en cours)
-function updateAside(dt) {
-  // Pendant une marche ou une pensée de la conversation, pas encore de mise en scène (ni zoom).
-  const goal = heroAside() && narrator.voice !== 'pensee' && narrator.voice !== 'marche' ? 1 : 0;
-  const step = dt / Math.max(0.05, config.narrator.asideZoomTime);
-  asideP = approach(asideP, goal, step);
-  const still = config.display.reduceMotion;
-  asideFx.set(asideP, config.narrator.asideDim, still);
-  const veilGoal = inScene(narrator) && narratorData.triggers[narrator.scene.line.trigger]?.veil ? 1 : 0;
-  const vs = dt / Math.max(0.05, config.narrator.veilTime);
-  veilP = approach(veilP, veilGoal, vs);
-  asideFx.setVeil(veilP, config.narrator.veilBlur, still);
-  // Pendant une conversation avec le joueur, l'interface (boutons, Panier, version) s'efface.
-  const sceneOn = inScene(narrator);
-  if (sceneOn !== sceneMode) {
-    sceneMode = sceneOn;
-    uiEl.classList.toggle('scene-mode', sceneOn);
-  }
-  stage.setZoom(still ? 1 : 1 + (config.narrator.asideZoom - 1) * ease(asideP));
-  audio.setFrozen(asideP > 0);
-}
-
-// À chaque image, en jeu ou dans le Panier (figé en pause et sous les menus).
-function updateNarrator(dt) {
-  watchSceneWalk();
-  const letters = stepNarrator(narrator, narratorData, dt, config.narrator);
-  if (narrator.line !== voiceLine) {
-    voiceLine = narrator.line;
-    if (voiceLine) voiceStarted();
-    else {
-      narratorUi.hide();
-      speakerWaves.hide();
-      speaker = null;
-    }
-  }
-  if (!voiceLine) return;
-  const n = Math.floor(narrator.shown);
-  narratorUi.setShown(n);
-  if (waitingAnswer(narrator)) narratorUi.choicesReady(choiceFocus);
-  narratorUi.setWaiting(waitingTap(narrator));
-  const asking = waitingName(narrator);
-  if (asking !== namePicker.visible) {
-    if (asking) namePicker.show(config.player.name, config.player.customName);
-    else namePicker.hide();
-  }
-  const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
-  const player = narrator.voice === 'epaisseur'; // le joueur : l'écran parle, en bas, sans petits bips
-  const every = config.narrator.blipEvery;
-  if (letters > 0 && every > 0 && n % every === 0 && !player) audio.play(hero ? 'blipHeros' : 'blip');
-  if (player) {
-    // (centré en bas par la feuille de style)
-  } else if (hero) {
-    stage.stageToClient(shown.x, shown.y - HEAD_HEIGHT * shown.scale * heroData.scale, head);
-    narratorUi.placeBubble(head.x, head.y);
-  } else if (speaker) {
-    stage.stageToClient(speaker[0], speaker[1], mouth);
-    narratorUi.placeBand(mouth.x, mouth.y + 18, hudLeft);
-    speakerWaves.pulse(narrator.t, config.display.reduceMotion);
-  } else narratorUi.placeBand(uiEl.clientWidth / 2, 0, hudLeft); // lieu sans haut-parleur : en haut
-}
-
-// Moments surveillés en jeu : arrivée, inactivité, bout du rayon.
-function watchNarrator(dt) {
-  if (!arrived && narrator.t > 1) {
-    arrived = true;
-    say('arrivee');
-  }
-  // Un aparté seulement si le héros est disponible : à l'arrêt, sans scanner ni se diriger quelque part.
-  narrator.asideOk = !walker.moving && !walker.hasTarget && !scan.active && pendingScan < 0;
-  const active = walker.moving || scan.active || pendingScan >= 0 || playerActed;
-  playerActed = false;
-  if (stepIdle(narrator, dt, active, config.narrator)) say('inactivite') || say('aparte_inactivite');
-  // Le tournis : trop de demi-tours, trop vite → étoiles, et il s'en plaint dès qu'il s'arrête.
-  if (stepDizzy(dizzy, narrator.t, walker.facing, walker.moving, config.dizzy) && !inScene(narrator)) say('tournis');
-  if (walker.x >= endOfAisleX) say('bout_du_rayon');
-  // S'éloigner du présentoir sans Scanette (point fixé par les données du lieu) : le haut-parleur le rappelle.
-  if (!gear.scanette && walker.x > (place.accueil?.remindAfterX ?? Infinity)) say('consigne_scanette');
-}
+const voices = createVoices(uiEl, {
+  sm,
+  audio,
+  hud,
+  shown,
+  heroScale: heroData.scale,
+  headHeight: HEAD_HEIGHT,
+  vibrate: (kind) => vibrate(kind),
+  place: () => place,
+  stage: () => stage,
+  proj: () => proj,
+  walker: () => walker,
+  camera: () => camera,
+  speakerWaves: () => speakerWaves,
+  heroBusy: () => scan.active || pendingScan >= 0,
+  hasScanette: () => gear.scanette,
+  aisleEndX: () => endOfAisleX,
+  walkTo: (pt) => walkTo(pt),
+  hideMarker: () => marker.hide(),
+});
+const say = voices.say;
+const heroAside = voices.heroAside;
 
 function scanProduct(i) {
   pendingScan = -1;
@@ -606,8 +409,8 @@ const diag = measure.diag;
 const departs = createDepartTools({
   sm,
   equipAll: () => equipAll(),
-  markSaid: (t) => (narrator.done[t] = true),
-  skipArrival: () => (arrived = true),
+  markSaid: (t) => voices.markSaid(t),
+  skipArrival: () => voices.skipArrival(),
   products: () => productState,
   capacity: () => capacity(gear, config.carry),
   giveCard,
@@ -622,14 +425,14 @@ function owner() {
   return focusOwner(sm.get(), {
     confirm: confirm.open,
     card: basketUi.detailOpen,
-    name: namePicker.visible,
-    choice: waitingAnswer(narrator),
+    name: voices.namePicker.visible,
+    choice: voices.waitingAnswer(),
     scene: heroAside(),
   });
 }
 
 function handleAction(action) {
-  playerActed = true;
+  voices.acted();
   const who = owner();
   const dir = action === 'up' || action === 'left' ? -1 : 1;
   switch (action) {
@@ -671,7 +474,7 @@ function handleAction(action) {
     case 'down':
       if (who === 'options') playerOptions.move(dir);
       else if (who === 'pause') journal.move(dir);
-      else if (who === 'name') namePicker.move(dir);
+      else if (who === 'name') voices.namePicker.move(dir);
       else if (who === 'panier') basketUi.move(dir);
       break;
     case 'action':
@@ -684,14 +487,14 @@ function handleAction(action) {
       else if (who === 'title') titleUi.press();
       else if (who === 'confirm') confirm.yes(); // manette : A = oui
       else if (who === 'card' || who === 'panier') basketUi.press(); // la carte mise en avant (ou retourner la grande)
-      else if (who === 'name') namePicker.press();
-      else if (who === 'choice') answer(narrator, choiceFocus, config.narrator);
-      else if (who === 'scene') skipNarrator(narrator, narratorData, config.narrator);
+      else if (who === 'name') voices.namePicker.press();
+      else if (who === 'choice') voices.answerFocused();
+      else if (who === 'scene') voices.skip();
       else if (who === 'play') tryScan();
       break;
     case 'choice1':
     case 'choice2':
-      if (who === 'choice') answer(narrator, action === 'choice1' ? 0 : 1, config.narrator);
+      if (who === 'choice') voices.answer(action === 'choice1' ? 0 : 1);
       break;
     case 'left':
     case 'right':
@@ -699,10 +502,9 @@ function handleAction(action) {
       else if (who === 'title') titleUi.move(dir);
       else if (who === 'confirm') confirm.focus(action === 'right');
       else if (who === 'card' || who === 'panier') basketUi.switchTab();
-      else if (who === 'name') namePicker.move(dir);
+      else if (who === 'name') voices.namePicker.move(dir);
       else if (who === 'choice') {
-        choiceFocus = action === 'left' ? 0 : 1;
-        narratorUi.focusChoice(choiceFocus);
+        voices.focusChoice(action === 'left' ? 0 : 1);
       }
       break;
     case 'panier':
@@ -749,8 +551,8 @@ function toggleFullscreen() {
 
 sm.onChange((now, before) => {
   // Hors du jeu (Panier, menus), le héros ne prend pas la parole : un moment important attend le retour.
-  if (now !== 'play') narrator.asideOk = false;
-  if (now === 'pause') journal.prepare(narrator.log);
+  if (now !== 'play') voices.leftGame();
+  if (now === 'pause') journal.prepare(voices.narrator.log);
   hud.setPaused(now === 'pause');
   audio.setState(now);
   if (now === 'menu') settings.open();
@@ -768,16 +570,7 @@ sm.onChange((now, before) => {
   }
   if (now === 'play' && before === 'pause') say('reprise');
   if (now === 'play' && before === 'panier') say('aparte_panier');
-  if (now === 'bench') {
-    silenceNarrator(narrator); // les mesures se font sans voix
-    voiceLine = null;
-    narratorUi.hide();
-    speakerWaves.hide();
-    asideP = 0;
-    asideFx.set(0, 0, true);
-    stage.setZoom(1);
-    audio.setFrozen(false);
-  }
+  if (now === 'bench') voices.reset(); // les mesures se font sans voix ni mise en scène
   if (before === 'panier') basketUi.close();
   if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
   if (now === 'play' || now === 'bench') stepper.reset();
@@ -787,10 +580,10 @@ sm.onChange((now, before) => {
 function onTarget(cx, cy) {
   dragPending = false;
   if (!sm.is('play')) return;
-  playerActed = true;
+  voices.acted();
   if (scan.active) return; // pendant une action (scan), le héros ne se déplace pas
   if (heroAside()) {
-    skipNarrator(narrator, narratorData, config.narrator); // toucher : la réplique passe
+    voices.skip(); // toucher : la réplique passe
     return;
   }
   pendingScan = -1;
@@ -886,8 +679,7 @@ function render() {
   shown.scale = scaleAt(proj, z);
   shown.level = actorLevel(depthRefs, z);
   shown.time = time;
-  const looking = heroAside() || (narrator.voice === 'regard' && !walker.moving);
-  const emotion = looking ? narrator.line?.emotion ?? '' : '';
+  const emotion = voices.emotion(walker.moving);
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
   dust.update(time);
@@ -896,6 +688,7 @@ function render() {
   const free = sm.is('play') && !scan.active && !heroAside(); // pendant une conversation : ni repère ni bouton « Scanner »
   const pk = free ? nearestProduct(pickupState, walker, config.scan) : -1;
   const reach = free && pk < 0 ? nearestProduct(productState, walker, config.scan) : -1;
+  const asideP = voices.asideP;
   if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
   if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, storeTime);
   else products.setMarker(reach, storeTime);
@@ -918,7 +711,7 @@ function render() {
     camera.x = fixedX;
     camera.y = 0;
     camera.ready = true;
-  } else if (inScene(narrator) && asideP === 0) {
+  } else if (voices.inScene() && asideP === 0) {
     // Conversation, avant la mise en scène : la caméra ne bouge plus, le héros s'avance au milieu de l'image.
   } else if (asideP > 0) {
     // Aparté : la caméra se centre sur le héros (le zoom resserre l'image autour de lui).
@@ -956,7 +749,7 @@ function frame(now) {
         // sauf la marche d'une conversation (il s'avance tout seul).
         intent.moveX = 0;
         intent.moveZ = 0;
-        if (narrator.line?.walk === undefined) clearTarget(walker);
+        if (!voices.walking()) clearTarget(walker);
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
       stepPendingScan();
@@ -966,15 +759,15 @@ function frame(now) {
     places.watchExits();
     const sec = Math.min(dt / 1000, 0.1);
     updateIntro(sec); // fondu final de l'intro, s'il est en cours
-    watchNarrator(sec);
-    updateNarrator(sec);
-    updateAside(sec);
+    voices.watch(sec);
+    voices.update(sec);
+    voices.updateAside(sec);
     render();
-    updateDizzyStars();
+    voices.updateStars();
   } else if (sm.is('intro')) {
     updateIntro(Math.min(dt / 1000, 0.1));
   } else if (sm.is('panier')) {
-    updateNarrator(Math.min(dt / 1000, 0.1));
+    voices.update(Math.min(dt / 1000, 0.1));
   } else if (sm.is('bench')) {
     measure.frame(dt, t0); // banc d'essai ou test rapide : le parcours remplace les commandes du joueur
   }
@@ -1015,15 +808,8 @@ const places = createPlaces(uiEl, gameEl, {
     marker.hide();
     stage = null;
   },
-  // Le héros vient d'être posé dans le nouveau lieu : une annonce en cours continue, elle sort du
-  // haut-parleur de ce lieu (ou du haut de l'écran).
-  onArrived() {
-    if (voiceLine && speaker) {
-      const sp = place.speakers?.items ?? [];
-      speaker = sp.length ? sp[nearestSpeaker(sp, walker.x)] : null;
-      if (speaker) speakerWaves.show(speaker[0], speaker[1]);
-    }
-  },
+  // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
+  onArrived: () => voices.arrivedInPlace(),
   render: () => render(),
 });
 
@@ -1061,14 +847,14 @@ async function start() {
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
-    if (key === 'narrator.screenFx' || key === 'display.reduceMotion') applyScreenFx();
-    if (key.startsWith('player.')) applyPlayerName();
+    if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
+    if (key.startsWith('player.')) voices.applyPlayerName();
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
     if (key === 'carry.panier') basketUi.setCapacity(capacity(gear, config.carry));
-    if (key === 'narrator.enabled' && !value) silenceNarrator(narrator);
-    if (key === 'narrator.asides' && !value && narrator.voice === 'heros') silenceNarrator(narrator);
+    if (key === 'narrator.enabled' && !value) voices.silence();
+    if (key === 'narrator.asides' && !value) voices.silence(true);
   });
   window.addEventListener('resize', layout);
   window.visualViewport?.addEventListener('resize', layout);
@@ -1102,21 +888,18 @@ async function start() {
     scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),
     // Tests automatiques : le héros prend tout au présentoir (Scanette et panier), sans s'y rendre.
     // Tests : un moment « once » considéré comme déjà dit (ex. la première rencontre, pour les tests du scanner).
-    markSaid(trigger) {
-      narrator.done[trigger] = true;
-    },
+    markSaid: (trigger) => voices.markSaid(trigger),
     flips: () => flips,
     place: () => place.id,
     useExit: (id) => places.useExit(id),
     lastTransitionMs: () => places.lastTransitionMs(),
     paths: () => pathCount,
     reloadPlace: () => places.reload(),
-    dizzy: () => ({ count: dizzy.count, times: dizzy.times.length, facing: walker.facing, moving: walker.moving, t: narrator.t }),
-    journal: () => narrator.log.map((e) => `${e.voice}: ${e.text}`),
+    journal: () => voices.narrator.log.map((e) => `${e.voice}: ${e.text}`),
     equip: () => equipAll(),
     // Tests automatiques : quitter l'écran titre comme si l'on touchait « Commencer » (sans plein écran).
     startGame: () => startGame(false),
-    narrator: () => ({ text: narrator.line?.text ?? '', voice: narrator.voice, trust: narrator.trust, waiting: waitingAnswer(narrator), shown: Math.floor(narrator.shown), visible: narratorUi.visible, shownVoice: narratorUi.voice, t: narrator.t }),
+    narrator: () => voices.info(),
     products: () => productState.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
     levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),

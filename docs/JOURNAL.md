@@ -14,7 +14,31 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 ---
 
-> Rapports plus anciens : `docs/journal/seances-01-a-50.md` (déplacés tels quels à la séance 51).
+> Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
+
+## Séance 54 — 16/11/2026 — Knip, puis découpage de main.js en 3 étapes
+
+**Décisions de l'auteur** : Knip accepté (1.a) ; exception de taille pour `style.css` (2.a) ; découpage de `main.js` en 3 étapes (3 : ok).
+
+**Fait** (aucun changement pour le joueur) :
+- **Knip** installé. Sa liste : 4 fonctions marquées « partagées » pour rien (`createCard`, `PLAYER`, `patrol`, `buildCard`), aucun code mort. Liste vidée, puis Knip ajouté à `npm test`.
+- **Découpage de `main.js`**, un commit par étape, tests complets à chaque fois :
+  1. `src/debug/measure.js` (DBG, banc d'essai, test rapide) et `src/debug/departs.js` (points de départ) ;
+  2. `src/game/places.js` (gestionnaire de lieux : charger, quitter, sorties, fondu) ;
+  3. `src/game/voices.js` (haut-parleur, pensées, apartés, rencontre, choix du nom, tournis).
+- `main.js` : 1 370 → **932 lignes**. C'est plus que les 600 annoncées : j'avais sous-estimé ce qui reste (règles de scan et de panier plein, traitement des commandes, fonctions de test).
+
+**Vérifié** :
+- À chaque étape : 159 tests de logique et Knip ; 82 tests navigateur PC et téléphone simulé, sans erreur console.
+- Comptages du rayon identiques (84 éléments, 38 images).
+- Mémoire identique après 5 allers-retours (3 077 éléments).
+- Une erreur attrapée par les tests à l'étape 1 (la caméra passée trop tôt à l'outil de mesure), corrigée avant publication.
+
+**À vérifier par l'auteur** : banc d'essai sur le téléphone, avant (`74cb80b`) et après, s'il le souhaite. Le code a été déplacé, pas changé.
+
+**Suite proposée** : reprendre A6 (2/3), le présentoir déplacé dans le hall et le départ à l'accueil. La suite du découpage de `main.js` peut attendre.
+
+---
 
 ## Séance 53 — 16/11/2026 — Remise en ordre (2/2) : des garde-fous qui se vérifient tout seuls
 
@@ -58,7 +82,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - `REGLES_CARTES_COMBAT.md` : ❓ « 12 cartes en combat » contre la capacité du panier, à régler avant B.
 - `DIRECTION_ARTISTIQUE.md` : reçoit, mot pour mot, le détail du style de `VISION.md`. **`VISION.md` pas encore modifié : en attente de l'accord de l'auteur.**
 - `SUIVI.md` : section « Ouvert » seule, et liste numérotée des 59 points 👀 à trancher ; les points ✅ sont dans `SUIVI-archive.md` (tels quels).
-- `JOURNAL.md` : tableau des étapes validées et 5 derniers rapports ; les anciens dans `docs/journal/seances-01-a-50.md` (tels quels).
+- `JOURNAL.md` : tableau des étapes validées et 5 derniers rapports ; les anciens dans `docs/journal/anciens-rapports.md` (tels quels).
 - `CLAUDE.md` : 68 lignes (au lieu de 84), carte des documents rangée par sujet.
 - Skills `.claude/skills/` : `fin-seance`, `valider` et `mesures`, avec le texte déplacé mot pour mot.
 - `src/core/CLAUDE.md` et `src/scene/CLAUDE.md` : règles propres à ces dossiers.
@@ -115,54 +139,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **À vérifier par l'auteur** : sur le téléphone, guider le héros au doigt derrière le caddie avec DBG ouvert (« calcul pire »), et le banc d'essai quand il le souhaite.
 
 **Audit** : les 5 corrections recommandées avant A6 sont faites (points 1, 5, 3, 2 + 4, 6). Peuvent attendre : 7 à 15.
-
----
-
-## Séance 50 (suite) — Audit, points 2 et 4 : construire, quitter et reconstruire un lieu ; images libérées
-
-**Fait** (aucun changement visible pour le joueur ; premier pas d'A6) :
-- `scene/placeView.js` : tout ce qui est construit pour afficher un lieu (scène, objets, produits, effets), et de quoi le défaire.
-- `main.js` : `loadPlace` / `unloadPlace`. Le héros, sa poussière et le repère passent d'un lieu à l'autre.
-- Images : celles du lieu sont libérées en partant (`releaseImages`) ; celles du héros et des produits restent chargées.
-- Le rappel de la Scanette (x = 900) est passé dans les données du lieu. Un lieu sans étagère ni rayon de devant ne fait plus planter le banc.
-
-**Vérifié** :
-- 147 tests de logique, 78 tests navigateur, sans erreur console.
-- Nouveau test : quitter le lieu et y revenir 3 fois → mêmes images en mémoire, même nombre d'éléments, produits scannés toujours scannés, le héros marche.
-- Comptages inchangés (84 éléments, 38 images, 5,57 Mpx).
-
-**À vérifier par l'auteur** : banc d'essai sur le téléphone, comparé à la version `2aa4b77` (la construction de la scène a été réorganisée ; le résultat doit être le même).
-
-**Pas encore fait (avec A6)** : l'état « transition » et le fondu, les sorties dans les données, le préchargement des lieux voisins, le banc qui traverse plusieurs lieux.
-
-**Reste de l'audit** : point 6 (chemin au doigt).
-
----
-
-## Séance 50 (suite) — Audit, point 3 : un seul état du monde
-
-**Fait** (aucun changement visible pour le joueur) :
-- `core/world.js` (testé) : l'état de chaque lieu (produits : place, scanné ; objets à prendre) est créé à la première visite et retrouvé tel quel ensuite.
-- L'affichage des produits (`scene/products.js`) ne garde plus sa propre copie : il montre cet état.
-- L'échange du panier plein passe par une fonction testée (`moveProduct`).
-- Une carte retient son lieu d'origine.
-
-**Vérifié** : 147 tests de logique (dont : « en revenant dans un lieu, un produit scanné est toujours scanné ») ; 77 tests navigateur, sans erreur console ; comptages inchangés.
-
-**Reste de l'audit** : points 2 + 4 (premier pas d'A6), puis 6.
-
----
-
-## Séance 50 (suite) — Audit, point 5 : « qui a la main ? »
-
-**Fait** (aucun changement visible pour le joueur) :
-- La règle de priorité des commandes est écrite une seule fois, dans `core/focus.js`, avec ses tests : question Oui / Non, puis grande carte, puis Panier ; choix du nom, puis réponse attendue, puis conversation, puis héros libre.
-- Le traitement des touches (`main.js`) s'en sert au lieu de conditions répétées.
-
-**Reporté** : l'état « transition » sera ajouté avec A6, quand il servira (règle : rien de construit pour plus tard).
-
-**Vérifié** : 144 tests de logique, 77 tests navigateur, sans erreur console.
-
-**Reste de l'audit** : points 3, 2 + 4, 6.
 
 ---
