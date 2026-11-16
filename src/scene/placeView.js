@@ -11,6 +11,7 @@ import { createProducts } from './products.js';
 import { createSpeakerWaves } from './speakers.js';
 import { createDebugMask } from './debugMask.js';
 import { propLevels } from './depth.js';
+import { createPoses } from './poses.js';
 
 export function createPlaceView(container, place, images, common, here, proj, config, getValue) {
   const stage = createStage(container, place, images, getValue);
@@ -24,9 +25,8 @@ export function createPlaceView(container, place, images, common, here, proj, co
     parent: acteurs,
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
-  // L'agent de sécurité : ses deux poses (repos, geste d'arrêt) dans une seule boîte. Chaque pose a son
-  // propre calque, qui reste : on passe de l'une à l'autre par l'opacité, sans rien redessiner (sinon il
-  // clignote sur téléphone : séances 59 et 60). Il ne change pas de profondeur : il est rangé avec les objets du décor (pas d'égalité
+  // L'agent de sécurité : un seul calque (sa boîte), ses deux poses (repos, geste d'arrêt) à l'intérieur,
+  // une seule visible, comme le héros (scene/poses.js ; règle : docs/ARCHITECTURE.md §4). Il ne change pas de profondeur : il est rangé avec les objets du décor (pas d'égalité
   // de niveau avec un portique).
   const g = place.guard;
   const guard = g ? createGuardBox(images, g, acteurs) : null;
@@ -62,27 +62,20 @@ export function createPlaceView(container, place, images, common, here, proj, co
 }
 
 // L'agent de sécurité (A6) : une boîte posée sur le calque des acteurs (placée à chaque image par
-// game/guard.js), avec une image par pose.
+// game/guard.js) ; ses poses à l'intérieur, comme celles du héros (scene/poses.js).
 function createGuardBox(images, g, parent) {
   const box = document.createElement('div');
   box.className = 'guard';
   box.style.transformOrigin = `${g.anchor[0]}px ${g.anchor[1]}px`;
-  const pose = (id) => {
-    const img = images.get(id);
-    const el = img.el;
-    el.className = 'guard-pose';
-    el.width = img.w;
-    el.height = img.h;
-    el.alt = '';
-    el.draggable = false;
-    box.appendChild(el);
-    return el;
-  };
-  const idle = pose(g.image);
-  const stop = pose(g.stopImage);
-  stop.style.opacity = '0';
+  const size = [images.get(g.image).w, images.get(g.image).h];
+  box.style.width = `${size[0]}px`; // comme le héros : la boîte a la taille du dessin (sans taille, le
+  box.style.height = `${size[1]}px`; // navigateur donnait un calque à chaque pose : mesuré séance 61)
+  const poses = createPoses(images, box, size, 'guard-pose');
+  const idle = poses.el(g.image);
+  const stop = poses.el(g.stopImage);
+  poses.show(idle);
   parent.appendChild(box);
-  return { box, idle, stop };
+  return { box, idle, stop, poses };
 }
 
 // Pluie (calque du dehors, découpée par le mur vitré) : deux voiles de gouttes qui glissent en biais,

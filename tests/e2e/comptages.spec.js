@@ -175,11 +175,12 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
   expect(errors).toEqual([]);
 });
 
-// Clignotement sur téléphone (séance 59) : un élément qui gagne ou perd son calque graphique est
-// redessiné. Pendant la scène de l'agent (interpellation, « Stop ! », poses), ni l'agent ni les
-// portiques ne doivent gagner ou perdre leur calque, ni être redessinés (séance 60 : l'agent était
-// redessiné à chaque changement de pose, quand sa bulle s'ouvrait et se fermait).
-test('hall : l’agent et les portiques gardent leur calque pendant la scène de l’agent', async ({ page }, info) => {
+// Clignotement sur téléphone (séances 59 à 61). Règle (docs/ARCHITECTURE.md §4) : un personnage ou un
+// objet animé = un seul calque, sur son conteneur ; ses poses à l'intérieur, sans calque propre.
+// Pendant la scène de l'agent (le héros marche, l'agent lève le bras puis le baisse, « Stop ! »), aucun
+// changement de pose ne crée de calque ni n'en change, pour le héros comme pour l'agent ; les portiques
+// gardent leur calque fixe (séance 27).
+test('hall : les changements de pose (héros, agent) ne créent ni ne changent aucun calque', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(60_000);
   await page.goto('./?lieu=accueil');
@@ -188,47 +189,52 @@ test('hall : l’agent et les portiques gardent leur calque pendant la scène de
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   await page.evaluate(() => {
     window.paperCart.markSaid('arrivee');
-    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.4], ['narrator.holdPerChar', 0]]) window.paperCart.set(k, v);
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.timedLine', 1.5]]) window.paperCart.set(k, v);
   });
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('DOM.enable');
   const { root } = await cdp.send('DOM.getDocument');
-  const watched = new Set();
-  for (const sel of ['.guard', '.guard-pose', '.prop']) {
+  const ids = async (sel) => {
     const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
-    for (const nodeId of nodeIds) watched.add((await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId);
-  }
-  expect(watched.size).toBe(7); // l'agent (boîte et deux poses) et les 4 portiques
+    return Promise.all(nodeIds.map(async (nodeId) => (await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId));
+  };
+  const containers = new Set([...(await ids('.guard')), ...(await ids('.actor')), ...(await ids('.prop'))]);
+  const poses = new Set([...(await ids('.guard-pose')), ...(await ids('.actor-frame'))]);
+  expect(containers.size).toBe(6); // l'agent, le héros, les 4 portiques
+  expect(poses.size).toBeGreaterThan(10); // 2 poses de l'agent, les images du héros
   let sig = null;
-  let switches = 0;
+  let changes = 0;
+  let poseLayers = 0;
   let tracking = false;
   cdp.on('LayerTree.layerTreeDidChange', (e) => {
     if (!e.layers) return;
-    const s = e.layers.filter((l) => watched.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
-    if (tracking && s !== sig) switches++;
+    const s = e.layers.filter((l) => containers.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
+    if (tracking && s !== sig) changes++;
     sig = s;
-  });
-  const layerOf = new Map(); // calque → élément
-  let repaints = 0;
-  cdp.on('LayerTree.layerTreeDidChange', (e) => {
-    for (const l of e.layers ?? []) if (watched.has(l.backendNodeId)) layerOf.set(l.layerId, l.backendNodeId);
-  });
-  cdp.on('LayerTree.layerPainted', (e) => {
-    if (tracking && layerOf.has(e.layerId)) repaints++;
+    if (tracking) poseLayers += e.layers.filter((l) => poses.has(l.backendNodeId)).length;
   });
   await cdp.send('LayerTree.enable');
   await page.waitForTimeout(2500); // l'agent va à sa place
   tracking = true;
+  const poseSeen = new Set();
+  const watchPose = async () => poseSeen.add((await page.evaluate(() => window.paperCart.guard())).pose);
   await page.keyboard.down('ArrowLeft');
-  await page.waitForFunction(() => window.paperCart.journal().some((l) => /Stop\s?!/.test(l)), null, { timeout: 15000 });
-  await page.waitForTimeout(800);
+  for (let k = 0; k < 60 && !(await page.evaluate(() => window.paperCart.journal().some((l) => /Stop\s?!/.test(l)))); k++) {
+    await watchPose();
+    await page.waitForTimeout(150);
+  }
+  for (let k = 0; k < 15; k++) {
+    await watchPose();
+    await page.waitForTimeout(150);
+  }
   await page.keyboard.up('ArrowLeft');
   for (const k of ['ArrowUp', 'ArrowDown']) {
     await page.keyboard.down(k);
     await page.waitForTimeout(700);
     await page.keyboard.up(k);
   }
-  console.log('Hall, agent et portiques : changements de calque', switches, ', redessins', repaints);
-  expect(switches).toBe(0);
-  expect(repaints).toBe(0);
+  expect([...poseSeen].sort()).toEqual(['idle', 'stop']); // l'agent a bien changé de pose
+  console.log('Hall : changements de calque', changes, ', calques de pose', poseLayers);
+  expect(changes).toBe(0);
+  expect(poseLayers).toBe(0);
 });

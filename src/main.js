@@ -312,7 +312,10 @@ const guard = createGuardWiring({
   },
   talking: () => voices.narrator.line !== null && voices.narrator.voice === 'agent',
   // Ensuite, il force : « Stop ! », et le héros fait demi-tour de quelques pas.
-  onStop: () => say('agent_stop'),
+  onStop() {
+    clearTarget(walker);
+    say('agent_stop');
+  },
   back: (dx) => setPath(walker, [[walker.x + dx, walker.z]]),
 });
 const heroAside = voices.heroAside;

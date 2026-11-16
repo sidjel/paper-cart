@@ -9,6 +9,7 @@
 //   qui suivent le bras image par image (données : held, hands) et se retournent avec la feuille.
 
 import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
+import { createPoses } from './poses.js';
 
 export function characterImageEntries(data, rasterScale) {
   const entries = [];
@@ -52,22 +53,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   root.appendChild(flip);
   parent.appendChild(root);
 
-  // Un élément <img> par image distincte ; une seule visible à la fois.
-  const elements = new Map();
-  function imageEl(url) {
-    if (!elements.has(url)) {
-      const img = images.get(url).el;
-      img.className = 'actor-frame';
-      img.width = w;
-      img.height = h;
-      img.alt = '';
-      img.draggable = false;
-      img.hidden = true;
-      flip.appendChild(img);
-      elements.set(url, img);
-    }
-    return elements.get(url);
-  }
+  // Un élément <img> par image distincte ; une seule visible à la fois, sans calque propre (scene/poses.js).
+  const poses = createPoses(images, flip, data.size, 'actor-frame');
+  const imageEl = (url) => poses.el(url);
   // Objets tenus : un élément par image distincte, derrière les images du héros, ou devant (front) quand
   // l'objet dessine lui-même la main qui le tient.
   const held = [];
@@ -148,7 +136,6 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let current = null; // animation en cours
   let animStartTime = 0;
   let animStartDist = 0;
-  let shown = null;
   let shownIndex = -1;
   let lastFlip = NaN;
   let lastX = NaN;
@@ -219,12 +206,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
     const frame = anim.els[i];
-    if (frame !== shown) {
-      stats.frameChanges++;
-      if (shown) shown.hidden = true;
-      frame.hidden = false;
-      shown = frame;
-    }
+    if (poses.show(frame)) stats.frameChanges++;
     placeHeld(anim.srcs[i], anim.away);
 
     // Corps vivant (rebond, respiration, écrasement), sauf si l'on réduit les animations.

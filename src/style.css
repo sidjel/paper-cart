@@ -1199,7 +1199,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 
 /* Agent de sécurité du hall (A6) : placé par src/game/guard.js. */
 .guard { position: absolute; left: 0; top: 0; will-change: transform; pointer-events: none; }
-.guard-pose { position: absolute; left: 0; top: 0; display: block; will-change: opacity; }
+.guard-pose { position: absolute; left: 0; top: 0; display: block; } /* pas de calque propre : voir scene/poses.js */
 
 /* Pluie derrière le mur vitré du hall (scene/placeView.js), sur le calque du dehors : le mur la découpe.
    Chaque voile dépasse d'une tuile et glisse d'une tuile par cycle : la boucle ne se voit pas.

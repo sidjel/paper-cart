@@ -1069,6 +1069,11 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
   // Il force contre la barrière : « Stop ! », et il fait demi-tour de quelques pas. Il ne passe jamais.
   await expect.poll(said, { timeout: 10000 }).toMatch(/agent: Stop\s?! De l.autre côté/);
+  // Le demi-tour attend que l'agent ait fini de parler.
+  const atStop = (await hero(page)).x;
+  await page.waitForTimeout(300);
+  if (await page.locator('.hero-bubble.agent').isVisible()) expect((await hero(page)).x).toBeLessThan(atStop + 5);
+  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 4000 });
   let minX = Infinity;
   let back = false;
   for (let k = 0; k < 30 && !back; k++) {
