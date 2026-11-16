@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="320" viewBox="0 0 220 320">
+  <!-- [TEMP] Agent de sécurité du hall (A6), forme provisoire en papier découpé : uniforme bleu marine, casquette, badge. Tourné vers la droite. Pieds en (110, 312). Contour blanc (découpe) puis trait sombre. -->
+  <ellipse cx="110" cy="312" rx="58" ry="10" fill="#3b3428" opacity="0.28"/>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <g stroke="#fbf8ee" stroke-width="10">
+      <path d="M78 228 h26 l2 82 h-30 z M114 228 h26 l4 82 h-30 z" fill="#232c3d"/>
+      <path d="M60 112 q50 -22 100 0 l8 124 h-116 z" fill="#2d3a55"/>
+      <circle cx="112" cy="74" r="34" fill="#e8c9a4"/>
+      <path d="M76 58 q36 -34 72 0 l20 6 h-92 z" fill="#232c3d"/>
+    </g>
+    <g stroke="#4a4236" stroke-width="2.6">
+      <path d="M78 228 h26 l2 82 h-30 z M114 228 h26 l4 82 h-30 z" fill="#232c3d"/>
+      <path d="M72 310 h36 M112 310 h38" stroke-width="7"/>
+      <path d="M60 112 q50 -22 100 0 l8 124 h-116 z" fill="#2d3a55"/>
+      <path d="M110 104 v126" stroke="#1b2333"/>
+      <path d="M64 120 q-16 50 -6 96 M156 120 q18 46 10 92" fill="none" stroke="#1b2333" stroke-width="3"/>
+      <circle cx="112" cy="74" r="34" fill="#e8c9a4"/>
+      <path d="M76 58 q36 -34 72 0 l20 6 h-92 z" fill="#232c3d"/>
+      <circle cx="130" cy="76" r="3.2" fill="#3b3428"/>
+      <path d="M122 92 h16" stroke-width="2.4"/>
+      <path d="M126 132 l12 -4 l4 12 l-10 8 l-10 -6 z" fill="#d8b44a"/>
+      <rect x="74" y="142" width="26" height="12" rx="2" fill="#fbf8ee"/>
+    </g>
+  </g>
+  <text x="87" y="151" font-family="sans-serif" font-size="7" font-weight="bold" fill="#2d3a55" text-anchor="middle">SÉCU</text>
+</svg>

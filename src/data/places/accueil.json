@@ -17,6 +17,13 @@
         2800,
         1080
       ]
+    },
+    "agent-securite": {
+      "src": "art/placeholder/agent-securite.svg",
+      "size": [
+        220,
+        320
+      ]
     }
   },
   "layers": [
@@ -56,7 +63,29 @@
         264
       ]
     ],
-    "obstacles": []
+    "obstacles": [
+      {
+        "name": "Portiques de sécurité (A6) : on ne passe pas ; l'agent de sécurité se place devant (guard.holdZ = bord avant, guard.zone = largeur)",
+        "points": [
+          [
+            620,
+            130
+          ],
+          [
+            1080,
+            130
+          ],
+          [
+            1080,
+            270
+          ],
+          [
+            620,
+            270
+          ]
+        ]
+      }
+    ]
   },
   "props": [],
   "exits": {
@@ -162,6 +191,41 @@
         2050,
         68
       ]
+    ]
+  },
+  "guard": {
+    "comment": "Agent de sécurité (A6) : garde les portiques (gates : x de chaque passage). Les portiques sont un obstacle de la zone de marche (bord avant en z = holdZ, de zone[0] à zone[1]). L'agent attend à son poste (post) ; quand le héros entre dans la zone (x) plus au fond que watchZ, il va se placer devant le portique le plus proche (standZ). Quand le héros pousse contre les portiques, le haut-parleur prévient. Il repart au poste quand le héros revient en deçà de releaseZ ou quitte la zone. [TEMP] forme provisoire.",
+    "image": "agent-securite",
+    "anchor": [
+      110,
+      312
+    ],
+    "scale": 0.95,
+    "post": [
+      560,
+      210
+    ],
+    "gates": [
+      710,
+      850,
+      990
+    ],
+    "zone": [
+      620,
+      1080
+    ],
+    "watchZ": 60,
+    "holdZ": 130,
+    "standZ": 235,
+    "releaseZ": 20
+  },
+  "rain": {
+    "comment": "Pluie derrière les portes vitrées (rectangle dans l'image du fond : x, y, largeur, hauteur).",
+    "rect": [
+      110,
+      190,
+      420,
+      418
     ]
   }
 }

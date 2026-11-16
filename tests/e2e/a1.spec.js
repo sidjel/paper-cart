@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }, info) => {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   // La partie commence dans le hall d'accueil (présentoir). Les tests du rayon y commencent directement
   // (lien ?lieu=) ; ceux du présentoir commencent dans le hall.
-  const hall = /^A5a (: mains vides|au doigt|: Scanette sans panier)/.test(info.title);
+  const hall = /^(A5a (: mains vides|au doigt|: Scanette sans panier)|A6)/.test(info.title);
   await page.goto(hall ? './' : './?lieu=rayon-essai');
   // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
@@ -30,6 +30,13 @@ test.afterEach(async () => {
 });
 
 const hero = (page) => page.evaluate(() => window.paperCart.hero());
+
+// Dans le hall : dépasser les portiques par l'avant (ils sont un obstacle).
+async function pastGates(page) {
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 1100);
+  await page.keyboard.up('ArrowRight');
+}
 
 // Aller au pied de l'étagère, devant la banane (1er produit), au clavier.
 async function toBanana(page) {
@@ -738,7 +745,8 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   await expect(page.locator('.panier-button')).toBeHidden();
   await expect(page.locator('.actor-held:visible')).toHaveCount(0); // vraiment invisibles à l'écran
   expect(await page.evaluate(() => window.paperCart.place())).toBe('accueil'); // la partie commence dans le hall
-  // Monter contre le mur, puis longer le hall jusqu'au présentoir.
+  // Passer devant les portiques (on ne les traverse pas), monter contre le mur, puis longer le hall jusqu'au présentoir.
+  await pastGates(page);
   await page.keyboard.down('ArrowUp');
   await page.waitForFunction(() => window.paperCart.hero().z > 200);
   await page.keyboard.up('ArrowUp');
@@ -854,6 +862,7 @@ test('A5a : Scanette sans panier, le héros s’interroge lui-même (pensée, bu
   test.skip(info.project.name !== 'pc', 'PC');
   await page.evaluate(() => window.paperCart.set('narrator.enabled', true));
   // Dans le hall : la Scanette seulement.
+  await pastGates(page);
   await page.keyboard.down('ArrowUp');
   await page.waitForFunction(() => window.paperCart.hero().z > 200);
   await page.keyboard.up('ArrowUp');
@@ -1026,4 +1035,33 @@ test('doigt qui glisse : le héros suit, et le chemin n’est calculé qu’une 
   await page.mouse.up();
   const h = await hero(page);
   expect(h.x).toBeGreaterThan(600); // il a suivi le doigt
+});
+
+test('A6 : l’agent de sécurité barre le portique visé ; le haut-parleur interdit la sortie, le héros trouve ça étrange', async ({ page }, info) => {
+  test.setTimeout(40_000);
+  await page.evaluate(() => {
+    window.paperCart.markSaid('arrivee'); // l'accueil du haut-parleur et ses pensées ont leurs propres tests
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.3], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1], ['narrator.enabled', false], ['narrator.enabled', true]]) window.paperCart.set(k, v);
+  });
+  const guard = () => page.evaluate(() => window.paperCart.guard());
+  const post = await guard();
+  // Vers le portique du milieu (x 850), puis vers le fond.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 830);
+  await page.keyboard.up('ArrowRight');
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(async () => (await guard()).gate, { timeout: 5000 }).toBe(1);
+  await page.waitForTimeout(1200);
+  expect((await hero(page)).z).toBeLessThanOrEqual(130); // il ne passe pas
+  await page.keyboard.up('ArrowUp');
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 3000 }).toBe(850);
+  const said = async () => (await page.evaluate(() => window.paperCart.journal())).join(' ');
+  await expect.poll(said, { timeout: 8000 }).toMatch(/narrateur: Les sorties sont réservées/);
+  await expect.poll(said, { timeout: 8000 }).toMatch(/pensee: Hum… étrange…/);
+  await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
+  // Il repart vers l'avant : l'agent retourne à son poste.
+  await page.keyboard.down('ArrowDown');
+  await page.waitForFunction(() => window.paperCart.hero().z < 10);
+  await page.keyboard.up('ArrowDown');
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 4000 }).toBe(post.x);
 });

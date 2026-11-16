@@ -1196,3 +1196,26 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 /* Changement de lieu : fondu au noir (au-dessus du jeu et des voix, sous les menus). */
 .place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; will-change: opacity; }
 .place-fade[hidden] { display: none; }
+
+/* Agent de sécurité du hall (A6) : placé par src/game/guard.js. */
+.guard { position: absolute; left: 0; top: 0; display: block; will-change: transform; pointer-events: none; }
+
+/* Pluie derrière les portes vitrées (scene/placeView.js) : deux voiles de traits qui glissent en biais.
+   Chaque voile dépasse d'une tuile, et glisse d'une tuile par cycle : la boucle ne se voit pas. */
+.rain { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; }
+.rain-sheet { position: absolute; left: -40px; top: 0; right: -40px; will-change: transform; animation: rain-fall linear infinite; }
+.rain-near {
+  height: calc(100% + 120px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='120'%3E%3Cg stroke='%23a9bbcd' stroke-width='2' stroke-linecap='round' opacity='0.6'%3E%3Cpath d='M14 4 l-4 22 M46 52 l-4 22 M30 92 l-4 22'/%3E%3C/g%3E%3C/svg%3E");
+  --rain-dx: 22px; --rain-dy: 120px; animation-duration: 0.42s;
+}
+.rain-far {
+  height: calc(100% + 90px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='90'%3E%3Cg stroke='%238fa3b8' stroke-width='1.4' stroke-linecap='round' opacity='0.45'%3E%3Cpath d='M9 8 l-3 16 M31 52 l-3 16'/%3E%3C/g%3E%3C/svg%3E");
+  --rain-dx: 17px; --rain-dy: 90px; animation-duration: 0.7s;
+}
+@keyframes rain-fall {
+  from { transform: translate3d(var(--rain-dx), calc(-1 * var(--rain-dy)), 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+.still .rain-sheet { animation: none; }

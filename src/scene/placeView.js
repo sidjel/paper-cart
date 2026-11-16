@@ -16,11 +16,14 @@ export function createPlaceView(container, place, images, common, here, proj, co
   const acteurs = stage.layers.acteurs;
   const props = createProps(place, images, acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
+  stage.el.classList.toggle('still', config.display.reduceMotion); // pluie figée
   const speakerWaves = createSpeakerWaves(acteurs);
   const products = createProducts(here.products, common, stage.layers.produits ?? acteurs, acteurs, config.scan, config.display, {
     parent: acteurs,
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
+  const guard = place.guard ? guardImage(images.get(place.guard.image), place.guard.anchor, acteurs) : null;
+  if (place.rain) addRain(stage.layers.fond, place.rain.rect);
   const debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
   return {
@@ -30,6 +33,7 @@ export function createPlaceView(container, place, images, common, here, proj, co
     speakerWaves,
     products,
     debugMask,
+    guard, // image de l'agent de sécurité (game/guard.js la place), ou null
     // En partant : tout ce qui a été construit pour ce lieu quitte la page.
     // Les images perdent aussi leur source : sinon le navigateur garde chaque <img> inscrite pour suivre la
     // taille de l'écran, et avec elle tout l'ancien lieu (mesuré : +58 éléments par changement de lieu).
@@ -38,4 +42,33 @@ export function createPlaceView(container, place, images, common, here, proj, co
       stage.el.remove();
     },
   };
+}
+
+// L'agent de sécurité (A6) : une image posée sur le calque des acteurs, placée à chaque image.
+function guardImage(img, anchor, parent) {
+  const el = img.el;
+  el.className = 'guard';
+  el.width = img.w;
+  el.height = img.h;
+  el.alt = '';
+  el.draggable = false;
+  el.style.transformOrigin = `${anchor[0]}px ${anchor[1]}px`;
+  parent.appendChild(el);
+  return el;
+}
+
+// Pluie derrière les portes vitrées : deux voiles de traits qui glissent vers le bas (animation CSS,
+// transform seulement), découpés au rectangle des vitres. Figée avec « réduire les animations ».
+function addRain(layer, [x, y, w, h]) {
+  const box = document.createElement('div');
+  box.className = 'rain';
+  box.style.transform = `translate(${x}px, ${y}px)`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  for (const k of ['near', 'far']) {
+    const sheet = document.createElement('div');
+    sheet.className = `rain-sheet rain-${k}`;
+    box.appendChild(sheet);
+  }
+  layer.appendChild(box);
 }

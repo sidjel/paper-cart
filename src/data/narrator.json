@@ -105,6 +105,17 @@
       "strong": true,
       "comment": "panier plein, le joueur refuse d'échanger une carte (pendant la question Oui / Non, le haut-parleur se tait)"
     },
+    "sortie_interdite": {
+      "strong": true,
+      "cooldown": 25,
+      "comment": "le héros veut sortir par les portiques du hall : l'agent de sécurité lui barre le passage (A6)"
+    },
+    "sortie_etrange": {
+      "voice": "pensee",
+      "follows": "sortie_interdite",
+      "cooldown": 25,
+      "comment": "juste après : le héros se parle à lui-même (bulle, sans mise en scène, ne compte pas comme un aparté)"
+    },
     "consigne_scanette": {
       "once": true,
       "comment": "le héros s'éloigne de l'accueil sans Scanette"
@@ -367,6 +378,16 @@
       "id": "panier_plein_1",
       "trigger": "panier_plein",
       "text": "[TEMP] Votre panier est plein, cher Client. Le Maxi-Gouffre vous recommande un caddie. Les caddies fonctionnent avec une pièce. Vous n'avez pas de pièce."
+    },
+    {
+      "id": "sortie_interdite_1",
+      "trigger": "sortie_interdite",
+      "text": "[TEMP] Les sorties sont réservées aux clients ayant réglé leurs achats."
+    },
+    {
+      "id": "sortie_etrange_1",
+      "trigger": "sortie_etrange",
+      "text": "[TEMP] Hum… étrange…"
     },
     {
       "id": "consigne_1",

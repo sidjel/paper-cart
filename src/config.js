@@ -48,6 +48,9 @@ export const config = {
     name: 'epaisseur', // comment le héros appelle le joueur (data/joueur.json), ou 'autre' : le nom tapé
     customName: '', // le nom tapé par le joueur (choix « Autre »)
   },
+  guard: {
+    speed: 700, // agent de sécurité du hall : vitesse pour aller d'un portique à l'autre (px/s)
+  },
   places: {
     fade: 0.25, // changement de lieu : durée du fondu au noir, puis du retour (s)
   },
@@ -274,6 +277,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.followWait', label: 'Aparté enchaîné : attendre que le héros s’arrête (max)', min: 0, max: 60, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
+  { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 100, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu', min: 0.05, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },

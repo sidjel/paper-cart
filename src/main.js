@@ -22,6 +22,7 @@ import { createWorld, moveProduct } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
+import { createGuardWiring } from './game/guard.js';
 import { createVoices } from './game/voices.js';
 import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
@@ -295,6 +296,8 @@ const voices = createVoices(uiEl, {
   hideMarker: () => marker.hide(),
 });
 const say = voices.say;
+// Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
+const guard = createGuardWiring({ onBlocked: () => say('sortie_interdite') });
 const heroAside = voices.heroAside;
 
 function scanProduct(i) {
@@ -687,6 +690,7 @@ function render() {
   const emotion = voices.emotion(walker.moving);
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
+  guard.render(a, z, shown.level);
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
   // Au présentoir, ce qu'on peut prendre passe avant les produits.
@@ -757,6 +761,7 @@ function frame(now) {
         if (!voices.walking()) clearTarget(walker);
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
+      guard.step(walker, intent, stepper.step);
       stepPendingScan();
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
@@ -802,6 +807,7 @@ const places = createPlaces(uiEl, gameEl, {
     productState = here.products;
     pickupState = here.pickups;
     markTaken();
+    guard.attach(place, view, proj);
     ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;
@@ -854,6 +860,7 @@ async function start() {
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
+    if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
     if (key.startsWith('player.')) voices.applyPlayerName();
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
@@ -889,6 +896,7 @@ async function start() {
   window.paperCart = {
     version: VERSION,
     state: () => sm.get(),
+    guard: () => guard.info(),
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),
