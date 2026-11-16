@@ -16,6 +16,35 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 64 — 17/11/2026 — Règles professionnelles (séance A : documentation et vérifications)
+
+**Demande de l'auteur** : fichier SEANCE_REGLES. Séance A seulement : inscrire les règles, vérifier les entrées et la boucle, proposer les profils, noter le combat et les images. Pas de tablette (PC et smartphone).
+
+**Règles inscrites, et où** (chacune à un seul endroit ; index dans `CLAUDE.md`) :
+- Affichage, parallaxe, lumière et ombres → `src/scene/CLAUDE.md` (résumé : ARCHITECTURE §4 ; direction de lumière : DIRECTION_ARTISTIQUE).
+- Boucle de jeu → ARCHITECTURE §3, avec un test : 60, 90, 120 et 144 Hz, et rattrapage limité.
+- Entrées → `src/input/CLAUDE.md`.
+- Son → `src/audio/CLAUDE.md` (vue d'ensemble : ARCHITECTURE §12).
+- Sauvegarde → ARCHITECTURE §13, pour plus tard.
+- Appareils → ARCHITECTURE §14 et `CLAUDE.md` (Fluidité).
+- Menus, dialogues, chargements, game design → GAME_DESIGN (code : `src/ui/CLAUDE.md` ; chargements, technique : ARCHITECTURE §11).
+- Méthode (un bug = un test + une leçon ; interrupteurs d'essai) → `CLAUDE.md`. Leçons des bugs passés → ARCHITECTURE §15.
+- Index « Où sont les règles » → `CLAUDE.md`, vérifié par un test. La relecture (`audit`) vérifie « lire la page avant de la modifier ».
+
+**Règles ajustées (avec la raison)** :
+- « 44 px réels » → **44 px CSS** : 44 pixels physiques ne feraient que 15 px CSS sur un écran de densité 3, trop petit pour un doigt.
+- Touche maintenue : pas de répétition d'action, **sauf pour se déplacer dans une liste ou un menu** (sinon il faudrait appuyer une fois par ligne).
+- Préchauffage : il sert au décodage des images. Un élément caché perd son calque, donc seul un calque qui reste en place reste prêt (d'où la règle « un calque par élément animé »).
+- « Jamais de changement d'image en jeu » : appliqué aux personnages et objets de la scène. Les cartes, qui montrent le produit scanné, sont notées comme écart à mesurer.
+- « Une règle à un seul endroit » : les règles de code sont dans le `CLAUDE.md` du dossier (lu automatiquement) ; `ARCHITECTURE.md` les résume et y renvoie.
+- La bulle de l'agent (3 s, séance 60) suit désormais la règle générale (durée selon le texte). Le code est à changer.
+
+**Vérifié** : 172 tests de logique (dont 5 nouveaux pour la boucle et 1 pour l'index des règles), Knip. Aucun code de jeu modifié. Écarts aux nouvelles règles : `SUIVI.md` (séance 64).
+
+**Suite** : séance B, le chantier son, puis les profils validés.
+
+---
+
 ## Séance 63 — 16/11/2026 — Reposer une carte (décision) ; moins de créations pendant le jeu
 
 **Demande de l'auteur** :
@@ -91,26 +120,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
 
 **À vérifier par l'auteur** : le clignotement sur le téléphone ; si 3 s suffisent pour lire la première phrase (longue).
-
----
-
-## Séance 59 — 16/11/2026 — Hall : la cause du clignotement, l'agent refait
-
-**Demande de l'auteur** : l'agent et les portiques clignotent encore (éteindre la pluie ne change rien). L'agent ne se déplace qu'une fois au début (du côté au milieu), un peu plus en retrait. Si le héros force : « Stop ! De l'autre côté je vous ai dit ! », et le héros fait demi-tour de quelques pas.
-
-**Mesures (navigateur de test, des comptages et non des temps)** :
-- L'agent **gagnait et perdait son calque graphique** à chaque changement de pose : ses deux images étaient montrées et cachées tour à tour. C'est la cause déjà connue des clignotements du rayon (séance 27).
-- Son niveau d'affichage changeait 7 fois en 5 s, **à égalité avec un portique** à chaque fois.
-
-**Fait** :
-- Les deux poses de l'agent sont dans une seule boîte, qui garde son calque.
-- L'agent ne change plus de profondeur : il est rangé avec les portiques, sans égalité de niveau.
-- Nouvel essai automatique : pendant toute la scène de l'agent, ni l'agent ni les portiques ne changent de calque (0 mesuré).
-- L'agent va une fois, au début, du côté au milieu, à 200 px en retrait de la barrière ; il ne bouge plus.
-- Première tentative : l'interpellation (héros figé, « !! »). Ensuite : « Stop ! De l'autre côté, je vous ai dit ! » [TEMP] et le héros fait demi-tour d'environ 170 px. Au plus une fois toutes les 1,5 s.
-
-**Vérifié** : 165 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
-
-**À vérifier par l'auteur** : le clignotement sur le téléphone. L'essai prouve que les calques ne bougent plus, mais seul le téléphone dit si c'était toute la cause.
 
 ---
