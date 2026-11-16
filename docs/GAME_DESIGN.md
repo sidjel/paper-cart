@@ -27,7 +27,7 @@
 ## Le hall d'accueil (A6) ✅ VALIDÉ (demande de l'auteur, séance 57 ; image de référence)
 - Le héros commence **à droite des portiques**, sans souvenir ; il ne peut **jamais** revenir à gauche (entrée, mur vitré).
 - Trois plans triés par profondeur : fond (mur vitré de côté en perspective, présentoir, comptoir), milieu (tapis d'entrée noir, **barrière de 4 portiques en diagonale**, agent de sécurité à gauche des portiques, tourné vers la droite), premier plan (plante en pot, file de caddies).
-- L'agent (même style que le héros) interpelle le héros qui va vers les portiques : bras tendu, **le héros est figé le temps de la bulle** : « Vous ne pouvez pas ressortir par ici ! Pour sortir, il faut traverser tout le magasin et passer par les caisses de l'autre côté. » [TEMP]. S'il force, l'agent le **repousse d'un petit pas** vers la droite.
+- L'agent (même style que le héros) va **une seule fois**, au début, du côté au milieu (en retrait des portiques), puis ne bouge plus (séance 59). La première fois que le héros va vers les portiques : bras tendu, **le héros est figé le temps de la bulle** : « Vous ne pouvez pas ressortir par ici ! Pour sortir, il faut traverser tout le magasin et passer par les caisses de l'autre côté. » [TEMP]. Ensuite, s'il force : « Stop ! De l'autre côté, je vous ai dit ! » [TEMP], et le héros **fait demi-tour de quelques pas**.
 - Dehors : parking de nuit, pluie, ruissellement, ronds dans les flaques ; tapis mouillé.
 - ✅ VALIDÉ (séance 58) : le héros sursaute (« !! » et gouttes) quand l'agent l'interpelle ; la pensée « Hum… étrange… » est gardée. L'hôtesse derrière le comptoir viendra avec A8 (échange du caddie).
 

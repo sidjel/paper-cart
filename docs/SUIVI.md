@@ -103,7 +103,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Pluie, ruissellement, ronds dans les flaques, tapis mouillé, parking de nuit | 57 | 👀 | Sans Canvas : SVG et CSS. Fluidité à vérifier sur le téléphone. |
 | Hôtesse au comptoir, « !! » du héros, pensée « Hum… étrange… » | 57 | ✅ | Séance 58 : « !! » fait ; pensée gardée ; hôtesse avec A8. |
 | Hôtesse derrière le comptoir | 58 | 🔧 | Avec A8 (échange du caddie au comptoir). |
-| Personnages et portiques qui clignotent dans le hall (téléphone) | 58 | 👀 | Cause probable, pas prouvée sur le téléphone : mémoire graphique saturée (des morceaux du fond manquaient aussi). Surfaces réduites de 13,8 à 10,5 millions de pixels. À tester ; si ça clignote encore, éteindre ⚙ → Affichage → « Pluie animée du hall » pour voir si la pluie en est la cause. |
+| Personnages et portiques qui clignotent dans le hall (téléphone) | 58 | 👀 | Séance 59 : pas la pluie (essai de l'auteur). Causes mesurées : l'agent gagnait et perdait son calque graphique à chaque pose ; il prenait le même niveau d'affichage qu'un portique. Corrigé ; un essai vérifie que ni l'agent ni les portiques ne changent de calque. À confirmer sur le téléphone. |
+| Agent : une seule fois au milieu, en retrait ; « Stop ! » et demi-tour du héros | 59 | 👀 | Construit, à tester. |
 | Pluie qui glisse de côté ; haut de la vitre clair | 58 | 👀 | Corrigés : pluie sur un calque qui suit le mur ; plafond découpé le long du mur de côté. |
 | Limites des comptages du hall | 57 | ❓ | Nouvelles mesures (83 éléments, 38 images, 4,5 Mpx) : à proposer de nouveau. |
 

@@ -16,6 +16,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 59 — 16/11/2026 — Hall : la cause du clignotement, l'agent refait
+
+**Demande de l'auteur** : l'agent et les portiques clignotent encore (éteindre la pluie ne change rien). L'agent ne se déplace qu'une fois au début (du côté au milieu), un peu plus en retrait. Si le héros force : « Stop ! De l'autre côté je vous ai dit ! », et le héros fait demi-tour de quelques pas.
+
+**Mesures (navigateur de test, des comptages et non des temps)** :
+- L'agent **gagnait et perdait son calque graphique** à chaque changement de pose : ses deux images étaient montrées et cachées tour à tour. C'est la cause déjà connue des clignotements du rayon (séance 27).
+- Son niveau d'affichage changeait 7 fois en 5 s, **à égalité avec un portique** à chaque fois.
+
+**Fait** :
+- Les deux poses de l'agent sont dans une seule boîte, qui garde son calque.
+- L'agent ne change plus de profondeur : il est rangé avec les portiques, sans égalité de niveau.
+- Nouvel essai automatique : pendant toute la scène de l'agent, ni l'agent ni les portiques ne changent de calque (0 mesuré).
+- L'agent va une fois, au début, du côté au milieu, à 200 px en retrait de la barrière ; il ne bouge plus.
+- Première tentative : l'interpellation (héros figé, « !! »). Ensuite : « Stop ! De l'autre côté, je vous ai dit ! » [TEMP] et le héros fait demi-tour d'environ 170 px. Au plus une fois toutes les 1,5 s.
+
+**Vérifié** : 165 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone. L'essai prouve que les calques ne bougent plus, mais seul le téléphone dit si c'était toute la cause.
+
+---
+
 ## Séance 58 — 16/11/2026 — Hall : clignotements, pluie, haut de la vitre ; le « !! » du héros
 
 **Demande de l'auteur** : corriger le clignotement des personnages et des portiques, la pluie qui bascule de côté, le haut du mur vitré mal couvert. Réponses : hôtesse plus tard (1 B), « !! » oui (2 A), pensée gardée (3 A).
@@ -124,29 +145,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Les objets déjà portés ne sont plus à prendre au présentoir.
 
 **Suite proposée** : A6 (3/3), l'agent de sécurité qui vient se placer devant le portique visé, l'annonce d'interdiction, la pensée « Hum… étrange… ».
-
----
-
-## Séance 54 — 16/11/2026 — Knip, puis découpage de main.js en 3 étapes
-
-**Décisions de l'auteur** : Knip accepté (1.a) ; exception de taille pour `style.css` (2.a) ; découpage de `main.js` en 3 étapes (3 : ok).
-
-**Fait** (aucun changement pour le joueur) :
-- **Knip** installé. Sa liste : 4 fonctions marquées « partagées » pour rien (`createCard`, `PLAYER`, `patrol`, `buildCard`), aucun code mort. Liste vidée, puis Knip ajouté à `npm test`.
-- **Découpage de `main.js`**, un commit par étape, tests complets à chaque fois :
-  1. `src/debug/measure.js` (DBG, banc d'essai, test rapide) et `src/debug/departs.js` (points de départ) ;
-  2. `src/game/places.js` (gestionnaire de lieux : charger, quitter, sorties, fondu) ;
-  3. `src/game/voices.js` (haut-parleur, pensées, apartés, rencontre, choix du nom, tournis).
-- `main.js` : 1 370 → **932 lignes**. C'est plus que les 600 annoncées : j'avais sous-estimé ce qui reste (règles de scan et de panier plein, traitement des commandes, fonctions de test).
-
-**Vérifié** :
-- À chaque étape : 159 tests de logique et Knip ; 82 tests navigateur PC et téléphone simulé, sans erreur console.
-- Comptages du rayon identiques (84 éléments, 38 images).
-- Mémoire identique après 5 allers-retours (3 077 éléments).
-- Une erreur attrapée par les tests à l'étape 1 (la caméra passée trop tôt à l'outil de mesure), corrigée avant publication.
-
-**À vérifier par l'auteur** : banc d'essai sur le téléphone, avant (`74cb80b`) et après, s'il le souhaite. Le code a été déplacé, pas changé.
-
-**Suite proposée** : reprendre A6 (2/3), le présentoir déplacé dans le hall et le départ à l'accueil. La suite du découpage de `main.js` peut attendre.
 
 ---

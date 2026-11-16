@@ -2,6 +2,30 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 54 — 16/11/2026 — Knip, puis découpage de main.js en 3 étapes
+
+**Décisions de l'auteur** : Knip accepté (1.a) ; exception de taille pour `style.css` (2.a) ; découpage de `main.js` en 3 étapes (3 : ok).
+
+**Fait** (aucun changement pour le joueur) :
+- **Knip** installé. Sa liste : 4 fonctions marquées « partagées » pour rien (`createCard`, `PLAYER`, `patrol`, `buildCard`), aucun code mort. Liste vidée, puis Knip ajouté à `npm test`.
+- **Découpage de `main.js`**, un commit par étape, tests complets à chaque fois :
+  1. `src/debug/measure.js` (DBG, banc d'essai, test rapide) et `src/debug/departs.js` (points de départ) ;
+  2. `src/game/places.js` (gestionnaire de lieux : charger, quitter, sorties, fondu) ;
+  3. `src/game/voices.js` (haut-parleur, pensées, apartés, rencontre, choix du nom, tournis).
+- `main.js` : 1 370 → **932 lignes**. C'est plus que les 600 annoncées : j'avais sous-estimé ce qui reste (règles de scan et de panier plein, traitement des commandes, fonctions de test).
+
+**Vérifié** :
+- À chaque étape : 159 tests de logique et Knip ; 82 tests navigateur PC et téléphone simulé, sans erreur console.
+- Comptages du rayon identiques (84 éléments, 38 images).
+- Mémoire identique après 5 allers-retours (3 077 éléments).
+- Une erreur attrapée par les tests à l'étape 1 (la caméra passée trop tôt à l'outil de mesure), corrigée avant publication.
+
+**À vérifier par l'auteur** : banc d'essai sur le téléphone, avant (`74cb80b`) et après, s'il le souhaite. Le code a été déplacé, pas changé.
+
+**Suite proposée** : reprendre A6 (2/3), le présentoir déplacé dans le hall et le départ à l'accueil. La suite du découpage de `main.js` peut attendre.
+
+---
+
 ## Séance 53 — 16/11/2026 — Remise en ordre (2/2) : des garde-fous qui se vérifient tout seuls
 
 **Décisions de l'auteur** : VISION.md modifié (direction visuelle → renvoi à DIRECTION_ARTISTIQUE.md) ; flou optionnel gardé, seule exception (choix A) ; les 59 points 👀 : « je te laisse trancher ».
