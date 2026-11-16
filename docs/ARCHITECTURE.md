@@ -98,8 +98,8 @@ A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des 
 
 ## 11. Lieux : règles ✅ (décidées par l'auteur, séance 50 ; à respecter dès A6)
 
-État réel 🔎 (séance 51) :
-- ✅ construit : deux lieux (`rayon-essai`, `accueil`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, gestionnaire dans `src/game/places.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG.
+État réel 🔎 (séance 55) :
+- ✅ construit : deux lieux (`accueil`, où la partie commence et où se trouve le présentoir, et `rayon-essai`), reliés par des **sorties** dans les données (`exits`) ; un lieu se construit et se défait (`scene/placeView.js`, gestionnaire dans `src/game/places.js`) ; ses images sont **libérées en partant** (`releaseImages`), celles du héros et des produits restent ; état `transition` : fondu au noir, rien ne bouge, le lieu suivant est chargé dans le noir (`core/places.js`) ; le monde se souvient (`core/world.js`) ; temps du dernier changement de lieu dans le rapport DBG.
 - ⏳ pas encore : préchargement des voisins (à décider après mesure sur le téléphone) ; comptages et banc par lieu ; banc qui traverse les lieux ; contrôle de la mémoire après plusieurs allers-retours dans le test des comptages (séance 2 de remise en ordre). Un test navigateur vérifie déjà que le nombre d'images ne grimpe pas après 3 allers-retours.
 
 - **Tout est dans les données** : chaque lieu décrit ses calques, sa zone de marche, ses points d'intérêt et ses **sorties** (lieu de destination et point d'arrivée du héros).

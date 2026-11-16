@@ -2,6 +2,18 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 50 (suite) — Audit, point 6 : le chemin au doigt, une fois par image
+
+**Fait** : quand le doigt (ou la souris) glisse en restant appuyé, le jeu retient le dernier point et calcule le chemin **au plus une fois par image**, au lieu d'une fois par mouvement du doigt. Le premier toucher reste immédiat.
+
+**Vérifié** : 147 tests de logique, 79 tests navigateur, sans erreur console. Nouveau test : 39 mouvements envoyés dans la même image → un seul calcul, et le héros suit bien.
+
+**À vérifier par l'auteur** : sur le téléphone, guider le héros au doigt derrière le caddie avec DBG ouvert (« calcul pire »), et le banc d'essai quand il le souhaite.
+
+**Audit** : les 5 corrections recommandées avant A6 sont faites (points 1, 5, 3, 2 + 4, 6). Peuvent attendre : 7 à 15.
+
+---
+
 ## Séance 50 (suite) — Audit, points 2 et 4 : construire, quitter et reconstruire un lieu ; images libérées
 
 **Fait** (aucun changement visible pour le joueur ; premier pas d'A6) :

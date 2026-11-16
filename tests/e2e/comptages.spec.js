@@ -35,7 +35,7 @@ test('comptages du rayon d’essai pendant le banc d’essai', async ({ page }, 
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await page.goto('./');
+  await page.goto('./?lieu=rayon-essai'); // les limites sont celles du rayon (la partie commence dans le hall)
   // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());

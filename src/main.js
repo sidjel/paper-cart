@@ -35,7 +35,7 @@ import { createHud } from './ui/hud.js';
 import { createJournal } from './ui/journal.js';
 import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
 import { createMeasureTools } from './debug/measure.js';
-import { createDepartTools } from './debug/departs.js';
+import { createDepartTools, startPlaceId } from './debug/departs.js';
 import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
@@ -45,7 +45,7 @@ import catalog from './data/products.json';
 
 // Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
 const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace };
-let place = rayonEssai;
+let place = PLACES[startPlaceId(Object.keys(PLACES), accueilPlace.id)]; // la partie commence dans le hall d'accueil
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;
 const touch = matchMedia('(pointer: coarse)').matches;
@@ -319,13 +319,18 @@ function productScales() {
 
 // Prendre tout ce qui est au présentoir (Scanette, panier), sans marcher : tests et points de départ.
 function equipAll() {
-  pickupState.forEach((it, k) => {
-    if (takeItem(gear, pickupState, k)) {
-      sprite.setHeld(it.id, true);
-      basketUi.addObject(it.id);
-    }
-  });
+  for (const id of Object.keys(gear)) {
+    gear[id] = true;
+    sprite.setHeld(id, true);
+    basketUi.addObject(id);
+  }
+  markTaken();
   basketUi.setCapacity(capacity(gear, config.carry));
+}
+
+// Ce que le héros porte déjà n'est plus à prendre au présentoir du lieu affiché.
+function markTaken() {
+  for (const it of pickupState) if (gear[it.id]) it.scanned = true;
 }
 
 // Donner une carte sans scanner (points de départ pour tester) : le produit quitte l'étagère, sans effet.
@@ -796,6 +801,7 @@ const places = createPlaces(uiEl, gameEl, {
     endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
     productState = here.products;
     pickupState = here.pickups;
+    markTaken();
     ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;

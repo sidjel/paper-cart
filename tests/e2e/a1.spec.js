@@ -11,7 +11,10 @@ test.beforeEach(async ({ page }, info) => {
     if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
   });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-  await page.goto('./');
+  // La partie commence dans le hall d'accueil (présentoir). Les tests du rayon y commencent directement
+  // (lien ?lieu=) ; ceux du présentoir commencent dans le hall.
+  const hall = /^A5a (: mains vides|au doigt|: Scanette sans panier)/.test(info.title);
+  await page.goto(hall ? './' : './?lieu=rayon-essai');
   // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
@@ -734,10 +737,14 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   expect(s.gear).toEqual({ scanette: false, panier: false });
   await expect(page.locator('.panier-button')).toBeHidden();
   await expect(page.locator('.actor-held:visible')).toHaveCount(0); // vraiment invisibles à l'écran
-  // Monter vers le présentoir (début du rayon, contre l'étagère).
+  expect(await page.evaluate(() => window.paperCart.place())).toBe('accueil'); // la partie commence dans le hall
+  // Monter contre le mur, puis longer le hall jusqu'au présentoir.
   await page.keyboard.down('ArrowUp');
-  await expect.poll(async () => (await state(page)).pickup, { timeout: 6000 }).toBeGreaterThanOrEqual(0);
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
   await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(async () => (await state(page)).pickup, { timeout: 10000 }).toBeGreaterThanOrEqual(0);
+  await page.keyboard.up('ArrowRight');
   await expect(page.locator('.scan-button')).toContainText('Prendre');
   await page.keyboard.press('Enter'); // la Scanette (le mur, tout près)
   await expect.poll(async () => (await state(page)).gear.scanette).toBe(true);
@@ -756,12 +763,14 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
 
 test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
-  const p = await page.evaluate(() => window.paperCart.worldToClient(395, 300)); // pile de paniers
+  const p = await page.evaluate(() => window.paperCart.worldToClient(1602, 300)); // pile de paniers, dans le hall
   await page.touchscreen.tap(p.x, p.y);
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
   expect((await state(page)).gear.scanette).toBe(false);
-  // Un produit à portée, mais pas de Scanette : rien n'est scanné.
+  // Dans le rayon, sans Scanette : un double toucher sur un produit ne scanne rien.
+  await page.evaluate(() => window.paperCart.useExit());
+  await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play');
   const c = await page.locator('.product').nth(0).boundingBox();
   await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
   await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
@@ -844,15 +853,19 @@ test('A5a : le menu du panier a deux onglets, Cartes et Objets', async ({ page }
 test('A5a : Scanette sans panier, le héros s’interroge lui-même (pensée, bulle en pointillés)', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'PC');
   await page.evaluate(() => window.paperCart.set('narrator.enabled', true));
+  // Dans le hall : la Scanette seulement.
   await page.keyboard.down('ArrowUp');
-  await expect.poll(async () => (await state(page)).pickup, { timeout: 6000 }).toBe(0);
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
   await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(async () => (await state(page)).pickup, { timeout: 10000 }).toBe(0);
+  await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter'); // la Scanette
   await expect.poll(async () => (await state(page)).gear.scanette).toBe(true);
-  // Vers la banane : le panier n'est plus à portée, la banane si.
-  await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => window.paperCart.scanState().reach === 0, null, { timeout: 8000 });
-  await page.keyboard.up('ArrowRight');
+  // Puis le rayon, sans panier : devant la banane.
+  await page.evaluate(() => window.paperCart.useExit());
+  await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play');
+  await toBanana(page);
   await expect.poll(async () => (await state(page)).pickup).toBe(-1);
   await page.locator('.narrator, .hero-bubble').evaluateAll((els) => els.forEach((e) => e.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))));
   await page.keyboard.press('Enter');

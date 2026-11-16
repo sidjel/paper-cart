@@ -57,7 +57,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Audit de l'architecture et de la fluidité avant A6 et A7, sans rien modifier | 50 | ❓ | Fait (rapport dans le JOURNAL, séance 50). 15 points ; **l'auteur valide une correction à la fois**, banc d'essai sur le téléphone avant et après pour la fluidité. |
 | Audit, points 2 et 4 : construire / quitter / reconstruire un lieu ; images du lieu libérées | 50 | 👀 n° 1 | `scene/placeView.js`, `loadPlace` / `unloadPlace`, `releaseImages`. Testé par 3 allers-retours (rien ne s'accumule). Banc d'essai à refaire sur le téléphone (comparer à `2aa4b77`). Transition, sorties et préchargement : avec A6. |
 | Audit, point 6 : chemin recalculé à chaque mouvement du doigt | 50 | 👀 n° 2 | Au plus un calcul par image. Testé. À mesurer sur le téléphone plus tard (décision de l'auteur). Points 7 à 15 : peuvent attendre. |
-| A6 (1/3) : l'accueil, lieu séparé ; aller-retour rayon ↔ accueil avec fondu | 51 | 👀 n° 3 | Hall provisoire, sorties dans les données, état « transition », lieu chargé dans le noir et ancien lieu libéré. À mesurer sur le téléphone : temps du changement (rapport DBG). Restent : présentoir déplacé et départ à l'accueil (2/3) ; agent et portiques (3/3) ; comptages et banc de l'accueil. |
+| A6 (1/3) : l'accueil, lieu séparé ; aller-retour rayon ↔ accueil avec fondu | 51 | 👀 n° 3 | Hall provisoire, sorties dans les données, état « transition », lieu chargé dans le noir et ancien lieu libéré. À mesurer sur le téléphone : temps du changement (rapport DBG). Restent : présentoir déplacé et départ à l'accueil (2/3) ; agent et portiques (3/3) ; comptages et banc de l'accueil. Séance 55 (2/3) : présentoir déplacé dans le hall (agrandi à 2 800 px, deux haut-parleurs), la partie commence dans le hall ; reste l'agent et les portiques (3/3). |
 
 ### À rappeler à l'auteur : points 7 à 15 de l'audit (séance 50), pas encore traités
 | Point | État | Notes |
@@ -82,6 +82,12 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | Découper le CSS par sujet (`style.css`, 1 198 lignes) | 54 | 🔧 | Exception de taille approuvée par l'auteur en attendant. |
 | Suite du découpage de `main.js` (932 lignes, limite 600) | 54 | ❓ | Proposition : règles de scan et de panier plein dans un fichier à part de `src/game/`, puis traitement des commandes. Accord de l'auteur requis. |
+
+### Séance 55
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Limites du test des comptages pour le hall d'accueil | 55 | ❓ | Le test ne couvre que le rayon. Ajouter le hall demande d'écrire dans `tests/e2e/comptages-limites.json` : accord de l'auteur requis (valeurs à proposer après mesure). |
+| Peut-on entrer dans le rayon sans Scanette ? | 55 | ❓ | Aujourd'hui oui (comme avant) : le haut-parleur le rappelle près du passage, et le scan est refusé. Autre option : l'agent ou le haut-parleur bloque le passage. Décision de jeu, à l'auteur. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.

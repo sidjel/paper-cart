@@ -21,7 +21,7 @@
 - ❓ À DÉFINIR : capacités du panier et du caddie (réglables dans ⚙ ; [TEMP] panier = 6) ; qui donne le jeton (voir `HISTOIRE.md`).
 
 ## Ordre des étapes ✅ VALIDÉ (séance 50, détail dans `PROTOTYPES.md`)
-- **A5** (ancien A5a) : accueil provisoire au début du rayon ; le héros prend Scanette et panier ; capacité limitée.
+- **A5** (ancien A5a) : le héros prend Scanette et panier au présentoir en libre-service ; capacité limitée. Le présentoir est dans le **hall d'accueil** depuis la séance 55 (A6), où la partie commence.
 - **A6** l'accueil (lieu séparé) → **A7** le deuxième rayon → **A8** le caddie (ancien A5b) : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**.
 
 ## Le Caddie jouable (A8) ✅ VALIDÉ

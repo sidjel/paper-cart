@@ -7,7 +7,15 @@
 import departsFile from '../data/departs.json';
 import { findDepart, cardCount, pickProducts, saidFor } from '../core/departs.js';
 
-const departId = new URLSearchParams(location.search).get('depart');
+const params = new URLSearchParams(location.search);
+const departId = params.get('depart');
+
+// Lieu où commence la partie : celui du lien ?lieu=<id> (tests), sinon celui du point de départ demandé,
+// sinon le lieu normal (fallback). ids : lieux qui existent.
+export function startPlaceId(ids, fallback) {
+  const asked = params.get('lieu') ?? (departId ? findDepart(departsFile.departs, departId)?.place : null);
+  return ids.includes(asked) ? asked : fallback;
+}
 
 function goToDepart(id) {
   const url = new URL(location.href);

@@ -262,30 +262,6 @@
       "depthRef": 56
     }
   ],
-  "accueil": {
-    "remindAfterX": 900,
-    "comment": "Accueil en libre-service (A5a), dessiné dans le décor du fond (rayon-fond.svg) au début du rayon : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). On les prend depuis le pied de l'étagère. remindAfterX : s'éloigner au-delà sans Scanette fait réagir le haut-parleur.",
-    "items": [
-      {
-        "id": "scanette",
-        "at": [
-          222,
-          340
-        ],
-        "w": 384,
-        "h": 270
-      },
-      {
-        "id": "panier",
-        "at": [
-          472,
-          470
-        ],
-        "w": 110,
-        "h": 140
-      }
-    ]
-  },
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
     "items": [
@@ -541,7 +517,7 @@
         ],
         "to": "accueil",
         "arrive": [
-          2180,
+          2580,
           60
         ],
         "facing": -1

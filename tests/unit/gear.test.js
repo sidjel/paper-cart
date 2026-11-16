@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGear, takeItem, capacity, scanBlocked } from '../../src/core/gear.js';
 import { nearestProduct } from '../../src/core/scan.js';
 import place from '../../src/data/places/rayon-essai.json';
+import accueil from '../../src/data/places/accueil.json';
 
 const CARRY = { panier: 6 };
 const P = { range: 150, minDepth: 150, looseRange: 170, looseDepth: 90 };
@@ -40,7 +41,8 @@ describe('accueil : Scanette et panier (A5a)', () => {
     p[0].scanned = true;
     expect(nearestProduct(p, { x: 300, z: 244 }, P)).toBe(1); // la Scanette prise, reste le panier
   });
-  it('le lieu d’essai a un accueil avec une Scanette et un panier', () => {
-    expect(place.accueil.items.map((i) => i.id).sort()).toEqual(['panier', 'scanette']);
+  it('le hall d’accueil a un présentoir avec une Scanette et un panier ; le rayon n’en a plus', () => {
+    expect(accueil.accueil.items.map((i) => i.id).sort()).toEqual(['panier', 'scanette']);
+    expect(place.accueil).toBeUndefined();
   });
 });

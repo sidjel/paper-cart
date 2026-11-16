@@ -29,7 +29,7 @@ describe('lieux : sorties et fondu', () => {
   });
   it('on peut aller du rayon à l’accueil et en revenir', () => {
     expect(exitAt(rayon.exits.items, 100, 60).to).toBe('accueil');
-    expect(exitAt(accueil.exits.items, 2300, 0).to).toBe('rayon-essai');
+    expect(exitAt(accueil.exits.items, 2690, 0).to).toBe('rayon-essai');
     expect(exitAt(rayon.exits.items, 1500, 60)).toBeNull();
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {

@@ -1,10 +1,38 @@
 {
-  "comment": "Points de départ pour tester vite (⚙ → Départ, ou lien ?depart=<id>). Recalculés à chaque chargement à partir du jeu actuel : ils restent valables après une mise à jour (contrairement à une sauvegarde). equip : Scanette et panier déjà pris. met : la rencontre avec le joueur est déjà faite (nom : celui des options). cards : nombre de cartes déjà dans le panier (« plein » : jusqu'à la capacité). Outil de test, pas un menu du jeu.",
+  "comment": "Points de départ pour tester vite (⚙ → Départ, ou lien ?depart=<id>). Recalculés à chaque chargement à partir du jeu actuel : ils restent valables après une mise à jour (contrairement à une sauvegarde). equip : Scanette et panier déjà pris. met : la rencontre avec le joueur est déjà faite (nom : celui des options). cards : nombre de cartes déjà dans le panier (« plein » : jusqu'à la capacité). Outil de test, pas un menu du jeu. place : lieu de départ (sinon l'accueil). Lien ?lieu=<id> : commencer dans ce lieu, sans rien d'autre.",
   "departs": [
-    { "id": "debut", "label": "Début normal (écran titre, intro, arrivée)" },
-    { "id": "equipe", "label": "Scanette et panier pris (la rencontre viendra au premier scan)", "equip": true },
-    { "id": "libre", "label": "Équipé, rencontre déjà faite (jeu libre)", "equip": true, "met": true },
-    { "id": "3-cartes", "label": "Équipé, rencontre faite, 3 cartes dans le panier", "equip": true, "met": true, "cards": 3 },
-    { "id": "panier-plein", "label": "Équipé, rencontre faite, panier plein", "equip": true, "met": true, "cards": "plein" }
+    {
+      "id": "debut",
+      "label": "Début normal (écran titre, intro, arrivée dans le hall d'accueil)"
+    },
+    {
+      "id": "equipe",
+      "label": "Scanette et panier pris (la rencontre viendra au premier scan)",
+      "equip": true,
+      "place": "rayon-essai"
+    },
+    {
+      "id": "libre",
+      "label": "Équipé, rencontre déjà faite (jeu libre)",
+      "equip": true,
+      "met": true,
+      "place": "rayon-essai"
+    },
+    {
+      "id": "3-cartes",
+      "label": "Équipé, rencontre faite, 3 cartes dans le panier",
+      "equip": true,
+      "met": true,
+      "cards": 3,
+      "place": "rayon-essai"
+    },
+    {
+      "id": "panier-plein",
+      "label": "Équipé, rencontre faite, panier plein",
+      "equip": true,
+      "met": true,
+      "cards": "plein",
+      "place": "rayon-essai"
+    }
   ]
 }

@@ -3,9 +3,11 @@ import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct } fro
 import { nearestProduct } from '../../src/core/scan.js';
 import place from '../../src/data/places/rayon-essai.json';
 import catalog from '../../src/data/products.json';
+import accueil from '../../src/data/places/accueil.json';
 
 const stageY = (z) => place.projection.floorFrontY - z * place.projection.depthToScreen;
-const build = () => ({ products: buildProducts(place, catalog, stageY), pickups: buildPickups(place, 264) });
+// Les produits viennent du rayon ; le présentoir (Scanette, panier) est dans le hall d'accueil depuis la séance 55.
+const build = () => ({ products: buildProducts(place, catalog, stageY), pickups: buildPickups(accueil, 264) });
 
 describe('état du monde', () => {
   it('produits et objets à prendre d’un lieu, d’après ses données', () => {
@@ -17,14 +19,16 @@ describe('état du monde', () => {
     expect(loose.z).toBeGreaterThan(0);
     expect(loose.standAt.length).toBeGreaterThan(0);
     expect(here.pickups.map((p) => p.id)).toEqual(['scanette', 'panier']);
+    expect(buildPickups(place, 264)).toEqual([]); // plus de présentoir dans le rayon
+    expect(buildProducts(accueil, catalog, stageY)).toEqual([]); // pas de produit dans le hall
   });
   it('le monde se souvient : en revenant dans un lieu, un produit scanné est toujours scanné', () => {
     const w = createWorld();
     const a = enterPlace(w, 'rayon', build);
     a.products[0].scanned = true;
     a.pickups[0].scanned = true;
-    enterPlace(w, 'accueil', () => ({ products: [], pickups: [] }));
-    expect(w.current).toBe('accueil');
+    enterPlace(w, 'ailleurs', () => ({ products: [], pickups: [] }));
+    expect(w.current).toBe('ailleurs');
     const back = enterPlace(w, 'rayon', build);
     expect(back).toBe(a);
     expect(back.products[0].scanned).toBe(true);

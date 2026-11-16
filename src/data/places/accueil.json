@@ -2,7 +2,7 @@
   "id": "accueil",
   "name": "[TEMP] Accueil — hall d'entrée",
   "size": [
-    2400,
+    2800,
     1080
   ],
   "projection": {
@@ -14,7 +14,7 @@
     "accueil-fond": {
       "src": "art/placeholder/accueil-fond.svg",
       "size": [
-        2400,
+        2800,
         1080
       ]
     }
@@ -23,7 +23,7 @@
     {
       "id": "fond",
       "image": "accueil-fond",
-      "contains": "plafond, mur, portes automatiques, portiques, comptoir, passage vers les rayons, sol",
+      "contains": "plafond, mur, portes automatiques, portiques, présentoir de Scanettes et de paniers, comptoir, passage vers les rayons, haut-parleurs, sol",
       "hiddenBy": "en partie par le personnage"
     },
     {
@@ -33,7 +33,7 @@
     }
   ],
   "spawn": [
-    1200,
+    420,
     60
   ],
   "walkMask": {
@@ -44,11 +44,11 @@
         -195
       ],
       [
-        2310,
+        2710,
         -195
       ],
       [
-        2310,
+        2710,
         264
       ],
       [
@@ -65,9 +65,9 @@
       {
         "id": "vers-rayon",
         "zone": [
-          2270,
+          2670,
           -195,
-          2310,
+          2710,
           264
         ],
         "to": "rayon-essai",
@@ -81,14 +81,14 @@
   },
   "bench": {
     "start": [
-      1200,
+      420,
       60
     ],
     "route": [
       {
         "to": [
-          600,
-          60
+          1352,
+          240
         ]
       },
       {
@@ -96,13 +96,19 @@
       },
       {
         "to": [
-          2000,
-          120
+          2500,
+          60
         ]
       },
       {
         "to": [
-          1200,
+          900,
+          -100
+        ]
+      },
+      {
+        "to": [
+          420,
           60
         ]
       },
@@ -113,12 +119,49 @@
   },
   "diagnostic": {
     "a": [
-      700,
+      900,
       40
     ],
     "b": [
-      1700,
+      1900,
       40
+    ]
+  },
+  "accueil": {
+    "remindAfterX": 2300,
+    "comment": "Présentoir en libre-service (A5), dessiné dans le décor du hall : Scanettes à gauche, paniers à main à droite. items : id (ce qu'on prend), at = [x, y] sur la scène (x : endroit à viser ; y : haut du dessin, pour le repère), w, h : zone du dessin (double toucher). remindAfterX : aller au-delà sans Scanette (vers les rayons) fait réagir le haut-parleur.",
+    "items": [
+      {
+        "id": "scanette",
+        "at": [
+          1352,
+          340
+        ],
+        "w": 384,
+        "h": 270
+      },
+      {
+        "id": "panier",
+        "at": [
+          1602,
+          470
+        ],
+        "w": 110,
+        "h": 140
+      }
+    ]
+  },
+  "speakers": {
+    "comment": "Haut-parleurs du plafond, dessinés dans le décor (mêmes x). items = [x, y] sur la scène : bouche du haut-parleur.",
+    "items": [
+      [
+        800,
+        68
+      ],
+      [
+        2050,
+        68
+      ]
     ]
   }
 }
