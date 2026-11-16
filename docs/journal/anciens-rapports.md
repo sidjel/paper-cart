@@ -2,6 +2,39 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 51 — 15/11/2026 — A6 (1/3) : l'accueil, un lieu séparé ; aller-retour avec fondu
+
+**Demande de l'auteur** : commencer A6 ; noter les points 7 à 15 de l'audit pour les lui rappeler (fait : SUIVI.md, section « À rappeler à l'auteur »).
+
+**Jouable maintenant** :
+- Tout à gauche du rayon (flèche verte « ACCUEIL » au sol) : fondu au noir, puis le héros arrive dans le **hall d'accueil** (formes provisoires : portes vitrées sous la pluie, portiques, comptoir, passage « RAYONS → »).
+- Par la droite du hall (flèche jaune), il revient au rayon.
+- Le rayon se souvient (produits scannés) ; les cartes et les objets suivent le héros.
+
+**Technique** :
+- Sorties décrites dans les données de chaque lieu (`exits`).
+- `core/places.js` (testé) : sorties et déroulé du fondu.
+- Nouvel état « transition » dans la machine à états : pendant le fondu, rien ne bouge.
+- Le nouveau lieu est chargé dans le noir, l'ancien est libéré.
+
+**Vérifié** :
+- 151 tests de logique, dont : chaque sortie mène à un lieu qui existe, et on arrive hors de toute sortie.
+- 81 tests navigateur PC et téléphone simulé, sans erreur console. Nouveau test : rayon → accueil → rayon, trois fois ; mêmes images en mémoire à la fin, produits scannés conservés, cartes conservées.
+- Comptages du rayon inchangés.
+
+**À vérifier par l'auteur** : le temps du changement de lieu sur le téléphone. Il est écrit dans le rapport DBG, ligne « Lieu » : « dernier changement de lieu : N ms dans le noir ».
+
+**Décisions prises seul** :
+- Le jeu commence encore dans le rayon ; le départ dans le hall viendra avec le déplacement du présentoir (étape 2/3).
+- Pas de préchargement du lieu voisin pour l'instant : on mesure d'abord le temps réel sur le téléphone.
+- Fondu de 0,25 s (⚙ → Caméra).
+
+**Pas encore fait** : comptages et banc d'essai pour l'accueil ; banc qui traverse les lieux.
+
+**Suite proposée** : A6 (2/3), le présentoir de Scanettes et de paniers déplacé dans le hall, et le jeu qui commence à l'accueil.
+
+---
+
 ## Séance 50 (suite) — Audit, point 6 : le chemin au doigt, une fois par image
 
 **Fait** : quand le doigt (ou la souris) glisse en restant appuyé, le jeu retient le dernier point et calcule le chemin **au plus une fois par image**, au lieu d'une fois par mouvement du doigt. Le premier toucher reste immédiat.

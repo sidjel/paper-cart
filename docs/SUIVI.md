@@ -86,8 +86,14 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 ### Séance 55
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| Limites du test des comptages pour le hall d'accueil | 55 | ❓ | Le test ne couvre que le rayon. Ajouter le hall demande d'écrire dans `tests/e2e/comptages-limites.json` : accord de l'auteur requis (valeurs à proposer après mesure). |
-| Peut-on entrer dans le rayon sans Scanette ? | 55 | ❓ | Aujourd'hui oui (comme avant) : le haut-parleur le rappelle près du passage, et le scan est refusé. Autre option : l'agent ou le haut-parleur bloque le passage. Décision de jeu, à l'auteur. |
+| Limites du test des comptages pour le hall d'accueil | 55 | ❓ | Séance 56 : le hall est mesuré à chaque test (60 éléments, 2 calques, 6 images visibles, surface 1,06 écran, 34 images, 3,25 Mpx, rien créé en jeu). Limites proposées à l'auteur ; à écrire dans `tests/e2e/comptages-limites.json` seulement après son accord. |
+| Peut-on entrer dans le rayon sans Scanette ? | 55 | ✅ | Séance 56, réponse de l'auteur : oui (A), on garde le rappel du haut-parleur et le scan refusé. |
+
+### Séance 56
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A6 (3/3) : agent de sécurité devant le portique visé, annonce d'interdiction, pensée « Hum… étrange… » | 56 | 👀 | Construit, à tester par l'auteur, puis validation d'A6. |
+| Pluie animée derrière les baies vitrées du hall | 56 | 👀 | Construite. Figée avec « réduire les animations ». Fluidité à vérifier sur le téléphone. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
