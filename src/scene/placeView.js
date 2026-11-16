@@ -10,6 +10,7 @@ import { createProps } from './props.js';
 import { createProducts } from './products.js';
 import { createSpeakerWaves } from './speakers.js';
 import { createDebugMask } from './debugMask.js';
+import { propLevels } from './depth.js';
 
 export function createPlaceView(container, place, images, common, here, proj, config, getValue) {
   const stage = createStage(container, place, images, getValue);
@@ -23,9 +24,19 @@ export function createPlaceView(container, place, images, common, here, proj, co
     parent: acteurs,
     levelOf: (id) => props.find((p) => p.id === id).el.style.zIndex,
   });
+  // L'agent de sécurité : ses deux poses (repos, geste d'arrêt) dans une seule boîte, qui garde son calque
+  // (montrer une image et cacher l'autre ne crée ni ne défait de calque : sinon, clignotement sur téléphone,
+  // mesuré séance 59). Il ne change pas de profondeur : il est rangé avec les objets du décor (pas d'égalité
+  // de niveau avec un portique).
   const g = place.guard;
-  const guard = g ? { idle: guardImage(images.get(g.image), g.anchor, acteurs), stop: guardImage(images.get(g.stopImage), g.anchor, acteurs) } : null;
-  if (guard) guard.stop.hidden = true;
+  const guard = g ? createGuardBox(images, g, acteurs) : null;
+  const depthRefs = props.map((p) => p.depthRef);
+  if (guard) {
+    depthRefs.push(g.post[1]);
+    const levels = propLevels(depthRefs);
+    props.forEach((p, i) => (p.el.style.zIndex = levels[i]));
+    guard.box.style.zIndex = levels[levels.length - 1];
+  }
   if (place.rain) {
     addRain(stage.layers[place.rain.layer], place.rain);
     if (place.rain.mat) addMatSheen(stage.layers[place.rain.mat.layer], place.rain.mat.points);
@@ -35,7 +46,7 @@ export function createPlaceView(container, place, images, common, here, proj, co
   return {
     stage,
     props,
-    depthRefs: props.map((p) => p.depthRef),
+    depthRefs, // profondeurs de référence (objets du décor, et l'agent s'il y en a un)
     speakerWaves,
     products,
     debugMask,
@@ -50,17 +61,28 @@ export function createPlaceView(container, place, images, common, here, proj, co
   };
 }
 
-// L'agent de sécurité (A6) : une image (par pose) posée sur le calque des acteurs, placée à chaque image.
-function guardImage(img, anchor, parent) {
-  const el = img.el;
-  el.className = 'guard';
-  el.width = img.w;
-  el.height = img.h;
-  el.alt = '';
-  el.draggable = false;
-  el.style.transformOrigin = `${anchor[0]}px ${anchor[1]}px`;
-  parent.appendChild(el);
-  return el;
+// L'agent de sécurité (A6) : une boîte posée sur le calque des acteurs (placée à chaque image par
+// game/guard.js), avec une image par pose.
+function createGuardBox(images, g, parent) {
+  const box = document.createElement('div');
+  box.className = 'guard';
+  box.style.transformOrigin = `${g.anchor[0]}px ${g.anchor[1]}px`;
+  const pose = (id) => {
+    const img = images.get(id);
+    const el = img.el;
+    el.className = 'guard-pose';
+    el.width = img.w;
+    el.height = img.h;
+    el.alt = '';
+    el.draggable = false;
+    box.appendChild(el);
+    return el;
+  };
+  const idle = pose(g.image);
+  const stop = pose(g.stopImage);
+  stop.hidden = true;
+  parent.appendChild(box);
+  return { box, idle, stop };
 }
 
 // Pluie (calque du dehors, découpée par le mur vitré) : deux voiles de gouttes qui glissent en biais,

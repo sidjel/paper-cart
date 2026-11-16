@@ -294,7 +294,7 @@
     ]
   },
   "guard": {
-    "comment": "Agent de sécurité (A6, refait séance 57) : à gauche de la barrière de portiques, tourné vers la droite. barrier : x de la barrière = x0 + z × slope (comme les portiques). Distances comptées depuis la barrière : watch (il se met en face du héros), warn (il l'interpelle s'il va vers la gauche), touch (contre la barrière : il le repousse de pushDist vers la droite, au plus une fois toutes les pushEvery s), release (assez loin : il pourra l'interpeller de nouveau). offset : distance de l'agent à la barrière. stopTime : durée du geste d'arrêt. [TEMP] forme provisoire. Règle : src/core/guard.js.",
+    "comment": "Agent de sécurité (A6 ; comportement refait séance 59). À gauche de la barrière, tourné vers la droite. Au début (après startDelay s), il va une seule fois de son poste (post, sur le côté) à sa place (stand, au milieu, en retrait de la barrière), à la même profondeur, puis ne bouge plus (il est rangé en profondeur comme un objet du décor). barrier : x = x0 + z × slope. Distances depuis la barrière : warn (première interpellation, le héros est figé le temps de la bulle), touch (il force : « Stop ! » et le héros fait demi-tour de backDist, au plus une fois toutes les stopEvery s). stopTime : durée du geste d'arrêt. [TEMP] forme provisoire. Règle : src/core/guard.js.",
     "image": "agent-securite",
     "stopImage": "agent-securite-stop",
     "anchor": [
@@ -303,25 +303,23 @@
     ],
     "scale": 0.85,
     "post": [
-      800,
-      150
+      440,
+      45
     ],
+    "stand": [
+      709,
+      45
+    ],
+    "startDelay": 1.2,
     "barrier": {
       "x0": 880,
       "slope": 0.65
     },
-    "offset": 120,
-    "zRange": [
-      -140,
-      240
-    ],
-    "watch": 420,
     "warn": 200,
     "touch": 70,
-    "release": 520,
-    "pushEvery": 1.2,
-    "pushDist": 90,
-    "stopTime": 0.8
+    "stopEvery": 1.5,
+    "backDist": 170,
+    "stopTime": 0.9
   },
   "rain": {
     "comment": "Pluie derrière le mur vitré (séance 57), sur son propre calque, derrière le fond et qui suit le mur (séance 58 : sur le calque du dehors, elle glissait de côté) : le mur la découpe à la forme des vitres. rect = zone de pluie (x, y, largeur, hauteur) : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), ruissellement, ronds dans les flaques (ripples : [x, y] dans le calque, au pied des vitres). mat = tapis d'entrée (dans le fond) : un reflet mouillé qui glisse lentement. Animations CSS, transform et opacité seulement ; figées avec « réduire les animations ».",

@@ -174,3 +174,51 @@ test('mémoire : 5 allers-retours rayon ↔ accueil, rien ne s’accumule', asyn
   expect(end.heapMb).toBeLessThanOrEqual(start.heapMb * 1.15 + 1);
   expect(errors).toEqual([]);
 });
+
+// Clignotement sur téléphone (séance 59) : un élément qui gagne ou perd son calque graphique est
+// redessiné. Pendant la scène de l'agent (interpellation, « Stop ! », poses), ni l'agent ni les
+// portiques ne doivent gagner ou perdre leur calque.
+test('hall : l’agent et les portiques gardent leur calque pendant la scène de l’agent', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
+  test.setTimeout(60_000);
+  await page.goto('./?lieu=accueil');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  await page.evaluate(() => {
+    window.paperCart.markSaid('arrivee');
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.4], ['narrator.holdPerChar', 0]]) window.paperCart.set(k, v);
+  });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  const { root } = await cdp.send('DOM.getDocument');
+  const watched = new Set();
+  for (const sel of ['.guard', '.prop']) {
+    const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
+    for (const nodeId of nodeIds) watched.add((await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId);
+  }
+  expect(watched.size).toBe(5); // l'agent et les 4 portiques
+  let sig = null;
+  let switches = 0;
+  let tracking = false;
+  cdp.on('LayerTree.layerTreeDidChange', (e) => {
+    if (!e.layers) return;
+    const s = e.layers.filter((l) => watched.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
+    if (tracking && s !== sig) switches++;
+    sig = s;
+  });
+  await cdp.send('LayerTree.enable');
+  await page.waitForTimeout(2500); // l'agent va à sa place
+  tracking = true;
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.journal().some((l) => /Stop\s?!/.test(l)), null, { timeout: 15000 });
+  await page.waitForTimeout(800);
+  await page.keyboard.up('ArrowLeft');
+  for (const k of ['ArrowUp', 'ArrowDown']) {
+    await page.keyboard.down(k);
+    await page.waitForTimeout(700);
+    await page.keyboard.up(k);
+  }
+  console.log('Hall, changements de calque (agent, portiques) :', switches);
+  expect(switches).toBe(0);
+});

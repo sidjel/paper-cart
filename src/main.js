@@ -311,8 +311,9 @@ const guard = createGuardWiring({
     say('agent_sortie');
   },
   talking: () => voices.narrator.line !== null && voices.narrator.voice === 'agent',
-  // Il force : un petit pas forcé vers la droite.
-  push: (dx) => setPath(walker, [[walker.x + dx, walker.z]]),
+  // Ensuite, il force : « Stop ! », et le héros fait demi-tour de quelques pas.
+  onStop: () => say('agent_stop'),
+  back: (dx) => setPath(walker, [[walker.x + dx, walker.z]]),
 });
 const heroAside = voices.heroAside;
 
@@ -706,7 +707,7 @@ function render() {
   const emotion = voices.emotion(walker.moving);
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
-  guard.render(a, z, shown.level);
+  guard.render(a);
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
   // Au présentoir, ce qu'on peut prendre passe avant les produits.

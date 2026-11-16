@@ -111,6 +111,12 @@
       "cooldown": 20,
       "comment": "le héros va vers la barrière de portiques du hall : l'agent de sécurité l'interpelle (bulle au-dessus de l'agent ; le héros s'arrête le temps de la bulle). Voix « agent » (séance 57)."
     },
+    "agent_stop": {
+      "voice": "agent",
+      "strong": true,
+      "cooldown": 0,
+      "comment": "après la première interpellation, le héros force contre les portiques : l'agent n'est pas content ; le héros fait demi-tour de quelques pas (séance 59)"
+    },
     "sortie_etrange": {
       "voice": "pensee",
       "follows": "agent_sortie",
@@ -379,6 +385,11 @@
       "id": "panier_plein_1",
       "trigger": "panier_plein",
       "text": "[TEMP] Votre panier est plein, cher Client. Le Maxi-Gouffre vous recommande un caddie. Les caddies fonctionnent avec une pièce. Vous n'avez pas de pièce."
+    },
+    {
+      "id": "agent_stop_1",
+      "trigger": "agent_stop",
+      "text": "[TEMP] Stop ! De l'autre côté, je vous ai dit !"
     },
     {
       "id": "agent_sortie_1",
