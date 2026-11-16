@@ -17,6 +17,7 @@
 - **Ne jamais pousser une version qui ne passe pas les tests** ou qui affiche des erreurs console.
 - Un commit par changement cohérent, avec un message clair en français.
 - Quand l'auteur valide une étape : skill **`valider`**.
+- Relecture à froid à la fin d'une étape importante (lancée par l'auteur) : skill **`audit`**.
 - Une version publiée cassée se corrige par un nouveau commit ou un `git revert`. Jamais de force-push, de `reset --hard` ni de réécriture de l'historique.
 - Pour un chantier risqué (gros remaniement, changement de technique d'affichage), proposer une branche à part et attendre l'accord de l'auteur.
 
