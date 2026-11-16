@@ -280,7 +280,7 @@ Les étiquettes affichées en français correspondent à des identifiants ASCII 
 ### 8.1 Scène mise à l'échelle
 - Tout le jeu est dessiné dans une **scène logique de taille fixe**, mise à l'échelle par une transformation CSS pour remplir l'écran sans déformer (bandes de décor sur les côtés si besoin).
 - **Deux profils**, choisis selon la fenêtre et recalculés au redimensionnement :
-  - `wide` : scène 1920×1080, pour PC et tablettes ;
+  - `wide` : scène 1920×1080, pour PC ;
   - `compact` : scène 1280×720, avec faces de cartes compactes (GD §17.4), quand la fenêtre fait moins de `COMPACT_MAX_WIDTH` × `COMPACT_MAX_HEIGHT` px CSS.
 - Les tailles exactes (cartes, main, panneaux) sont fixées au jalon J1 d'après des captures validées par l'auteur. Objectifs : zones à toucher ≥ `TOUCH_MIN_PX` px réels, texte ≥ 12 px réels.
 - En portrait sur téléphone : écran `rotate` superposé et pause.

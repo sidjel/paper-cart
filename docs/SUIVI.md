@@ -125,6 +125,26 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Petite carte du Panier créée à chaque scan | 63 | ❓ | Écart restant, faible coût (panneau caché). À corriger plus tard si l'auteur le souhaite (cases préparées d'avance). |
 | 7. Test de mémoire, aussi avec un échec au milieu | 62 | ✅ | |
 
+### Séance 64 (règles professionnelles, séance A)
+| Demande ou écart | Séance | État | Notes |
+|---|---|---|---|
+| Règles inscrites (affichage, parallaxe, lumière, boucle, entrées, son, sauvegarde, appareils, menus, dialogues, chargements, méthode, index) | 64 | ✅ | Liste et emplacements : rapport de la séance 64 (JOURNAL). |
+| Profils d'appareils (PC modeste, PC rapide, smartphone) | 64 | ❓ | Options proposées ; à construire après accord (séance B). |
+| Chantier son (diagnostic, essai long, corrections) | 64 | 🔧 | Séance B, avec comparaison sur le téléphone. |
+| Entrées : pas d'essai automatique à la manette | 64 | ❓ | Clavier, souris et doigt ont leurs essais ; la manette se simule dans le navigateur de test (faux `getGamepads`). |
+| Entrées : les aides à l'écran ne suivent pas le dernier appareil utilisé | 64 | ❓ | Choisies une fois au démarrage (doigt ou clavier) ; rien pour la manette. |
+| Entrées : pas de pause automatique si la manette est débranchée | 64 | ❓ | Le branchement et le débranchement sont bien détectés. |
+| Entrées : manette jamais essayée pour de vrai | 64 | 🔧 | Une étape n'est validée qu'après un essai sur une vraie manette. |
+| Entrées : zones à toucher de moins de 44 px | 64 | ❓ | Boutons du jeu et du HUD : 44 px. Menus de réglages, onglets, diagnostic : 36 à 40 px (9 endroits). |
+| Bulle qui se ferme seule : durée selon le texte (2,5 s + 50 ms par lettre) | 64 | ❓ | Le code garde la durée fixe de l'agent (3 s, séance 60) : à changer. |
+| Cartes (volante, Panier) : changement d'image (`src`) en jeu | 64 | ❓ | La règle l'interdit pour les personnages et objets de la scène ; les cartes montrent l'image du produit scanné (image déjà décodée). À mesurer avant de décider. |
+| « Lire la page avant de la modifier » : le compteur du Panier force une mise en page (`offsetWidth`) pour relancer son animation | 64 | ❓ | À chaque scan. Petit écart, connu. |
+| Chargement : pas de signe d'attente au-delà de 0,3 s | 64 | ❓ | Le fondu reste noir pendant le chargement (0,7 à 1,4 s pour le rayon sur le téléphone). |
+| Parallaxe : « réduire les animations » ne diminue pas encore son amplitude ; interrupteur d'arrondi à ajouter (🧪) | 64 | ❓ | |
+| Direction de la lumière du hall et du rayon | 64 | ❓ | À définir par l'auteur (DIRECTION_ARTISTIQUE). |
+| Téléphone : boutons du HUD en haut à droite, pas à portée de pouce | 64 | ❓ | Règle des menus. |
+| Cahier des charges des images (`IMAGES.md`, avant D) : chaque dessin rogné au plus près du trait, avec son **point d'appui au sol** (les pieds) | 64 | 🔧 | Pour que l'ombre et l'ordre devant/derrière tombent juste sans retoucher le code. |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 

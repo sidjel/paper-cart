@@ -53,3 +53,11 @@ Reprise de `docs/archive/maxi-gouffre-GAME_DESIGN.md` §7.3 et §7.4. **Effets d
 - 12 produits scannables (`src/data/products.json`) : 10 sur l'étagère, 1 sur une table, 1 dans le caddie.
 - Une carte = nom, puissance, stade de départ (Frais ou Mûr), propriétés ; icône de stade (forme + couleur).
 - Le Panier liste les cartes, sans interaction. Pas de vieillissement, pas de familles, pas de combat.
+
+## Technique du combat 🧪 À TESTER (prototype B ; noté séance 64)
+- Le combat se joue **dans le décor déjà chargé** (aucun rechargement de lieu) ; la caméra cadre le duel ; marche, scan et animations d'ambiance sont en pause.
+- Les cartes en main utilisent des **emplacements préparés et réutilisés**, jamais recréés à chaque pioche.
+- Le vieillissement n'avance **jamais en temps réel** ni pendant un menu ou une pause, quel que soit le déclenchement choisi (❓ le déclenchement reste à décider par l'auteur).
+- Une carte qui change de stade est signalée (animation, son court) et **ne change jamais pendant qu'on la sélectionne**.
+- Les combos et recettes sont **dans les données**, jamais écrits dans le code.
+
