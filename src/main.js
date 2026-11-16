@@ -519,6 +519,7 @@ function handleAction(action) {
       else if (who === 'choice') voices.answerFocused();
       else if (who === 'scene') voices.skip();
       else if (who === 'play') tryScan();
+      else if (who === 'erreur') places.retry(); // manette (A), Entrée : « Réessayer »
       break;
     case 'choice1':
     case 'choice2':
@@ -848,6 +849,8 @@ const places = createPlaces(uiEl, gameEl, {
   },
   // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
   onArrived: () => voices.arrivedInPlace(),
+  logError,
+  onLoadFailed: () => say('lieu_inaccessible'),
   render: () => render(),
 });
 
@@ -960,6 +963,7 @@ async function start() {
       measure.startQuick({ warmup, block, settle, rounds }, suite);
     },
     quickReport: () => measure.quickReport(),
+    errors: () => [...errorLog],
     assets: () => ({ images: assetStats.images, pixels: assetStats.pixels, timings: assetStats.perImage.length }),
     audioStarted: () => audio.started,
     // Tests automatiques : changer un réglage, exactement comme dans le panneau (il est donc enregistré).

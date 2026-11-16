@@ -49,6 +49,10 @@ describe('lieux : sorties et fondu', () => {
   });
   it('la machine à états a un état « transition », entre deux moments de jeu', () => {
     expect(TRANSITIONS.play).toContain('transition');
-    expect(TRANSITIONS.transition).toEqual(['play']);
+    expect(TRANSITIONS.transition).toEqual(['play', 'erreur']);
+  });
+
+  it('un lieu qui ne se charge pas : la transition se termine toujours (jeu, ou écran « Réessayer » qui revient au jeu)', () => {
+    expect(TRANSITIONS.erreur).toEqual(['play']);
   });
 });

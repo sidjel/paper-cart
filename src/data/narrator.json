@@ -125,6 +125,11 @@
       "cooldown": 25,
       "comment": "juste après : le héros se parle à lui-même (bulle, sans mise en scène, ne compte pas comme un aparté)"
     },
+    "lieu_inaccessible": {
+      "strong": true,
+      "cooldown": 0,
+      "comment": "un lieu n'a pas pu être chargé : le héros est revenu au lieu de départ (séance 62)"
+    },
     "consigne_scanette": {
       "once": true,
       "comment": "le héros s'éloigne de l'accueil sans Scanette"
@@ -402,6 +407,11 @@
       "id": "sortie_etrange_1",
       "trigger": "sortie_etrange",
       "text": "[TEMP] Hum… étrange…"
+    },
+    {
+      "id": "lieu_inaccessible_1",
+      "trigger": "lieu_inaccessible",
+      "text": "[TEMP] Cher Client, ce rayon est momentanément inaccessible. Merci de votre compréhension."
     },
     {
       "id": "consigne_1",

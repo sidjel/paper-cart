@@ -6,7 +6,8 @@
 //
 // game : { places (données des lieux), base, sm, world, catalog, getValue,
 //          commonImages(), actors() → [repère, poussière, héros], walker(), canLeave(),
-//          onLoaded({ place, proj, mask, here, view }), onLeaving(), onArrived(), render() }
+//          onLoaded({ place, proj, mask, here, view }), onLeaving(), onArrived(), render(),
+//          logError(texte) → diagnostic (F3), onLoadFailed() → le haut-parleur prévient }
 
 import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
@@ -63,27 +64,82 @@ export function createPlaces(ui, container, game) {
   let transition = null;
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
 
+  // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
+  // héros revient là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti), le
+  // haut-parleur prévient. Si même ce rechargement échoue : un écran d'erreur avec « Réessayer ».
+  // Dans tous les cas, l'état « transition » se termine.
+  let leftFrom = null; // { id, x, z, facing } : où était le héros en partant
+  let ignoredExit = null; // sortie d'où l'on vient de revenir après un échec
+  const errorEl = document.createElement('div');
+  errorEl.className = 'place-error';
+  errorEl.hidden = true;
+  errorEl.setAttribute('role', 'alertdialog');
+  errorEl.innerHTML = '<p>[TEMP] Impossible de charger ce lieu.</p><button>Réessayer</button>';
+  ui.appendChild(errorEl);
+  const retryBtn = errorEl.querySelector('button');
+  retryBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    retry();
+  });
+
   function leaveBy(exit) {
+    const w = game.walker();
+    leftFrom = { id: place.id, x: w.x, z: w.z, facing: w.facing };
     transition = createTransition(exit);
     fadeEl.hidden = false;
     game.sm.go('transition');
   }
 
+  function putHero(x, z, facing) {
+    const walker = game.walker();
+    walker.x = walker.prevX = x;
+    walker.z = walker.prevZ = z;
+    walker.vx = walker.vz = 0;
+    walker.facing = facing ?? walker.facing;
+    walker.away = false;
+    clearTarget(walker);
+  }
+
   async function change(exit) {
     const t0 = performance.now();
     unload();
-    await load(exit.to);
-    const walker = game.walker();
-    walker.x = walker.prevX = exit.arrive[0];
-    walker.z = walker.prevZ = exit.arrive[1];
-    walker.vx = walker.vz = 0;
-    walker.facing = exit.facing ?? walker.facing;
-    walker.away = false;
-    clearTarget(walker);
-    game.onArrived();
-    game.render();
+    try {
+      await load(exit.to);
+      putHero(exit.arrive[0], exit.arrive[1], exit.facing);
+      game.onArrived();
+    } catch (err) {
+      game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
+      unload(); // ce qui a pu être construit avant l'échec
+      if (await backToStart(exit)) game.onLoadFailed();
+      else errorEl.hidden = false;
+    }
+    if (view) game.render();
     lastMs = Math.round(performance.now() - t0);
     placeReady(transition);
+  }
+
+  // Recharger le lieu de départ et y remettre le héros. Renvoie false si cela échoue aussi.
+  async function backToStart(exit) {
+    try {
+      await load(leftFrom.id);
+      putHero(leftFrom.x, leftFrom.z, leftFrom.facing);
+      ignoredExit = exit;
+      return true;
+    } catch (err) {
+      game.logError(`lieu « ${leftFrom.id} » non rechargé : ${err?.message ?? err}`);
+      unload();
+      return false;
+    }
+  }
+
+  // « Réessayer » (écran d'erreur) : on retente le lieu de départ.
+  async function retry() {
+    if (errorEl.hidden) return;
+    errorEl.hidden = true;
+    if (await backToStart(null)) {
+      game.render();
+      game.sm.go('play');
+    } else errorEl.hidden = false;
   }
 
   return {
@@ -103,6 +159,8 @@ export function createPlaces(ui, container, game) {
       if (transition || !game.canLeave()) return;
       const walker = game.walker();
       const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
+      if (exit === ignoredExit) return; // revenu par là après un échec : il doit d'abord en ressortir
+      ignoredExit = null;
       if (exit && game.places[exit.to]) leaveBy(exit);
     },
     // À chaque image pendant le changement de lieu : seul le fondu avance.
@@ -112,7 +170,8 @@ export function createPlaces(ui, container, game) {
       if (transition.phase === 'done') {
         transition = null;
         fadeEl.hidden = true;
-        game.sm.go('play');
+        game.sm.go(view ? 'play' : 'erreur'); // sans lieu : l'écran d'erreur attend « Réessayer »
+        if (!view) retryBtn.focus({ preventScroll: true });
       }
     },
     // Tests : prendre une sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
@@ -122,6 +181,7 @@ export function createPlaces(ui, container, game) {
       leaveBy(exit);
       return true;
     },
+    retry,
     // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
     async reload() {
       const id = place.id;

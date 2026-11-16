@@ -1254,3 +1254,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .hero-surprise svg { display: block; animation: surprise-pop 0.35s ease-out; transform-origin: 30px 60px; }
 @keyframes surprise-pop { from { transform: scale(0.2); } 60% { transform: scale(1.2); } to { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .hero-surprise svg { animation: none; } }
+/* Un lieu n'a pas pu être chargé, même le lieu de départ (src/game/places.js) : message et « Réessayer ». */
+.place-error { position: absolute; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #14110d; color: #f3ecdc; text-align: center; padding: 24px; }
+.place-error[hidden] { display: none; }
+.place-error p { margin: 0; font-size: calc(18px * var(--ts, 1)); }
+.place-error button { font: inherit; font-size: calc(18px * var(--ts, 1)); padding: 12px 28px; border-radius: 10px; border: 2px solid #f3ecdc; background: #2e2820; color: #f3ecdc; }
