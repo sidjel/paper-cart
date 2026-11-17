@@ -145,6 +145,7 @@ export const config = {
     heroVolume: 0.5, // volume des apartés du héros (froissement de papier, petits bips)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
     // Instruments de la musique (séance 66 : interrupteurs pour trouver un bruit ; le shaker, fautif, est retiré).
+    preparedSounds: true, // essai : sons courts préparés une fois (oui) ou fabriqués à chaque fois comme avant (non)
     musicBass: true, // basse
     musicPiano: true, // piano électrique (accords)
     musicMelody: true, // mélodie (vibraphone)
@@ -218,6 +219,7 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.preparedSounds', label: 'Essai : sons courts préparés', type: 'bool' },
   { group: 'Son', key: 'audio.musicBass', label: 'Musique : basse', type: 'bool' },
   { group: 'Son', key: 'audio.musicPiano', label: 'Musique : piano', type: 'bool' },
   { group: 'Son', key: 'audio.musicMelody', label: 'Musique : mélodie', type: 'bool' },

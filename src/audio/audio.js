@@ -142,7 +142,7 @@ export function createAudio(settings, song) {
   }
   // Un son préparé (variante k), ou à défaut fabriqué en direct (graph : nœuds de chaque partie).
   function playPrepared(name, k, bus, live) {
-    if (prepared) {
+    if (prepared && settings.preparedSounds !== false) {
       const src = ctx.createBufferSource();
       src.buffer = prepared[name][k];
       src.connect(bus);
