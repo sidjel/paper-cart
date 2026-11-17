@@ -14,7 +14,7 @@ export function createAudio(settings, song) {
   // Nœuds créés et libérés, par catégorie (effets, musique) : le navigateur ne permet pas de les compter,
   // on les compte nous-mêmes (règles : src/audio/CLAUDE.md). « Actifs » = créés − libérés : retombe à zéro
   // quand plus rien ne joue.
-  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0, byName: {} };
+  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0, byName: {}, recent: [] };
 
   // Un son joué : ses nœuds sont libérés quand sa source se termine (onended → disconnect). Le nettoyage
   // est idempotent (garde cleanedUp) : le compteur ne baisse qu'une fois, même après stop() puis onended.
@@ -359,6 +359,9 @@ export function createAudio(settings, song) {
         music: stats.music.created - stats.music.freed,
         states: stats.states.slice(-4),
         byName: { ...stats.byName },
+        recent: stats.recent.slice(),
+        clock: ctx ? Math.round(ctx.currentTime) : 0, // horloge du son (s)
+        song: music ? music.position() : '', // où en est la musique
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
       };
     },
@@ -386,6 +389,10 @@ export function createAudio(settings, song) {
       if (!running() || !SOUNDS[name]) return;
       stats.played++;
       stats.byName[name] = (stats.byName[name] ?? 0) + 1; // quels sons (diagnostic : un son inattendu)
+      if (name !== 'pas' && name !== 'blip' && name !== 'blipHeros') {
+        stats.recent.push(`${Math.round(ctx.currentTime)} s ${name}`); // les derniers sons (hors pas et bips de texte)
+        if (stats.recent.length > 6) stats.recent.shift();
+      }
       SOUNDS[name]();
     },
     // À chaque image affichée.

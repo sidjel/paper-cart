@@ -76,6 +76,8 @@ export function createMusic(song) {
   }
 
   return {
+    // Où en est la musique (diagnostic) : numéro de boucle (20 s chacune), mesure, mélodie jouée ou non.
+    position: () => `boucle ${loop + 1}, mesure ${Math.floor((s.events[idx]?.beat ?? 0) / 4) + 1}/8, mélodie ${s.melodyLoops[loop % s.melodyLoops.length] ? 'oui' : 'non (basse seule)'}`,
     // À chaque image : programme les notes des prochaines LOOKAHEAD secondes.
     // tracked(source, nœuds) : libère les nœuds d'une note à sa fin (audio.js). Renvoie le nombre de notes programmées.
     update(ctx, out, noise, tracked = () => {}) {
