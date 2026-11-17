@@ -141,6 +141,8 @@ test('mode dev : « Départ » sur l’écran titre ouvre les points de départ 
   await page.locator('.title-button', { hasText: 'Départ' }).click();
   const rayon2 = page.locator('.title-departs button', { hasText: 'Rayon 2' });
   await expect(rayon2).toBeVisible();
+  await expect(rayon2).toBeInViewport(); // sur le téléphone aussi (avant : sous l'écran)
+  await page.screenshot({ path: `test-results/captures/titre-departs-${test.info().project.name}.png` });
   await rayon2.click();
   await page.waitForFunction(() => window.paperCart?.place() === 'rayon-2' && window.paperCart.state() === 'play', null, { timeout: 15000 });
 });

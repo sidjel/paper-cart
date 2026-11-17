@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, exitTarget } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -82,5 +82,18 @@ describe('lieux : sorties et fondu', () => {
     expect(showWait(tr, p)).toBe(true); // 0,35 s dans le noir
     placeReady(tr);
     expect(showWait(tr, p)).toBe(false);
+  });
+});
+
+describe('passages au doigt (séance 67)', () => {
+  it('toucher une ouverture envoie au milieu de son passage, même trop bas pour être touché ; ailleurs, rien', () => {
+    const a = rayon2.exits.items.find((e) => e.id === 'vers-rayon-a');
+    const mid = [(a.zone[0] + a.zone[2]) / 2, (a.zone[1] + a.zone[3]) / 2];
+    expect(exitTarget(rayon2.exits.items, 2170, -200)).toEqual(mid); // bas de l'écran, devant l'ouverture
+    expect(exitTarget(rayon2.exits.items, 1500, -200)).toBe(null); // ailleurs : on marche, simplement
+    expect(exitTarget(rayon2.exits.items, 2170, 100)).toBe(null); // le sol devant l'ouverture : on marche
+    const b = rayon.exits.items.find((e) => e.id === 'vers-rayon2-b');
+    expect(exitTarget(rayon.exits.items, 3140, 600)).toEqual([(b.zone[0] + b.zone[2]) / 2, (b.zone[1] + b.zone[3]) / 2]); // l'ouverture, au fond
+    expect(exitTarget(rayon.exits.items, 1000, 600)).toBe(null); // l'étagère : comme avant
   });
 });

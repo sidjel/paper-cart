@@ -1,10 +1,7 @@
 {
   "id": "accueil",
   "name": "[TEMP] Accueil — hall d'entrée",
-  "size": [
-    2800,
-    1080
-  ],
+  "size": [2800, 1080],
   "projection": {
     "floorFrontY": 880,
     "depthToScreen": 1,
@@ -13,69 +10,42 @@
   "images": {
     "accueil-dehors": {
       "src": "art/placeholder/accueil-dehors.svg",
-      "size": [
-        1100,
-        800
-      ]
+      "size": [1100, 800]
     },
     "accueil-fond": {
       "src": "art/placeholder/accueil-fond.svg",
-      "size": [
-        2800,
-        1080
-      ]
+      "size": [2800, 1080]
     },
     "accueil-avant": {
       "src": "art/placeholder/accueil-avant.svg",
-      "size": [
-        2800,
-        300
-      ]
+      "size": [2800, 300]
     },
     "portique": {
       "src": "art/placeholder/portique.svg",
-      "size": [
-        80,
-        270
-      ]
+      "size": [80, 270]
     },
     "agent-securite": {
       "src": "art/placeholder/agent-securite.svg",
-      "size": [
-        220,
-        320
-      ]
+      "size": [220, 320]
     },
     "agent-securite-stop": {
       "src": "art/placeholder/agent-securite-stop.svg",
-      "size": [
-        220,
-        320
-      ]
+      "size": [220, 320]
     }
   },
   "layers": [
     {
       "id": "dehors",
       "image": "accueil-dehors",
-      "position": [
-        -300,
-        90
-      ],
+      "position": [-300, 90],
       "parallax": 0.6,
       "contains": "dehors, vu par le mur vitré : parking de nuit sous la pluie (pluie, ruissellement et ronds dans les flaques animés)",
       "hiddenBy": "le fond, sauf par les vitres du mur de côté (quadrilatère (0,100)-(700,172)-(700,600)-(0,860))",
-      "size": [
-        800,
-        900
-      ]
+      "size": [800, 900]
     },
     {
       "id": "pluie",
-      "size": [
-        720,
-        880
-      ],
+      "size": [720, 880],
       "contains": "pluie, ruissellement, ronds dans les flaques (animés), devant le dehors ; suit le mur (pas de parallaxe)",
       "hiddenBy": "le fond, sauf par les vitres"
     },
@@ -93,39 +63,21 @@
     {
       "id": "premier-plan",
       "image": "accueil-avant",
-      "position": [
-        0,
-        820
-      ],
+      "position": [0, 820],
       "parallax": 1.25,
       "opacity": "display.hallForegroundOpacity",
       "contains": "plante verte en pot, file de caddies emboîtés (sentiment d'enfermement)",
       "hiddenBy": "rien"
     }
   ],
-  "spawn": [
-    1060,
-    40
-  ],
+  "spawn": [1060, 40],
   "walkMask": {
     "comment": "Même repère que le rayon : x le long du hall, z la profondeur (264 = au pied du mur). Bord gauche : juste à droite de la barrière de portiques, en biais comme elle (le héros bute dessus ; la baie et le tapis sont hors d'atteinte).",
     "area": [
-      [
-        799,
-        -195
-      ],
-      [
-        2710,
-        -195
-      ],
-      [
-        2710,
-        264
-      ],
-      [
-        1098,
-        264
-      ]
+      [799, -195],
+      [2710, -195],
+      [2710, 264],
+      [1098, 264]
     ],
     "obstacles": []
   },
@@ -133,14 +85,8 @@
     {
       "id": "portique-1",
       "image": "portique",
-      "at": [
-        1030,
-        230
-      ],
-      "anchor": [
-        40,
-        262
-      ],
+      "at": [1030, 230],
+      "anchor": [40, 262],
       "scale": 0.8,
       "depthRef": 230,
       "comment": "Barrière de portiques (séance 57) : du fond (1) au premier plan (4). at : pied au sol ; scale : plus petit au fond. Le héros ne passe jamais à gauche (bord de la zone de marche)."
@@ -148,42 +94,24 @@
     {
       "id": "portique-2",
       "image": "portique",
-      "at": [
-        945,
-        100
-      ],
-      "anchor": [
-        40,
-        262
-      ],
+      "at": [945, 100],
+      "anchor": [40, 262],
       "scale": 0.9,
       "depthRef": 100
     },
     {
       "id": "portique-3",
       "image": "portique",
-      "at": [
-        867,
-        -20
-      ],
-      "anchor": [
-        40,
-        262
-      ],
+      "at": [867, -20],
+      "anchor": [40, 262],
       "scale": 1.0,
       "depthRef": -20
     },
     {
       "id": "portique-4",
       "image": "portique",
-      "at": [
-        789,
-        -140
-      ],
-      "anchor": [
-        40,
-        262
-      ],
+      "at": [789, -140],
+      "anchor": [40, 262],
       "scale": 1.1,
       "depthRef": -140
     }
@@ -193,53 +121,30 @@
     "items": [
       {
         "id": "vers-rayon",
-        "zone": [
-          2670,
-          -195,
-          2710,
-          264
-        ],
+        "zone": [2670, -195, 2710, 264],
         "to": "rayon-essai",
-        "arrive": [
-          220,
-          60
-        ],
+        "arrive": [220, 60],
         "facing": 1
       }
     ]
   },
   "bench": {
-    "start": [
-      1060,
-      40
-    ],
+    "start": [1060, 40],
     "route": [
       {
-        "to": [
-          1352,
-          240
-        ]
+        "to": [1352, 240]
       },
       {
         "wait": 1
       },
       {
-        "to": [
-          2500,
-          60
-        ]
+        "to": [2500, 60]
       },
       {
-        "to": [
-          1000,
-          -100
-        ]
+        "to": [1000, -100]
       },
       {
-        "to": [
-          1060,
-          40
-        ]
+        "to": [1060, 40]
       },
       {
         "wait": 1
@@ -247,14 +152,8 @@
     ]
   },
   "diagnostic": {
-    "a": [
-      1000,
-      40
-    ],
-    "b": [
-      1900,
-      40
-    ]
+    "a": [1000, 40],
+    "b": [1900, 40]
   },
   "accueil": {
     "remindAfterX": 2300,
@@ -262,19 +161,13 @@
     "items": [
       {
         "id": "scanette",
-        "at": [
-          1352,
-          340
-        ],
+        "at": [1352, 340],
         "w": 384,
         "h": 270
       },
       {
         "id": "panier",
-        "at": [
-          1602,
-          470
-        ],
+        "at": [1602, 470],
         "w": 110,
         "h": 140
       }
@@ -283,33 +176,18 @@
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor (mêmes x). items = [x, y] sur la scène : bouche du haut-parleur.",
     "items": [
-      [
-        800,
-        68
-      ],
-      [
-        2050,
-        68
-      ]
+      [800, 68],
+      [2050, 68]
     ]
   },
   "guard": {
     "comment": "Agent de sécurité (A6 ; comportement refait séance 59). À gauche de la barrière, tourné vers la droite. Au début (après startDelay s), il va une seule fois de son poste (post, sur le côté) à sa place (stand, au milieu, en retrait de la barrière), à la même profondeur, puis ne bouge plus (il est rangé en profondeur comme un objet du décor). barrier : x = x0 + z × slope. Distances depuis la barrière : warn (première interpellation, le héros est figé le temps de la bulle), touch (il force : « Stop ! » et le héros fait demi-tour de backDist, au plus une fois toutes les stopEvery s). stopTime : durée du geste d'arrêt. [TEMP] forme provisoire. Règle : src/core/guard.js.",
     "image": "agent-securite",
     "stopImage": "agent-securite-stop",
-    "anchor": [
-      110,
-      312
-    ],
+    "anchor": [110, 312],
     "scale": 0.85,
-    "post": [
-      440,
-      45
-    ],
-    "stand": [
-      709,
-      45
-    ],
+    "post": [440, 45],
+    "stand": [709, 45],
     "startDelay": 1.2,
     "barrier": {
       "x0": 880,
@@ -324,65 +202,24 @@
   "rain": {
     "comment": "Pluie derrière le mur vitré (séance 57), sur son propre calque, derrière le fond et qui suit le mur (séance 58 : sur le calque du dehors, elle glissait de côté) : le mur la découpe à la forme des vitres. rect = zone de pluie (x, y, largeur, hauteur) : deux voiles de gouttes (devant rapide et pâle, derrière plus lent), ruissellement, ronds dans les flaques (ripples : [x, y] dans le calque, au pied des vitres). mat = tapis d'entrée (dans le fond) : un reflet mouillé qui glisse lentement. Animations CSS, transform et opacité seulement ; figées avec « réduire les animations ».",
     "layer": "pluie",
-    "rect": [
-      0,
-      96,
-      710,
-      770
-    ],
+    "rect": [0, 96, 710, 770],
     "ripples": [
-      [
-        60,
-        803
-      ],
-      [
-        140,
-        745
-      ],
-      [
-        220,
-        687
-      ],
-      [
-        300,
-        714
-      ],
-      [
-        380,
-        656
-      ],
-      [
-        460,
-        598
-      ],
-      [
-        540,
-        624
-      ],
-      [
-        620,
-        567
-      ]
+      [60, 803],
+      [140, 745],
+      [220, 687],
+      [300, 714],
+      [380, 656],
+      [460, 598],
+      [540, 624],
+      [620, 567]
     ],
     "mat": {
       "layer": "fond",
       "points": [
-        [
-          640,
-          650
-        ],
-        [
-          880,
-          650
-        ],
-        [
-          490,
-          800
-        ],
-        [
-          250,
-          800
-        ]
+        [640, 650],
+        [880, 650],
+        [490, 800],
+        [250, 800]
       ]
     }
   }

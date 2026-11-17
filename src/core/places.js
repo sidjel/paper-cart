@@ -10,6 +10,18 @@ export function exitAt(exits, x, z) {
   return null;
 }
 
+// Au doigt ou à la souris (séance 67) : un point visé dans la zone « reach » d'une sortie (l'ouverture
+// elle-même, ou le rayon de devant à cet endroit) devient le milieu de sa zone de passage : toucher une
+// ouverture, c'est vouloir la passer, même si le passage est trop bas pour être touché. Renvoie [x, z] ou null.
+export function exitTarget(exits, x, z) {
+  for (const e of exits) {
+    if (!e.reach) continue;
+    const [x1, z1, x2, z2] = e.reach;
+    if (x >= x1 && x <= x2 && z >= z1 && z <= z2) return [(e.zone[0] + e.zone[2]) / 2, (e.zone[1] + e.zone[3]) / 2];
+  }
+  return null;
+}
+
 // Fondu : 'out' (l'écran noircit) → 'load' (noir : on change de lieu) → 'in' (le noir s'efface) → 'done'.
 // p : { fade } (durée de chaque fondu, s).
 export function createTransition(exit) {

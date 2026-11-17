@@ -112,3 +112,18 @@ test('A7 : longer le fond du rayon 7 (ou le bord avant du rayon 2) devant les ou
   await page.keyboard.up('ArrowLeft');
   expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-2');
 });
+
+test('A7 au doigt : toucher l’ouverture du rayon de devant (en bas de l’écran) ramène au rayon 7', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'au doigt');
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-a'));
+  await arrivedIn(page, 'rayon-2');
+  const vp = page.viewportSize();
+  const pt = await page.evaluate(() => window.paperCart.worldToClient(2170, -190));
+  await page.touchscreen.tap(pt.x, Math.min(vp.height - 4, pt.y));
+  await arrivedIn(page, 'rayon-essai');
+  expect((await hero(page)).x).toBe(2170);
+  // Et dans l'autre sens : toucher l'ouverture de l'étagère du fond.
+  const op = await page.evaluate(() => window.paperCart.worldToClient(2170, 500));
+  await page.touchscreen.tap(op.x, op.y);
+  await arrivedIn(page, 'rayon-2');
+});

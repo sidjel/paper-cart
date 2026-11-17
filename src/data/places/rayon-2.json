@@ -1,10 +1,7 @@
 {
   "id": "rayon-2",
   "name": "[TEMP] Rayon 8 (entretien, bric-à-brac)",
-  "size": [
-    3600,
-    1080
-  ],
+  "size": [3600, 1080],
   "projection": {
     "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond).",
     "floorFrontY": 880,
@@ -14,34 +11,22 @@
   "images": {
     "rayon-lointain": {
       "src": "art/placeholder/rayon-lointain.svg",
-      "size": [
-        3600,
-        470
-      ]
+      "size": [3600, 470]
     },
     "rayon2-fond": {
       "src": "art/placeholder/rayon2-fond.svg",
-      "size": [
-        3600,
-        1080
-      ]
+      "size": [3600, 1080]
     },
     "rayon2-avant": {
       "src": "art/placeholder/rayon2-avant.svg",
-      "size": [
-        4300,
-        150
-      ]
+      "size": [4300, 150]
     }
   },
   "layers": [
     {
       "id": "lointain",
       "image": "rayon-lointain",
-      "position": [
-        0,
-        150
-      ],
+      "position": [0, 150],
       "parallax": 0.55,
       "contains": "rayons qui se perdent au loin (magasin sans fin)",
       "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
@@ -65,71 +50,29 @@
     {
       "id": "premier-plan",
       "image": "rayon2-avant",
-      "position": [
-        0,
-        930
-      ],
+      "position": [0, 930],
       "parallax": 1,
       "opacity": "display.foregroundOpacity",
       "contains": "l'arrière du rayon 7, en transparence, avec ses deux ouvertures (les passages) et leurs panneaux ; sans parallaxe, pour que les ouvertures restent en face des passages",
       "hiddenBy": "rien"
     }
   ],
-  "spawn": [
-    2170,
-    -150
-  ],
+  "spawn": [2170, -150],
   "walkMask": {
     "comment": "Même repère que le rayon d'essai. Séance 67 (A7) : le sol se prolonge vers l'avant dans les deux ouvertures du rayon de devant (jusqu'à z −250) ; le passage vers le rayon 7 est au bout de ces prolongements : longer le bord avant ne le déclenche jamais.",
     "area": [
-      [
-        90,
-        -195
-      ],
-      [
-        2060,
-        -195
-      ],
-      [
-        2060,
-        -250
-      ],
-      [
-        2280,
-        -250
-      ],
-      [
-        2280,
-        -195
-      ],
-      [
-        3040,
-        -195
-      ],
-      [
-        3040,
-        -250
-      ],
-      [
-        3240,
-        -250
-      ],
-      [
-        3240,
-        -195
-      ],
-      [
-        3510,
-        -195
-      ],
-      [
-        3510,
-        264
-      ],
-      [
-        90,
-        264
-      ]
+      [90, -195],
+      [2060, -195],
+      [2060, -250],
+      [2280, -250],
+      [2280, -195],
+      [3040, -195],
+      [3040, -250],
+      [3240, -250],
+      [3240, -195],
+      [3510, -195],
+      [3510, 264],
+      [90, 264]
     ],
     "obstacles": []
   },
@@ -137,64 +80,34 @@
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
     "items": [
-      [
-        600,
-        68
-      ],
-      [
-        1300,
-        68
-      ],
-      [
-        1980,
-        68
-      ],
-      [
-        2470,
-        68
-      ],
-      [
-        3340,
-        68
-      ]
+      [600, 68],
+      [1300, 68],
+      [1980, 68],
+      [2470, 68],
+      [3340, 68]
     ]
   },
   "bench": {
     "comment": "Banc d'essai du rayon 2 : parcours automatique, loin des deux passages.",
-    "start": [
-      600,
-      60
-    ],
+    "start": [600, 60],
     "route": [
       {
-        "to": [
-          1500,
-          220
-        ]
+        "to": [1500, 220]
       },
       {
         "wait": 0.8
       },
       {
-        "to": [
-          1800,
-          -120
-        ]
+        "to": [1800, -120]
       },
       {
-        "to": [
-          3300,
-          150
-        ]
+        "to": [3300, 150]
       },
       {
         "wait": 0.6
       },
       {
-        "to": [
-          600,
-          60
-        ]
+        "to": [600, 60]
       },
       {
         "wait": 0.6
@@ -203,94 +116,56 @@
   },
   "diagnostic": {
     "comment": "Test rapide : aller-retour en ligne droite entre a et b (aucun obstacle). En caméra fixe, la caméra est centrée entre a et b.",
-    "a": [
-      1300,
-      40
-    ],
-    "b": [
-      2300,
-      40
-    ]
+    "a": [1300, 40],
+    "b": [2300, 40]
   },
   "shelfProducts": {
     "comment": "[TEMP] Produits du rayon 2 (A7) : quelques produits du catalogue, posés sur les mêmes tablettes que le rayon d'essai (même étagère).",
     "items": [
       {
         "product": "pile",
-        "at": [
-          560,
-          394
-        ]
+        "at": [560, 394]
       },
       {
         "product": "plante",
-        "at": [
-          1180,
-          282
-        ]
+        "at": [1180, 282]
       },
       {
         "product": "oeufs",
-        "at": [
-          1440,
-          394
-        ]
+        "at": [1440, 394]
       },
       {
         "product": "biere",
-        "at": [
-          2440,
-          394
-        ]
+        "at": [2440, 394]
       },
       {
         "product": "glace",
-        "at": [
-          2900,
-          282
-        ]
+        "at": [2900, 282]
       },
       {
         "product": "fromage",
-        "at": [
-          3380,
-          394
-        ]
+        "at": [3380, 394]
       }
     ]
   },
   "exits": {
-    "comment": "Deux passages vers le rayon 7 (A7) : au sol, devant, au même x que les deux ouvertures de l'étagère du rayon 7 ; on y revient devant l'ouverture correspondante (le bon côté).",
+    "comment": "Deux passages vers le rayon 7 (A7) : au sol, devant, au même x que les deux ouvertures de l'étagère du rayon 7 ; on y revient devant l'ouverture correspondante (le bon côté). reach : toucher l'ouverture du rayon de devant (bas de l'écran, à ce x) envoie au passage, trop bas pour être touché.",
     "items": [
       {
         "id": "vers-rayon-a",
-        "zone": [
-          2070,
-          -250,
-          2270,
-          -225
-        ],
+        "zone": [2070, -250, 2270, -225],
         "to": "rayon-essai",
-        "arrive": [
-          2170,
-          220
-        ],
-        "facing": 1
+        "arrive": [2170, 220],
+        "facing": 1,
+        "reach": [2060, -260, 2280, -60]
       },
       {
         "id": "vers-rayon-b",
-        "zone": [
-          3050,
-          -250,
-          3230,
-          -225
-        ],
+        "zone": [3050, -250, 3230, -225],
         "to": "rayon-essai",
-        "arrive": [
-          3140,
-          220
-        ],
-        "facing": -1
+        "arrive": [3140, 220],
+        "facing": -1,
+        "reach": [3040, -260, 3240, -60]
       }
     ]
   }

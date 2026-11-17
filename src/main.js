@@ -23,6 +23,7 @@ import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
 import { createGuardWiring } from './game/guard.js';
+import { exitTarget } from './core/places.js';
 import { quality } from './scene/quality.js';
 import { createVoices } from './game/voices.js';
 import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
@@ -479,6 +480,7 @@ function handleAction(action) {
       else if (who === 'bench') measure.cancel();
       else if (who === 'menu') sm.back();
       else if (who === 'options') sm.go('title');
+      else if (who === 'title') titleUi.back(); // liste des départs (mode dev)
       else if (who === 'confirm') confirm.no();
       else if (who === 'card') basketUi.closeDetail(); // d'abord la grande carte
       else if (who === 'panier' || who === 'pause') sm.go('play');
@@ -646,6 +648,9 @@ function onDrag(cx, cy) {
 }
 
 function walkTo(target) {
+  // Toucher une ouverture : aller jusqu'à son passage (core/places.js).
+  const pass = exitTarget(place.exits?.items ?? [], target.x, target.z);
+  if (pass) [target.x, target.z] = pass;
   clampToBounds(mask, target);
   // Chemin qui contourne les objets si la ligne droite est bloquée.
   pathCount++;

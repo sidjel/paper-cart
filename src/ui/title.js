@@ -27,25 +27,43 @@ export function createTitleScreen(root, { image, onStart, onOptions, departs = n
     b.className = 'title-button title-dev';
     b.dataset.act = 'departs';
     b.textContent = 'Départ (dev)';
+    // La liste s'ouvre par-dessus l'écran titre (au centre, défilante) : sur un téléphone en paysage,
+    // sous le menu, elle sortait de l'écran (séance 67).
     list = document.createElement('div');
     list.className = 'title-departs';
     list.hidden = true;
-    list.append(...departs);
+    const close = document.createElement('button');
+    close.className = 'title-departs-close';
+    close.textContent = 'Fermer';
+    close.addEventListener('click', () => closeDeparts());
+    list.append(close, ...departs);
     b.addEventListener('click', () => {
-      list.hidden = !list.hidden;
+      list.hidden = false;
+      refresh();
+      focus = 1;
+      buttons[focus]?.focus({ preventScroll: true });
     });
-    el.querySelector('.title-menu').append(b, list);
+    el.querySelector('.title-menu').append(b);
+    el.appendChild(list);
   }
   // Boutons au clavier et à la manette : ceux du menu, puis la liste des départs si elle est ouverte.
   const buttons = [];
   const refresh = () => {
     buttons.length = 0;
-    buttons.push(...el.querySelectorAll('.title-menu > .title-button'));
-    if (list && !list.hidden) buttons.push(...list.querySelectorAll('button'));
+    if (list && !list.hidden) buttons.push(...list.querySelectorAll('button')); // liste ouverte : elle seule
+    else buttons.push(...el.querySelectorAll('.title-menu > .title-button'));
   };
   refresh();
   root.appendChild(el);
   let focus = 0;
+  function closeDeparts() {
+    if (!list || list.hidden) return false;
+    list.hidden = true;
+    refresh();
+    focus = buttons.length - 1; // de retour sur « Départ (dev) »
+    buttons[focus]?.focus({ preventScroll: true });
+    return true;
+  }
   return {
     show() {
       el.hidden = false;
@@ -64,6 +82,8 @@ export function createTitleScreen(root, { image, onStart, onOptions, departs = n
       focus = (focus + dir + buttons.length) % buttons.length;
       buttons[focus].focus({ preventScroll: true });
     },
+    // Échap, B : fermer la liste des départs si elle est ouverte. Renvoie true si quelque chose s'est fermé.
+    back: () => closeDeparts(),
     // Manette (A) : le bouton mis en avant.
     press() {
       refresh();

@@ -1270,7 +1270,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .place-wait.still span { animation: none; }
 /* Écran titre, mode dev : liste des points de départ (src/ui/title.js). */
 .title-dev { opacity: 0.75; font-size: 0.8em; }
-.title-departs { display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow-y: auto; margin-top: 6px; }
+.title-departs { position: fixed; inset: 6% 12%; z-index: 30; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding: 16px; border-radius: 12px; border: 2px solid #f3ecdc; background: rgba(20, 17, 13, 0.96); }
 .title-departs[hidden] { display: none; }
-.title-departs button { min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 2px solid #f3ecdc; background: rgba(20, 17, 13, 0.75); color: #f3ecdc; font: inherit; font-size: 0.85em; text-align: left; }
+.title-departs button { min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 2px solid #f3ecdc; background: #2e2820; color: #f3ecdc; font: inherit; font-size: 0.85em; text-align: left; }
 .title-departs button.current { border-color: #e9c24a; }
+.title-departs .title-departs-close { align-self: flex-end; text-align: center; }
