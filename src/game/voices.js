@@ -94,7 +94,9 @@ export function createVoices(ui, game) {
     else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
     if (hero && !reply && !thought) game.vibrate('fort');
     if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
-    if (narrator.voice === 'epaisseur') audio.play('froissement'); // le joueur répond (sans voix : ses pensées)
+    // Le joueur répond : un froissement de papier, seulement si le réglage le demande (séance 66 : l'auteur
+    // ne veut pas ce bruit au début de chaque réplique du joueur).
+    if (narrator.voice === 'epaisseur' && config.audio.rustleOnReply) audio.play('froissement');
     // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
     const sp = game.place().speakers?.items ?? [];
     speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
