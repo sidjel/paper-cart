@@ -42,11 +42,12 @@ import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
 import accueilPlace from './data/places/accueil.json';
+import rayon2 from './data/places/rayon-2.json';
 import heroData from './data/characters/heros.json';
 import catalog from './data/products.json';
 
 // Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
-const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace };
+const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace, [rayon2.id]: rayon2 };
 let place = PLACES[startPlaceId(Object.keys(PLACES), accueilPlace.id)]; // la partie commence dans le hall d'accueil
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;

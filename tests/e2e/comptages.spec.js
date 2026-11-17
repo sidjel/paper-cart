@@ -7,7 +7,7 @@ import limites from './comptages-limites.json' with { type: 'json' };
 // Un lieu sans limites inscrites (le hall, séance 56) est seulement mesuré : les valeurs sont proposées
 // à l'auteur, qui décide des limites.
 
-for (const lieu of ['rayon-essai', 'accueil'])
+for (const lieu of ['rayon-essai', 'accueil', 'rayon-2'])
 test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(120_000);

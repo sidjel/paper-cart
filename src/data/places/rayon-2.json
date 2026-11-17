@@ -1,0 +1,265 @@
+{
+  "id": "rayon-2",
+  "name": "[TEMP] Rayon 8 (entretien, bric-à-brac)",
+  "size": [
+    3600,
+    1080
+  ],
+  "projection": {
+    "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond).",
+    "floorFrontY": 880,
+    "depthToScreen": 1,
+    "scalePerDepth": 0.0012
+  },
+  "images": {
+    "rayon-avant": {
+      "src": "art/placeholder/rayon-avant.svg",
+      "size": [
+        4300,
+        150
+      ]
+    },
+    "rayon-lointain": {
+      "src": "art/placeholder/rayon-lointain.svg",
+      "size": [
+        3600,
+        470
+      ]
+    },
+    "rayon2-fond": {
+      "src": "art/placeholder/rayon2-fond.svg",
+      "size": [
+        3600,
+        1080
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "lointain",
+      "image": "rayon-lointain",
+      "position": [
+        0,
+        150
+      ],
+      "parallax": 0.55,
+      "contains": "rayons qui se perdent au loin (magasin sans fin)",
+      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
+    },
+    {
+      "id": "fond",
+      "image": "rayon2-fond",
+      "contains": "plafond, panneaux (rayon 8), étagère du fond avec deux ouvertures, sol avec les flèches des deux passages vers le rayon 7",
+      "hiddenBy": "en partie par les objets et le personnage (petites surfaces)"
+    },
+    {
+      "id": "produits",
+      "contains": "produits à scanner, posés sur l'étagère du fond",
+      "hiddenBy": "en partie par les objets et le personnage"
+    },
+    {
+      "id": "acteurs",
+      "contains": "personnage, ombre, poussière, présentoirs, caddie, repère du point visé — triés par profondeur",
+      "hiddenBy": "rien"
+    },
+    {
+      "id": "premier-plan",
+      "image": "rayon-avant",
+      "position": [
+        0,
+        930
+      ],
+      "parallax": 1.25,
+      "opacity": "display.foregroundOpacity",
+      "contains": "rayon d'en face (côté caméra), en transparence ; seulement sa partie haute (produits), deux fois moins haut depuis la séance 46",
+      "hiddenBy": "rien"
+    }
+  ],
+  "spawn": [
+    2170,
+    -150
+  ],
+  "walkMask": {
+    "comment": "Même repère que le rayon d'essai. Pas d'objet au sol pour l'instant.",
+    "area": [
+      [
+        90,
+        -195
+      ],
+      [
+        3510,
+        -195
+      ],
+      [
+        3510,
+        264
+      ],
+      [
+        90,
+        264
+      ]
+    ],
+    "obstacles": []
+  },
+  "props": [],
+  "speakers": {
+    "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
+    "items": [
+      [
+        600,
+        68
+      ],
+      [
+        1300,
+        68
+      ],
+      [
+        1980,
+        68
+      ],
+      [
+        2470,
+        68
+      ],
+      [
+        3340,
+        68
+      ]
+    ]
+  },
+  "bench": {
+    "comment": "Banc d'essai du rayon 2 : parcours automatique, loin des deux passages.",
+    "start": [
+      600,
+      60
+    ],
+    "route": [
+      {
+        "to": [
+          1500,
+          220
+        ]
+      },
+      {
+        "wait": 0.8
+      },
+      {
+        "to": [
+          1800,
+          -120
+        ]
+      },
+      {
+        "to": [
+          3300,
+          150
+        ]
+      },
+      {
+        "wait": 0.6
+      },
+      {
+        "to": [
+          600,
+          60
+        ]
+      },
+      {
+        "wait": 0.6
+      }
+    ]
+  },
+  "diagnostic": {
+    "comment": "Test rapide : aller-retour en ligne droite entre a et b (aucun obstacle). En caméra fixe, la caméra est centrée entre a et b.",
+    "a": [
+      1300,
+      40
+    ],
+    "b": [
+      2300,
+      40
+    ]
+  },
+  "shelfProducts": {
+    "comment": "[TEMP] Produits du rayon 2 (A7) : quelques produits du catalogue, posés sur les mêmes tablettes que le rayon d'essai (même étagère).",
+    "items": [
+      {
+        "product": "pile",
+        "at": [
+          560,
+          394
+        ]
+      },
+      {
+        "product": "plante",
+        "at": [
+          1180,
+          282
+        ]
+      },
+      {
+        "product": "oeufs",
+        "at": [
+          1440,
+          394
+        ]
+      },
+      {
+        "product": "biere",
+        "at": [
+          2440,
+          394
+        ]
+      },
+      {
+        "product": "glace",
+        "at": [
+          2900,
+          282
+        ]
+      },
+      {
+        "product": "fromage",
+        "at": [
+          3380,
+          394
+        ]
+      }
+    ]
+  },
+  "exits": {
+    "comment": "Deux passages vers le rayon 7 (A7) : au sol, devant, au même x que les deux ouvertures de l'étagère du rayon 7 ; on y revient devant l'ouverture correspondante (le bon côté).",
+    "items": [
+      {
+        "id": "vers-rayon-a",
+        "zone": [
+          2080,
+          -195,
+          2260,
+          -180
+        ],
+        "to": "rayon-essai",
+        "arrive": [
+          2170,
+          220
+        ],
+        "facing": 1
+      },
+      {
+        "id": "vers-rayon-b",
+        "zone": [
+          3050,
+          -195,
+          3230,
+          -180
+        ],
+        "to": "rayon-essai",
+        "arrive": [
+          3140,
+          220
+        ],
+        "facing": -1
+      }
+    ]
+  }
+}

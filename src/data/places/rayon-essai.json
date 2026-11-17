@@ -70,7 +70,7 @@
     {
       "id": "fond",
       "image": "rayon-fond",
-      "contains": "plafond, panneaux, étagère du fond avec deux ouvertures, sol",
+      "contains": "plafond, panneaux, étagère du fond avec deux ouvertures (les passages vers le rayon 2), sol",
       "hiddenBy": "en partie par les objets et le personnage (petites surfaces)"
     },
     {
@@ -505,7 +505,7 @@
   },
   "aisleEndX": 3360,
   "exits": {
-    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ».",
+    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ». Les deux ouvertures de l'étagère du fond mènent au rayon 2 (A7, séance 67), qu'on rejoint au même x, côté avant.",
     "items": [
       {
         "id": "vers-accueil",
@@ -519,6 +519,36 @@
         "arrive": [
           2580,
           60
+        ],
+        "facing": -1
+      },
+      {
+        "id": "vers-rayon2-a",
+        "zone": [
+          2080,
+          250,
+          2260,
+          264
+        ],
+        "to": "rayon-2",
+        "arrive": [
+          2170,
+          -150
+        ],
+        "facing": 1
+      },
+      {
+        "id": "vers-rayon2-b",
+        "zone": [
+          3050,
+          250,
+          3230,
+          264
+        ],
+        "to": "rayon-2",
+        "arrive": [
+          3140,
+          -150
         ],
         "facing": -1
       }

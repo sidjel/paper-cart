@@ -4,12 +4,26 @@ import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
 import accueil from '../../src/data/places/accueil.json';
+import rayon2 from '../../src/data/places/rayon-2.json';
 import { existsSync } from 'node:fs';
 
-const PLACES = { [rayon.id]: rayon, [accueil.id]: accueil };
+const PLACES = { [rayon.id]: rayon, [accueil.id]: accueil, [rayon2.id]: rayon2 };
 const P = { fade: 0.25 };
 
 describe('lieux : sorties et fondu', () => {
+  it('A7 : deux passages entre le rayon 7 et le rayon 2, chacun fait arriver du bon côté (au même endroit, en face)', () => {
+    for (const [a, b] of [['rayon-essai', 'rayon-2'], ['rayon-2', 'rayon-essai']]) {
+      const ways = PLACES[a].exits.items.filter((e) => e.to === b);
+      expect(ways.length, `${a} → ${b}`).toBe(2);
+      for (const e of ways) {
+        const mid = (e.zone[0] + e.zone[2]) / 2;
+        expect(e.arrive[0]).toBe(mid); // même x : on arrive en face du passage
+        // et le passage du retour est au même x
+        expect(PLACES[b].exits.items.some((r) => r.to === a && (r.zone[0] + r.zone[2]) / 2 === mid)).toBe(true);
+      }
+    }
+  });
+
   it('chaque sortie mène à un lieu qui existe ; on arrive sur le sol, hors de toute sortie (pas d’aller-retour sans fin)', () => {
     for (const pl of Object.values(PLACES)) {
       const here = compileMask(pl.walkMask);
@@ -21,7 +35,7 @@ describe('lieux : sorties et fondu', () => {
         expect(isWalkable(compileMask(dest.walkMask), x, z), e.id).toBe(true);
         expect(exitAt(dest.exits.items, x, z), e.id).toBeNull();
         // la zone de sortie touche bien le sol du lieu
-        expect(isWalkable(here, (e.zone[0] + e.zone[2]) / 2, 60), e.id).toBe(true);
+        expect(isWalkable(here, (e.zone[0] + e.zone[2]) / 2, (e.zone[1] + e.zone[3]) / 2), e.id).toBe(true);
       }
       expect(exitAt(pl.exits.items, pl.spawn[0], pl.spawn[1]), pl.id).toBeNull();
       for (const im of Object.values(pl.images)) expect(existsSync(`public/${im.src}`), im.src).toBe(true);
