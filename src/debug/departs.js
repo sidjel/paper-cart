@@ -24,6 +24,19 @@ function goToDepart(id) {
   location.replace(url.href); // rechargement : on part d'un jeu propre
 }
 
+// Un bouton par point de départ (onglet « Départ » des réglages, et écran titre en mode dev).
+export function departButtons(className = '') {
+  return departsFile.departs.map((d) => {
+    const b = document.createElement('button');
+    b.textContent = d.label;
+    b.dataset.depart = d.id;
+    if (className) b.className = className;
+    if (d.id === (departId ?? 'debut')) b.classList.add('current');
+    b.addEventListener('click', () => goToDepart(d.id));
+    return b;
+  });
+}
+
 export function createDepartTools(game) {
   // Onglet « Départ » des réglages : choisir où commencer (le jeu se recharge).
   const el = document.createElement('div');
@@ -32,14 +45,7 @@ export function createDepartTools(game) {
   note.className = 'settings-note';
   note.textContent = 'Pour tester vite : le jeu se recharge et commence à ce point. Lien direct : ajouter ?depart=<nom> à l’adresse.';
   el.appendChild(note);
-  for (const d of departsFile.departs) {
-    const b = document.createElement('button');
-    b.textContent = d.label;
-    b.dataset.depart = d.id;
-    if (d.id === (departId ?? 'debut')) b.classList.add('current');
-    b.addEventListener('click', () => goToDepart(d.id));
-    el.appendChild(b);
-  }
+  el.append(...departButtons());
 
   function apply(def) {
     game.sm.go('play'); // sans écran titre ni intro

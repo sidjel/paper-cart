@@ -202,6 +202,7 @@ export const config = {
   },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
+    devMode: true, // outils de développement visibles hors des réglages (écran titre : « Départ ») ; à couper pour la version vendue
   },
 };
 
@@ -345,6 +346,7 @@ export const TUNABLES = [
   },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
+  { group: 'Diagnostic', key: 'debug.devMode', label: 'Mode dev (écran titre : « Départ »)', type: 'bool', reload: true },
   { group: 'Diagnostic', key: 'bench.passes', label: 'Banc : nombre de tours', min: 1, max: 10, step: 1 },
   { group: 'Diagnostic', key: 'bench.soundMinutes', label: 'Essai son long : durée', min: 1, max: 20, step: 1, unit: 'min' },
   { group: 'Diagnostic', key: 'bench.warmup', label: 'Banc : chauffe', min: 0, max: 10, step: 1, unit: 's' },

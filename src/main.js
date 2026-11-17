@@ -37,7 +37,7 @@ import { createHud } from './ui/hud.js';
 import { createJournal } from './ui/journal.js';
 import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
 import { createMeasureTools } from './debug/measure.js';
-import { createDepartTools, startPlaceId } from './debug/departs.js';
+import { createDepartTools, startPlaceId, departButtons } from './debug/departs.js';
 import { createAudio } from './audio/audio.js';
 import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
@@ -135,6 +135,7 @@ applyCrt();
 // Écran titre (après le chargement) : Commencer, Options. Sur téléphone, Commencer passe en plein écran
 // paysage (le jeu ne doit pas démarrer à la verticale).
 const titleUi = createTitleScreen(uiEl, {
+  departs: config.debug.devMode ? departButtons() : null, // mode dev : « Départ » sur l'écran titre
   image: `${BASE}art/placeholder/titre/titre.svg`,
   onStart: () => startGame(true),
   onOptions: () => sm.go('options'),

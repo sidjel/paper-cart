@@ -134,3 +134,13 @@ test('Options : le nom du joueur (une proposition, ou son propre nom tapé)', as
   expect(saved['player.customName']).toBe('Pid');
   await page.screenshot({ path: `test-results/captures/options-nom-${info.project.name}.png` });
 });
+
+test('mode dev : « Départ » sur l’écran titre ouvre les points de départ ; le rayon 2 y est', async ({ page }) => {
+  await page.goto('./');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.locator('.title-button', { hasText: 'Départ' }).click();
+  const rayon2 = page.locator('.title-departs button', { hasText: 'Rayon 2' });
+  await expect(rayon2).toBeVisible();
+  await rayon2.click();
+  await page.waitForFunction(() => window.paperCart?.place() === 'rayon-2' && window.paperCart.state() === 'play', null, { timeout: 15000 });
+});

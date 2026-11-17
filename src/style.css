@@ -1268,3 +1268,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 @keyframes place-wait { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(12deg); } }
 @media (prefers-reduced-motion: reduce) { .place-wait span { animation: none; } }
 .place-wait.still span { animation: none; }
+/* Écran titre, mode dev : liste des points de départ (src/ui/title.js). */
+.title-dev { opacity: 0.75; font-size: 0.8em; }
+.title-departs { display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow-y: auto; margin-top: 6px; }
+.title-departs[hidden] { display: none; }
+.title-departs button { min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 2px solid #f3ecdc; background: rgba(20, 17, 13, 0.75); color: #f3ecdc; font: inherit; font-size: 0.85em; text-align: left; }
+.title-departs button.current { border-color: #e9c24a; }

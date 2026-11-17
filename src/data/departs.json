@@ -33,6 +33,13 @@
       "met": true,
       "cards": "plein",
       "place": "rayon-essai"
+    },
+    {
+      "id": "rayon-2",
+      "label": "Rayon 2 (équipé, rencontre faite)",
+      "equip": true,
+      "met": true,
+      "place": "rayon-2"
     }
   ]
 }

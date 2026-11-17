@@ -1,7 +1,8 @@
 // Écran titre : grand nom du jeu, image mystérieuse, et le menu (Commencer, Options).
 // Doigt, souris, clavier (Tab ou flèches, Entrée) et manette (croix ou LB/RB, A).
 
-export function createTitleScreen(root, { image, onStart, onOptions }) {
+// departs : boutons des points de départ (mode dev : config.debug.devMode), ou null.
+export function createTitleScreen(root, { image, onStart, onOptions, departs = null }) {
   const el = document.createElement('div');
   el.className = 'title-screen';
   el.hidden = true;
@@ -16,9 +17,33 @@ export function createTitleScreen(root, { image, onStart, onOptions }) {
       </nav>
     </div>`;
   el.querySelector('.title-image').src = image;
-  const buttons = [...el.querySelectorAll('.title-button')];
-  buttons[0].addEventListener('click', () => onStart());
-  buttons[1].addEventListener('click', () => onOptions());
+  const main = [...el.querySelectorAll('.title-button')];
+  main[0].addEventListener('click', () => onStart());
+  main[1].addEventListener('click', () => onOptions());
+  // Mode dev : « Départ » ouvre la liste des points de départ (le jeu se recharge à ce point).
+  let list = null;
+  if (departs) {
+    const b = document.createElement('button');
+    b.className = 'title-button title-dev';
+    b.dataset.act = 'departs';
+    b.textContent = 'Départ (dev)';
+    list = document.createElement('div');
+    list.className = 'title-departs';
+    list.hidden = true;
+    list.append(...departs);
+    b.addEventListener('click', () => {
+      list.hidden = !list.hidden;
+    });
+    el.querySelector('.title-menu').append(b, list);
+  }
+  // Boutons au clavier et à la manette : ceux du menu, puis la liste des départs si elle est ouverte.
+  const buttons = [];
+  const refresh = () => {
+    buttons.length = 0;
+    buttons.push(...el.querySelectorAll('.title-menu > .title-button'));
+    if (list && !list.hidden) buttons.push(...list.querySelectorAll('button'));
+  };
+  refresh();
   root.appendChild(el);
   let focus = 0;
   return {
@@ -35,12 +60,14 @@ export function createTitleScreen(root, { image, onStart, onOptions }) {
     },
     // Gauche/haut : bouton précédent ; droite/bas : suivant.
     move(dir) {
+      refresh();
       focus = (focus + dir + buttons.length) % buttons.length;
       buttons[focus].focus({ preventScroll: true });
     },
     // Manette (A) : le bouton mis en avant.
     press() {
-      buttons[focus].click();
+      refresh();
+      buttons[focus]?.click();
     },
   };
 }
