@@ -51,3 +51,38 @@ test('A7 : l’ouverture de droite mène en face, de l’autre côté du rayon 2
   const h = await hero(page);
   expect([h.x, h.z]).toEqual([3140, 220]);
 });
+
+test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son produit prend la place du produit scanné', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'clavier : PC');
+  test.setTimeout(60_000);
+  const scanState = () => page.evaluate(() => window.paperCart.scanState());
+  await page.evaluate(() => window.paperCart.set('carry.panier', 1));
+  // Rayon 2 : scanner les œufs (x 1440).
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-a'));
+  await arrivedIn(page, 'rayon-2');
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 200);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.scanState().reach === 2, null, { timeout: 8000 }); // à chaque image (le héros passe vite)
+  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await scanState()).active, { timeout: 6000 }).toBe(false);
+  await expect(page.locator('.panier-count')).toHaveText('1/1');
+  // Retour au rayon 7 : le steak (x 1440) ; le panier est plein → échanger la carte des œufs.
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon-a'));
+  await arrivedIn(page, 'rayon-essai');
+  const before = (await page.evaluate(() => window.paperCart.products())).length;
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.scanState().reach === 4, null, { timeout: 8000 });
+  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.press('Enter');
+  await page.locator('.confirm button', { hasText: 'Oui' }).click();
+  await page.locator('.panier .card').first().click();
+  await expect(page.locator('.panier')).toBeHidden();
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.products())).length, { timeout: 6000 }).toBe(before + 1);
+  const added = (await page.evaluate(() => window.paperCart.products())).at(-1);
+  expect(added).toEqual({ id: 'oeufs', x: 1440, scanned: false }); // les œufs, à la place du steak, prêts à scanner
+  await expect(page.locator('.product').filter({ visible: true }).locator('xpath=.')).not.toHaveCount(0);
+  await page.screenshot({ path: `test-results/captures/a7-${info.project.name}-echange.png` });
+});

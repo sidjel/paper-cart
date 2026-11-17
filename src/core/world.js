@@ -54,17 +54,32 @@ export function moveProduct(products, from, to) {
 }
 
 // Panier plein : une carte est reposée pour faire de la place au produit `target`, dans le lieu `placeId`.
-// Échange seulement si la carte reposée vient d'un produit de ce lieu-ci ; sinon rien (son produit ne
-// réapparaît nulle part : question ouverte, docs/SUIVI.md). Renvoie l'échange prévu { from, to }, ou null.
-// (Sorti de main.js à la séance 62, sans changer le comportement.)
+// Son produit prend la place du produit scanné, sur ce rayon-ci (règle de l'auteur, séance 63) :
+// - carte de ce lieu : son produit d'origine y est déplacé → { from, to } ;
+// - carte d'un autre lieu (A7, séance 67) : un nouveau produit est posé ici → { product, to }.
+// Renvoie l'échange prévu, ou null (rien de reposé).
 export function planSwap(dropped, placeId, target) {
-  return dropped && dropped.slot >= 0 && dropped.place === placeId ? { from: dropped.slot, to: target } : null;
+  if (!dropped) return null;
+  if (dropped.place === placeId && dropped.slot >= 0) return { from: dropped.slot, to: target };
+  if (dropped.place && dropped.place !== placeId && dropped.productId) return { product: dropped.productId, to: target };
+  return null;
+}
+
+// Le produit `def` posé à la place du produit `to` (même endroit, même échelle que lui), prêt à scanner.
+export function swapEntry(products, to, id, def) {
+  const b = products[to];
+  const k = b.w / b.def.size[0];
+  return { id, def, x: b.x, y: b.y, w: Math.round(def.size[0] * k), h: Math.round(def.size[1] * k), loose: b.loose, z: b.z, standAt: b.standAt, on: b.on, scanned: false };
 }
 
 // La carte du produit `scanned` arrive : si l'échange prévu l'attendait, le produit reposé prend sa place.
-// Renvoie l'indice du produit déplacé, ou -1.
-export function applySwap(pending, products, scanned) {
+// catalog : data/products.json (pour un produit venu d'un autre lieu). Renvoie l'indice du produit posé, ou -1.
+export function applySwap(pending, products, scanned, catalog) {
   if (!pending || pending.to !== scanned) return -1;
+  if (pending.product) {
+    products.push(swapEntry(products, pending.to, pending.product, catalog.products[pending.product]));
+    return products.length - 1;
+  }
   moveProduct(products, pending.from, pending.to);
   return pending.from;
 }

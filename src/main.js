@@ -18,7 +18,7 @@ import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } 
 import { createIntroUi } from './ui/intro.js';
 import introFile from './data/intro.json';
 import { findPath } from './core/pathfinding.js';
-import { createWorld, planSwap, applySwap } from './core/world.js';
+import { createWorld, planSwap, applySwap, swapEntry } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
@@ -249,6 +249,7 @@ function chooseCardToDrop(i) {
       const target = dropFor;
       dropFor = -1;
       const swap = planSwap(dropped, place.id, target); // règle : core/world.js
+      if (swap?.product) swap.spare = products.reserve(swapEntry(productState, target, swap.product, catalog.products[swap.product])); // image décodée d'avance
       if (swap) pendingSwap = swap;
       panierMode = 'consult';
       sm.go('play');
@@ -380,8 +381,9 @@ function onScanEvent(ev) {
     it.scanned = true;
     products.remove(scan.index);
     // Échange : le produit reposé apparaît à la place de celui qu'on vient de scanner (core/world.js).
-    const moved = applySwap(pendingSwap, productState, scan.index);
+    const moved = applySwap(pendingSwap, productState, scan.index, catalog);
     if (moved >= 0) {
+      if (pendingSwap.spare >= 0) products.adopt(moved, pendingSwap.spare); // produit venu d'un autre lieu
       pendingSwap = null;
       products.sync(moved);
     }

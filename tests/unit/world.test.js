@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct, planSwap, applySwap } from '../../src/core/world.js';
+import { createWorld, enterPlace, buildProducts, buildPickups, moveProduct, planSwap, applySwap, swapEntry } from '../../src/core/world.js';
 import { nearestProduct } from '../../src/core/scan.js';
 import place from '../../src/data/places/rayon-essai.json';
 import catalog from '../../src/data/products.json';
@@ -45,9 +45,9 @@ describe('état du monde', () => {
     expect(nearestProduct(products, { x: lait.x, z: 200 }, { range: 150, minDepth: 150 })).toBe(0);
   });
 
-  it('échange prévu seulement si la carte reposée vient d’un produit de ce lieu', () => {
+  it('échange prévu : carte de ce lieu → son produit est déplacé ; d’un autre lieu → un nouveau produit (A7)', () => {
     expect(planSwap({ slot: 2, place: 'rayon-essai' }, 'rayon-essai', 5)).toEqual({ from: 2, to: 5 });
-    expect(planSwap({ slot: 2, place: 'accueil' }, 'rayon-essai', 5)).toBe(null); // d'un autre lieu : rien
+    expect(planSwap({ slot: 2, place: 'rayon-2', productId: 'pile' }, 'rayon-essai', 5)).toEqual({ product: 'pile', to: 5 });
     expect(planSwap({ slot: -1, place: 'rayon-essai' }, 'rayon-essai', 5)).toBe(null); // sans produit d'origine
     expect(planSwap(null, 'rayon-essai', 5)).toBe(null); // rien de reposé
   });
@@ -63,4 +63,17 @@ describe('état du monde', () => {
     expect({ x: products[2].x, z: products[2].z }).toEqual(at5);
     expect(products[2].scanned).toBe(false); // de nouveau scannable, à la place du produit scanné
   });
+
+  it('A7 : la carte d’un autre lieu est reposée : son produit apparaît à la place du produit scanné, ici, prêt à scanner', () => {
+    const { products } = build();
+    const n = products.length;
+    const target = products[0];
+    expect(applySwap({ product: 'pile', to: 0 }, products, 3, catalog)).toBe(-1); // un autre produit scanné : rien
+    const i = applySwap({ product: 'pile', to: 0 }, products, 0, catalog);
+    expect(i).toBe(n); // un produit de plus dans ce lieu
+    expect(products[i]).toMatchObject({ id: 'pile', x: target.x, y: target.y, scanned: false });
+    expect(products[i].w).toBe(Math.round(catalog.products.pile.size[0] * (target.w / target.def.size[0])));
+    expect(swapEntry(products, 0, 'pile', catalog.products.pile).loose).toBe(target.loose);
+  });
 });
+

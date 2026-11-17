@@ -101,6 +101,7 @@ export const config = {
     followDelay: 0.8, // délai avant une réplique enchaînée (aparté après l'accueil, réaction du haut-parleur) (s)
   },
   scan: {
+    exchangeSpares: 6, // images préparées par lieu pour les échanges avec un produit venu d'un autre lieu (A7)
     range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
     minDepth: 150, // il faut être assez près de l'étagère du fond (profondeur minimale)
     // Produits posés ailleurs (table, caddie) : portée autour du produit, sur le sol.
@@ -269,6 +270,7 @@ export const TUNABLES = [
   { group: 'Scanner', key: 'scan.laser', label: 'Laser', min: 0.05, max: 0.8, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.dissolve', label: 'Dissolution du produit', min: 0.1, max: 1.5, step: 0.05, unit: 's' },
   { group: 'Scanner', key: 'scan.card', label: 'Apparition de la carte', min: 0.3, max: 2.5, step: 0.05, unit: 's' },
+  { group: 'Scanner', key: 'scan.exchangeSpares', label: 'Échanges entre rayons : images préparées', min: 0, max: 12, step: 1, reload: true },
   { group: 'Scanner', key: 'scan.particles', label: 'Nombre de confettis', min: 0, max: 24, step: 1, reload: true },
   { group: 'Son', key: 'audio.scanVolume', label: 'Sons du scanner', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },

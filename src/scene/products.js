@@ -43,6 +43,19 @@ export function createProducts(items, images, parent, effectsParent, settings, d
   });
   items.forEach((_, i) => place(i));
 
+  // Réserve pour les échanges avec un produit venu d'un autre lieu (A7) : quelques images préparées au
+  // chargement ; l'image d'un produit échangé y est posée et décodée pendant que le joueur choisit sa carte,
+  // avant d'apparaître (rien n'apparaît à froid). Au retour dans le lieu, il a sa propre image.
+  const spares = [];
+  for (let k = 0; k < settings.exchangeSpares; k++) {
+    const el = new Image();
+    el.className = 'product';
+    el.alt = '';
+    el.draggable = false;
+    el.hidden = true;
+    spares.push({ el, used: false });
+  }
+
   // Repère au-dessus du produit à portée.
   const marker = document.createElement('div');
   marker.className = 'scan-marker';
@@ -164,5 +177,22 @@ export function createProducts(items, images, parent, effectsParent, settings, d
     dissolving = -1;
   }
 
-  return { setMarker, markAt, update, remove, sync: place };
+  // Prépare l'image d'un produit échangé (entry : core/world.js swapEntry). Renvoie son numéro, ou -1.
+  function reserve(entry) {
+    const k = spares.findIndex((s) => !s.used);
+    if (k < 0) return -1;
+    const s = spares[k];
+    s.used = true;
+    s.el.src = images.get(entry.def.image).url;
+    s.el.width = entry.w;
+    s.el.height = entry.h;
+    s.el.decode?.().catch(() => {});
+    return k;
+  }
+  // Le produit `index` (nouveau, dans l'état du monde) prend l'image préparée `k`.
+  function adopt(index, k) {
+    els[index] = spares[k].el;
+  }
+
+  return { setMarker, markAt, update, remove, sync: place, reserve, adopt };
 }
