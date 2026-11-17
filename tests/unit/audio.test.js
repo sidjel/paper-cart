@@ -17,6 +17,7 @@ class FakeContext {
     this.currentTime = 0;
     this.sampleRate = 48000;
     this.destination = node();
+    window.lastCtx = this;
   }
   createGain() {
     return node({ gain: param() });
@@ -41,8 +42,14 @@ class FakeContext {
     sources.push(s);
     return s;
   }
-  resume() {}
-  suspend() {}
+  resume() {
+    this.state = 'running';
+    return Promise.resolve();
+  }
+  suspend() {
+    this.state = 'suspended';
+    return Promise.resolve();
+  }
 }
 const end = () => {
   for (const s of sources.splice(0)) s.onended?.();
@@ -85,6 +92,21 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().music).toBeGreaterThan(0);
     end();
     expect(a.counters().music).toBe(0);
+  });
+
+  it('interrompu (appel, autre application) : le son reprend au prochain geste, et c’est compté', () => {
+    const a = createAudio(settings, song);
+    a.unlock();
+    expect(a.counters().resumed).toBe(0);
+    for (const st of ['interrupted', 'suspended']) {
+      window.lastCtx.state = st;
+      a.unlock(); // un geste du joueur
+      expect(a.counters().state).toBe('running');
+    }
+    expect(a.counters().resumed).toBe(2);
+    a.setHidden(true); // onglet caché : pas de reprise au geste
+    a.unlock();
+    expect(a.counters().state).toBe('suspended');
   });
 
   it('la pluie de l’intro (son en boucle) est libérée quand on l’arrête', () => {

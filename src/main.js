@@ -433,7 +433,7 @@ const measure = createMeasureTools(uiEl, {
   audioInfo() {
     const c = audio.counters();
     const states = c.states.length ? ` · changements d'état : ${c.states.join(', ')}` : '';
-    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music}${states}`;
+    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music} · reprises au geste ${c.resumed}${states}`;
   },
   gamepad: () => input?.gamepad.connected ?? false,
 });

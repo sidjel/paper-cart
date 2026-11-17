@@ -14,7 +14,7 @@ export function createAudio(settings, song) {
   // Nœuds créés et libérés, par catégorie (effets, musique) : le navigateur ne permet pas de les compter,
   // on les compte nous-mêmes (règles : src/audio/CLAUDE.md). « Actifs » = créés − libérés : retombe à zéro
   // quand plus rien ne joue.
-  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [] };
+  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0 };
 
   // Un son joué : ses nœuds sont libérés quand sa source se termine (onended → disconnect). Le nettoyage
   // est idempotent (garde cleanedUp) : le compteur ne baisse qu'une fois, même après stop() puis onended.
@@ -331,9 +331,13 @@ export function createAudio(settings, song) {
 
   return {
     // Appelé au premier geste du joueur.
+    // Appelé à chaque geste du joueur : si le son a été suspendu ou interrompu (appel, autre application,
+    // écran éteint), il reprend ici (séance 65, correction n° 2 ; « interrupted » : Safari).
     unlock() {
       if (!ctx) init();
-      if (ctx && ctx.state === 'suspended' && !hidden) ctx.resume();
+      if (!ctx || hidden || (ctx.state !== 'suspended' && ctx.state !== 'interrupted')) return;
+      stats.resumed++;
+      ctx.resume().catch(() => {}); // refusé hors geste : réessayé au geste suivant
     },
     get started() {
       return !!ctx;
@@ -354,6 +358,7 @@ export function createAudio(settings, song) {
         sfx: stats.sfx.created - stats.sfx.freed,
         music: stats.music.created - stats.music.freed,
         states: stats.states.slice(-4),
+        resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
       };
     },
     applyVolumes,
@@ -373,8 +378,8 @@ export function createAudio(settings, song) {
     setHidden(h) {
       hidden = h;
       if (!ctx) return;
-      if (h) ctx.suspend();
-      else ctx.resume();
+      if (h) ctx.suspend().catch(() => {});
+      else ctx.resume().catch(() => {}); // si le navigateur refuse sans geste : reprise au prochain geste (unlock)
     },
     play(name) {
       if (!running() || !SOUNDS[name]) return;
