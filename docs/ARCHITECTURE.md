@@ -133,7 +133,7 @@ Vue d'ensemble : un seul accès au son (`src/audio/audio.js`), tout synthétisé
 - Le jeu se joue **sur PC et sur smartphone**, dans le navigateur. Il vise **60 images par seconde partout**, avec un **profil de qualité** par appareil : densité de pixels plafonnée, effets coûteux (pluie animée, poussière, parallaxe lointaine) activés ou non.
 - Le profil initial est choisi au démarrage d'après les **capacités estimées** de l'appareil, pas seulement l'étiquette « PC / smartphone » (un PC modeste ne doit pas recevoir un profil plus lourd qu'un bon téléphone). Les indices du navigateur (mémoire, cœurs) sont approximatifs : le choix s'appuie surtout sur un **court test de vitesse au premier lancement** (l'indice de vitesse du diagnostic), gardé dans le navigateur. Pas de WebGL juste pour lire le nom de la carte graphique. Le profil reste modifiable dans les options du joueur, **sans changement automatique en pleine partie**.
 - **Appareils de référence** : PC (Core i3-8145U, 4 Go de mémoire) et Oppo Reno 2 (8 Go). Les objectifs se jugent sur chacun, dans son profil.
-- ⏳ Profils : proposés à l'auteur (séance 64), à construire après son accord.
+- Profils (option A, séance 64) : **étape 1 faite (séance 66)** : Léger (densité 1, sans pluie animée ni poussière, plans lointains immobiles), Normal (densité 1,5), Fin (densité 2) ; valeurs dans `src/config.js` (`display.profiles`), règle dans `core/profiles.js`, lue par `scene/quality.js` ; choix dans les options (au chargement). [TEMP] « Fin » par défaut. ⏳ Étape 2 : choix automatique au premier lancement par un court test d'affichage, seuils à caler sur les deux appareils de référence.
 
 ## 15. Leçons (un bug corrigé = un test qui échoue s'il revient + une ligne ici)
 

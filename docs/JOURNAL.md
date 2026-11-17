@@ -16,6 +16,33 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séances 65-66 — 17/11/2026 — Chantier son ; profils de qualité (étape 1)
+
+**Demandes de l'auteur** : la séance B (le chantier son, puis les profils) ; des bruits gênants signalés en jouant.
+
+**Fait (son)** :
+- **Mesure** : compteurs dans le diagnostic (nœuds actifs, sons joués, les plus joués, derniers sons, position de la musique, changements d'état, sons coupés) et « Essai son long ».
+- **Correction n° 1** : chaque son libère ses nœuds à sa fin. Confirmé sur le téléphone : 3 et 31 nœuds actifs, contre 1 975 et 5 549 avant.
+- **Correction n° 2** : reprise au geste après une interruption.
+- **Correction n° 3** : sons courts préparés une fois au démarrage.
+- **Correction n° 4** : nombre maximum de sons par famille.
+- **Bruits gênants** :
+  - le **shaker** de la musique : retiré (trouvé par l'auteur avec les interrupteurs d'instruments) ;
+  - le **froissement** des pensées et des réponses du joueur : interrupteur « Froissement », désactivé ;
+  - le réglage « Apartés du héros » est remplacé par « Bip du héros » et « Froissement » ;
+  - les bips du héros sont espacés (≈ 5 par seconde) et adoucis ;
+  - le joueur reste sans bip (choix de l'auteur).
+
+**Fait (profils, étape 1)** : Léger, Normal, Fin, au choix dans les options. « Fin » par défaut, l'affichage d'avant. Sur le téléphone simulé, Léger divise par 4 la mémoire d'images (0,9 contre 3,8 millions de pixels) et éteint la pluie.
+
+**Vérifié** : 190 tests de logique, Knip, 94 essais navigateur (PC et téléphone simulé), sans erreur console. Comptages inchangés en « Fin ».
+
+**À vérifier par l'auteur** :
+- l'écoute du son, 5 minutes ;
+- le banc d'essai du hall et du rayon dans les trois profils, sur le téléphone et, si possible, sur le PC i3. Ces résultats serviront à caler le choix automatique (étape 2).
+
+---
+
 ## Séance 64 — 17/11/2026 — Règles professionnelles (séance A : documentation et vérifications)
 
 **Demande de l'auteur** : fichier SEANCE_REGLES. Séance A seulement : inscrire les règles, vérifier les entrées et la boucle, proposer les profils, noter le combat et les images. Pas de tablette (PC et smartphone).
@@ -103,22 +130,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
 
 **À vérifier par l'auteur** : le clignotement sur le téléphone. S'il a disparu, l'auteur valide.
-
----
-
-## Séance 60 — 16/11/2026 — Agent : plus de clignotement à la bulle ; héros immobile ; bulle de 3 s
-
-**Demande de l'auteur** : l'agent clignote quand sa bulle apparaît et quand elle disparaît ; le héros ne doit pas bouger tant que la bulle est ouverte ; la bulle se ferme seule au bout de 3 s.
-
-**Fait** :
-- **Clignotement** : à chaque changement de pose (bras levé pendant la bulle), l'image de l'agent était redessinée. Chaque pose a maintenant son propre calque, qui reste ; on passe de l'une à l'autre par l'opacité, sans rien redessiner.
-  - L'essai automatique compte maintenant les redessins de l'agent et des portiques (0) en plus des changements de calque.
-  - Vérifié : avec l'ancienne façon de faire, l'essai échoue.
-- **Héros immobile** tant que l'agent parle : clavier et manette l'étaient déjà ; le toucher et le clic aussi maintenant.
-- **Bulle de l'agent fermée seule au bout de 3 s** (⚙ → Narrateur). Ses répliques s'écrivent assez vite (en 1,2 s au plus) pour être lues avant.
-
-**Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
-
-**À vérifier par l'auteur** : le clignotement sur le téléphone ; si 3 s suffisent pour lire la première phrase (longue).
 
 ---
