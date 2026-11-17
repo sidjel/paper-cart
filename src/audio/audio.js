@@ -75,6 +75,7 @@ export function createAudio(settings, song) {
       data[i] = (x / 0x3fffffff) - 1;
     }
     music = createMusic(song, settings);
+    prepare().catch(() => {}); // sons courts préparés une fois (sinon : fabriqués en direct, comme avant)
     // Chaque changement d'état du son est noté (une interruption par un appel, une autre application…).
     ctx.onstatechange = () => stats.states.push(`${new Date().toLocaleTimeString('fr-FR')} ${ctx.state}${hidden ? ' (onglet caché)' : ''}`);
     applyVolumes();
@@ -92,19 +93,64 @@ export function createAudio(settings, song) {
   }
 
   // Petite note : forme d'onde, fréquence de départ et d'arrivée, début, durée, volume.
-  function tone(type, f0, f1, t, dur, vol, bus = scanBus) {
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
+  // Une petite note dans le contexte c (le vrai, ou un contexte de préparation) ; renvoie ses nœuds.
+  function toneGraph(c, out, type, f0, f1, t, dur, vol) {
+    const o = c.createOscillator();
+    const g = c.createGain();
     o.type = type;
     o.frequency.setValueAtTime(f0, t);
     if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(bus);
+    o.connect(g).connect(out);
     o.start(t);
     o.stop(t + dur + 0.02);
-    track(o, [o, g]);
+    return [o, g];
+  }
+  function tone(type, f0, f1, t, dur, vol, bus = scanBus) {
+    const nodes = toneGraph(ctx, bus, type, f0, f1, t, dur, vol);
+    track(nodes[0], nodes);
+  }
+
+  // ---------- Sons courts et répétitifs, préparés une fois (séance 66, correction n° 3) ----------
+  // Pas, petits bips du texte, froissement : calculés au démarrage du son dans un OfflineAudioContext, à
+  // la fréquence du vrai contexte. En jeu, en jouer un = une seule source branchée sur un bus permanent,
+  // aucun filtre ni oscillateur créé. Tant qu'ils ne sont pas prêts (quelques millisecondes), ils sont
+  // fabriqués comme avant.
+  let prepared = null; // { nom: [AudioBuffer par variante] }
+  const PREPARED = {
+    pas: [0, 1].map((f) => ({ len: 0.14, draw: (c, out) => [stepGraph(c, out, 0, f)] })),
+    blip: [0, 1, 2].map((n) => ({ len: 0.06, draw: (c, out) => [toneGraph(c, out, 'square', 620 + n * 40, 620 + n * 40, 0, 0.03, 0.05)] })),
+    blipHeros: [0, 1, 2].map((n) => ({ len: 0.07, draw: (c, out) => [toneGraph(c, out, 'triangle', 330 + n * 30, 300 + n * 30, 0, 0.04, 0.09)] })),
+    froissement: [{ len: 0.3, draw: (c, out) => froissGraph(c, out, 0) }],
+  };
+  async function prepare() {
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC) return;
+    const out = {};
+    for (const [name, variants] of Object.entries(PREPARED)) {
+      out[name] = await Promise.all(
+        variants.map((v) => {
+          const c = new OAC(1, Math.ceil(v.len * ctx.sampleRate), ctx.sampleRate);
+          v.draw(c, c.destination);
+          return c.startRendering();
+        }),
+      );
+    }
+    prepared = out;
+  }
+  // Un son préparé (variante k), ou à défaut fabriqué en direct (graph : nœuds de chaque partie).
+  function playPrepared(name, k, bus, live) {
+    if (prepared) {
+      const src = ctx.createBufferSource();
+      src.buffer = prepared[name][k];
+      src.connect(bus);
+      src.start();
+      track(src, [src]);
+      return;
+    }
+    for (const nodes of live()) track(nodes[0], nodes);
   }
 
   // [TEMP] Bip de caisse : deux notes courtes et nettes.
@@ -212,28 +258,33 @@ export function createAudio(settings, song) {
   let blipN = 0;
   function blip() {
     blipN = (blipN + 1) % 3;
-    tone('square', 620 + blipN * 40, 620 + blipN * 40, ctx.currentTime, 0.03, 0.05, voiceBus);
+    const n = blipN;
+    playPrepared('blip', n, voiceBus, () => [toneGraph(ctx, voiceBus, 'square', 620 + n * 40, 620 + n * 40, ctx.currentTime, 0.03, 0.05)]);
   }
 
   // [TEMP] Froissement de papier : trois petits crissements de bruit filtré (aparté du héros).
   function froissement() {
-    const t = ctx.currentTime;
+    playPrepared('froissement', 0, heroBus, () => froissGraph(ctx, heroBus, ctx.currentTime));
+  }
+  function froissGraph(c, out, t) {
+    const parts = [];
     for (let k = 0; k < 3; k++) {
       const at = t + k * 0.07;
-      const src = ctx.createBufferSource();
+      const src = c.createBufferSource();
       src.buffer = noise;
-      const bp = ctx.createBiquadFilter();
+      const bp = c.createBiquadFilter();
       bp.type = 'bandpass';
       bp.Q.value = 1.2;
       bp.frequency.value = 2600 + k * 900;
-      const g = ctx.createGain();
+      const g = c.createGain();
       g.gain.setValueAtTime(0.0001, at);
       g.gain.exponentialRampToValueAtTime(0.3 - k * 0.06, at + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, at + 0.06);
-      src.connect(bp).connect(g).connect(heroBus);
+      src.connect(bp).connect(g).connect(out);
       src.start(at, 0.1 + k * 0.2, 0.08);
-      track(src, [src, bp, g]);
+      parts.push([src, bp, g]);
     }
+    return parts;
   }
 
   // [TEMP] Carte qui se retourne (Panier) : un petit souffle de papier qui glisse (bruit filtré dont le
@@ -300,7 +351,8 @@ export function createAudio(settings, song) {
   let heroN = 0;
   function blipHeros() {
     heroN = (heroN + 1) % 3;
-    tone('triangle', 330 + heroN * 30, 300 + heroN * 30, ctx.currentTime, 0.04, 0.09, heroBus);
+    const n = heroN;
+    playPrepared('blipHeros', n, heroBus, () => [toneGraph(ctx, heroBus, 'triangle', 330 + n * 30, 300 + n * 30, ctx.currentTime, 0.04, 0.09)]);
   }
 
   function running() {
@@ -310,21 +362,24 @@ export function createAudio(settings, song) {
   // Un pas : frottement étouffé d'une semelle souple sur le lino, sans claquement.
   // Pieds gauche et droit légèrement différents, pour ne pas sonner comme une machine.
   function step() {
-    const t = ctx.currentTime;
     foot = 1 - foot;
-    const src = ctx.createBufferSource();
+    const f = foot;
+    playPrepared('pas', f, sfxBus, () => [stepGraph(ctx, sfxBus, ctx.currentTime, f)]);
+  }
+  function stepGraph(c, out, t, f) {
+    const src = c.createBufferSource();
     src.buffer = noise;
-    const lp = ctx.createBiquadFilter();
+    const lp = c.createBiquadFilter();
     lp.type = 'lowpass';
-    lp.frequency.value = foot ? 700 : 600;
+    lp.frequency.value = f ? 700 : 600;
     lp.Q.value = 0.5;
-    const g = ctx.createGain();
+    const g = c.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.22, t + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-    src.connect(lp).connect(g).connect(sfxBus);
-    src.start(t, foot ? 0.2 : 0.6, 0.12);
-    track(src, [src, lp, g]);
+    src.connect(lp).connect(g).connect(out);
+    src.start(t, f ? 0.2 : 0.6, 0.12);
+    return [src, lp, g];
   }
 
   const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
@@ -362,6 +417,7 @@ export function createAudio(settings, song) {
         recent: stats.recent.slice(),
         clock: ctx ? Math.round(ctx.currentTime) : 0, // horloge du son (s)
         song: music ? music.position() : '', // où en est la musique
+        prepared: !!prepared, // sons courts préparés une fois au démarrage
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
       };
     },

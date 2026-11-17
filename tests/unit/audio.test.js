@@ -5,6 +5,7 @@ import song from '../../src/data/music/supermarche.json';
 // Faux contexte audio : on garde les sources créées pour simuler leur fin (onended).
 let sources;
 let disconnected;
+let built; // filtres et oscillateurs créés dans le vrai contexte (pas en préparation)
 function param() {
   return { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} };
 }
@@ -18,11 +19,13 @@ class FakeContext {
     this.sampleRate = 48000;
     this.destination = node();
     window.lastCtx = this;
+    if (!window.realCtx) window.realCtx = this;
   }
   createGain() {
     return node({ gain: param() });
   }
   createBiquadFilter() {
+    if (!this.offline) built++;
     return node({ frequency: param(), Q: param() });
   }
   createDynamicsCompressor() {
@@ -32,6 +35,7 @@ class FakeContext {
     return { getChannelData: () => new Float32Array(n) };
   }
   createOscillator() {
+    if (!this.offline) built++;
     return this.source({ frequency: param() });
   }
   createBufferSource() {
@@ -51,6 +55,17 @@ class FakeContext {
     return Promise.resolve();
   }
 }
+// Contexte de préparation (OfflineAudioContext) : rend un faux tampon.
+class FakeOffline extends FakeContext {
+  constructor() {
+    super();
+    this.offline = true;
+    window.lastCtx = window.realCtx;
+  }
+  startRendering() {
+    return Promise.resolve({ fake: 'tampon' });
+  }
+}
 const end = () => {
   for (const s of sources.splice(0)) s.onended?.();
 };
@@ -58,9 +73,11 @@ const end = () => {
 beforeEach(() => {
   sources = [];
   disconnected = 0;
-  vi.stubGlobal('window', { AudioContext: FakeContext });
+  built = 0;
+  vi.stubGlobal('window', { AudioContext: FakeContext, OfflineAudioContext: FakeOffline });
 });
 afterEach(() => vi.unstubAllGlobals());
+const prepared = (a) => vi.waitFor(() => expect(a.counters().prepared).toBe(true));
 
 const settings = { latency: 'balanced', muted: false, master: 1, music: 1, pauseMusic: 0.5, steps: 1, scanVolume: 1, voiceVolume: 1, heroVolume: 1 };
 
@@ -81,7 +98,7 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     a.play('pas');
     const once = sources.slice();
     end();
-    for (const s of once) s.onended(); // stop() puis onended, par exemple
+    for (const s of once) s.onended?.(); // stop() puis onended, par exemple
     expect(a.counters().sfx).toBe(0);
   });
 
@@ -120,6 +137,19 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     noBass.update();
     expect(withAll).toBeGreaterThan(0);
     expect(noBass.counters().music).toBe(0);
+  });
+
+  it('sons courts préparés une fois : un pas, un bip, un froissement = une seule source, aucun filtre ni oscillateur', async () => {
+    const a = createAudio(settings, song);
+    a.unlock();
+    await prepared(a);
+    end();
+    built = 0;
+    for (const name of ['pas', 'pas', 'blip', 'blipHeros', 'froissement']) a.play(name);
+    expect(built).toBe(0);
+    expect(a.counters().sfx).toBe(5); // une source par son
+    end();
+    expect(a.counters().sfx).toBe(0);
   });
 
   it('la pluie de l’intro (son en boucle) est libérée quand on l’arrête', () => {

@@ -434,7 +434,7 @@ const measure = createMeasureTools(uiEl, {
     const c = audio.counters();
     const top = Object.entries(c.byName).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([n, k]) => `${n} ${k}`).join(', ');
     const states = c.states.length ? ` · changements d'état : ${c.states.join(', ')}` : '';
-    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music} · les plus joués : ${top || 'aucun'} · derniers sons : ${c.recent.join(', ') || 'aucun'} · horloge du son ${c.clock} s · musique : ${c.song} · reprises au geste ${c.resumed}${states}`;
+    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music} · les plus joués : ${top || 'aucun'} · derniers sons : ${c.recent.join(', ') || 'aucun'} · horloge du son ${c.clock} s · musique : ${c.song} · sons courts préparés ${c.prepared ? 'oui' : 'non'} · reprises au geste ${c.resumed}${states}`;
   },
   gamepad: () => input?.gamepad.connected ?? false,
 });

@@ -13,6 +13,7 @@ test('le son ne s’accumule pas : les nœuds des pas sont libérés, la musique
   await page.evaluate(() => window.paperCart.set('narrator.enabled', false)); // pas de petits bips de texte
   await page.keyboard.press('ArrowRight'); // premier geste : le son démarre
   await expect.poll(() => page.evaluate(() => window.paperCart.audio().state), { timeout: 5000 }).toBe('running');
+  await expect.poll(() => page.evaluate(() => window.paperCart.audio().prepared), { timeout: 5000 }).toBe(true); // sons courts préparés (séance 66)
   const before = await page.evaluate(() => window.paperCart.audio());
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(2000);
