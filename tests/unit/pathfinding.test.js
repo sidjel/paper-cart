@@ -43,3 +43,15 @@ describe('contourner les objets (toucher pour aller)', () => {
     expect(Math.hypot(w.x - 750, w.z - 215)).toBeLessThan(5);
   });
 });
+
+describe('point praticable le plus proche (séance 67)', () => {
+  it('hors d’un sol à coins (prolongement dans une ouverture) : ramené au bord du sol le plus proche, pas contre un obstacle', () => {
+    const mask = compileMask({
+      area: [[0, 0], [1000, 0], [1000, 264], [700, 264], [700, 330], [500, 330], [500, 264], [0, 264]],
+      obstacles: [{ points: [[100, 100], [300, 100], [300, 180], [100, 180]] }],
+    });
+    const [x, z] = nearestWalkable(mask, 200, 320); // au-dessus du sol, à gauche de l'ouverture
+    expect(x).toBeCloseTo(200, 0);
+    expect(z).toBeGreaterThan(258);
+  });
+});

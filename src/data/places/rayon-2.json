@@ -12,13 +12,6 @@
     "scalePerDepth": 0.0012
   },
   "images": {
-    "rayon-avant": {
-      "src": "art/placeholder/rayon-avant.svg",
-      "size": [
-        4300,
-        150
-      ]
-    },
     "rayon-lointain": {
       "src": "art/placeholder/rayon-lointain.svg",
       "size": [
@@ -31,6 +24,13 @@
       "size": [
         3600,
         1080
+      ]
+    },
+    "rayon2-avant": {
+      "src": "art/placeholder/rayon2-avant.svg",
+      "size": [
+        4300,
+        150
       ]
     }
   },
@@ -64,14 +64,14 @@
     },
     {
       "id": "premier-plan",
-      "image": "rayon-avant",
+      "image": "rayon2-avant",
       "position": [
         0,
         930
       ],
-      "parallax": 1.25,
+      "parallax": 1,
       "opacity": "display.foregroundOpacity",
-      "contains": "rayon d'en face (côté caméra), en transparence ; seulement sa partie haute (produits), deux fois moins haut depuis la séance 46",
+      "contains": "l'arrière du rayon 7, en transparence, avec ses deux ouvertures (les passages) et leurs panneaux ; sans parallaxe, pour que les ouvertures restent en face des passages",
       "hiddenBy": "rien"
     }
   ],
@@ -80,10 +80,42 @@
     -150
   ],
   "walkMask": {
-    "comment": "Même repère que le rayon d'essai. Pas d'objet au sol pour l'instant.",
+    "comment": "Même repère que le rayon d'essai. Séance 67 (A7) : le sol se prolonge vers l'avant dans les deux ouvertures du rayon de devant (jusqu'à z −250) ; le passage vers le rayon 7 est au bout de ces prolongements : longer le bord avant ne le déclenche jamais.",
     "area": [
       [
         90,
+        -195
+      ],
+      [
+        2060,
+        -195
+      ],
+      [
+        2060,
+        -250
+      ],
+      [
+        2280,
+        -250
+      ],
+      [
+        2280,
+        -195
+      ],
+      [
+        3040,
+        -195
+      ],
+      [
+        3040,
+        -250
+      ],
+      [
+        3240,
+        -250
+      ],
+      [
+        3240,
         -195
       ],
       [
@@ -233,10 +265,10 @@
       {
         "id": "vers-rayon-a",
         "zone": [
-          2080,
-          -195,
-          2260,
-          -180
+          2070,
+          -250,
+          2270,
+          -225
         ],
         "to": "rayon-essai",
         "arrive": [
@@ -249,9 +281,9 @@
         "id": "vers-rayon-b",
         "zone": [
           3050,
-          -195,
+          -250,
           3230,
-          -180
+          -225
         ],
         "to": "rayon-essai",
         "arrive": [

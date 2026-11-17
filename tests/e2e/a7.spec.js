@@ -86,3 +86,29 @@ test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son pr
   await expect(page.locator('.product').filter({ visible: true }).locator('xpath=.')).not.toHaveCount(0);
   await page.screenshot({ path: `test-results/captures/a7-${info.project.name}-echange.png` });
 });
+
+test('A7 : longer le fond du rayon 7 (ou le bord avant du rayon 2) devant les ouvertures ne fait pas changer de rayon', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'clavier : PC');
+  test.setTimeout(40_000);
+  // Rayon 7 : contre le fond, puis tout le long vers la droite, devant les deux ouvertures.
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 250);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 3400, null, { timeout: 15000 });
+  await page.keyboard.up('ArrowRight');
+  expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
+  // Rayon 2 : contre le bord avant, tout le long vers la gauche.
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-b'));
+  await arrivedIn(page, 'rayon-2');
+  await page.keyboard.down('ArrowLeft'); // d'abord hors du prolongement de l'ouverture
+  await page.waitForFunction(() => window.paperCart.hero().x < 2900);
+  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.down('ArrowDown');
+  await page.waitForFunction(() => window.paperCart.hero().z < -185);
+  await page.keyboard.up('ArrowDown');
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.hero().x < 1800, null, { timeout: 15000 });
+  await page.keyboard.up('ArrowLeft');
+  expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-2');
+});

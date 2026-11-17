@@ -40,12 +40,14 @@ function cornerNodes(mask) {
   return nodes;
 }
 
-// Si le point visé est dans un obstacle, on le ramène juste à côté (au bord le plus proche).
+// Si le point visé est dans un obstacle ou hors du sol, on le ramène juste à côté (au bord le plus proche).
+// Les bords de la zone de marche comptent aussi : elle peut avoir des coins (séance 67, A7 : le sol se
+// prolonge dans les ouvertures) ; sinon un point hors du sol était ramené contre un obstacle lointain.
 export function nearestWalkable(mask, x, z) {
   if (isWalkable(mask, x, z)) return [x, z];
   let best = null;
   let bestD = Infinity;
-  for (const poly of mask.obstacles) {
+  for (const poly of [mask.area, ...mask.obstacles]) {
     const n = poly.length / 2;
     for (let i = 0; i < n; i++) {
       const ax = poly[i * 2], az = poly[i * 2 + 1];

@@ -101,7 +101,7 @@
     60
   ],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond, -195 = tout en bas de l'écran, derrière le rayon du premier plan). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage.",
+    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond, -195 = tout en bas de l'écran, derrière le rayon du premier plan). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage. Séance 67 (A7) : le sol se prolonge dans les deux ouvertures de l'étagère du fond (jusqu'à z 330) ; le passage vers le rayon 2 est au fond de ces prolongements : longer l'étagère ne le déclenche jamais.",
     "area": [
       [
         90,
@@ -113,6 +113,38 @@
       ],
       [
         3510,
+        264
+      ],
+      [
+        3240,
+        264
+      ],
+      [
+        3240,
+        330
+      ],
+      [
+        3040,
+        330
+      ],
+      [
+        3040,
+        264
+      ],
+      [
+        2280,
+        264
+      ],
+      [
+        2280,
+        330
+      ],
+      [
+        2060,
+        330
+      ],
+      [
+        2060,
         264
       ],
       [
@@ -525,10 +557,10 @@
       {
         "id": "vers-rayon2-a",
         "zone": [
-          2080,
-          250,
-          2260,
-          264
+          2070,
+          300,
+          2270,
+          330
         ],
         "to": "rayon-2",
         "arrive": [
@@ -541,9 +573,9 @@
         "id": "vers-rayon2-b",
         "zone": [
           3050,
-          250,
+          300,
           3230,
-          264
+          330
         ],
         "to": "rayon-2",
         "arrive": [
