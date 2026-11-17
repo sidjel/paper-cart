@@ -432,8 +432,9 @@ const measure = createMeasureTools(uiEl, {
   placeNote: () => `${place.id}${places.lastTransitionMs() ? ` (dernier changement de lieu : ${places.lastTransitionMs()} ms dans le noir)` : ''}`,
   audioInfo() {
     const c = audio.counters();
+    const top = Object.entries(c.byName).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([n, k]) => `${n} ${k}`).join(', ');
     const states = c.states.length ? ` · changements d'état : ${c.states.join(', ')}` : '';
-    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music} · reprises au geste ${c.resumed}${states}`;
+    return `${audio.describe()} · sons joués ${c.played} · notes ${c.notes} · nœuds actifs : effets ${c.sfx}, musique ${c.music} · les plus joués : ${top || 'aucun'} · reprises au geste ${c.resumed}${states}`;
   },
   gamepad: () => input?.gamepad.connected ?? false,
 });

@@ -14,7 +14,7 @@ export function createAudio(settings, song) {
   // Nœuds créés et libérés, par catégorie (effets, musique) : le navigateur ne permet pas de les compter,
   // on les compte nous-mêmes (règles : src/audio/CLAUDE.md). « Actifs » = créés − libérés : retombe à zéro
   // quand plus rien ne joue.
-  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0 };
+  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0, byName: {} };
 
   // Un son joué : ses nœuds sont libérés quand sa source se termine (onended → disconnect). Le nettoyage
   // est idempotent (garde cleanedUp) : le compteur ne baisse qu'une fois, même après stop() puis onended.
@@ -358,6 +358,7 @@ export function createAudio(settings, song) {
         sfx: stats.sfx.created - stats.sfx.freed,
         music: stats.music.created - stats.music.freed,
         states: stats.states.slice(-4),
+        byName: { ...stats.byName },
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
       };
     },
@@ -384,6 +385,7 @@ export function createAudio(settings, song) {
     play(name) {
       if (!running() || !SOUNDS[name]) return;
       stats.played++;
+      stats.byName[name] = (stats.byName[name] ?? 0) + 1; // quels sons (diagnostic : un son inattendu)
       SOUNDS[name]();
     },
     // À chaque image affichée.
