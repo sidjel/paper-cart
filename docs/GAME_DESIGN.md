@@ -41,7 +41,7 @@
 - **A6** l'accueil (lieu séparé) → **A7** le deuxième rayon → **A8** le caddie (ancien A5b) : l'échange du panier contre le caddie se fait **au comptoir de l'accueil**.
 
 ## Reposer une carte ✅ VALIDÉ (séance 63)
-- **Échange** (panier plein) : le produit de la carte reposée **remplace le produit scanné, sur le rayon où se fait l'échange**, même si la carte vient d'un autre lieu (à construire avec A7, quand deux lieux auront des produits).
+- **Échange** (panier plein) : le produit de la carte reposée **remplace le produit scanné, sur le rayon où se fait l'échange**, même si la carte vient d'un autre lieu (construit avec A7, séance 67).
 - **Abandon** (pas encore dans le jeu) : une carte abandonnée **retourne dans son lieu et à sa place d'origine**.
 
 ## Le hall d'accueil (A6) ✅ VALIDÉ (demande de l'auteur, séance 57 ; image de référence)

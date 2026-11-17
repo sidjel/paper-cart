@@ -120,7 +120,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | 3. Historique des temps d'image remis à zéro à chaque lieu | 62 | ✅ | |
 | 4. Règle d'échange du panier dans `core/world.js` | 62 | ✅ | Sans changement de comportement. |
 | 5. Carte reposée qui vient d'un autre lieu : où va son produit ? | 62 | ✅ | Séance 63 : échange → le produit remplace le produit scanné, sur ce rayon-ci ; abandon (à venir) → retour au lieu et à la place d'origine (GAME_DESIGN). L'échange entre lieux se construit avec A7. |
-| Échange d'une carte venue d'un autre lieu | 63 | 🔧 | Avec A7 (aujourd'hui seul le rayon a des produits). |
+| Échange d'une carte venue d'un autre lieu | 63 | ✅ | Fait avec A7 (séance 67). |
 | 6. Éléments créés pendant le jeu par les cartes | 62 | ✅ | Séance 63 (« on corrige si ce n'est pas risqué ») : carte volante préparée une fois ; textes du haut-parleur et des cartes mis à jour sans nouveaux nœuds. Reste la petite carte ajoutée au Panier à chaque scan (panneau caché ; correction plus risquée : liste, onglets, clavier). Essai : un scan ne crée qu'elle. |
 | Petite carte du Panier créée à chaque scan | 63 | ❓ | Écart restant, faible coût (panneau caché). À corriger plus tard si l'auteur le souhaite (cases préparées d'avance). |
 | 7. Test de mémoire, aussi avec un échec au milieu | 62 | ✅ | |
@@ -153,7 +153,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | A6 validée temporairement, sur le principe | 67 | ✅ | `379f554` ; l'auteur y reviendra. |
 | A7 (1/2) : rayon 2, deux passages (les ouvertures du rayon 7), arrivée du bon côté | 67 | 👀 | Choix de détail (Claude) : les deux ouvertures déjà dessinées dans l'étagère du rayon 7 servent de passages ; on arrive en face, côté avant du rayon 2. À tester par l'auteur. |
-| A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | 🔧 | Règle de la séance 63 : le produit remplace le produit scanné, sur ce rayon-ci. |
+| A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | 👀 | Fait : le produit prend la place du produit scanné, sur ce rayon-ci (règle de la séance 63). Son image est préparée et décodée pendant le choix de la carte (règle « rien n'apparaît à froid »). |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.

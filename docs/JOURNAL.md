@@ -17,6 +17,25 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 67 — 17/11/2026 — Bulles selon le texte, signe d'attente ; A6 validée (temporairement) ; A7 le rayon 2
+
+**Demandes de l'auteur** : continuer (bulles, chargements) ; valider A6 « temporairement, sur le principe » ; lancer A7.
+
+**Fait** :
+- **Bulles qui se ferment seules** : leur durée suit le texte (2,5 s + 50 ms par lettre). Validé par l'auteur.
+- **Signe d'attente** : trois points de papier dans le noir au-delà de 0,3 s de chargement. Validé par l'auteur.
+- **A6** inscrite comme validée temporairement (`379f554`).
+- **A7 (1/2)** : le **rayon 2** (« Rayon 8, entretien », décor provisoire, 6 produits) est juste derrière l'étagère du rayon 7. Les deux ouvertures déjà dessinées dans cette étagère sont les **deux passages**. On arrive en face, côté avant du rayon 2 (flèches « RAYON 7 » au sol), et l'on revient au même endroit.
+- **A7 (2/2)** : panier plein, une carte venue de l'autre rayon est reposée. Son produit prend la place du produit scanné, sur ce rayon-ci (règle de la séance 63). Son image est préparée et décodée pendant le choix de la carte.
+
+**Décision prise seul** (détail) : utiliser les deux ouvertures existantes de l'étagère du rayon 7 comme passages.
+
+**Vérifié** : 194 tests de logique, Knip, 101 essais navigateur (PC et téléphone simulé), sans erreur console. Nouveaux essais : passer par l'ouverture en marchant et revenir ; l'autre ouverture ; l'échange avec une carte du rayon 2. Comptages du rayon 2 mesurés (66 éléments, 35 images, 5,4 Mpx, rien créé en jeu).
+
+**À vérifier par l'auteur** : A7 sur le téléphone. Les passages se trouvent-ils facilement ? Arrive-t-on bien « du bon côté » ? La fluidité dans le rayon 2 ?
+
+---
+
 ## Séances 65-66 — 17/11/2026 — Chantier son ; profils de qualité (étape 1)
 
 **Demandes de l'auteur** : la séance B (le chantier son, puis les profils) ; des bruits gênants signalés en jouant.
@@ -114,22 +133,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 - Coût probable : faible pour la carte cachée ; la carte qui vole est construite au moment où elle part, d'où un risque de petit à-coup. À mesurer sur le téléphone (DBG pendant un scan) avant toute correction.
 
 **Point 5, à trancher** : voir les options dans la réponse de la séance et dans SUIVI.
-
----
-
-## Séance 61 — 16/11/2026 — Un seul mécanisme de poses ; règle « un personnage = un calque »
-
-**Demande de l'auteur** : l'agent clignote encore. Son diagnostic : le héros a un seul calque et ses poses sont cachées ou montrées à l'intérieur ; l'agent (séance 60) avait un calque par pose, que Chrome ne prépare pas quand il est invisible. Corriger avec le même code que le héros, remplacer l'essai, écrire la règle. Et le demi-tour du héros seulement après la fin de la bulle de l'agent.
-
-**Fait** :
-- **`scene/poses.js`** : un seul mécanisme de poses pour tous les personnages (le héros l'utilise, l'agent aussi). Une image par pose, à l'intérieur du conteneur, une seule visible (`hidden`), sans calque propre.
-- **Trouvé en mesurant** : la boîte de l'agent n'avait pas de taille, et le navigateur donnait alors **un calque à chaque pose**. C'était probablement déjà la cause à la séance 59. Elle a maintenant la taille du dessin, comme le héros : 0 calque de pose.
-- **Essai remplacé** : pendant la scène de l'agent (le héros marche, l'agent lève puis baisse le bras), aucun changement de pose ne crée de calque ni n'en change, pour le héros comme pour l'agent. L'essai de la séance 60 (« zéro redessin ») est retiré : il visait le mauvais objectif.
-- **Règle écrite** (décision de l'auteur) dans `docs/ARCHITECTURE.md` §4 et `src/scene/CLAUDE.md`.
-- Le héros fait demi-tour **une fois la bulle « Stop ! » fermée**.
-
-**Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
-
-**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il a disparu, l'auteur valide.
 
 ---

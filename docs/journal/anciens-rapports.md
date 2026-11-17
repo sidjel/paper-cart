@@ -2,6 +2,23 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 61 — 16/11/2026 — Un seul mécanisme de poses ; règle « un personnage = un calque »
+
+**Demande de l'auteur** : l'agent clignote encore. Son diagnostic : le héros a un seul calque et ses poses sont cachées ou montrées à l'intérieur ; l'agent (séance 60) avait un calque par pose, que Chrome ne prépare pas quand il est invisible. Corriger avec le même code que le héros, remplacer l'essai, écrire la règle. Et le demi-tour du héros seulement après la fin de la bulle de l'agent.
+
+**Fait** :
+- **`scene/poses.js`** : un seul mécanisme de poses pour tous les personnages (le héros l'utilise, l'agent aussi). Une image par pose, à l'intérieur du conteneur, une seule visible (`hidden`), sans calque propre.
+- **Trouvé en mesurant** : la boîte de l'agent n'avait pas de taille, et le navigateur donnait alors **un calque à chaque pose**. C'était probablement déjà la cause à la séance 59. Elle a maintenant la taille du dessin, comme le héros : 0 calque de pose.
+- **Essai remplacé** : pendant la scène de l'agent (le héros marche, l'agent lève puis baisse le bras), aucun changement de pose ne crée de calque ni n'en change, pour le héros comme pour l'agent. L'essai de la séance 60 (« zéro redessin ») est retiré : il visait le mauvais objectif.
+- **Règle écrite** (décision de l'auteur) dans `docs/ARCHITECTURE.md` §4 et `src/scene/CLAUDE.md`.
+- Le héros fait demi-tour **une fois la bulle « Stop ! » fermée**.
+
+**Vérifié** : 166 tests de logique, Knip, 86 essais navigateur (PC et téléphone simulé), sans erreur console.
+
+**À vérifier par l'auteur** : le clignotement sur le téléphone. S'il a disparu, l'auteur valide.
+
+---
+
 ## Séance 60 — 16/11/2026 — Agent : plus de clignotement à la bulle ; héros immobile ; bulle de 3 s
 
 **Demande de l'auteur** : l'agent clignote quand sa bulle apparaît et quand elle disparaît ; le héros ne doit pas bouger tant que la bulle est ouverte ; la bulle se ferme seule au bout de 3 s.
