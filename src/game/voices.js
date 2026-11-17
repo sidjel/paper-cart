@@ -90,13 +90,13 @@ export function createVoices(ui, game) {
     if (voiceLine.walk !== undefined) startSceneWalk(voiceLine.walk);
     narratorUi.show(voiceLine.text, narrator.voice, config.display.reduceMotion, voiceLine.choices?.map((c) => c.text) ?? null);
     choiceFocus = 0;
-    if (thought) audio.play('froissement');
-    else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
+    if (thought) {
+      if (config.audio.rustle) audio.play('froissement'); // réglage « Froissement » (séance 66)
+    } else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
     if (hero && !reply && !thought) game.vibrate('fort');
     if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
-    // Le joueur répond : un froissement de papier, seulement si le réglage le demande (séance 66 : l'auteur
-    // ne veut pas ce bruit au début de chaque réplique du joueur).
-    if (narrator.voice === 'epaisseur' && config.audio.rustleOnReply) audio.play('froissement');
+    // Le joueur répond : un froissement de papier, seulement avec le réglage « Froissement » (séance 66).
+    if (narrator.voice === 'epaisseur' && config.audio.rustle) audio.play('froissement');
     // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
     const sp = game.place().speakers?.items ?? [];
     speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
@@ -206,7 +206,7 @@ export function createVoices(ui, game) {
     const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
     const player = narrator.voice === 'epaisseur'; // le joueur : l'écran parle, en bas, sans petits bips
     const every = hero ? config.narrator.heroBlipEvery : config.narrator.blipEvery; // le héros : plus espacés (séance 66)
-    if (letters > 0 && every > 0 && n % every === 0 && !player) audio.play(hero ? 'blipHeros' : 'blip');
+    if (letters > 0 && every > 0 && n % every === 0 && !player && (!hero || config.audio.heroBlips)) audio.play(hero ? 'blipHeros' : 'blip'); // « Bip du héros »
     if (player) {
       // (centré en bas par la feuille de style)
     } else if (hero) {

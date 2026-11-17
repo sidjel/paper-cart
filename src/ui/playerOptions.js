@@ -7,7 +7,7 @@
 import { TUNABLES, getValue, setValue, onConfigChange } from '../config.js';
 
 const SECTIONS = [
-  ['Son', ['audio.muted', 'audio.master', 'audio.music', 'audio.steps', 'audio.scanVolume', 'audio.voiceVolume', 'audio.heroVolume']],
+  ['Son', ['audio.muted', 'audio.master', 'audio.music', 'audio.steps', 'audio.scanVolume', 'audio.voiceVolume', 'audio.heroBlips', 'audio.rustle']],
   ['Affichage', ['display.fullscreenMode', 'display.narratorAlpha', 'display.crt', 'display.crtStrength']],
   ['Accessibilité', ['access.textSize', 'narrator.speed', 'access.vibration', 'access.brightness', 'access.contrast', 'display.reduceMotion']],
   ['Jeu', ['player.name', 'player.customName', 'intro.enabled', 'narrator.enabled', 'input.virtualJoystick']],
