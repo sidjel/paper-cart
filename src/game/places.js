@@ -17,6 +17,7 @@ import { exitAt, createTransition, stepTransition, placeReady, transitionBlack }
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
+import { quality } from '../scene/quality.js';
 
 export function createPlaces(ui, container, game) {
   let place = null;
@@ -26,7 +27,7 @@ export function createPlaces(ui, container, game) {
 
   async function load(id) {
     place = game.places[id];
-    const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
+    const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
     assetStats.rasterScale = rasterScale;
     // Décodées avant l'affichage. L'historique des temps d'image repart de zéro à chaque lieu (il ne grossit plus).
     assetStats.perImage.length = 0;

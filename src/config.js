@@ -126,6 +126,14 @@ export const config = {
     hallForegroundOpacity: 0.9, // opacité du premier plan du hall (plante, caddies)
     hallRain: true, // pluie animée du hall (et reflet du tapis) ; l'éteindre aide à chercher la cause d'un clignotement
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
+    // Profil de qualité (ARCHITECTURE §14) : 'leger', 'normal' ou 'fin'. [TEMP] « Fin » par défaut (comme
+    // avant les profils) en attendant le choix automatique au premier lancement (étape suivante).
+    profile: 'fin',
+    profiles: {
+      leger: { density: 1, rain: false, dust: false, farParallax: false },
+      normal: { density: 1.5, rain: true, dust: true, farParallax: true },
+      fin: { density: 2, rain: true, dust: true, farParallax: true },
+    },
     // Objets du décor (caddie, présentoirs) sur leur propre calque, en permanence. Sans cela, le
     // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
     // à chaque bascule l'objet est redessiné et peut disparaître un instant (clignotement).
@@ -325,6 +333,10 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.crt', label: 'Filtre écran cathodique', type: 'bool' },
   { group: 'Affichage', key: 'display.crtStrength', label: 'Force du filtre cathodique', min: 0.1, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },
+  {
+    group: 'Affichage', key: 'display.profile', label: 'Qualité (profil)', type: 'choice', reload: true,
+    options: [['leger', 'Légère (téléphones modestes, PC anciens)'], ['normal', 'Normale'], ['fin', 'Fine (appareils rapides)']],
+  },
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
   { group: 'Diagnostic', key: 'bench.passes', label: 'Banc : nombre de tours', min: 1, max: 10, step: 1 },

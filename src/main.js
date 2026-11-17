@@ -23,6 +23,7 @@ import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
 import { createGuardWiring } from './game/guard.js';
+import { quality } from './scene/quality.js';
 import { createVoices } from './game/voices.js';
 import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
@@ -692,7 +693,7 @@ function layout() {
   if (!stage) return;
   stage.layout(config.camera.zoom);
   const v = stage.view;
-  renderLine = `zoom ${config.camera.zoom} · scène ×${v.scale.toFixed(3)} · visible ${Math.round(v.viewW)}×${Math.round(v.viewH)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${config.display.maxPixelRatio})`;
+  renderLine = `zoom ${config.camera.zoom} · scène ×${v.scale.toFixed(3)} · visible ${Math.round(v.viewW)}×${Math.round(v.viewH)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${quality().pixelRatio}) · profil ${config.display.profile}`;
 }
 
 const camera = createCamera();
@@ -862,7 +863,7 @@ const places = createPlaces(uiEl, gameEl, {
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
   const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
-  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, config.display.maxPixelRatio);
+  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, quality().pixelRatio);
   // Images communes à tous les lieux.
   loadedImages = await loadImages([
     // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
@@ -895,7 +896,7 @@ async function start() {
     if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
-    if (key === 'display.hallRain') stage?.el.classList.toggle('no-rain', !value);
+    if (key === 'display.hallRain') stage?.el.classList.toggle('no-rain', !quality().rain);
     if (key.startsWith('player.')) voices.applyPlayerName();
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();

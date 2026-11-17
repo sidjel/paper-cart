@@ -2,6 +2,8 @@
 // Une petite réserve d'éléments créés au chargement et réutilisés : rien n'est créé pendant le jeu.
 // Animés par le temps de jeu (figés en pause), seulement en transform et opacity.
 
+import { quality } from './quality.js';
+
 const POOL = 6;
 const DRIFT = 26; // recul du nuage, en pixels de scène, sur sa durée de vie
 const RISE = 16; // montée du nuage
@@ -34,7 +36,7 @@ export function createDust(parent, image, anchor, settings, display) {
     },
     // (sx, sy) : pieds du personnage sur la scène ; facing : 1 vers la droite, -1 vers la gauche.
     spawn(sx, sy, facing, scale, level, time) {
-      if (!settings.dust || display.reduceMotion) return;
+      if (!quality().dust || display.reduceMotion) return; // réglage « poussière » et profil de qualité
       const it = items[next];
       counter.spawns++;
       next = (next + 1) % POOL;

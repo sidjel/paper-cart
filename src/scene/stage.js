@@ -5,6 +5,8 @@
 //   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
 // - les calques sont créés d'après la pile déclarée dans les données du lieu.
 
+import { quality } from './quality.js';
+
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
 export function createStage(container, place, images, getValue) {
   const [W, H] = place.size;
@@ -15,6 +17,7 @@ export function createStage(container, place, images, getValue) {
 
   const layers = {};
   const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
+  const farStill = !quality().farParallax; // lu une fois : le profil s'applique au chargement
   for (const def of place.layers) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
@@ -64,7 +67,8 @@ export function createStage(container, place, images, getValue) {
     el.style.transform = `translate3d(${view.offX - view.camX * s}px, ${view.offY - view.camY * s}px, 0) scale(${s})`;
     for (const p of parallax) {
       // Décalage par rapport au sol : un calque lointain (f < 1) « recule » moins vite.
-      const dx = view.camX * (1 - p.f);
+      // Profil Léger : les plans lointains (f < 1) suivent le décor (moins de mouvement à dessiner).
+      const dx = p.f < 1 && farStill ? 0 : view.camX * (1 - p.f);
       if (dx !== p.last) {
         p.el.style.transform = `translate3d(${dx}px, 0, 0)`;
         p.last = dx;

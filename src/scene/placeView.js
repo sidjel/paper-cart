@@ -12,6 +12,7 @@ import { createSpeakerWaves } from './speakers.js';
 import { createDebugMask } from './debugMask.js';
 import { propLevels } from './depth.js';
 import { createPoses } from './poses.js';
+import { quality } from './quality.js';
 
 export function createPlaceView(container, place, images, common, here, proj, config, getValue) {
   const stage = createStage(container, place, images, getValue);
@@ -19,7 +20,7 @@ export function createPlaceView(container, place, images, common, here, proj, co
   const props = createProps(place, images, acteurs, proj);
   stage.el.classList.toggle('props-layered', config.display.propLayers);
   stage.el.classList.toggle('still', config.display.reduceMotion); // pluie figée
-  stage.el.classList.toggle('no-rain', !config.display.hallRain); // pluie éteinte (réglages)
+  stage.el.classList.toggle('no-rain', !quality().rain); // pluie éteinte (réglages, ou profil Léger)
   const speakerWaves = createSpeakerWaves(acteurs);
   const products = createProducts(here.products, common, stage.layers.produits ?? acteurs, acteurs, config.scan, config.display, {
     parent: acteurs,
