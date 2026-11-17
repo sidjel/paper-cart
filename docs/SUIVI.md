@@ -93,7 +93,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 ### Séance 56
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| A6 (3/3) : agent de sécurité devant le portique visé, annonce d'interdiction, pensée « Hum… étrange… » | 56 | 👀 | Construit, à tester par l'auteur, puis validation d'A6. |
+| A6 (3/3) : agent de sécurité devant le portique visé, annonce d'interdiction, pensée « Hum… étrange… » | 56 | ✅ | Validée temporairement (`379f554`), sur le principe ; l'auteur y reviendra. |
 | Pluie animée derrière les baies vitrées du hall | 56 | 👀 | Construite. Figée avec « réduire les animations ». Fluidité à vérifier sur le téléphone. |
 
 ### Séance 57
