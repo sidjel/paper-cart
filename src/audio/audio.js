@@ -4,6 +4,8 @@
 
 import { createMusic } from './music.js';
 
+const HERO_BLIP = 0.05; // force du petit bip d'écriture du héros (séance 66 : adouci, 0,09 avant)
+
 export function createAudio(settings, song) {
   let ctx = null;
   let master, musicBus, sfxBus, scanBus, voiceBus, heroBus, noise, music;
@@ -122,7 +124,7 @@ export function createAudio(settings, song) {
   const PREPARED = {
     pas: [0, 1].map((f) => ({ len: 0.14, draw: (c, out) => [stepGraph(c, out, 0, f)] })),
     blip: [0, 1, 2].map((n) => ({ len: 0.06, draw: (c, out) => [toneGraph(c, out, 'square', 620 + n * 40, 620 + n * 40, 0, 0.03, 0.05)] })),
-    blipHeros: [0, 1, 2].map((n) => ({ len: 0.07, draw: (c, out) => [toneGraph(c, out, 'triangle', 330 + n * 30, 300 + n * 30, 0, 0.04, 0.09)] })),
+    blipHeros: [0, 1, 2].map((n) => ({ len: 0.07, draw: (c, out) => [toneGraph(c, out, 'triangle', 330 + n * 30, 300 + n * 30, 0, 0.04, HERO_BLIP)] })),
     froissement: [{ len: 0.3, draw: (c, out) => froissGraph(c, out, 0) }],
   };
   async function prepare() {
@@ -352,7 +354,7 @@ export function createAudio(settings, song) {
   function blipHeros() {
     heroN = (heroN + 1) % 3;
     const n = heroN;
-    playPrepared('blipHeros', n, heroBus, () => [toneGraph(ctx, heroBus, 'triangle', 330 + n * 30, 300 + n * 30, ctx.currentTime, 0.04, 0.09)]);
+    playPrepared('blipHeros', n, heroBus, () => [toneGraph(ctx, heroBus, 'triangle', 330 + n * 30, 300 + n * 30, ctx.currentTime, 0.04, HERO_BLIP)]);
   }
 
   function running() {

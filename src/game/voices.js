@@ -203,7 +203,7 @@ export function createVoices(ui, game) {
     }
     const hero = narrator.voice === 'heros' || narrator.voice === 'pensee'; // bulle au-dessus du héros
     const player = narrator.voice === 'epaisseur'; // le joueur : l'écran parle, en bas, sans petits bips
-    const every = config.narrator.blipEvery;
+    const every = hero ? config.narrator.heroBlipEvery : config.narrator.blipEvery; // le héros : plus espacés (séance 66)
     if (letters > 0 && every > 0 && n % every === 0 && !player) audio.play(hero ? 'blipHeros' : 'blip');
     if (player) {
       // (centré en bas par la feuille de style)

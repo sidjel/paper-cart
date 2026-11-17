@@ -79,6 +79,7 @@ export const config = {
     lineCooldown: 600, // une même réplique ne revient pas avant (s)
     inactivity: 30, // délai d'inactivité avant une remarque (s)
     blipEvery: 2, // un petit bip toutes les N lettres (0 = aucun)
+    heroBlipEvery: 8, // héros (apartés, pensées) : un petit bip toutes les N lettres, ≈ 5 par seconde (séance 66, choix de l'auteur ; 0 = aucun)
     // Apartés du héros (il se tourne vers l'écran et parle au joueur)
     asides: true, // le héros fait des apartés
     asideGap: 150, // écart minimal entre deux apartés (s) : un moment rare
@@ -293,6 +294,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.followWait', label: 'Aparté enchaîné : attendre que le héros s’arrête (max)', min: 0, max: 60, step: 1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.followDelay', label: 'Délai d’une réplique enchaînée', min: 0, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
+  { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu', min: 0.05, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
