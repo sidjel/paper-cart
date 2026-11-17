@@ -148,6 +148,13 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Téléphone : boutons du HUD en haut à droite, pas à portée de pouce | 64 | ❓ | Règle des menus. |
 | Cahier des charges des images (`IMAGES.md`, avant D) : chaque dessin rogné au plus près du trait, avec son **point d'appui au sol** (les pieds) | 64 | 🔧 | Pour que l'ombre et l'ordre devant/derrière tombent juste sans retoucher le code. |
 
+### Séance 67 (A7)
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A6 validée temporairement, sur le principe | 67 | ✅ | `379f554` ; l'auteur y reviendra. |
+| A7 (1/2) : rayon 2, deux passages (les ouvertures du rayon 7), arrivée du bon côté | 67 | 👀 | Choix de détail (Claude) : les deux ouvertures déjà dessinées dans l'étagère du rayon 7 servent de passages ; on arrive en face, côté avant du rayon 2. À tester par l'auteur. |
+| A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | 🔧 | Règle de la séance 63 : le produit remplace le produit scanné, sur ce rayon-ci. |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 
