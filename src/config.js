@@ -145,6 +145,14 @@ export const config = {
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
     heroVolume: 0.5, // volume des sons du héros (bips, froissement, aparté) ; plus dans le panneau (séance 66, demande de l'auteur : remplacé par les deux interrupteurs ci-dessous)
     heroBlips: true, // petits bips d'écriture du héros (apartés, pensées)
+    // Nombre maximum de sons en même temps, par famille (le plus ancien s'arrête ; une famille ne coupe jamais une autre).
+    maxPas: 2,
+    maxTexte: 3, // bips du texte (haut-parleur, héros)
+    maxPapier: 2, // froissement, carte qui se retourne
+    maxScanner: 4, // bip, aspiration, carte, prise
+    maxVoix: 2, // annonce, ding
+    maxAparte: 1,
+    maxAmbiance: 2, // pluie, portes
     rustle: false, // froissement de papier : début des pensées du héros et réponses du joueur (séance 66 : désactivé, choix de l'auteur)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
     // Instruments de la musique (séance 66 : interrupteurs pour trouver un bruit ; le shaker, fautif, est retiré).
@@ -222,6 +230,11 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.maxPas', label: 'Sons en même temps : pas', min: 1, max: 6, step: 1 },
+  { group: 'Son', key: 'audio.maxTexte', label: 'Sons en même temps : bips du texte', min: 1, max: 8, step: 1 },
+  { group: 'Son', key: 'audio.maxPapier', label: 'Sons en même temps : papier', min: 1, max: 6, step: 1 },
+  { group: 'Son', key: 'audio.maxScanner', label: 'Sons en même temps : scanner', min: 1, max: 8, step: 1 },
+  { group: 'Son', key: 'audio.maxVoix', label: 'Sons en même temps : haut-parleur', min: 1, max: 4, step: 1 },
   { group: 'Son', key: 'audio.heroBlips', label: 'Bip du héros', type: 'bool' },
   { group: 'Son', key: 'audio.rustle', label: 'Froissement', type: 'bool' },
   { group: 'Son', key: 'audio.preparedSounds', label: 'Essai : sons courts préparés', type: 'bool' },

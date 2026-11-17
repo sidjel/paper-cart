@@ -42,7 +42,7 @@ class FakeContext {
     return this.source({});
   }
   source(extra) {
-    const s = node({ start() {}, stop() {}, onended: null, ...extra });
+    const s = node({ start() {}, stop(...when) { if (!when.length) this.cut = true; }, onended: null, ...extra });
     sources.push(s);
     return s;
   }
@@ -79,7 +79,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 const prepared = (a) => vi.waitFor(() => expect(a.counters().prepared).toBe(true));
 
-const settings = { latency: 'balanced', muted: false, master: 1, music: 1, pauseMusic: 0.5, steps: 1, scanVolume: 1, voiceVolume: 1, heroVolume: 1 };
+const settings = { latency: 'balanced', muted: false, master: 1, music: 1, pauseMusic: 0.5, steps: 1, scanVolume: 1, voiceVolume: 1, heroVolume: 1, maxPas: 2, maxVoix: 2 };
 
 describe('son : aucun nœud ne s’accumule (séance 65)', () => {
   it('chaque son libère ses nœuds à sa fin : le compteur des effets retombe à zéro', () => {
@@ -150,6 +150,18 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().sfx).toBe(5); // une source par son
     end();
     expect(a.counters().sfx).toBe(0);
+  });
+
+  it('famille pleine : son son le plus ancien s’arrête, sans jamais couper une autre famille (séance 66)', () => {
+    const a = createAudio(settings, song);
+    a.unlock();
+    a.play('annonce'); // haut-parleur
+    const voice = sources.slice();
+    for (let k = 0; k < 5; k++) a.play('pas'); // 5 pas qui ne se terminent pas
+    const cut = sources.filter((s) => s.cut);
+    expect(cut.length).toBe(3); // les 3 plus anciens pas (limite : 2)
+    expect(voice.some((s) => s.cut)).toBe(false); // le haut-parleur n'est jamais coupé par les pas
+    expect(a.counters().cut).toBe(3);
   });
 
   it('la pluie de l’intro (son en boucle) est libérée quand on l’arrête', () => {

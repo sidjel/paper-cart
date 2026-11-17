@@ -16,20 +16,62 @@ export function createAudio(settings, song) {
   // Nœuds créés et libérés, par catégorie (effets, musique) : le navigateur ne permet pas de les compter,
   // on les compte nous-mêmes (règles : src/audio/CLAUDE.md). « Actifs » = créés − libérés : retombe à zéro
   // quand plus rien ne joue.
-  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0, byName: {}, recent: [] };
+  const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [], resumed: 0, byName: {}, recent: [], cut: 0 };
 
   // Un son joué : ses nœuds sont libérés quand sa source se termine (onended → disconnect). Le nettoyage
   // est idempotent (garde cleanedUp) : le compteur ne baisse qu'une fois, même après stop() puis onended.
   // (Séance 65, correction n° 1 : avant, aucun nœud n'était jamais déconnecté.)
   function track(src, nodes, cat = 'sfx') {
     stats[cat].created += nodes.length;
+    if (collecting) collecting.push(src);
     let cleanedUp = false;
     src.onended = () => {
       if (cleanedUp) return;
       cleanedUp = true;
       for (const n of nodes) n.disconnect();
       stats[cat].freed += nodes.length;
+      if (src.playing) src.playing.left--;
     };
+  }
+
+  // ---------- Nombre maximum de sons simultanés, par famille (séance 66, correction n° 4) ----------
+  // Chaque famille a sa limite (config.audio.maxPas, maxTexte…) ; si elle est pleine, son son le plus ancien
+  // s'arrête. Une famille ne coupe jamais une autre : les pas ou les froissements ne couvrent jamais le
+  // haut-parleur, l'interface ou (plus tard) le combat.
+  const FAMILY = {
+    pas: 'pas',
+    blip: 'texte',
+    blipHeros: 'texte',
+    froissement: 'papier',
+    retourne: 'papier',
+    bip: 'scanner',
+    aspire: 'scanner',
+    carte: 'scanner',
+    prise: 'scanner',
+    annonce: 'voix',
+    ding: 'voix',
+    aparte: 'aparte',
+    pluie: 'ambiance',
+    portes: 'ambiance',
+  };
+  const playing = {}; // famille → sons en cours [{ sources, left }], du plus ancien au plus récent
+  let collecting = null; // sources créées par le son en train de démarrer
+  function limit(family) {
+    const list = (playing[family] ??= []);
+    for (let i = list.length - 1; i >= 0; i--) if (list[i].left <= 0) list.splice(i, 1); // finis
+    const max = settings[`max${family[0].toUpperCase()}${family.slice(1)}`] ?? Infinity; // config.audio.maxPas…
+    while (list.length >= max) {
+      const oldest = list.shift();
+      stats.cut++;
+      for (const src of oldest.sources) {
+        try {
+          src.stop(); // déclenche onended : ses nœuds sont libérés
+        } catch {
+          // déjà arrêté
+        }
+      }
+    }
+    return list;
   }
 
   function init() {
@@ -420,6 +462,7 @@ export function createAudio(settings, song) {
         clock: ctx ? Math.round(ctx.currentTime) : 0, // horloge du son (s)
         song: music ? music.position() : '', // où en est la musique
         prepared: !!prepared, // sons courts préparés une fois au démarrage
+        cut: stats.cut, // sons arrêtés parce que leur famille était pleine
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
       };
     },
@@ -451,7 +494,14 @@ export function createAudio(settings, song) {
         stats.recent.push(`${Math.round(ctx.currentTime)} s ${name}`); // les derniers sons (hors pas et bips de texte)
         if (stats.recent.length > 6) stats.recent.shift();
       }
+      const family = FAMILY[name] ?? name;
+      const list = limit(family);
+      collecting = [];
       SOUNDS[name]();
+      const entry = { sources: collecting, left: collecting.length };
+      collecting = null;
+      for (const src of entry.sources) src.playing = entry;
+      if (entry.left > 0) list.push(entry);
     },
     // À chaque image affichée.
     update() {
