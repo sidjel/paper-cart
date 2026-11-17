@@ -14,14 +14,14 @@ export function compileSong(song) {
     const b0 = bar * bpb;
     for (const [beat, dur, vel] of song.piano) for (const n of c.notes) events.push({ beat: b0 + beat, kind: 'piano', midi: n, dur, vel });
     for (const [beat, which, dur] of song.bass) events.push({ beat: b0 + beat, kind: 'bass', midi: c[which], dur, vel: 1 });
-    for (const [beat, vel] of song.shaker) events.push({ beat: b0 + beat, kind: 'shaker', midi: 0, dur: 0, vel });
   });
   for (const [beat, midi, dur] of song.melody) events.push({ beat, kind: 'melody', midi, dur, vel: 1 });
   events.sort((a, b) => a.beat - b.beat);
   return { events, loopBeats: song.chords.length * bpb, spb: 60 / song.bpm, melodyLoops: song.melodyLoops ?? [true] };
 }
 
-// settings : config.audio (instruments activés : musicBass, musicPiano, musicMelody, musicShaker).
+// settings : config.audio (instruments activés : musicBass, musicPiano, musicMelody).
+// Le shaker a été retiré (séance 66, décision de l'auteur : c'était lui, le bruit gênant sur le téléphone).
 export function createMusic(song, settings = {}) {
   const s = compileSong(song);
   let start = -1;
@@ -49,8 +49,8 @@ export function createMusic(song, settings = {}) {
     track(o, [o, g]);
   }
 
-  const ON = { bass: 'musicBass', piano: 'musicPiano', melody: 'musicMelody', shaker: 'musicShaker' };
-  function play(ctx, out, noise, e, t) {
+  const ON = { bass: 'musicBass', piano: 'musicPiano', melody: 'musicMelody' };
+  function play(ctx, out, e, t) {
     if (settings[ON[e.kind]] === false) return; // instrument coupé dans ⚙
     const len = e.dur * s.spb;
     if (e.kind === 'piano') {
@@ -63,18 +63,6 @@ export function createMusic(song, settings = {}) {
       // Vibraphone : son pur avec une petite harmonique aiguë.
       tone(ctx, out, 'sine', freq(e.midi), t, 0.07, 0.006, len + 0.9);
       tone(ctx, out, 'sine', freq(e.midi) * 4, t, 0.006, 0.004, 0.25);
-    } else {
-      // Shaker : bruit très aigu et très court.
-      const src = ctx.createBufferSource();
-      src.buffer = noise;
-      const hp = ctx.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = 7000;
-      const g = ctx.createGain();
-      env(ctx, g, t, 0.03 * e.vel, 0.004, 0.05);
-      src.connect(hp).connect(g).connect(out);
-      src.start(t, (idx % 7) * 0.1, 0.1);
-      track(src, [src, hp, g]);
     }
   }
 
@@ -83,7 +71,7 @@ export function createMusic(song, settings = {}) {
     position: () => `boucle ${loop + 1}, mesure ${Math.floor((s.events[idx]?.beat ?? 0) / 4) + 1}/8, mélodie ${s.melodyLoops[loop % s.melodyLoops.length] ? 'oui' : 'non (basse seule)'}`,
     // À chaque image : programme les notes des prochaines LOOKAHEAD secondes.
     // tracked(source, nœuds) : libère les nœuds d'une note à sa fin (audio.js). Renvoie le nombre de notes programmées.
-    update(ctx, out, noise, tracked = () => {}) {
+    update(ctx, out, tracked = () => {}) {
       track = tracked;
       let notes = 0;
       const now = ctx.currentTime;
@@ -94,7 +82,7 @@ export function createMusic(song, settings = {}) {
       while ((t = timeOf(idx)) < now + LOOKAHEAD) {
         const e = s.events[idx];
         if (e.kind !== 'melody' || s.melodyLoops[loop % s.melodyLoops.length]) {
-          play(ctx, out, noise, e, t);
+          play(ctx, out, e, t);
           notes++;
         }
         idx++;

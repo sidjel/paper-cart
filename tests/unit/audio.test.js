@@ -115,7 +115,7 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     all.update();
     const withAll = all.counters().music;
     end();
-    const noBass = createAudio({ ...settings, musicBass: false, musicPiano: false, musicMelody: false, musicShaker: false }, song);
+    const noBass = createAudio({ ...settings, musicBass: false, musicPiano: false, musicMelody: false }, song);
     noBass.unlock();
     noBass.update();
     expect(withAll).toBeGreaterThan(0);

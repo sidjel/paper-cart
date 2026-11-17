@@ -66,7 +66,7 @@ export function createAudio(settings, song) {
     voiceBus.connect(master);
     heroBus = ctx.createGain(); // apartés du héros (froissement, petits bips)
     heroBus.connect(master);
-    // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et le shaker.
+    // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et les souffles.
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const data = noise.getChannelData(0);
     let x = 12345;
@@ -397,7 +397,7 @@ export function createAudio(settings, song) {
     },
     // À chaque image affichée.
     update() {
-      if (running()) stats.notes += music.update(ctx, musicBus, noise, (src, nodes) => track(src, nodes, 'music'));
+      if (running()) stats.notes += music.update(ctx, musicBus, (src, nodes) => track(src, nodes, 'music'));
     },
   };
 }
