@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -54,5 +54,19 @@ describe('lieux : sorties et fondu', () => {
 
   it('un lieu qui ne se charge pas : la transition se termine toujours (jeu, ou écran « Réessayer » qui revient au jeu)', () => {
     expect(TRANSITIONS.erreur).toEqual(['play']);
+  });
+
+  it('jamais d’écran noir muet : le signe d’attente apparaît si le chargement dure plus de waitAfter', () => {
+    const p = { fade: 0.25, waitAfter: 0.3 };
+    const tr = createTransition({ to: 'x' });
+    stepTransition(tr, 0.3, p); // fondu : noir
+    expect(tr.phase).toBe('load');
+    expect(showWait(tr, p)).toBe(false);
+    stepTransition(tr, 0.2, p);
+    expect(showWait(tr, p)).toBe(false);
+    stepTransition(tr, 0.15, p);
+    expect(showWait(tr, p)).toBe(true); // 0,35 s dans le noir
+    placeReady(tr);
+    expect(showWait(tr, p)).toBe(false);
   });
 });

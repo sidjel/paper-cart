@@ -1259,3 +1259,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .place-error[hidden] { display: none; }
 .place-error p { margin: 0; font-size: calc(18px * var(--ts, 1)); }
 .place-error button { font: inherit; font-size: calc(18px * var(--ts, 1)); padding: 12px 28px; border-radius: 10px; border: 2px solid #f3ecdc; background: #2e2820; color: #f3ecdc; }
+/* Signe d'attente dans le noir d'un changement de lieu (src/game/places.js) : trois points de papier. */
+.place-wait { position: absolute; left: 50%; bottom: 18%; display: flex; gap: 12px; transform: translateX(-50%); }
+.place-wait[hidden] { display: none; }
+.place-wait span { width: 12px; height: 12px; border-radius: 3px; background: #efe7d4; animation: place-wait 0.9s ease-in-out infinite; }
+.place-wait span:nth-child(2) { animation-delay: 0.15s; }
+.place-wait span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes place-wait { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(12deg); } }
+@media (prefers-reduced-motion: reduce) { .place-wait span { animation: none; } }
+.place-wait.still span { animation: none; }

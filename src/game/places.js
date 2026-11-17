@@ -13,7 +13,7 @@ import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack } from '../core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -61,6 +61,14 @@ export function createPlaces(ui, container, game) {
   const fadeEl = document.createElement('div');
   fadeEl.className = 'place-fade';
   fadeEl.hidden = true;
+  // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais de noir muet.
+  const waitEl = document.createElement('div');
+  waitEl.className = 'place-wait';
+  waitEl.hidden = true;
+  waitEl.setAttribute('role', 'status');
+  waitEl.setAttribute('aria-label', 'Chargement');
+  waitEl.innerHTML = '<span></span><span></span><span></span>';
+  fadeEl.appendChild(waitEl);
   ui.appendChild(fadeEl);
   let transition = null;
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
@@ -168,6 +176,11 @@ export function createPlaces(ui, container, game) {
     update(dt) {
       if (stepTransition(transition, dt, config.places) === 'load') change(transition.exit);
       fadeEl.style.opacity = transitionBlack(transition, config.places);
+      const wait = showWait(transition, config.places);
+      if (waitEl.hidden === wait) {
+        waitEl.hidden = !wait;
+        waitEl.classList.toggle('still', config.display.reduceMotion); // « réduire les animations » : points immobiles
+      }
       if (transition.phase === 'done') {
         transition = null;
         fadeEl.hidden = true;

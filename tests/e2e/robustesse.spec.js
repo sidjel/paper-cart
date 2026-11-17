@@ -58,3 +58,15 @@ test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'accueil', null, { timeout: 15000 });
   await expect(page.locator('.place-error')).toBeHidden();
 });
+
+test('un chargement lent : un signe d’attente apparaît dans le noir, puis le lieu s’ouvre', async ({ page }) => {
+  await page.route('**/rayon-fond.svg', async (r) => {
+    await new Promise((res) => setTimeout(res, 1200)); // réseau lent (dans le test seulement)
+    await r.continue();
+  });
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
+  await expect(page.locator('.place-wait')).toBeVisible({ timeout: 3000 });
+  await page.screenshot({ path: 'test-results/captures/robustesse-attente.png' });
+  await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'rayon-essai', null, { timeout: 15000 });
+  await expect(page.locator('.place-wait')).toBeHidden();
+});
