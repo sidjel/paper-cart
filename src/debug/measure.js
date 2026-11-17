@@ -38,7 +38,7 @@ export function createMeasureTools(ui, game) {
   }));
   const benchUi = createBenchUi(ui, {
     onStart: () => startBench(config.bench.passes, config.bench.warmup),
-    onStartSound: () => startBench(config.bench.soundPasses, config.bench.warmup, 'son'),
+    onStartSound: () => startBench(999, config.bench.warmup, 'son'), // s'arrête au bout de bench.soundMinutes
     getContext: () => ({
       version: game.version,
       renderLine: game.renderLine(),
@@ -150,6 +150,7 @@ export function createMeasureTools(ui, game) {
     if (!sm.is('menu')) return;
     bench = createBench(game.place().bench, passes, warmup);
     bench.kind = kind;
+    bench.soundT = 0;
     placeAtStart(bench, game.walker());
     game.resetCamera();
     game.marker().hide();
@@ -182,7 +183,8 @@ export function createMeasureTools(ui, game) {
     // Contexte de l'image, pour savoir à quel moment les images lentes arrivent.
     if (bench.measuring) benchUi.record(dt, performance.now() - t0, Math.abs(camera.x - camBefore) > 0.05, bench.segStarts !== segBefore, walker.moving);
     benchUi.progress(bench);
-    if (bench.phase === 'done') endBench('terminé');
+    if (bench.measuring && bench.kind === 'son') bench.soundT += dt / 1000;
+    if (bench.phase === 'done' || (bench.kind === 'son' && bench.soundT >= config.bench.soundMinutes * 60)) endBench('terminé');
   }
 
   return {

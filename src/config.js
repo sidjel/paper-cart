@@ -159,7 +159,7 @@ export const config = {
   bench: {
     passes: 3, // nombre de tours mesurés
     warmup: 3, // secondes de chauffe, non mesurées
-    soundPasses: 15, // essai son long : nombre de tours (≈ 20 s par tour dans le rayon)
+    soundMinutes: 5, // essai son long : durée (le parcours se répète)
     // Interrupteurs d'essai : rejouer le même parcours sans une option, pour comparer deux rapports.
     noForeground: false,
     noFarLayer: false,
@@ -301,7 +301,7 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.maxPixelRatio', label: 'Densité de pixels max', min: 0.5, max: 3, step: 0.25, reload: true },
   { group: 'Technique', key: 'loop.stepHz', label: 'Pas fixe de la logique', min: 30, max: 240, step: 10, unit: 'Hz' },
   { group: 'Diagnostic', key: 'bench.passes', label: 'Banc : nombre de tours', min: 1, max: 10, step: 1 },
-  { group: 'Diagnostic', key: 'bench.soundPasses', label: 'Essai son long : nombre de tours', min: 3, max: 60, step: 1 },
+  { group: 'Diagnostic', key: 'bench.soundMinutes', label: 'Essai son long : durée', min: 1, max: 20, step: 1, unit: 'min' },
   { group: 'Diagnostic', key: 'bench.warmup', label: 'Banc : chauffe', min: 0, max: 10, step: 1, unit: 's' },
   { group: 'Diagnostic', key: 'bench.noForeground', label: 'Essai sans rayon de devant', type: 'bool' },
   { group: 'Diagnostic', key: 'bench.noFarLayer', label: 'Essai sans rayons lointains', type: 'bool' },

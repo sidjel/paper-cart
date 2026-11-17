@@ -11,11 +11,24 @@ export function createAudio(settings, song) {
   let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
   let foot = 0;
-  // Mesure (séance 65, avant correction) : nœuds créés et libérés, par catégorie (effets, musique).
-  // Le navigateur ne permet pas de compter les nœuds : on les compte nous-mêmes. Aujourd'hui aucun
-  // n'est libéré (aucun disconnect) : « actifs » = créés. Ce compteur doit retomber à zéro après correction.
+  // Nœuds créés et libérés, par catégorie (effets, musique) : le navigateur ne permet pas de les compter,
+  // on les compte nous-mêmes (règles : src/audio/CLAUDE.md). « Actifs » = créés − libérés : retombe à zéro
+  // quand plus rien ne joue.
   const stats = { played: 0, notes: 0, sfx: { created: 0, freed: 0 }, music: { created: 0, freed: 0 }, states: [] };
-  const count = (n) => (stats.sfx.created += n);
+
+  // Un son joué : ses nœuds sont libérés quand sa source se termine (onended → disconnect). Le nettoyage
+  // est idempotent (garde cleanedUp) : le compteur ne baisse qu'une fois, même après stop() puis onended.
+  // (Séance 65, correction n° 1 : avant, aucun nœud n'était jamais déconnecté.)
+  function track(src, nodes, cat = 'sfx') {
+    stats[cat].created += nodes.length;
+    let cleanedUp = false;
+    src.onended = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      for (const n of nodes) n.disconnect();
+      stats[cat].freed += nodes.length;
+    };
+  }
 
   function init() {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -91,7 +104,7 @@ export function createAudio(settings, song) {
     o.connect(g).connect(bus);
     o.start(t);
     o.stop(t + dur + 0.02);
-    count(2);
+    track(o, [o, g]);
   }
 
   // [TEMP] Bip de caisse : deux notes courtes et nettes.
@@ -117,7 +130,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
     src.connect(bp).connect(g).connect(scanBus);
     src.start(t, 0.3, 0.6);
-    count(3);
+    track(src, [src, bp, g]);
   }
 
   // [TEMP] La carte apparaît : petit « pop » qui monte, puis une note claire.
@@ -143,7 +156,7 @@ export function createAudio(settings, song) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.16, t + 1.5);
     src.connect(bp).connect(g).connect(sfxBus);
-    count(3);
+    track(src, [src, bp, g]);
     src.start(t);
     rain = { src, g };
   }
@@ -171,7 +184,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
     src.connect(bp).connect(g).connect(sfxBus);
     src.start(t, 0.4, 1.2);
-    count(3);
+    track(src, [src, bp, g]);
   }
 
   // [TEMP] Ding (une seule note claire, un peu réverbérée).
@@ -219,7 +232,7 @@ export function createAudio(settings, song) {
       g.gain.exponentialRampToValueAtTime(0.0001, at + 0.06);
       src.connect(bp).connect(g).connect(heroBus);
       src.start(at, 0.1 + k * 0.2, 0.08);
-      count(3);
+      track(src, [src, bp, g]);
     }
   }
 
@@ -240,7 +253,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
     src.connect(bp).connect(g).connect(scanBus);
     src.start(t, 0.37, 0.16);
-    count(3);
+    track(src, [src, bp, g]);
     // claquement : très court, plus aigu
     const c = ctx.createBufferSource();
     c.buffer = noise;
@@ -254,7 +267,7 @@ export function createAudio(settings, song) {
     cg.gain.exponentialRampToValueAtTime(0.0001, at + 0.035);
     c.connect(hp).connect(cg).connect(scanBus);
     c.start(at, 0.61, 0.04);
-    count(3);
+    track(c, [c, hp, cg]);
   }
 
   // [TEMP] Aparté : souffle grave qui monte (le temps s'arrête), puis une note basse tenue.
@@ -274,7 +287,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
     src.connect(lp).connect(g).connect(heroBus);
     src.start(t, 0.2, 0.85);
-    count(3);
+    track(src, [src, lp, g]);
     // [TEMP] Motif de l'Épaisseur : quatre notes de cloche douce, toujours les mêmes à chaque aparté.
     const notes = [659, 784, 988, 880];
     notes.forEach((f, i) => {
@@ -311,7 +324,7 @@ export function createAudio(settings, song) {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
     src.connect(lp).connect(g).connect(sfxBus);
     src.start(t, foot ? 0.2 : 0.6, 0.12);
-    count(3);
+    track(src, [src, lp, g]);
   }
 
   const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
@@ -370,7 +383,7 @@ export function createAudio(settings, song) {
     },
     // À chaque image affichée.
     update() {
-      if (running()) stats.notes += music.update(ctx, musicBus, noise, (n) => (stats.music.created += n));
+      if (running()) stats.notes += music.update(ctx, musicBus, noise, (src, nodes) => track(src, nodes, 'music'));
     },
   };
 }

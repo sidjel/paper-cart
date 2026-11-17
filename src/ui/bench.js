@@ -38,7 +38,7 @@ export function createBenchUi(root, { onStart, onStartSound, getContext }) {
   soundBtn.textContent = 'Essai son long';
   const soundHelp = document.createElement('p');
   soundHelp.className = 'settings-note';
-  soundHelp.textContent = "Même parcours pendant plusieurs minutes, son activé (coupe « Son coupé » avant). Écoute si les pas et la musique se dégradent, puis copie le rapport.";
+  soundHelp.textContent = "Même parcours pendant plusieurs minutes (durée : réglage « Essai son long »), son activé (coupe « Son coupé » avant). Écoute si les pas et la musique se dégradent, puis copie le rapport.";
   launcher.append(startBtn, help, soundBtn, soundHelp);
   startBtn.addEventListener('click', () => onStart());
   soundBtn.addEventListener('click', () => onStartSound());

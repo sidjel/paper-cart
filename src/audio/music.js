@@ -24,7 +24,7 @@ export function compileSong(song) {
 export function createMusic(song) {
   const s = compileSong(song);
   let start = -1;
-  let created = () => {}; // mesure : nœuds audio créés (voir update)
+  let track = () => {}; // libère les nœuds d'une note quand elle se termine (voir update)
   let idx = 0;
   let loop = 0;
 
@@ -45,7 +45,7 @@ export function createMusic(song) {
     o.connect(g).connect(out);
     o.start(t);
     o.stop(t + attack + decay + 0.05);
-    created(2);
+    track(o, [o, g]);
   }
 
   function play(ctx, out, noise, e, t) {
@@ -71,15 +71,15 @@ export function createMusic(song) {
       env(ctx, g, t, 0.03 * e.vel, 0.004, 0.05);
       src.connect(hp).connect(g).connect(out);
       src.start(t, (idx % 7) * 0.1, 0.1);
-      created(3);
+      track(src, [src, hp, g]);
     }
   }
 
   return {
     // À chaque image : programme les notes des prochaines LOOKAHEAD secondes.
-    // counted(n) : n nœuds audio créés (mesure). Renvoie le nombre de notes programmées.
-    update(ctx, out, noise, counted = () => {}) {
-      created = counted;
+    // tracked(source, nœuds) : libère les nœuds d'une note à sa fin (audio.js). Renvoie le nombre de notes programmées.
+    update(ctx, out, noise, tracked = () => {}) {
+      track = tracked;
       let notes = 0;
       const now = ctx.currentTime;
       if (start < 0) start = now + 0.15;
