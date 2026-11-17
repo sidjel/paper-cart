@@ -21,7 +21,8 @@ export function compileSong(song) {
   return { events, loopBeats: song.chords.length * bpb, spb: 60 / song.bpm, melodyLoops: song.melodyLoops ?? [true] };
 }
 
-export function createMusic(song) {
+// settings : config.audio (instruments activés : musicBass, musicPiano, musicMelody, musicShaker).
+export function createMusic(song, settings = {}) {
   const s = compileSong(song);
   let start = -1;
   let track = () => {}; // libère les nœuds d'une note quand elle se termine (voir update)
@@ -48,7 +49,9 @@ export function createMusic(song) {
     track(o, [o, g]);
   }
 
+  const ON = { bass: 'musicBass', piano: 'musicPiano', melody: 'musicMelody', shaker: 'musicShaker' };
   function play(ctx, out, noise, e, t) {
+    if (settings[ON[e.kind]] === false) return; // instrument coupé dans ⚙
     const len = e.dur * s.spb;
     if (e.kind === 'piano') {
       // Piano électrique doux : fondamentale + un peu d'octave.

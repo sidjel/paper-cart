@@ -109,6 +109,19 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().state).toBe('suspended');
   });
 
+  it('un instrument coupé dans ⚙ ne joue plus (séance 66 : chercher un bruit dans la musique)', () => {
+    const all = createAudio(settings, song);
+    all.unlock();
+    all.update();
+    const withAll = all.counters().music;
+    end();
+    const noBass = createAudio({ ...settings, musicBass: false, musicPiano: false, musicMelody: false, musicShaker: false }, song);
+    noBass.unlock();
+    noBass.update();
+    expect(withAll).toBeGreaterThan(0);
+    expect(noBass.counters().music).toBe(0);
+  });
+
   it('la pluie de l’intro (son en boucle) est libérée quand on l’arrête', () => {
     const a = createAudio(settings, song);
     a.unlock();

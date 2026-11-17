@@ -144,6 +144,11 @@ export const config = {
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
     heroVolume: 0.5, // volume des apartés du héros (froissement de papier, petits bips)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
+    // Instruments de la musique (séance 66 : un bruit grave vient de la musique ; on cherche lequel).
+    musicBass: true, // basse
+    musicPiano: true, // piano électrique (accords)
+    musicMelody: true, // mélodie (vibraphone)
+    musicShaker: true, // shaker (petit bruit aigu)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
     latency: 'balanced',
@@ -214,6 +219,10 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.musicBass', label: 'Musique : basse', type: 'bool' },
+  { group: 'Son', key: 'audio.musicPiano', label: 'Musique : piano', type: 'bool' },
+  { group: 'Son', key: 'audio.musicMelody', label: 'Musique : mélodie', type: 'bool' },
+  { group: 'Son', key: 'audio.musicShaker', label: 'Musique : shaker', type: 'bool' },
   { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
   {
     group: 'Son', key: 'audio.latency', label: 'Réserve de son (anti-grésillement)', type: 'choice', reload: true,

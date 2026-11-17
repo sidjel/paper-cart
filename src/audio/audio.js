@@ -74,7 +74,7 @@ export function createAudio(settings, song) {
       x = (x * 1103515245 + 12345) & 0x7fffffff;
       data[i] = (x / 0x3fffffff) - 1;
     }
-    music = createMusic(song);
+    music = createMusic(song, settings);
     // Chaque changement d'état du son est noté (une interruption par un appel, une autre application…).
     ctx.onstatechange = () => stats.states.push(`${new Date().toLocaleTimeString('fr-FR')} ${ctx.state}${hidden ? ' (onglet caché)' : ''}`);
     applyVolumes();
