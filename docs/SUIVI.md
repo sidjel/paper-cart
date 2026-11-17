@@ -153,6 +153,10 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | A6 validée temporairement, sur le principe | 67 | ✅ | `379f554` ; l'auteur y reviendra. |
 | A7 (1/2) : rayon 2, deux passages (les ouvertures du rayon 7), arrivée du bon côté | 67 | 👀 | Choix de détail (Claude) : les deux ouvertures déjà dessinées dans l'étagère du rayon 7 servent de passages ; on arrive en face, côté avant du rayon 2. À tester par l'auteur. |
+| Passages : vraies ouvertures et panneaux (choix B de l'auteur) | 67 | 👀 | Panneaux « ↑ RAYON 8 » au-dessus des ouvertures du rayon 7 ; dans le rayon 2, ouvertures visibles dans le rayon de devant, avec « ↓ RAYON 7 » (calque sans parallaxe, pour rester en face). |
+| On passait au rayon 2 en longeant l'étagère (bug signalé) | 67 | ✅ | Le sol se prolonge dans les ouvertures ; le passage est au fond. Test et leçon (ARCHITECTURE §15). |
+| Départ « Rayon 2 » ; « Départ » sur l'écran titre (mode dev) | 67 | ✅ | Réglage « Mode dev » (⚙ → Diagnostic), activé pendant le développement. |
+| Message « Onglet … fermé · Annuler » à la fermeture de l'onglet | 67 | ❓ | Message de Chrome lui-même (pas du jeu, qui n'affiche aucune fenêtre à la fermeture) : impossible à retirer depuis le jeu. |
 | A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | 👀 | Fait : le produit prend la place du produit scanné, sur ce rayon-ci (règle de la séance 63). Son image est préparée et décodée pendant le choix de la carte (règle « rien n'apparaît à froid »). |
 
 ## Points 👀 restants (à revoir avec A6)
