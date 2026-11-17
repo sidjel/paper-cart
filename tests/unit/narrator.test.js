@@ -391,8 +391,18 @@ describe('narrateur : machine à écrire', () => {
 });
 
 describe('réplique qui se ferme seule (timed)', () => {
-  it('une longue réplique est écrite en entier puis se ferme au bout de timedLine s, sans toucher', () => {
-    const p = { ...P, timedLine: 3 };
+  it('une réplique qui se ferme seule reste ouverte selon la longueur de son texte (2,5 s au moins + 50 ms par lettre)', () => {
+    const p = { ...P, timedMin: 2.5, timedPerChar: 0.05 };
+    const short = { triggers: { a: { voice: 'agent', timed: true } }, lines: [{ id: 'a1', trigger: 'a', text: 'Stop !' }] };
+    const m = createNarrator();
+    narrate(m, short, 'a', p);
+    for (let t = 0; t < 2.4; t += 0.05) stepNarrator(m, short, 0.05, p);
+    expect(m.line).not.toBe(null); // court : 2,5 s au moins
+    for (let t = 2.4; t < 2.6; t += 0.05) stepNarrator(m, short, 0.05, p);
+    expect(m.line).toBe(null);
+  });
+  it('une longue réplique est écrite en entier assez tôt, puis se ferme seule, sans toucher', () => {
+    const p = { ...P, timedMin: 1, timedPerChar: 3 / 126 }; // 126 lettres : 3 s
     const text = 'x'.repeat(126); // à 40 lettres/s, il faudrait 3,2 s rien que pour l'écrire
     const data = { triggers: { a: { voice: 'agent', timed: true } }, lines: [{ id: 'a1', trigger: 'a', text }] };
     const n = createNarrator();

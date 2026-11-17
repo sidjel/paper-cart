@@ -1063,8 +1063,8 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   expect((await hero(page)).x).toBe(frozen);
   await page.keyboard.up('ArrowLeft');
   const t0 = Date.now();
-  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 4000 }); // fermée seule, sans toucher
-  expect(Date.now() - t0).toBeLessThan(3500);
+  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 8000 }); // fermée seule, sans toucher
+  expect(Date.now() - t0).toBeLessThan(7000); // 126 lettres : ≈ 6,3 s depuis son début (2,5 s + 50 ms par lettre)
   await page.keyboard.down('ArrowLeft');
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
   // Il force contre la barrière : « Stop ! », et il fait demi-tour de quelques pas. Il ne passe jamais.
@@ -1076,7 +1076,7 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 4000 });
   let minX = Infinity;
   let back = false;
-  for (let k = 0; k < 30 && !back; k++) {
+  for (let k = 0; k < 60 && !back; k++) {
     const x = (await hero(page)).x;
     if (x > minX + 100) back = true;
     minX = Math.min(minX, x);

@@ -200,7 +200,7 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   await page.evaluate(() => {
     window.paperCart.markSaid('arrivee');
-    for (const [k, v] of [['narrator.speed', 400], ['narrator.timedLine', 1.5]]) window.paperCart.set(k, v);
+    for (const [k, v] of [['narrator.speed', 400], ['narrator.timedMin', 1], ['narrator.timedPerChar', 0.005]]) window.paperCart.set(k, v);
   });
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('DOM.enable');

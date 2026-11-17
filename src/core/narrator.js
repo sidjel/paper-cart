@@ -136,8 +136,9 @@ export function narrate(n, data, trigger, p, force = false) {
     return n.line;
   }
   begin(n, best, voice, p);
-  // timed : la réplique se ferme seule au bout de p.timedLine s (écrite assez vite pour être lue avant).
-  if (tr.timed) n.timed = p.timedLine;
+  // timed : la réplique se ferme seule, selon la longueur de son texte (règle de la séance 64 : jamais une
+  // durée fixe ; p.timedMin s au moins, p.timedPerChar s par lettre) ; écrite assez vite pour être lue avant.
+  if (tr.timed) n.timed = Math.max(p.timedMin, best.text.length * p.timedPerChar);
   return best;
 }
 
@@ -251,6 +252,7 @@ export function stepNarrator(n, data, dt, p) {
     return Math.floor(n.shown) - before;
   }
   if (waitingAnswer(n) || waitingName(n) || n.line.wait) return 0; // la réplique attend la réponse, le nom, ou un toucher
+  if (n.timed) return 0; // se ferme seule à la fin de sa durée (ci-dessus), pas avant
   n.hold -= dt;
   if (n.hold <= 0) end(n, data, p);
   return 0;
