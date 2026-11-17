@@ -139,10 +139,10 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Entrées : pas de pause automatique si la manette est débranchée | 64 | ❓ | Le branchement et le débranchement sont bien détectés. |
 | Entrées : manette jamais essayée pour de vrai | 64 | 🔧 | Une étape n'est validée qu'après un essai sur une vraie manette. |
 | Entrées : zones à toucher de moins de 44 px | 64 | ❓ | Boutons du jeu et du HUD : 44 px. Menus de réglages, onglets, diagnostic : 36 à 40 px (9 endroits). |
-| Bulle qui se ferme seule : durée selon le texte (2,5 s + 50 ms par lettre) | 64 | ✅ | Fait (séance 67). |
+| Bulle qui se ferme seule : durée selon le texte (2,5 s + 50 ms par lettre) | 64 | ✅ | Fait (séance 67), validé par l'auteur. |
 | Cartes (volante, Panier) : changement d'image (`src`) en jeu | 64 | ❓ | La règle l'interdit pour les personnages et objets de la scène ; les cartes montrent l'image du produit scanné (image déjà décodée). À mesurer avant de décider. |
 | « Lire la page avant de la modifier » : le compteur du Panier force une mise en page (`offsetWidth`) pour relancer son animation | 64 | ❓ | À chaque scan. Petit écart, connu. |
-| Chargement : pas de signe d'attente au-delà de 0,3 s | 64 | ✅ | Fait (séance 67) : trois points de papier dans le noir. |
+| Chargement : pas de signe d'attente au-delà de 0,3 s | 64 | ✅ | Fait (séance 67) : trois points de papier dans le noir. Validé par l'auteur. |
 | Parallaxe : « réduire les animations » ne diminue pas encore son amplitude ; interrupteur d'arrondi à ajouter (🧪) | 64 | ❓ | |
 | Direction de la lumière du hall et du rayon | 64 | ❓ | À définir par l'auteur (DIRECTION_ARTISTIQUE). |
 | Téléphone : boutons du HUD en haut à droite, pas à portée de pouce | 64 | ❓ | Règle des menus. |
