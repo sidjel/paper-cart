@@ -17,7 +17,7 @@
 - **Chargements** : jamais d'écran noir muet ; au-delà d'environ 0,3 s, un petit signe d'attente dans le style du jeu, qui ne clignote pas (pas d'apparition trop brève) ; en cas d'échec, un message clair et « Réessayer ».
 - **Une seule voix à la fois.** Une parole déclenchée par le joueur (l'agent qui bloque, un objet examiné) passe avant une remarque d'ambiance, coupée ou mise en attente ; les **moments importants** (apartés, première rencontre) ne sont jamais coupés ni perdus.
 - **Tout texte s'accélère d'un toucher** (touche, bouton) et se ferme d'un second, même geste partout, avec un court délai anti-faux-clic.
-- Une bulle qui se ferme seule reste ouverte **selon la longueur de son texte**, jamais une durée fixe : [TEMP] 2,5 s au moins et environ 50 ms par caractère, réglables dans ⚙ ; avec une **durée maximum** (❓ À DÉFINIR : valeur). Un texte important peut rester ouvert jusqu'au geste du joueur.
+- Une bulle qui se ferme seule reste ouverte **selon la longueur de son texte**, jamais une durée fixe : [TEMP] 2,5 s au moins et environ 50 ms par caractère, réglables dans ⚙ ; au plus **6 s** (✅ choix de l'auteur, séance 69 ; réglable dans ⚙). Un texte important peut rester ouvert jusqu'au geste du joueur.
 - Une bulle **reste dans l'écran**, ne cache pas le visage de celui qui parle, sa pointe tournée vers lui. Au changement de lieu ou en pause, aucune bulle ne reste accrochée à un élément disparu ni ne reprend de façon incohérente.
 - Le héros n'est figé par une bulle **que si la situation l'impose** (l'agent qui le repousse, une introduction) ; les remarques du narrateur laissent marcher. Les **apartés** gardent leur règle (temps du magasin figé).
 - Les dialogues restent relisibles dans l'historique.

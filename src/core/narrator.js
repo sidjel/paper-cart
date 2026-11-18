@@ -137,8 +137,9 @@ export function narrate(n, data, trigger, p, force = false) {
   }
   begin(n, best, voice, p);
   // timed : la réplique se ferme seule, selon la longueur de son texte (règle de la séance 64 : jamais une
-  // durée fixe ; p.timedMin s au moins, p.timedPerChar s par lettre) ; écrite assez vite pour être lue avant.
-  if (tr.timed) n.timed = Math.max(p.timedMin, best.text.length * p.timedPerChar);
+  // durée fixe ; p.timedMin s au moins, p.timedPerChar s par lettre, p.timedMax s au plus : séance 69) ;
+  // écrite assez vite pour être lue avant.
+  if (tr.timed) n.timed = Math.min(p.timedMax, Math.max(p.timedMin, best.text.length * p.timedPerChar));
   return best;
 }
 

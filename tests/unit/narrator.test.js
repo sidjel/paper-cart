@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach, waitingName, answerName } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
-const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20 };
+const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20, timedMax: 99 };
 const DATA = {
   triggers: { arrivee: { once: true, strong: true }, scan: { every: 3 }, idle: {} },
   lines: [
@@ -400,6 +400,16 @@ describe('réplique qui se ferme seule (timed)', () => {
     expect(m.line).not.toBe(null); // court : 2,5 s au moins
     for (let t = 2.4; t < 2.6; t += 0.05) stepNarrator(m, short, 0.05, p);
     expect(m.line).toBe(null);
+  });
+  it('une réplique très longue se ferme seule au bout de timedMax secondes au plus (6 s)', () => {
+    const p = { ...P, timedMin: 2.5, timedPerChar: 0.05, timedMax: 6 };
+    const data = { triggers: { a: { voice: 'agent', timed: true } }, lines: [{ id: 'a1', trigger: 'a', text: 'x'.repeat(300) }] }; // 15 s sans maximum
+    const n = createNarrator();
+    narrate(n, data, 'a', p);
+    for (let t = 0; t < 5.9; t += 0.05) stepNarrator(n, data, 0.05, p);
+    expect(n.line).not.toBe(null);
+    for (let t = 5.9; t < 6.1; t += 0.05) stepNarrator(n, data, 0.05, p);
+    expect(n.line).toBe(null);
   });
   it('une longue réplique est écrite en entier assez tôt, puis se ferme seule, sans toucher', () => {
     const p = { ...P, timedMin: 1, timedPerChar: 3 / 126 }; // 126 lettres : 3 s

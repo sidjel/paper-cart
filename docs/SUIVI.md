@@ -167,7 +167,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | Gestes du navigateur neutralisés partout, pas seulement dans la zone de jeu | 69 | ❓ | `index.html` interdit le zoom sur toute la page (`user-scalable=no`). À corriger dans la séance des entrées. |
 | L'écran d'erreur ne passe pas le relais à l'écran de fondu | 69 | ❓ | Règle : `docs/ARCHITECTURE.md` §11. À vérifier et corriger dans une séance de code. |
-| Durée maximum d'une bulle qui se ferme seule | 69 | ❓ | Valeur à choisir par l'auteur, puis réglage dans ⚙. Textes importants ouverts jusqu'au geste : à décider lesquels. |
+| Durée maximum d'une bulle qui se ferme seule | 69 | ✅ | Choix A de l'auteur : 6 s au plus (`narrator.timedMax`, réglable dans ⚙). Textes importants ouverts jusqu'au geste : à décider lesquels le jour où il y en aura. |
 | Sauvegarde : ne jamais écraser celle d'une version plus récente ; essai « mémoire pleine » | 69 | ❓ | Règles ajoutées (§13) ; la sauvegarde n'est pas encore construite. |
 
 ## Points 👀 restants (à revoir avec A6)

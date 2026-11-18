@@ -76,6 +76,7 @@ export const config = {
     hold: 1.8, // temps affiché une fois le texte complet (s)…
     timedMin: 2.5, // bulle qui se ferme seule (agent) : ouverte au moins ce temps (s)… [TEMP]
     timedPerChar: 0.05, // … et ce temps par lettre (s) : la durée suit la longueur du texte [TEMP]
+    timedMax: 6, // … et jamais plus que ce temps (s) (choix A de l'auteur, séance 69)
     holdPerChar: 0.035, // … plus ce temps par lettre (les longues répliques restent plus longtemps)
     minGap: 20, // écart minimal entre deux prises de parole (s), sauf moments forts
     lineCooldown: 600, // une même réplique ne revient pas avant (s)
@@ -290,6 +291,7 @@ export const TUNABLES = [
   { group: 'Accessibilité', key: 'display.reduceMotion', label: 'Réduire les animations', type: 'bool' },
   { group: 'Narrateur', key: 'narrator.timedMin', label: 'Bulle qui se ferme seule : au moins', min: 1, max: 6, step: 0.5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.timedPerChar', label: 'Bulle qui se ferme seule : par lettre', min: 0, max: 0.15, step: 0.01, unit: 's' },
+  { group: 'Narrateur', key: 'narrator.timedMax', label: 'Bulle qui se ferme seule : au plus', min: 3, max: 15, step: 0.5, unit: 's' },
   { group: 'Narrateur', key: 'narrator.hold', label: 'Temps affiché après le texte', min: 0.5, max: 6, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.holdPerChar', label: '… plus, par lettre', min: 0, max: 0.1, step: 0.005, unit: 's' },
   { group: 'Narrateur', key: 'narrator.minGap', label: 'Écart minimal entre deux répliques', min: 0, max: 120, step: 5, unit: 's' },
