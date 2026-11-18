@@ -158,7 +158,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Départ « Rayon 2 » ; « Départ » sur l'écran titre (mode dev) | 67 | ✅ | Réglage « Mode dev » (⚙ → Diagnostic), activé pendant le développement. |
 | Liste des départs de l'écran titre inaccessible sur téléphone (sous l'écran) | 67 | ✅ | Ouverte au centre, défilante, « Fermer » (Échap, B). Essai : visible dans l'écran du téléphone. |
 | Rayon 2 → rayon 7 impossible au doigt | 67 | ✅ | Le passage était sous le bas de l'écran. Toucher une ouverture (ou le rayon de devant à cet endroit) envoie au passage (`reach`, `core/places.js`). Essai au doigt, dans les deux sens. |
-| Le héros clignote une ou deux fois au début, dans le hall | 67 | ❓ | Non reproduit dans le navigateur de test (le calque du héros n'est créé qu'une fois). Question posée à l'auteur : à quel moment exactement. |
+| Le héros clignote une ou deux fois au début, dans le hall | 67 | 👀 | Seulement à la première apparition du hall, avant tout mouvement, jamais au retour (réponse de l'auteur). Cause : le noir de fin d'intro commençait à s'effacer au moment même où la scène était dessinée pour la première fois. Correction (séance 68) : noir plein 0,3 s de plus (« Intro : noir plein avant le fondu final »). À confirmer sur le téléphone. |
 | Message « Onglet … fermé · Annuler » à la fermeture de l'onglet | 67 | ❓ | Message de Chrome lui-même (pas du jeu, qui n'affiche aucune fenêtre à la fermeture) : impossible à retirer depuis le jeu. |
 | A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | 👀 | Fait : le produit prend la place du produit scanné, sur ce rayon-ci (règle de la séance 63). Son image est préparée et décodée pendant le choix de la carte (règle « rien n'apparaît à froid »). |
 
