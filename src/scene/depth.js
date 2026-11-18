@@ -3,7 +3,7 @@
 // (depthRef, en z du monde). Le personnage passe devant lui s'il est plus près (z plus petit),
 // derrière sinon. Les objets ont des niveaux multiples de 3 (3, 6, 9…), les personnages les deux
 // niveaux entre eux : un personnage ne change de bande que lorsqu'il franchit un point de référence.
-// Dans une même bande, deux personnages (le héros et son caddie, A8) : le plus proche prend le niveau
+// Dans une même bande, deux personnages (le héros et son chariot, A8) : le plus proche prend le niveau
 // du dessus (nearer).
 
 // refs : profondeurs de référence. Renvoie le niveau de chaque objet (le plus loin = le plus bas).

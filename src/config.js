@@ -63,13 +63,13 @@ export const config = {
   },
   carry: {
     panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
-    caddie: 12, // [TEMP] capacité du caddie (A8) — à régler par l'auteur
+    chariot: 12, // [TEMP] capacité du chariot (A8) — à régler par l'auteur
   },
-  caddie: {
-    follow: 140, // distance à laquelle le caddie suit le héros, sur son chemin (px du monde)
+  chariot: {
+    follow: 140, // distance à laquelle le chariot suit le héros, sur son chemin (px du monde)
     ease: 10, // vitesse à laquelle il rattrape son retard (part par seconde)
     range: 200, // distance pour le garer ou le reprendre (px du monde ; plus que la distance de suivi)
-    size: 0.8, // [TEMP] taille du caddie à côté du héros
+    size: 0.8, // [TEMP] taille du chariot à côté du héros
   },
   access: {
     textSize: 'normale', // taille du texte de l'interface : petite, normale, grande
@@ -112,7 +112,7 @@ export const config = {
     exchangeSpares: 6, // images préparées par lieu pour les échanges avec un produit venu d'un autre lieu (A7)
     range: 150, // distance (le long du rayon) à laquelle un produit est à portée (px)
     minDepth: 150, // il faut être assez près de l'étagère du fond (profondeur minimale)
-    // Produits posés ailleurs (table, caddie) : portée autour du produit, sur le sol.
+    // Produits posés ailleurs (table, chariot) : portée autour du produit, sur le sol.
     looseRange: 170, // écart maximal le long du rayon (px)
     looseDepth: 90, // écart maximal en profondeur
     awayDepth: 30, // produit plus loin que ça en profondeur : le personnage se met de dos pour le scanner
@@ -134,7 +134,7 @@ export const config = {
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
     foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
-    hallForegroundOpacity: 0.9, // opacité du premier plan du hall (plante, caddies)
+    hallForegroundOpacity: 0.9, // opacité du premier plan du hall (plante, chariots)
     hallRain: true, // pluie animée du hall (et reflet du tapis) ; l'éteindre aide à chercher la cause d'un clignotement
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
     // Profil de qualité (ARCHITECTURE §14) : 'leger', 'normal' ou 'fin'. [TEMP] « Fin » par défaut (comme
@@ -145,7 +145,7 @@ export const config = {
       normal: { density: 1.5, rain: true, dust: true, farParallax: true },
       fin: { density: 2, rain: true, dust: true, farParallax: true },
     },
-    // Objets du décor (caddie, présentoirs) sur leur propre calque, en permanence. Sans cela, le
+    // Objets du décor (chariot, présentoirs) sur leur propre calque, en permanence. Sans cela, le
     // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
     // à chaque bascule l'objet est redessiné et peut disparaître un instant (clignotement).
     propLayers: true,
@@ -271,15 +271,15 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.hallRain', label: 'Pluie animée du hall', type: 'bool' },
   { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
-  { group: 'Caddie', key: 'carry.caddie', label: 'Capacité du caddie (cartes)', min: 1, max: 40, step: 1 },
-  { group: 'Caddie', key: 'caddie.follow', label: 'Distance de suivi', min: 30, max: 200, step: 5, unit: 'px' },
-  { group: 'Caddie', key: 'caddie.ease', label: 'Souplesse du suivi (rattrapage)', min: 2, max: 30, step: 1 },
-  { group: 'Caddie', key: 'caddie.size', label: 'Taille du caddie', min: 0.4, max: 1.4, step: 0.05 },
-  { group: 'Caddie', key: 'caddie.range', label: 'Portée pour garer ou reprendre', min: 50, max: 350, step: 10, unit: 'px' },
+  { group: 'Chariot', key: 'carry.chariot', label: 'Capacité du chariot (cartes)', min: 1, max: 40, step: 1 },
+  { group: 'Chariot', key: 'chariot.follow', label: 'Distance de suivi', min: 30, max: 200, step: 5, unit: 'px' },
+  { group: 'Chariot', key: 'chariot.ease', label: 'Souplesse du suivi (rattrapage)', min: 2, max: 30, step: 1 },
+  { group: 'Chariot', key: 'chariot.size', label: 'Taille du chariot', min: 0.4, max: 1.4, step: 0.05 },
+  { group: 'Chariot', key: 'chariot.range', label: 'Portée pour garer ou reprendre', min: 50, max: 350, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
-  { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou caddie : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },
-  { group: 'Scanner', key: 'scan.looseDepth', label: 'Produit sur table ou caddie : portée en profondeur', min: 30, max: 200, step: 5 },
+  { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou chariot : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },
+  { group: 'Scanner', key: 'scan.looseDepth', label: 'Produit sur table ou chariot : portée en profondeur', min: 30, max: 200, step: 5 },
   { group: 'Scanner', key: 'scan.raise', label: 'Lever la Scanette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.laser', label: 'Laser', min: 0.05, max: 0.8, step: 0.01, unit: 's' },
   { group: 'Scanner', key: 'scan.dissolve', label: 'Dissolution du produit', min: 0.1, max: 1.5, step: 0.05, unit: 's' },

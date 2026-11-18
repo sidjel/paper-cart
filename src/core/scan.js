@@ -8,7 +8,7 @@
 //  (bas, largeur, hauteur), pour savoir si un toucher tombe dessus ; standAt : où se placer pour le scanner.
 //  - sur l'étagère du fond (loose absent) : on les scanne depuis le pied de l'étagère (z ≥ minDepth),
 //    à moins de `range` le long du rayon ;
-//  - posés ailleurs (loose : table, caddie…, à la profondeur z) : à moins de looseRange le long du
+//  - posés ailleurs (loose : table, chariot…, à la profondeur z) : à moins de looseRange le long du
 //    rayon et de looseDepth en profondeur, de n'importe quel côté.
 // Renvoie un écart « normalisé » (0 = juste devant, 1 = limite de portée), ou Infinity hors de portée.
 function reachOf(it, hero, p) {

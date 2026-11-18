@@ -52,14 +52,14 @@ describe('ordre d’affichage selon la profondeur', () => {
   it('le personnage passe devant ou derrière selon sa profondeur', () => {
     expect(actorLevel(refs, 50)).toBe(7); // devant les deux
     expect(actorLevel(refs, 50, true)).toBe(8); // le plus proche des deux personnages, dans la même bande
-    expect(actorLevel(refs, 130)).toBe(4); // derrière le caddie, devant le présentoir
+    expect(actorLevel(refs, 130)).toBe(4); // derrière le chariot, devant le présentoir
     expect(actorLevel(refs, 200)).toBe(1); // derrière les deux
   });
 });
 
 describe('rayon d’essai : on peut passer derrière les objets', () => {
   const m = compileMask(place.walkMask);
-  it('couloir derrière le présentoir et derrière le caddie', () => {
+  it('couloir derrière le présentoir et derrière le chariot', () => {
     expect(isWalkable(m, 750, 215)).toBe(true);
     expect(isWalkable(m, 1417, 200)).toBe(true);
   });

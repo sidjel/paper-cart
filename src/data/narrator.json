@@ -391,7 +391,7 @@
     {
       "id": "panier_plein_1",
       "trigger": "panier_plein",
-      "text": "[TEMP] Votre panier est plein, cher Client. Le Maxi-Gouffre vous recommande un caddie. Les caddies fonctionnent avec une pièce. Vous n'avez pas de pièce."
+      "text": "[TEMP] Votre panier est plein, cher Client. Le Maxi-Gouffre vous recommande un chariot. Les chariots fonctionnent avec une pièce. Vous n'avez pas de pièce."
     },
     {
       "id": "agent_stop_1",

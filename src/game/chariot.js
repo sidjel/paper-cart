@@ -1,26 +1,26 @@
-// Le caddie jouable (A8, étape 1/3), branché sur le jeu : la règle est dans core/caddie.js.
+// Le chariot jouable (A8, étape 1/3), branché sur le jeu : la règle est dans core/chariot.js.
 // Une seule image, créée au chargement ; comme le héros, elle passe sur le calque des acteurs du lieu
-// affiché (mount), et n'est montrée que dans le lieu où le caddie se trouve (le changement se fait dans
+// affiché (mount), et n'est montrée que dans le lieu où le chariot se trouve (le changement se fait dans
 // le noir d'un changement de lieu). Rangée en profondeur comme un personnage ; avec le héros, le plus
 // proche passe devant.
 //
 // game : { walker(), place() → id du lieu affiché }
 
 import { config } from '../config.js';
-import { createCaddie, takeCaddie, parkCaddie, nearCaddie, leaveCaddie, stepCaddie } from '../core/caddie.js';
+import { createChariot, takeChariot, parkChariot, nearChariot, leaveChariot, stepChariot } from '../core/chariot.js';
 import { worldToStageX, worldToStageY, scaleAt } from '../scene/projection.js';
 import { actorLevel } from '../scene/depth.js';
 
-export const CADDIE_IMAGE = 'art/placeholder/caddie-vide.svg';
-export const CADDIE_SIZE = [335, 250];
-const ANCHOR = [212, 230]; // point du sol sous le caddie, dans l'image (comme le caddie du décor)
+export const CHARIOT_IMAGE = 'art/placeholder/chariot-vide.svg';
+export const CHARIOT_SIZE = [335, 250];
+const ANCHOR = [212, 230]; // point du sol sous le chariot, dans l'image (comme le chariot du décor)
 
 // image : { url, w, h } (images communes, préparées au chargement).
-export function createCaddieWiring(game, image, parent) {
-  let state = null; // pas de caddie tant que le héros n'en a pas
+export function createChariotWiring(game, image, parent) {
+  let state = null; // pas de chariot tant que le héros n'en a pas
   const el = new Image();
   el.src = image.url;
-  el.className = 'caddie';
+  el.className = 'chariot';
   el.width = image.w;
   el.height = image.h;
   el.alt = '';
@@ -40,40 +40,40 @@ export function createCaddieWiring(game, image, parent) {
     get owned() {
       return state !== null;
     },
-    // Le héros reçoit un caddie (point de départ de test, en attendant le comptoir) : il le suit.
+    // Le héros reçoit un chariot (point de départ de test, en attendant le comptoir) : il le suit.
     give() {
       const w = game.walker();
-      state = createCaddie(game.place(), w.x - config.caddie.follow, w.z);
-      takeCaddie(state, w);
+      state = createChariot(game.place(), w.x - config.chariot.follow, w.z);
+      takeChariot(state, w);
       // Avant le dévoilement de la scène (point de départ) : il apparaît dans le noir.
       shownHere = true;
       el.hidden = false;
     },
-    // Un lieu vient d'être construit : le caddie s'y montre seulement s'il y est.
+    // Un lieu vient d'être construit : le chariot s'y montre seulement s'il y est.
     attach(pr) {
       proj = pr;
       shownHere = state !== null && state.place === game.place();
       if (el.hidden === shownHere) el.hidden = !shownHere;
     },
-    // On quitte le lieu : le caddie reste là où il est, garé.
+    // On quitte le lieu : le chariot reste là où il est, garé.
     leaving() {
-      if (state) leaveCaddie(state);
+      if (state) leaveChariot(state);
     },
-    // Bouton d'action : 'garer', 'reprendre' ou '' (rien à faire avec le caddie ici).
+    // Bouton d'action : 'garer', 'reprendre' ou '' (rien à faire avec le chariot ici).
     action() {
-      if (!state || !nearCaddie(state, game.walker(), game.place(), config.caddie.range)) return '';
+      if (!state || !nearChariot(state, game.walker(), game.place(), config.chariot.range)) return '';
       return state.following ? 'garer' : 'reprendre';
     },
     toggle() {
       const a = this.action();
-      if (a === 'garer') parkCaddie(state);
-      else if (a === 'reprendre') takeCaddie(state, game.walker());
+      if (a === 'garer') parkChariot(state);
+      else if (a === 'reprendre') takeChariot(state, game.walker());
       return a;
     },
     step(dt) {
-      if (state && shownHere) stepCaddie(state, game.walker(), config.caddie, dt);
+      if (state && shownHere) stepChariot(state, game.walker(), config.chariot, dt);
     },
-    // Le héros est-il plus proche que le caddie (il passe alors devant lui, dans une même bande) ?
+    // Le héros est-il plus proche que le chariot (il passe alors devant lui, dans une même bande) ?
     heroNearer(z) {
       return shownHere && z <= state.z + 1;
     },
@@ -81,7 +81,7 @@ export function createCaddieWiring(game, image, parent) {
       if (!shownHere) return;
       const x = state.prevX + (state.x - state.prevX) * alpha;
       const z = state.prevZ + (state.z - state.prevZ) * alpha;
-      const s = scaleAt(proj, z) * config.caddie.size;
+      const s = scaleAt(proj, z) * config.chariot.size;
       const fx = worldToStageX(proj, x);
       const fy = worldToStageY(proj, z);
       // L'image a sa poignée à droite : on la retourne quand il roule vers la droite (poignée côté héros).

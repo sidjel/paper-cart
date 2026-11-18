@@ -1,4 +1,4 @@
-// Objets du décor que le personnage peut contourner (caddie, présentoir…).
+// Objets du décor que le personnage peut contourner (chariot, présentoir…).
 // Chacun est une illustration entière, posée au sol à sa position dans le monde (at),
 // avec son point d'ancrage dans l'image (anchor) et son point de référence de profondeur (depthRef).
 

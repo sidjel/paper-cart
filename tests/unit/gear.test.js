@@ -47,10 +47,10 @@ describe('accueil : Scanette et panier (A5a)', () => {
   });
 });
 
-describe('le caddie remplace le panier (A8)', () => {
-  it('avec le caddie, sans panier : on scanne, avec la capacité du caddie', () => {
-    const g = { scanette: true, panier: false, caddie: true };
-    const carry = { panier: 6, caddie: 12 };
+describe('le chariot remplace le panier (A8)', () => {
+  it('avec le chariot, sans panier : on scanne, avec la capacité du chariot', () => {
+    const g = { scanette: true, panier: false, chariot: true };
+    const carry = { panier: 6, chariot: 12 };
     expect(capacity(g, carry)).toBe(12);
     expect(scanBlocked(g, 6, carry)).toBe('');
     expect(scanBlocked(g, 12, carry)).toBe('plein');

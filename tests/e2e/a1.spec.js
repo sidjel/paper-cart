@@ -513,9 +513,9 @@ test('A3 à la souris : double clic sur un produit, puis le clavier annule une a
   expect((await page.evaluate(() => window.paperCart.scanState())).cards.length).toBe(1);
 });
 
-test('Essai : scanner la boîte d’œufs dans le caddie, de profil (double toucher ou double clic)', async ({ page }, info) => {
+test('Essai : scanner la boîte d’œufs dans le chariot, de profil (double toucher ou double clic)', async ({ page }, info) => {
   const n = await page.locator('.product').count();
-  const eggs = page.locator('.product').nth(n - 1); // le dernier produit : les œufs du caddie
+  const eggs = page.locator('.product').nth(n - 1); // le dernier produit : les œufs du chariot
   const r = await eggs.boundingBox();
   const c = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
   if (info.project.name === 'telephone') {
@@ -525,11 +525,11 @@ test('Essai : scanner la boîte d’œufs dans le caddie, de profil (double touc
     await page.mouse.dblclick(c.x, c.y);
   }
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 10000 }).toBe(true);
-  // À gauche du caddie, tourné vers la droite, de face (donc de profil vers le produit).
+  // À gauche du chariot, tourné vers la droite, de face (donc de profil vers le produit).
   const h = await hero(page);
   expect(h).toMatchObject({ facing: 1, away: false });
   await page.waitForTimeout(450);
-  await page.screenshot({ path: `test-results/captures/essai-${info.project.name}-caddie.png` });
+  await page.screenshot({ path: `test-results/captures/essai-${info.project.name}-chariot.png` });
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Œufs']);
   await expect(eggs).toBeHidden();
 });

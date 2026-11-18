@@ -1,6 +1,6 @@
 // Produits sur l'étagère et effets du scanner (affichage seulement ; la logique est dans core/scan.js).
 // - chaque produit est une illustration entière posée sur une tablette de l'étagère du fond,
-//   ou ailleurs (sur une table, dans le caddie : « loose ») ; ces derniers sont dessinés juste
+//   ou ailleurs (sur une table, dans le chariot : « loose ») ; ces derniers sont dessinés juste
 //   au-dessus de l'objet qui les porte, sur leur propre calque comme lui (pas de clignotement) ;
 // - un repère en papier flotte au-dessus du produit à portée ;
 // - pendant un scan : laser, dissolution du produit, confettis aspirés par la Scanette.

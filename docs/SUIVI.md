@@ -38,9 +38,9 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | L'accueil, un lieu à part (hall, portique, agent, comptoir) | 37 | 🔧 | Noté dans HISTOIRE, PERSONNAGES et PROTOTYPES (étape après A5, à proposer seulement après validation de A5). Rien de construit. Séance 51 : A6 en cours (1/3 construit). |
 | Nom du deck (« courses » provisoire) | 36 | ❓ | Pistes proposées en séance 36 ; renommer « Panier » dans le jeu une fois choisi. |
 | Capacités et panier plein | 36 | ❓ | [TEMP] panier = 6 (⚙ → Scanner) ; panier plein : scan refusé en attendant le choix de l'auteur (options proposées en séance 36). |
-| Qui donne le jeton de caddie | 36 | ❓ | Pistes : le Vieux Monsieur avant sa mort ; ou rendre son caddie à la Caisse Finale pour récupérer sa pièce (le passeur des morts). |
+| Qui donne le jeton de chariot | 36 | ❓ | Pistes : le Vieux Monsieur avant sa mort ; ou rendre son chariot à la Caisse Finale pour récupérer sa pièce (le passeur des morts). |
 | Narrateur A4 | 31 | 🔧 | Séance 32 : bande au haut-parleur, machine à écrire, annonce et petits bips, 12 répliques [TEMP] sur 8 moments, rare et sans répétition, fil « Client » → « Article non référencé » (choix A). **À tester par l'auteur.** Séance 33 : apartés du héros ajoutés. **Validation d'A4 proposée** (après un test rapide de fluidité si l'auteur le souhaite). |
-| Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Caddie jouable (A5) en sera la forme physique. |
+| Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Chariot jouable (A5) en sera la forme physique. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |
 | Style des décors | 29 | 🧪 | Crayon de couleur pour personnages, produits et décors : à tester au prototype D (docs/DIRECTION_ARTISTIQUE.md). |
 
@@ -54,7 +54,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Découper src/main.js (≈ 1 250 lignes à la séance 50) | 29 | 🔧 | Repris dans l'audit de la séance 50 (point 11) : en attente de validation. |
-| Plan du magasin (affiche ou dépliant, dans les Objets) pour retrouver son caddie ; « plan », pas « carte » | 50 | ❓ | GAME_DESIGN.md. Plus tard. |
+| Plan du magasin (affiche ou dépliant, dans les Objets) pour retrouver son chariot ; « plan », pas « carte » | 50 | ❓ | GAME_DESIGN.md. Plus tard. |
 | Audit de l'architecture et de la fluidité avant A6 et A7, sans rien modifier | 50 | ❓ | Fait (rapport dans le JOURNAL, séance 50). 15 points ; **l'auteur valide une correction à la fois**, banc d'essai sur le téléphone avant et après pour la fluidité. |
 | Audit, points 2 et 4 : construire / quitter / reconstruire un lieu ; images du lieu libérées | 50 | 👀 n° 1 | `scene/placeView.js`, `loadPlace` / `unloadPlace`, `releaseImages`. Testé par 3 allers-retours (rien ne s'accumule). Banc d'essai à refaire sur le téléphone (comparer à `2aa4b77`). Transition, sorties et préchargement : avec A6. |
 | Audit, point 6 : chemin recalculé à chaque mouvement du doigt | 50 | 👀 n° 2 | Au plus un calcul par image. Testé. À mesurer sur le téléphone plus tard (décision de l'auteur). Points 7 à 15 : peuvent attendre. |
@@ -103,7 +103,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Agent : style du héros, bulle, héros figé, poussée s'il force | 57 | 👀 | Construit. Réplique [TEMP] de l'auteur. |
 | Pluie, ruissellement, ronds dans les flaques, tapis mouillé, parking de nuit | 57 | 👀 | Sans Canvas : SVG et CSS. Fluidité à vérifier sur le téléphone. |
 | Hôtesse au comptoir, « !! » du héros, pensée « Hum… étrange… » | 57 | ✅ | Séance 58 : « !! » fait ; pensée gardée ; hôtesse avec A8. |
-| Hôtesse derrière le comptoir | 58 | 🔧 | Avec A8 (échange du caddie au comptoir). |
+| Hôtesse derrière le comptoir | 58 | 🔧 | Avec A8 (échange du chariot au comptoir). |
 | Personnages et portiques qui clignotent dans le hall (téléphone) | 58 | 👀 | Séance 59 : pas la pluie (essai de l'auteur). Causes mesurées : l'agent gagnait et perdait son calque graphique à chaque pose ; il prenait le même niveau d'affichage qu'un portique. Corrigé ; un essai vérifie que ni l'agent ni les portiques ne changent de calque. À confirmer sur le téléphone. |
 | Agent : une seule fois au milieu, en retrait ; « Stop ! » et demi-tour du héros | 59 | 👀 | Construit, à tester. |
 | L'agent clignote à l'ouverture et à la fermeture de sa bulle | 60 | 👀 | Séance 61 : la correction de la séance 60 (un calque par pose) était la mauvaise ; diagnostic de l'auteur. L'agent change maintenant de pose comme le héros (`scene/poses.js`) ; sa boîte a la taille du dessin (sans taille, chaque pose avait son calque : mesuré). Règle écrite (ARCHITECTURE §4, src/scene/CLAUDE.md). Essai : aucun calque créé ni changé par une pose. Si l'agent ne clignote plus, l'auteur valide. |
@@ -178,13 +178,22 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Publication : `main` (CLAUDE.md) ou branche de session (cet environnement) | 70 | ✅ | Choix 1 de l'auteur : pousser sur `main`, maintenant et pour les séances suivantes. |
 | **À rappeler à l'auteur** : tester A7 et les entrées sur PC (avec une manette) | 70 | 👀 | L'auteur est sur téléphone (séance 70). Rappeler en début de séance suivante. A7 validée provisoirement en attendant. |
 
-### Séance 72 : A8 (1/3), le caddie qui suit
+### Séance 73 : le chariot redéfini par l'auteur
 | Demande | Séance | État | Notes |
 |---|---|---|---|
-| A8 (1/3) : caddie qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | 👀 | Départ de test « caddie » (dernier de la liste). Réglages ⚙ › Caddie (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
+| Renommer « caddie » en « chariot » (jeu et documentation) | 73 | ✅ | Fait partout (textes, données, code, images provisoires) ; le journal et l'archive gardent l'ancien mot (historique). |
+| Chariot poussé par le héros, en papier 2D comme lui | 73 | ✅ | Décision ; à construire. Détails du ressenti : questions posées à l'auteur. |
+| Chariot et panier : l'un ou l'autre | 73 | ✅ | Décision ; déjà le cas dans le départ de test (le panier est rendu). |
+| Chariot persistant quand on change de pièce | 73 | ❓ | Conflit avec la décision de la séance 50 (il reste garé dans son lieu) : question posée à l'auteur. |
+| Une vraie utilité, agréable et fun | 73 | ❓ | Rien de précis dans les documents : pistes proposées à l'auteur. |
+
+### Séance 72 : A8 (1/3), le chariot qui suit
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A8 (1/3) : chariot qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | ❌ abandonné (séance 73 : poussé par le héros) | Départ de test « chariot » (dernier de la liste). Réglages ⚙ › Chariot (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
 | Garer près d'un produit : le bouton d'action dit « Scanner » | 72 | ❓ | Le scan passe avant. Question posée à l'auteur. |
 | Qui donne le jeton, échange au comptoir (hôtesse) | 72 | ❓ | Étape 2/3, question posée à l'auteur. |
-| Scanner quand le caddie est garé loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question posée à l'auteur. |
+| Scanner quand le chariot est garé loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question posée à l'auteur. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.

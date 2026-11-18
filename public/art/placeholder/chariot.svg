@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="335" height="250" viewBox="1205 530 335 250">
-<!-- [TEMP] Caddie abandonné : objet du décor que le personnage peut contourner. Généré, provisoire. -->
+<!-- [TEMP] Chariot abandonné : objet du décor que le personnage peut contourner. Généré, provisoire. -->
 <defs><filter id="crayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter></defs>
 <g filter="url(#crayon)"><g transform="translate(0 70)">
 <g><path d="M1296 520 h236 l-22 120 h-196 z" fill="#c9cdc8" fill-opacity="0.55" stroke="#fbf8ee" stroke-width="9" stroke-linejoin="round"/><path d="M1296 520 h236 l-22 120 h-196 z" fill="#c9cdc8" fill-opacity="0.55" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/></g>

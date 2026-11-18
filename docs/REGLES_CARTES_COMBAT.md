@@ -8,7 +8,7 @@
 - Face à face, tour par tour, sans chrono (*Baten Kaitos*, *Final Fantasy*).
 - Points de vie des deux côtés.
 - Panier de 12 cartes, main de 5, jusqu'à 3 cartes jouées par tour.
-- ❓ À DÉFINIR avant B (séance 51) : « Panier de 12 cartes » ne colle pas avec le contenant porté ([TEMP] panier = 6, caddie plus grand : `GAME_DESIGN.md`). Combien de cartes en combat, et d'où viennent-elles (tout le contenu du panier ou du caddie ? un choix avant le combat ?) ?
+- ❓ À DÉFINIR avant B (séance 51) : « Panier de 12 cartes » ne colle pas avec le contenant porté ([TEMP] panier = 6, chariot plus grand : `GAME_DESIGN.md`). Combien de cartes en combat, et d'où viennent-elles (tout le contenu du panier ou du chariot ? un choix avant le combat ?) ?
 - L'ennemi **annonce son prochain coup**.
 - Jauge épique et attaque ultime mise en scène : prototype C.
 
@@ -50,7 +50,7 @@ Reprise de `docs/archive/maxi-gouffre-GAME_DESIGN.md` §7.3 et §7.4. **Effets d
 - **6 recettes** : Milkshake Protéiné (banane + lait) · Burger Gras (steak + baguette) · Petit-Dèj Épique (lait + céréales) · Ado Muet (enfant + console) · Plante Mutante (plante + pile pourrie) · Lance de Fortune (baguette + scotch).
 
 ## Déjà en place dans le jeu (provisoire, d'après le code)
-- 12 produits scannables (`src/data/products.json`) : 10 sur l'étagère, 1 sur une table, 1 dans le caddie.
+- 12 produits scannables (`src/data/products.json`) : 10 sur l'étagère, 1 sur une table, 1 dans le chariot.
 - Une carte = nom, puissance, stade de départ (Frais ou Mûr), propriétés ; icône de stade (forme + couleur).
 - Le Panier liste les cartes, sans interaction. Pas de vieillissement, pas de familles, pas de combat.
 

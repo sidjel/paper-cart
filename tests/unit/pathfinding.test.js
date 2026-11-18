@@ -25,7 +25,7 @@ describe('contourner les objets (toucher pour aller)', () => {
     expect(path[path.length - 1]).toEqual([750, 215]);
     checkPath(750, 40, path);
   });
-  it('contourne le caddie', () => {
+  it('contourne le chariot', () => {
     const path = findPath(mask, 1417, 60, 1417, 200);
     expect(path.length).toBeGreaterThan(1);
     checkPath(1417, 60, path);

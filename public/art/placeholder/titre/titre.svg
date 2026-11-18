@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-<!-- [TEMP] Image de l'écran titre : rayon sans fin vers une lueur lointaine, caddie abandonné, silhouette de papier. Généré, provisoire. -->
+<!-- [TEMP] Image de l'écran titre : rayon sans fin vers une lueur lointaine, chariot abandonné, silhouette de papier. Généré, provisoire. -->
 <defs>
 <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151827"/><stop offset="0.55" stop-color="#2a2f45"/><stop offset="1" stop-color="#1a1b26"/></linearGradient>
 <radialGradient id="lueur" cx="960" cy="470" r="420" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe7b0" stop-opacity="0.95"/><stop offset="0.12" stop-color="#f3c77a" stop-opacity="0.6"/><stop offset="0.45" stop-color="#8a6a7a" stop-opacity="0.18"/><stop offset="1" stop-color="#2a2f45" stop-opacity="0"/></radialGradient>

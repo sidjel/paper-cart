@@ -90,7 +90,7 @@ Le diagnostic en 4 configurations a été retiré (séance 30, décision de l'au
 
 ## 9. Prévu, pas encore construit ⏳
 
-A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des lieux : §11) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅).
+A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le chariot (règles des lieux : §11) · combat (B) · vieillissement des cartes · découverte (C) · `docs/IMAGES.md` et l'outil de conversion `tools/` (avant le prototype D) · **générateur de hasard à graine dans `core/`** (dès que le jeu tire au hasard ✅) · **file de travail lourd avec budget par image** (dès qu'un travail lourd apparaît en jeu ✅).
 
 ## 10. Héritage de Maxi-Gouffre
 
@@ -113,7 +113,7 @@ A6 l'accueil (en cours : 1/3), A7 le deuxième rayon, A8 le caddie (règles des 
 - **Transition courte (fondu) gérée par la machine à états** : rien ne bouge et rien ne se charge à l'écran pendant le changement de lieu.
 - **Un seul écran de fondu noir** pour tout le jeu (`src/game/places.js`) : changements de lieu, début de partie, fin de l'intro (séance 68). Tout autre écran plein écran (intro, erreur) **lui passe le relais quand il est déjà plein à l'écran**, puis n'est retiré que dessous. Rien n'est créé ni retiré de la page au moment où la scène se dévoile ; une fois transparent, l'écran de fondu ne prend ni touchers ni sélection.
 - **Téléchargement d'avance d'un lieu voisin** (s'il est construit) : il peut être annulé, et la transition marche sans lui.
-- **Le monde se souvient** : un produit scanné reste scanné au retour, un caddie garé reste garé ; les cartes et les objets suivent le héros.
+- **Le monde se souvient** : un produit scanné reste scanné au retour, un chariot garé reste garé ; les cartes et les objets suivent le héros.
 - **Mesures** : comptages **par lieu** ; banc d'essai qui traverse les trois lieux et les transitions ; mémoire contrôlée après plusieurs allers-retours (elle ne doit pas grimper) ; temps de transition mesuré sur le téléphone.
 
 ## 12. Son ✅ (règles décidées par l'auteur, séance 64)

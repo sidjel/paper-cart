@@ -94,7 +94,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     onOpen();
   });
   const count = button.querySelector('.panier-count');
-  let name = 'Panier'; // le menu porte le nom du contenant : « Panier », puis « Caddie » (A8)
+  let name = 'Panier'; // le menu porte le nom du contenant : « Panier », puis « Chariot » (A8)
 
   const panel = document.createElement('div');
   panel.className = 'panier panel';
@@ -391,14 +391,14 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
       li.append(img, txt);
       objList.appendChild(li);
     },
-    // Le contenant change (le caddie remplace le panier) : nom du menu et du bouton.
+    // Le contenant change (le chariot remplace le panier) : nom du menu et du bouton.
     setName(n) {
       name = n;
       button.setAttribute('aria-label', `${n} (I)`);
       button.title = `${n} (I)`;
       panel.setAttribute('aria-label', n);
     },
-    // Un objet n'est plus porté (le panier, rendu contre le caddie).
+    // Un objet n'est plus porté (le panier, rendu contre le chariot).
     removeObject(id) {
       const k = owned.indexOf(id);
       if (k < 0) return;

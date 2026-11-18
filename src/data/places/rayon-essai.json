@@ -17,8 +17,8 @@
       "src": "art/placeholder/presentoir-crousti.svg",
       "size": [290, 315]
     },
-    "caddie": {
-      "src": "art/placeholder/caddie.svg",
+    "chariot": {
+      "src": "art/placeholder/chariot.svg",
       "size": [335, 250]
     },
     "petite-table": {
@@ -56,7 +56,7 @@
     },
     {
       "id": "acteurs",
-      "contains": "personnage, ombre, poussière, présentoirs, caddie, repère du point visé — triés par profondeur",
+      "contains": "personnage, ombre, poussière, présentoirs, chariot, repère du point visé — triés par profondeur",
       "hiddenBy": "rien"
     },
     {
@@ -97,7 +97,7 @@
         ]
       },
       {
-        "name": "Caddie abandonné",
+        "name": "Chariot abandonné",
         "points": [
           [1265, 105],
           [1570, 105],
@@ -135,8 +135,8 @@
       "comment": "at : point du sol sous le bord avant, au milieu. depthRef : profondeur à laquelle le personnage passe de devant à derrière."
     },
     {
-      "id": "caddie",
-      "image": "caddie",
+      "id": "chariot",
+      "image": "chariot",
       "at": [1417, 120],
       "anchor": [212, 230],
       "depthRef": 127
@@ -239,7 +239,7 @@
         "at": [1360, 120],
         "lift": 160,
         "scale": 1.1,
-        "on": "caddie",
+        "on": "chariot",
         "standAt": [
           [1205, 120],
           [1360, 200]

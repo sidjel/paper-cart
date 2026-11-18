@@ -37,7 +37,7 @@ describe('double toucher : produit visé', () => {
   });
 });
 
-describe('produits posés ailleurs (table, caddie)', () => {
+describe('produits posés ailleurs (table, chariot)', () => {
   const items = [{ x: 3050, z: 50, loose: true, scanned: false, standAt: [[2900, 50], [3200, 50], [3050, 130]] }, { x: 3380, scanned: false }];
   it('à portée de n’importe quel côté, sans être au pied de l’étagère', () => {
     expect(nearestProduct(items, { x: 2900, z: 50 }, P)).toBe(0); // à gauche

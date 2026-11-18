@@ -1,15 +1,15 @@
-// Le caddie jouable (A8, étape 1/3) : logique pure.
+// Le chariot jouable (A8, étape 1/3) : logique pure.
 // Il suit le héros dans le lieu où il se trouve, en reprenant son chemin (la trace de ses pas) à une
 // distance donnée derrière lui : il passe donc là où le héros est passé, jamais à travers une étagère.
 // Il ne bloque jamais le héros (aucune collision). On peut le garer et le reprendre quand on est à
 // côté. Il ne suit pas le héros d'un lieu à l'autre : en partant, il reste garé là où il était
-// (docs/GAME_DESIGN.md, « Le Caddie jouable »).
+// (docs/GAME_DESIGN.md, « Le Chariot jouable »).
 
 const TRAIL = 48; // points de la trace (tableau fixe, rien n'est créé en jeu)
 const TRAIL_STEP = 8; // distance entre deux points de la trace (px du monde)
 
 // place : id du lieu où il se trouve.
-export function createCaddie(place, x, z) {
+export function createChariot(place, x, z) {
   return {
     place, x, z,
     prevX: x, prevZ: z, // position au pas précédent (affichage lissé)
@@ -28,8 +28,8 @@ function pushTrail(c, x, z) {
   c.trailLen = Math.min(TRAIL, c.trailLen + 1);
 }
 
-// Le héros reprend le caddie : la trace part du caddie et va jusqu'au héros (ils sont à côté).
-export function takeCaddie(c, hero) {
+// Le héros reprend le chariot : la trace part du chariot et va jusqu'au héros (ils sont à côté).
+export function takeChariot(c, hero) {
   c.following = true;
   c.trailLen = 0;
   c.trailHead = -1;
@@ -37,23 +37,23 @@ export function takeCaddie(c, hero) {
   pushTrail(c, hero.x, hero.z);
 }
 
-export function parkCaddie(c) {
+export function parkChariot(c) {
   c.following = false;
 }
 
 // Le héros est-il assez près pour le garer ou le reprendre ? range : px du monde.
-export function nearCaddie(c, hero, place, range) {
+export function nearChariot(c, hero, place, range) {
   return c.place === place && Math.hypot(c.x - hero.x, (c.z - hero.z) * 1.5) <= range;
 }
 
-// Le héros quitte le lieu : le caddie reste là, garé.
-export function leaveCaddie(c) {
+// Le héros quitte le lieu : le chariot reste là, garé.
+export function leaveChariot(c) {
   c.following = false;
 }
 
 // Un pas de jeu. p : { follow (distance derrière le héros, px), ease (part du retard rattrapée par
 // seconde) }. Le point visé est sur la trace, à `follow` du héros en remontant le chemin.
-export function stepCaddie(c, hero, p, dt) {
+export function stepChariot(c, hero, p, dt) {
   c.prevX = c.x;
   c.prevZ = c.z;
   if (!c.following) return;

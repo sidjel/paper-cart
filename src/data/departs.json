@@ -1,5 +1,5 @@
 {
-  "comment": "Points de départ pour tester vite (⚙ → Départ, ou lien ?depart=<id>). Recalculés à chaque chargement à partir du jeu actuel : ils restent valables après une mise à jour (contrairement à une sauvegarde). equip : Scanette et panier déjà pris. met : la rencontre avec le joueur est déjà faite (nom : celui des options). caddie : le caddie remplace le panier (A8, en attendant le comptoir). cards : nombre de cartes déjà dans le panier (« plein » : jusqu'à la capacité). Outil de test, pas un menu du jeu. place : lieu de départ (sinon l'accueil). Lien ?lieu=<id> : commencer dans ce lieu, sans rien d'autre.",
+  "comment": "Points de départ pour tester vite (⚙ → Départ, ou lien ?depart=<id>). Recalculés à chaque chargement à partir du jeu actuel : ils restent valables après une mise à jour (contrairement à une sauvegarde). equip : Scanette et panier déjà pris. met : la rencontre avec le joueur est déjà faite (nom : celui des options). chariot : le chariot remplace le panier (A8, en attendant le comptoir). cards : nombre de cartes déjà dans le panier (« plein » : jusqu'à la capacité). Outil de test, pas un menu du jeu. place : lieu de départ (sinon l'accueil). Lien ?lieu=<id> : commencer dans ce lieu, sans rien d'autre.",
   "departs": [
     {
       "id": "debut",
@@ -42,11 +42,11 @@
       "place": "rayon-2"
     },
     {
-      "id": "caddie",
-      "label": "Avec le caddie (A8), dans le rayon 7, rencontre faite",
+      "id": "chariot",
+      "label": "Avec le chariot (A8), dans le rayon 7, rencontre faite",
       "equip": true,
       "met": true,
-      "caddie": true,
+      "chariot": true,
       "place": "rayon-essai"
     }
   ]

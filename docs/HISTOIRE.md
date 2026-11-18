@@ -43,11 +43,11 @@
 ## La Scanette et la stase des rayons ✅ VALIDÉ
 - On ne dit plus « douchette » : c'est **la Scanette**, le scanner en libre-service des supermarchés. Technologie **propre au magasin** : elle extrait l'**essence** d'un produit en carte.
 - Sur l'étagère, le produit est **figé hors du temps** ; une fois scanné, dans *son* panier, **son évolution commence**.
-- **L'accueil** : plein de Scanettes et de paniers à main en libre-service, côte à côte. Le héros doit prendre une Scanette (**obligatoire**) et un panier. Ni pièce ni jeton : pas de caddie au début.
+- **L'accueil** : plein de Scanettes et de paniers à main en libre-service, côte à côte. Le héros doit prendre une Scanette (**obligatoire**) et un panier. Ni pièce ni jeton : pas de chariot au début.
 - **Elle peut casser** (usure, combat, chute dans un rayon) et devient l'**Extracteur** (« Scanette modifiée ») : réparée, bricolée, plus puissante, elle n'obéit plus tout à fait au magasin. Elle évolue ensuite comme une arme de *Final Fantasy* (Scanette → Extracteur → …).
 - ❓ À DÉFINIR : l'événement qui la casse et quand (Acte I ? avant la Révélation ?) ; qui la modifie (le héros avec du Scotch ? Kévin ? un employé oublié de l'Acte II ?) ; ce que l'Extracteur permet de plus (avec B et C) ; les versions suivantes et leurs noms.
 - ❓ À DÉFINIR : peut-on scanner des êtres vivants ? (piste : les humains donnent leur **carte de fidélité**, qui contient leur essence).
-- ❓ À DÉFINIR : qui donne le **jeton de caddie** (pistes : le Vieux Monsieur juste avant sa mort ; ou à la Caisse Finale on rend son caddie et on récupère sa pièce, comme celle du passeur des morts).
+- ❓ À DÉFINIR : qui donne le **jeton de chariot** (pistes : le Vieux Monsieur juste avant sa mort ; ou à la Caisse Finale on rend son chariot et on récupère sa pièce, comme celle du passeur des morts).
 - Le magasin garde son nom, **Maxi-Gouffre** ✅ (❓ vérifier plus tard la marque « Maxi », chaîne québécoise).
 
 ## Progression en 3 actes
@@ -58,7 +58,7 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - **Acte III — La Caisse Finale** : confrontation avec le Gérant ; sens réel de la sortie ❓ À DÉFINIR.
 
 ## L'accueil, un lieu à part ✅ VALIDÉ (séance 37 ; construction en cours : A6)
-- À terme, distinct du premier rayon : grand hall d'entrée, portes automatiques, **portique de sécurité**, **agent de sécurité**, présentoir de Scanettes et de paniers, **comptoir** d'échange panier → caddie. Un **point de retour** du joueur. (En attendant, l'accueil provisoire reste au début du rayon d'essai.)
+- À terme, distinct du premier rayon : grand hall d'entrée, portes automatiques, **portique de sécurité**, **agent de sécurité**, présentoir de Scanettes et de paniers, **comptoir** d'échange panier → chariot. Un **point de retour** du joueur. (En attendant, l'accueil provisoire reste au début du rayon d'essai.)
 - ❓ À DÉFINIR : c'est en passant le portique que le héros est **scanné par le magasin et aplati** (enregistré comme un article) ; le « bip » du portique serait le **dernier son** dont il se souvient avant son trou de mémoire.
 
 ## L'intro du jeu 🧪 À TESTER (séance 43, textes [TEMP] dans `src/data/intro.json`)
