@@ -18,6 +18,29 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 70 — 18/11/2026 — A7 validée ; séance des entrées
+
+**Demandes de l'auteur** : valider A7, puis la séance des entrées.
+
+**Fait** :
+- **A7 validée** : `215dd8f` (JOURNAL, PROTOTYPES, SUIVI) (`57bd0a4`).
+- **Aides qui suivent l'appareil** : clavier et souris, doigt ou manette. L'aide du bas, l'écran Pause et la touche indiquée sur « Scanner » (« Entrée » ou « A ») changent dès qu'on se sert d'un autre appareil.
+- **Rien de « collé »** : quand le jeu perd le focus ou la page (changement d'onglet, appel), tout est relâché. Au retour, il faut un nouveau geste : une touche gardée enfoncée ne refait plus marcher le héros ; la manette doit revenir au repos, y compris au branchement.
+- **Manette débranchée → pause**, si c'est celle qu'on utilisait.
+- Commit : `a5a393a`.
+
+**Pas fait, en attente de l'auteur** : gestes du navigateur seulement dans la zone de jeu (question ci-dessous).
+
+**Vérifié** : 198 tests de logique et Knip ; 114 essais navigateur (PC et téléphone simulé), dont 4 nouveaux avec une **manette simulée** (le stick fait marcher, Start met en pause, un bouton tenu au branchement ne fait rien, la manette débranchée met en pause) et 1 au clavier. Ce dernier échoue si l'on retire la correction. Captures PC et téléphone simulé, aucune erreur console. **Pas vérifié ici** : une vraie manette, un vrai téléphone.
+
+**À vérifier par l'auteur** : avec une vraie manette sur PC, brancher, marcher, scanner (A), Panier (Y), Start, puis débrancher en marchant (→ pause). Sur PC, changer de fenêtre en gardant une flèche enfoncée : au retour, le héros reste arrêté.
+
+**Décisions prises seul** (détails) : textes des aides manette ; le clavier et la souris partagent les mêmes aides.
+
+**Proposition pour la séance suivante** : finir les gestes du navigateur (selon la réponse), puis l'écran d'erreur qui passe le relais à l'écran de fondu.
+
+---
+
 ## Séance 69 — 18/11/2026 — Règles v3 ; bulle de 6 s au plus
 
 **Demandes de l'auteur** : compléter les règles de la séance 64 avec les nouveautés v3 (documentation seulement) ; clignotement du début validé sur son téléphone ; durée maximum des bulles : choix A (6 s).

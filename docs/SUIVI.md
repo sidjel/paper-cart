@@ -168,6 +168,15 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Durée maximum d'une bulle qui se ferme seule | 69 | ✅ | Choix A de l'auteur : 6 s au plus (`narrator.timedMax`, réglable dans ⚙). Textes importants ouverts jusqu'au geste : à décider lesquels le jour où il y en aura. |
 | Sauvegarde : ne jamais écraser celle d'une version plus récente ; essai « mémoire pleine » | 69 | ❓ | Règles ajoutées (§13) ; la sauvegarde n'est pas encore construite. |
 
+### Séance 70 : la séance des entrées
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Aides à l'écran selon le dernier appareil utilisé | 70 | 👀 | Clavier et souris, doigt ou manette : l'aide du bas, l'écran Pause et la touche du bouton « Scanner » (« Entrée » ou « A ») changent dès qu'on se sert d'un autre appareil. À essayer par l'auteur. |
+| Tout relâché quand le jeu perd le focus ou la page ; nouveau geste exigé au retour | 70 | 👀 | Touches, doigt, manette. Une touche gardée enfoncée ne refait plus marcher le héros ; une manette doit revenir au repos (aussi au branchement : le premier appui qui la réveille ne compte pas). |
+| Manette utilisée débranchée → pause | 70 | 👀 | **Essai sur une vraie manette à faire par l'auteur** (règle : étape validée seulement après cet essai). Essais automatiques avec une manette simulée. |
+| Gestes du navigateur seulement dans la zone de jeu | 70 | ❓ | Pas encore changé : question posée à l'auteur (zoom à deux doigts dans les menus, puis jeu resté zoomé). |
+| Publication : `main` (CLAUDE.md) ou branche de session (cet environnement) | 70 | ❓ | Question posée à l'auteur. |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 
