@@ -53,6 +53,7 @@ export const config = {
   },
   places: {
     fade: 0.25, // changement de lieu : durée du fondu au noir, puis du retour (s)
+    revealHold: 0.3, // début de partie sans intro : noir presque plein tenu ce temps-là avant de s'effacer (s)
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît dans le noir
   },
   intro: {
@@ -328,6 +329,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
   { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
+  { group: 'Caméra', key: 'places.revealHold', label: 'Début sans intro : noir tenu avant le dévoilement', min: 0, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu', min: 0.05, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },

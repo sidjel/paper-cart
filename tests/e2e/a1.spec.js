@@ -554,7 +554,7 @@ test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
 const narr = (page) => page.evaluate(() => window.paperCart.narrator());
 
 test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la bande la complète puis la ferme', async ({ page }, info) => {
-  const band = page.locator('.narrator');
+  const band = page.locator('.narrator:not([hidden])'); // cachée = attribut hidden (elle garde son calque, séance 68)
   const viewW0 = (await page.evaluate(() => window.paperCart.camera())).viewW;
   await expect(band).toBeVisible({ timeout: 4000 });
   const n1 = await narr(page);
@@ -576,8 +576,8 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   await expect(band).toBeHidden();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
   // Première rencontre, graduée : il se parle d'abord à lui-même (pensées, bulle en pointillés)…
-  const bubble = page.locator('.hero-bubble');
-  await expect(page.locator('.hero-bubble.thought')).toBeVisible({ timeout: 4000 });
+  const bubble = page.locator('.hero-bubble:not([hidden])');
+  await expect(page.locator('.hero-bubble.thought:not([hidden])')).toBeVisible({ timeout: 4000 });
   expect((await narr(page)).voice).toBe('pensee');
   expect((await narr(page)).text).toMatch(/parking/);
   await expect.poll(async () => (await narr(page)).shown, { timeout: 5000 }).toBeGreaterThan(40);
@@ -612,12 +612,12 @@ test('A4 : la première rencontre, après la première carte : une conversation 
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.journal())).join(' '), { timeout: 10000 }).toMatch(/pensee: Hum/);
   await expect.poll(async () => (await narr(page)).voice, { timeout: 20000 }).toBe('heros');
   expect(Math.abs((await hero(page)).x - x0)).toBeGreaterThan(50);
-  const bubble = page.locator('.hero-bubble');
+  const bubble = page.locator('.hero-bubble:not([hidden])');
   await expect(bubble).toContainText('Ce bip');
   expect((await hero(page)).away).toBe(false);
   await expect(page.locator('.aside-bar-top')).toBeVisible();
   // Chaque réplique attend un toucher (petit ▾) : elle ne passe pas toute seule.
-  await expect(page.locator('.hero-bubble.tap')).toBeVisible({ timeout: 3000 });
+  await expect(page.locator('.hero-bubble.tap:not([hidden])')).toBeVisible({ timeout: 3000 });
   await page.waitForTimeout(1500);
   await expect(bubble).toContainText('Ce bip');
   await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-rencontre.png` });
@@ -697,7 +697,7 @@ test('A4 : la première rencontre, après la première carte : une conversation 
 
 test('A4 : le premier scan est commenté, même si l’accueil n’est pas fini', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'PC');
-  await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('.narrator:not([hidden])')).toBeVisible({ timeout: 4000 });
   // Marcher jusqu'au pied de l'étagère, sous la banane, et scanner.
   await toBanana(page);
   await page.keyboard.press('Enter');
@@ -712,9 +712,9 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
     window.paperCart.set('narrator.asideGap', 0);
     window.paperCart.set('narrator.breath', 0);
   });
-  await expect(page.locator('.narrator')).toBeVisible({ timeout: 4000 });
-  await page.locator('.narrator').click();
-  await page.locator('.narrator').click();
+  await expect(page.locator('.narrator:not([hidden])')).toBeVisible({ timeout: 4000 });
+  await page.locator('.narrator:not([hidden])').click();
+  await page.locator('.narrator:not([hidden])').click();
   await page.evaluate(() => {
     // sans les premières pensées de l'accueil (éteindre puis rallumer efface la suite en attente)
     window.paperCart.set('narrator.enabled', false);
@@ -723,15 +723,15 @@ test('A4 : inactivité, rien à scanner, et narrateur désactivable', async ({ p
   // Rien à portée : Entrée fait réagir le narrateur.
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await narr(page)).text, { timeout: 3000 }).toMatch(/vide|rien/i);
-  await page.locator('.narrator').click();
-  await page.locator('.narrator').click();
+  await page.locator('.narrator:not([hidden])').click();
+  await page.locator('.narrator:not([hidden])').click();
   await page.keyboard.press('ArrowRight'); // une action : l'inactivité repart de zéro
   // Sans rien faire pendant 5 s (temps de jeu) : la 1re fois, c'est le héros qui parle (aparté).
   await expect.poll(async () => (await narr(page)).voice, { timeout: 15000 }).toBe('heros');
   expect((await narr(page)).text).toMatch(/toujours là|sortie/);
   // Désactivé : la bande disparaît.
   await page.evaluate(() => window.paperCart.set('narrator.enabled', false));
-  await expect(page.locator('.narrator')).toBeHidden();
+  await expect(page.locator('.narrator:not([hidden])')).toBeHidden();
 });
 
 
@@ -880,7 +880,7 @@ test('A5a : Scanette sans panier, le héros s’interroge lui-même (pensée, bu
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await narr(page)).voice, { timeout: 3000 }).toBe('pensee');
   expect((await narr(page)).text).toMatch(/panier/);
-  await expect(page.locator('.hero-bubble.thought')).toBeVisible();
+  await expect(page.locator('.hero-bubble.thought:not([hidden])')).toBeVisible();
   expect((await state(page)).active).toBe(false);
 });
 
@@ -1052,7 +1052,7 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   // Vers la gauche : il lève le bras et parle (bulle au-dessus de lui) ; le héros sursaute et s'arrête.
   await page.keyboard.down('ArrowLeft');
   await expect.poll(said, { timeout: 5000 }).toMatch(/agent: Vous ne pouvez pas ressortir par ici/);
-  await expect(page.locator('.hero-bubble.agent')).toBeVisible();
+  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeVisible();
   await expect(page.locator('.hero-surprise')).toBeVisible(); // « !! »
   expect((await guard()).pose).toBe('stop');
   const frozen = (await hero(page)).x;
@@ -1063,7 +1063,7 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   expect((await hero(page)).x).toBe(frozen);
   await page.keyboard.up('ArrowLeft');
   const t0 = Date.now();
-  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 8000 }); // fermée seule, sans toucher
+  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 8000 }); // fermée seule, sans toucher
   expect(Date.now() - t0).toBeLessThan(7000); // 126 lettres : ≈ 6,3 s depuis son début (2,5 s + 50 ms par lettre)
   await page.keyboard.down('ArrowLeft');
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
@@ -1072,8 +1072,8 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   // Le demi-tour attend que l'agent ait fini de parler.
   const atStop = (await hero(page)).x;
   await page.waitForTimeout(300);
-  if (await page.locator('.hero-bubble.agent').isVisible()) expect((await hero(page)).x).toBeLessThan(atStop + 5);
-  await expect(page.locator('.hero-bubble.agent')).toBeHidden({ timeout: 4000 });
+  if (await page.locator('.hero-bubble.agent:not([hidden])').isVisible()) expect((await hero(page)).x).toBeLessThan(atStop + 5);
+  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 4000 });
   let minX = Infinity;
   let back = false;
   for (let k = 0; k < 60 && !back; k++) {

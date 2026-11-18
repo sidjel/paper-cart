@@ -306,9 +306,10 @@ const say = voices.say;
 // La partie commence (après l'écran titre ou l'intro, passée ou non) : préchauffer les poses du héros et de
 // l'agent pendant que le noir couvre encore la scène (séance 68 : le héros clignait à ses premiers clignements d'yeux).
 sm.onChange((now, before) => {
-  if (now === 'play' && (before === 'intro' || before === 'title')) {
+  if (now === 'play' && (before === 'intro' || before === 'title' || before === 'loading')) {
     sprite.warm(6);
     guard.warm();
+    if (before !== 'intro') places.reveal(); // sans intro : la scène se dévoile depuis le noir (avec l'intro : son propre noir)
   }
 });
 // Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
@@ -816,6 +817,7 @@ function frame(now) {
       onScanEvent(stepScan(scan, stepper.step, config.scan));
     }
     if (walker.moving) hud.playerMoved();
+    places.revealStep(Math.min(dt / 1000, 0.1));
     places.watchExits();
     const sec = Math.min(dt / 1000, 0.1);
     updateIntro(sec); // fondu final de l'intro, s'il est en cours

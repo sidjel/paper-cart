@@ -4,10 +4,15 @@
 
 // Un seul élément : trois arcs dessinés en CSS (l'élément et ses deux pseudo-éléments).
 
+// Séance 68 : l'élément n'est jamais caché (son calque reste en place, déjà préparé) ; au repos il est
+// presque transparent (0,001 : encore dessiné, invisible). Le cacher puis le montrer créait un calque à
+// chaque annonce, et le téléphone redessinait alors la scène (le héros clignotait).
+const IDLE = '0.001';
+
 export function createSpeakerWaves(parent) {
   const el = document.createElement('div');
   el.className = 'speaker-waves';
-  el.hidden = true;
+  el.style.opacity = IDLE;
   parent.appendChild(el);
   let x = 0;
   let y = 0;
@@ -16,7 +21,6 @@ export function createSpeakerWaves(parent) {
     show(sx, sy) {
       x = sx - 40;
       y = sy;
-      el.hidden = false;
     },
     // t : temps de jeu (s) ; still : sans mouvement.
     pulse(t, still) {
@@ -25,7 +29,7 @@ export function createSpeakerWaves(parent) {
       el.style.opacity = still ? 0.85 : 0.55 + 0.4 * Math.abs(Math.sin(t * 7 + 0.6));
     },
     hide() {
-      el.hidden = true;
+      el.style.opacity = IDLE;
     },
   };
 }

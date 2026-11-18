@@ -297,3 +297,47 @@ test('un scan ne crée que la petite carte du Panier', async ({ page }, info) =>
   expect(c.created).toBe(1); // la petite carte du Panier
   expect(c.added).toEqual({ 'panier-grid': 1 });
 });
+
+// Rien n'apparaît à froid au début de la partie (séance 68 : le héros et la bande du haut-parleur
+// clignotaient sur le téléphone). Une fois la scène dévoilée, plus aucun calque n'est créé ni retiré pendant
+// 6 s, alors que le haut-parleur fait son annonce d'arrivée et que le héros cligne des yeux.
+test('début de partie : après l’apparition du hall, aucun calque créé ni retiré (annonce comprise)', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  test.setTimeout(40_000);
+  await page.goto('./');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('DOM.getDocument', { depth: -1 });
+  await cdp.send('LayerTree.enable');
+  let tracking = false;
+  let prev = null;
+  const changes = [];
+  cdp.on('LayerTree.layerTreeDidChange', (e) => {
+    if (!e.layers) return;
+    const cur = new Set(e.layers.map((l) => l.backendNodeId || l.layerId));
+    if (tracking && prev) {
+      for (const id of cur) if (!prev.has(id)) changes.push(['+', id]);
+      for (const id of prev) if (!cur.has(id)) changes.push(['-', id]);
+    }
+    prev = cur;
+  });
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart.state() === 'play');
+  await page.waitForTimeout(700); // noir tenu puis effacé : la scène est dévoilée
+  tracking = true;
+  await page.waitForFunction(() => window.paperCart.journal().length > 0, null, { timeout: 8000 }); // l'annonce d'arrivée
+  await page.waitForTimeout(5000);
+  const names = [];
+  for (const [k, id] of changes) {
+    try {
+      const d = (await cdp.send('DOM.describeNode', { backendNodeId: id })).node;
+      const a = d.attributes ?? [];
+      names.push(`${k}${d.localName}.${a[a.indexOf('class') + 1] ?? ''}`);
+    } catch {
+      names.push(`${k}?`);
+    }
+  }
+  console.log('Calques créés ou retirés après l’apparition :', names.length, names.join(' '));
+  expect(names).toEqual([]);
+});

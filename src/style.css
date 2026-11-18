@@ -18,7 +18,7 @@
 * { box-sizing: border-box; }
 /* Règle posée une fois : un élément caché (attribut hidden) n'est jamais affiché, même si son style
    lui donne un display (cause du panier visible dans la main avant d'être pris, séance 37). */
-[hidden] { display: none !important; }
+[hidden] { display: none !important; } /* sauf la bande du haut-parleur et la bulle du héros (séance 68 : elles gardent leur calque) */
 
 html, body {
   margin: 0;
@@ -121,7 +121,7 @@ html, body {
   font-size: calc(15px * var(--ts, 1));
 }
 #ui > * { pointer-events: auto; }
-#ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner, #ui > .flying-card, #ui > .scan-button { pointer-events: none; }
+#ui > .hint, #ui > .version, #ui > .joystick, #ui > .bench-banner, #ui > .flying-card, #ui > .scan-button, #ui > .place-fade { pointer-events: none; }
 
 button, select {
   font: inherit;
@@ -387,7 +387,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   transition: opacity 0.15s;
   pointer-events: none;
 }
-.scan-marker.visible { opacity: 1; will-change: transform; }
+.scan-marker { will-change: transform; } /* séance 68 : un calque en permanence (il en gagnait et perdait un) */
+.scan-marker.visible { opacity: 1; }
 .scan-laser {
   position: absolute;
   left: 0;
@@ -546,10 +547,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 0 0 0 2px rgb(61 53 42 / 0.6);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s;
+  /* Pas de fondu (séance 68) : un fondu d'opacité crée un calque à part à chaque réplique, et le téléphone
+     redessine alors la scène (le héros et la bande clignotaient au début de la partie). */
   z-index: 20; /* les voix restent sous les menus */
 }
-.narrator[hidden] { display: none; }
+.narrator[hidden] { display: flex !important; opacity: 0.001; pointer-events: none !important; } /* séance 68 : jamais retirée ni tout à fait transparente, pour garder son calque (préparé) */
+.narrator { will-change: transform; } /* un calque à elle, en permanence (elle passe par-dessus la scène) */
 .narrator.visible { opacity: 1; }
 .narrator-tail {
   position: absolute;
@@ -580,10 +583,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 0 0 0 3px var(--paper);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.18s;
+  /* Pas de fondu (séance 68) : voir .narrator. */
   z-index: 21;
 }
-.hero-bubble[hidden] { display: none; }
+.hero-bubble[hidden] { display: block !important; opacity: 0.001; pointer-events: none !important; } /* séance 68 : voir .narrator[hidden] */
+.hero-bubble { will-change: transform; }
 .hero-bubble.visible { opacity: 1; }
 .hero-bubble-text { margin: 0; font-size: calc(15px * var(--ts, 1)); line-height: 1.3; font-style: italic; }
 .hero-bubble-tail {

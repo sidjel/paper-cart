@@ -72,6 +72,7 @@ export function createPlaces(ui, container, game) {
   ui.appendChild(fadeEl);
   let transition = null;
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
+  let revealT = -1; // dévoilement du début de partie sans intro (voir reveal), -1 : aucun
 
   // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
   // héros revient là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti), le
@@ -187,6 +188,26 @@ export function createPlaces(ui, container, game) {
         game.sm.go(view ? 'play' : 'erreur'); // sans lieu : l'écran d'erreur attend « Réessayer »
         if (!view) retryBtn.focus({ preventScroll: true });
       }
+    },
+    // Début de partie sans intro (séance 68) : la scène se dévoile depuis un noir presque plein (0,98 : la
+    // scène se dessine derrière et ses calques animés sont créés avant de se voir), tenu revealHold s, puis
+    // effacé en places.fade s. Rien n'apparaît à froid.
+    reveal() {
+      revealT = 0;
+      fadeEl.hidden = false;
+      fadeEl.style.opacity = '0.98';
+    },
+    // À chaque image de jeu.
+    revealStep(dt) {
+      if (revealT < 0) return;
+      revealT += dt;
+      const p = config.places;
+      const o = revealT < p.revealHold ? 0.98 : 0.98 * (1 - (revealT - p.revealHold) / p.fade);
+      if (o <= 0) {
+        revealT = -1;
+        fadeEl.hidden = true;
+        fadeEl.style.opacity = '0';
+      } else fadeEl.style.opacity = String(o);
     },
     // Tests : prendre une sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
     useExit(id) {
