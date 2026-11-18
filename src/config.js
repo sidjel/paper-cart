@@ -59,6 +59,7 @@ export const config = {
     enabled: true, // texte d'introduction après « Commencer »
     fadeIn: 0.9, // apparition d'une ligne (s)
     fadeOut: 0.7, // disparition d'une ligne (s)
+    endHold: 0.3, // à la fin, le noir reste plein ce temps-là (la scène se prépare derrière, sans se voir) (s)
     endFade: 1.8, // fondu final du noir vers la partie (s)
   },
   carry: {
@@ -277,6 +278,7 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'intro.enabled', label: 'Introduction après « Commencer »', type: 'bool' },
   { group: 'Narrateur', key: 'intro.fadeIn', label: 'Intro : apparition d’une ligne', min: 0.1, max: 3, step: 0.1, unit: 's' },
+  { group: 'Narrateur', key: 'intro.endHold', label: 'Intro : noir plein avant le fondu final', min: 0, max: 1, step: 0.05, unit: 's' },
   { group: 'Narrateur', key: 'intro.endFade', label: 'Intro : fondu final', min: 0.2, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
   {
