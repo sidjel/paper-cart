@@ -92,7 +92,6 @@ export function createGuardWiring(game) {
       const fy = worldToStageY(proj, state.z);
       head.x = fx;
       head.y = fy - HEAD * s;
-      view.poses.tick(); // préchauffage des poses, s'il est en cours
       const p = state.stopT > 0 || game.talking() ? 'stop' : 'idle';
       if (p !== pose) {
         view.poses.show(p === 'stop' ? view.stop : view.idle); // comme le héros : une image montrée, l'autre cachée
@@ -100,8 +99,6 @@ export function createGuardWiring(game) {
       }
       view.box.style.transform = `translate3d(${fx - data.anchor[0]}px, ${fy - data.anchor[1]}px, 0) scale(${s})`;
     },
-    // Préchauffer les poses de l'agent (rien n'apparaît à froid).
-    warm: () => view?.poses.warm(),
     head: () => head, // en coordonnées de la scène
     info: () => (state ? { x: state.x, z: state.z, warned: state.warned, pose } : null),
   };

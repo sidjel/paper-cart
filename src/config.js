@@ -53,15 +53,13 @@ export const config = {
   },
   places: {
     fade: 0.25, // changement de lieu : durée du fondu au noir, puis du retour (s)
-    revealHold: 0.3, // début de partie sans intro : noir presque plein tenu ce temps-là avant de s'effacer (s)
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît dans le noir
   },
   intro: {
     enabled: true, // texte d'introduction après « Commencer »
     fadeIn: 0.9, // apparition d'une ligne (s)
     fadeOut: 0.7, // disparition d'une ligne (s)
-    endHold: 0.3, // à la fin, le noir reste plein ce temps-là (la scène se prépare derrière, sans se voir) (s)
-    endFade: 1.8, // fondu final du noir vers la partie (s)
+    endFade: 1.8, // fondu final du noir vers la partie (s) : fait par l'écran noir des changements de lieu (séance 68)
   },
   carry: {
     panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
@@ -279,7 +277,6 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.voiceVolume', label: 'Narrateur (annonce, bips)', min: 0, max: 1, step: 0.05 },
   { group: 'Narrateur', key: 'intro.enabled', label: 'Introduction après « Commencer »', type: 'bool' },
   { group: 'Narrateur', key: 'intro.fadeIn', label: 'Intro : apparition d’une ligne', min: 0.1, max: 3, step: 0.1, unit: 's' },
-  { group: 'Narrateur', key: 'intro.endHold', label: 'Intro : noir plein avant le fondu final', min: 0, max: 1, step: 0.05, unit: 's' },
   { group: 'Narrateur', key: 'intro.endFade', label: 'Intro : fondu final', min: 0.2, max: 5, step: 0.1, unit: 's' },
   { group: 'Narrateur', key: 'narrator.enabled', label: 'Le narrateur parle', type: 'bool' },
   {
@@ -329,7 +326,6 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.blipEvery', label: 'Petit bip toutes les N lettres (0 = aucun)', min: 0, max: 6, step: 1 },
   { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
-  { group: 'Caméra', key: 'places.revealHold', label: 'Début sans intro : noir tenu avant le dévoilement', min: 0, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu', min: 0.05, max: 1, step: 0.05, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },

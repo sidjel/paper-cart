@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } from '../../src/core/intro.js';
 import lines from '../../src/data/intro.json' with { type: 'json' };
 
-const P = { fadeIn: 1, fadeOut: 1, endHold: 0, endFade: 2 };
+const P = { fadeIn: 1, fadeOut: 1, endFade: 2 };
 const L = [{ text: 'A', hold: 1 }, { text: 'B', hold: 1 }];
 const run = (it, s) => {
   const started = [];
@@ -43,20 +43,5 @@ describe('intro (texte blanc sur noir)', () => {
       expect(typeof l.text).toBe('string');
       expect(l.hold).toBeGreaterThan(0);
     }
-  });
-});
-
-describe('fin de l’intro : le noir reste plein un instant (séance 68)', () => {
-  it('pendant endHold, le noir est plein (la scène se prépare derrière) ; ensuite il s’efface ; puis c’est fini', async () => {
-    const { createIntro, stepIntro, blackOpacity, skipAll } = await import('../../src/core/intro.js');
-    const p = { fadeIn: 1, fadeOut: 1, endHold: 0.3, endFade: 2 };
-    const it = createIntro([{ text: 'a', hold: 1 }]);
-    skipAll(it);
-    stepIntro(it, 0.2, p);
-    expect(blackOpacity(it, p)).toBe(0.98); // presque plein : la scène se dessine derrière, sans se voir
-    stepIntro(it, 0.2, p); // 0,4 s
-    expect(blackOpacity(it, p)).toBeLessThan(0.98);
-    stepIntro(it, 2, p);
-    expect(it.done).toBe(true);
   });
 });

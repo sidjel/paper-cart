@@ -341,3 +341,51 @@ test('début de partie : après l’apparition du hall, aucun calque créé ni r
   console.log('Calques créés ou retirés après l’apparition :', names.length, names.join(' '));
   expect(names).toEqual([]);
 });
+
+// Fin de l'intro (séance 68, cause prouvée par l'auteur : intro désactivée, plus de clignotement). Son écran
+// noir est retiré sous l'écran noir des lieux, déjà plein, qui s'efface ensuite comme après un changement de
+// lieu. Pendant tout ce passage, rien d'autre ne gagne ni ne perd son calque.
+test('fin de l’intro : l’écran noir des lieux prend le relais ; rien d’autre ne change de calque', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  test.setTimeout(60_000);
+  await page.goto('./');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('DOM.getDocument', { depth: -1 });
+  await cdp.send('LayerTree.enable');
+  let tracking = false;
+  let prev = null;
+  const changes = [];
+  cdp.on('LayerTree.layerTreeDidChange', (e) => {
+    if (!e.layers) return;
+    const cur = new Set(e.layers.map((l) => l.backendNodeId || l.layerId));
+    if (tracking && prev) {
+      for (const id of cur) if (!prev.has(id)) changes.push(['+', id]);
+      for (const id of prev) if (!cur.has(id)) changes.push(['-', id]);
+    }
+    prev = cur;
+  });
+  await page.locator('.title-button', { hasText: 'Commencer' }).click();
+  await page.waitForFunction(() => window.paperCart.state() === 'intro');
+  await page.waitForTimeout(1500);
+  tracking = true; // avant la fin de l'intro
+  await page.keyboard.press('Escape'); // passer l'intro
+  await page.waitForFunction(() => window.paperCart.state() === 'play', null, { timeout: 30000 });
+  expect(await page.locator('.place-fade').isVisible()).toBe(true); // le relais : l'écran noir des lieux
+  await page.waitForTimeout(5000); // fondu fini, annonce d'arrivée, clignement des yeux
+  const names = [];
+  for (const [k, id] of changes) {
+    try {
+      const d = (await cdp.send('DOM.describeNode', { backendNodeId: id })).node;
+      const a = d.attributes ?? [];
+      names.push(`${k}${d.localName}.${(a[a.indexOf('class') + 1] ?? '').split(' ')[0]}`);
+    } catch {
+      names.push(`${k}?`);
+    }
+  }
+  console.log('Fin de l’intro, calques :', names.join(' '));
+  const allowed = new Set(['+div.place-fade', '-div.intro', '-div.place-fade']);
+  expect(names.filter((n) => !allowed.has(n))).toEqual([]);
+  await expect(page.locator('.place-fade')).toBeHidden();
+});

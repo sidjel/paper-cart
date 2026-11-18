@@ -72,7 +72,8 @@ export function createPlaces(ui, container, game) {
   ui.appendChild(fadeEl);
   let transition = null;
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
-  let revealT = -1; // dévoilement du début de partie sans intro (voir reveal), -1 : aucun
+  let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
+  let revealFade = 0.25;
 
   // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
   // héros revient là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti), le
@@ -189,20 +190,21 @@ export function createPlaces(ui, container, game) {
         if (!view) retryBtn.focus({ preventScroll: true });
       }
     },
-    // Début de partie sans intro (séance 68) : la scène se dévoile depuis un noir presque plein (0,98 : la
-    // scène se dessine derrière et ses calques animés sont créés avant de se voir), tenu revealHold s, puis
-    // effacé en places.fade s. Rien n'apparaît à froid.
-    reveal() {
+    // Début de partie (séance 68) : la scène se dévoile depuis le noir, avec l'écran noir des changements de
+    // lieu (sa propre couche dès le départ, effacé par son opacité, retiré une fois transparent : il ne fait
+    // pas clignoter). L'intro lui passe le relais (son propre écran noir, retiré, faisait clignoter le héros
+    // et la bande du haut-parleur : test de l'auteur, intro désactivée). fade : durée de l'effacement (s).
+    reveal(fade) {
       revealT = 0;
+      revealFade = fade;
       fadeEl.hidden = false;
-      fadeEl.style.opacity = '0.98';
+      fadeEl.style.opacity = '1';
     },
     // À chaque image de jeu.
     revealStep(dt) {
       if (revealT < 0) return;
       revealT += dt;
-      const p = config.places;
-      const o = revealT < p.revealHold ? 0.98 : 0.98 * (1 - (revealT - p.revealHold) / p.fade);
+      const o = 1 - revealT / revealFade;
       if (o <= 0) {
         revealT = -1;
         fadeEl.hidden = true;

@@ -1,6 +1,6 @@
 // Intro (après « Commencer ») : une ligne de texte à la fois, chacune apparaît en fondu, reste, puis
 // s'efface ; à la fin, l'écran noir s'efface sur le début de la partie. Logique pure, temps du jeu.
-// p : config.intro { fadeIn, fadeOut, endHold, endFade }.
+// p : config.intro { fadeIn, fadeOut, endFade }.
 
 export function createIntro(lines) {
   return { lines, i: 0, t: 0, phase: 'line', done: false, started: -1 };
@@ -18,7 +18,7 @@ export function stepIntro(it, dt, p) {
   if (it.phase === 'line') {
     const total = p.fadeIn + it.lines[it.i].hold + p.fadeOut;
     if (it.t >= total) next(it);
-  } else if (it.phase === 'end' && it.t >= p.endHold + p.endFade) it.done = true;
+  } else if (it.phase === 'end' && it.t >= p.endFade) it.done = true;
   return started;
 }
 
@@ -37,14 +37,10 @@ export function lineOpacity(it, p) {
   return Math.max(0, 1 - (it.t - p.fadeIn - hold) / p.fadeOut);
 }
 
-// Opacité du fond noir : 1 pendant les lignes ; à la fin, encore plein pendant endHold (la partie est déjà
-// dessinée derrière : le téléphone prépare la scène avant qu'elle se voie ; séance 68 : sans cela, le héros
-// clignotait à la première apparition du hall), puis il s'efface sur la partie.
+// Opacité du fond noir : 1 pendant les lignes, puis s'efface sur la partie.
 export function blackOpacity(it, p) {
   if (it.phase === 'line') return 1;
-  // Pendant endHold : presque plein (0,98, invisible à l'œil) : un noir tout à fait opaque empêcherait le
-  // navigateur de dessiner la scène derrière, donc de préparer les poses (séance 68).
-  return Math.max(0, Math.min(0.98, 1 - (it.t - p.endHold) / p.endFade));
+  return Math.max(0, 1 - it.t / p.endFade);
 }
 
 // Toucher, Entrée, A : la ligne suivante tout de suite ; « Passer » : directement la fin.

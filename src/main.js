@@ -175,6 +175,15 @@ function startIntro() {
 // À chaque image, pendant l'intro puis pendant le fondu final (le jeu est déjà lancé derrière).
 function updateIntro(dt) {
   if (!introRun) return;
+  // Relais (séance 68) : l'écran de l'intro n'est retiré que 2 images après l'arrivée de l'écran noir des
+  // lieux, pour que celui-ci soit déjà affiché (sinon, une image sans rien devant la scène).
+  if (introRun.handoff !== undefined) {
+    if (--introRun.handoff <= 0) {
+      introUi.hide();
+      introRun = null;
+    }
+    return;
+  }
   const started = stepIntro(introRun, dt, config.intro);
   if (started >= 0 && introLines[started].sound) audio.play(introLines[started].sound);
   const line = introRun.phase === 'line' ? introLines[introRun.i] : null;
@@ -182,11 +191,8 @@ function updateIntro(dt) {
   if (introRun.phase === 'end' && sm.is('intro')) {
     audio.stopRain();
     audio.setFrozen(false);
-    sm.go('play'); // la partie commence derrière le noir qui s'efface
-  }
-  if (introRun.done) {
-    introUi.hide();
-    introRun = null;
+    sm.go('play'); // l'écran noir des lieux prend le relais, plein (places.reveal) : le retrait de l'intro ne se voit pas
+    introRun.handoff = 2;
   }
 }
 
@@ -303,14 +309,10 @@ const voices = createVoices(uiEl, {
   guardHead: () => guard.head(),
 });
 const say = voices.say;
-// La partie commence (après l'écran titre ou l'intro, passée ou non) : préchauffer les poses du héros et de
-// l'agent pendant que le noir couvre encore la scène (séance 68 : le héros clignait à ses premiers clignements d'yeux).
+// La partie commence (après l'écran titre, ou l'intro passée ou non) : la scène se dévoile depuis l'écran noir
+// des changements de lieu (src/game/places.js, reveal). Avec l'intro, il prend le relais de son noir.
 sm.onChange((now, before) => {
-  if (now === 'play' && (before === 'intro' || before === 'title' || before === 'loading')) {
-    sprite.warm(6);
-    guard.warm();
-    if (before !== 'intro') places.reveal(); // sans intro : la scène se dévoile depuis le noir (avec l'intro : son propre noir)
-  }
+  if (now === 'play' && (before === 'intro' || before === 'title' || before === 'loading')) places.reveal(before === 'intro' ? config.intro.endFade : config.places.fade);
 });
 // Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
 const guardHeadPt = { x: 0, y: 0 };
