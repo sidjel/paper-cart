@@ -194,3 +194,8 @@ Déplacés tels quels depuis `docs/SUIVI.md` à la séance 51, sans rien perdre.
 | Exception de taille pour `style.css` | 53 | ✅ | Approuvée par l'auteur (choix A). |
 | Découpage de `main.js` en 3 étapes | 53 | ✅ | `src/debug/` (mesures, départs), `src/game/places.js`, `src/game/voices.js` ; 1 370 → 932 lignes ; aucun changement de comportement. |
 
+### Séance 67 (A7), validée en séance 70
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A7 (1/2) : rayon 2, deux passages (les ouvertures du rayon 7), arrivée du bon côté | 67 | ✅ | Choix de détail (Claude) : les deux ouvertures déjà dessinées dans l'étagère du rayon 7 servent de passages ; on arrive en face, côté avant du rayon 2. À tester par l'auteur. | **A7 validée par l'auteur (`215dd8f`, séance 70).**
+| A7 (2/2) : échange d'une carte venue de l'autre rayon | 67 | ✅ | Fait : le produit prend la place du produit scanné, sur ce rayon-ci (règle de la séance 63). Son image est préparée et décodée pendant le choix de la carte (règle « rien n'apparaît à froid »). | **A7 validée par l'auteur (`215dd8f`, séance 70).**
