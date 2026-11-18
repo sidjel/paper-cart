@@ -17,6 +17,32 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 68 — 18/11/2026 — Rayon 2 au doigt ; écran titre ; le clignotement du début enfin expliqué
+
+**Demandes de l'auteur** :
+- A7 : ouvertures et panneaux, Départ « Rayon 2 », « Départ » sur l'écran titre (mode dev), plus de passage involontaire en longeant l'étagère, passage au doigt.
+- Le héros et la bande du haut-parleur qui clignotent au tout début.
+
+**Fait (A7, écran titre)** :
+- Le sol se prolonge dans les ouvertures et le passage est au fond : longer l'étagère ne fait plus changer de rayon.
+- Toucher une ouverture envoie au passage.
+- Ouvertures visibles dans le rayon de devant du rayon 2, et panneaux au-dessus des passages.
+- Liste des départs au centre de l'écran titre, défilante.
+
+**Le clignotement du début** :
+- Mes trois premières corrections (noir prolongé, préchauffage des poses, calques des bulles) visaient une mauvaise cause : sans effet sur le téléphone.
+- À la demande de l'auteur, une **investigation différentielle sans rien modifier**. Mesure : la fin du fondu de l'intro et le premier clignement des yeux tombent à moins de 0,5 s l'un de l'autre, donc on ne pouvait pas les distinguer à l'œil. Tests proposés, un seul changement chacun.
+- **Test G de l'auteur : intro désactivée → plus de clignotement.** Cause prouvée : l'écran noir de l'intro, retiré de la page à la fin de son fondu.
+- **Correction (choix 1)** : l'écran noir des changements de lieu, qui ne fait pas clignoter, prend le relais, déjà plein. L'écran de l'intro est retiré dessous, 2 images plus tard, puis le noir s'efface comme après un changement de lieu.
+- **Ménage (choix A)** : noir prolongé et préchauffage retirés ; calques permanents des bulles gardés.
+- La leçon est corrigée (ARCHITECTURE §15).
+
+**Vérifié** : 197 tests de logique, Knip, 107 essais navigateur. Nouvel essai sur toute la fin de l'intro : seuls le noir des lieux (arrivée, puis départ une fois transparent) et l'écran de l'intro (retiré dessous) changent de calque.
+
+**À vérifier par l'auteur** : le début de partie, intro passée et intro vue en entier.
+
+---
+
 ## Séance 67 — 17/11/2026 — Bulles selon le texte, signe d'attente ; A6 validée (temporairement) ; A7 le rayon 2
 
 **Demandes de l'auteur** : continuer (bulles, chargements) ; valider A6 « temporairement, sur le principe » ; lancer A7.
@@ -108,30 +134,5 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Non corrigé (plus risqué)** : la petite carte du Panier, ajoutée à chaque scan dans le panneau caché. Il faudrait des cases préparées d'avance, ce qui touche la liste, les onglets et le choix au clavier. Coût faible : le panneau est caché, rien n'est dessiné.
 
 **Vérifié** : 171 tests de logique, Knip, 92 essais navigateur (PC et téléphone simulé), sans erreur console. Capture du Panier : la carte et son symbole de stade s'affichent bien.
-
----
-
-## Séance 62 — 16/11/2026 — Robustesse des changements de lieu
-
-**Demande de l'auteur** : 7 points (fichier SEANCE_ROBUSTESSE), un commit par point, avant A7. Rien de visible quand tout va bien, jamais d'écran noir bloqué.
-
-**Fait** :
-1. **Un lieu qui ne se charge pas** : retour au lieu de départ, le héros là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti). Annonce [TEMP] « Cher Client, ce rayon est momentanément inaccessible. Merci de votre compréhension. », et l'erreur est notée au diagnostic (F3). Si même le lieu de départ échoue : écran « Réessayer » (doigt, souris, Entrée, manette A), qui ramène au jeu. L'état « transition » se termine toujours.
-2. **`loadImages`** libère ce qu'il avait préparé (mémoire, adresses temporaires, compteurs) avant de relancer l'erreur. Test unitaire : un échec à la 3ᵉ image.
-3. **L'historique des temps d'image** repart de zéro à chaque lieu ; le diagnostic l'indique. Vérifié dans le test de mémoire.
-4. **La règle d'échange du panier** est dans `core/world.js` (`planSwap`, `applySwap`), sans changer le comportement. Tests.
-5. Une question pour l'auteur (ci-dessous).
-6. Une mesure, sans correction (ci-dessous).
-7. **Test de mémoire** : il existait ; ajout du cas avec un échec de chargement au milieu des 5 allers-retours. Images, pixels et écouteurs reviennent exactement au départ ; +12 éléments de page (marge : 30).
-
-**Vérifié** : 171 tests de logique, Knip, 91 essais navigateur (PC et téléphone simulé). Nouveaux essais avec une image bloquée (retour au hall ; écran « Réessayer »).
-
-**Point 6 (mesuré dans le navigateur de test, sans correction)** : oui, il y a un vrai écart à la règle « rien n'est créé pendant le jeu ».
-- À chaque scan, **2 cartes sont construites** : la petite carte du Panier (dans le panneau caché) et la carte qui vole vers le Panier (visible). Cela fait environ 28 éléments.
-- Le texte du haut-parleur **remplace ses morceaux de texte à chaque lettre** (~230 par réplique). Ce ne sont pas des éléments, mais du travail pour le ramasse-miettes.
-- Le test des comptages ne le voit pas : le banc d'essai ne scanne pas.
-- Coût probable : faible pour la carte cachée ; la carte qui vole est construite au moment où elle part, d'où un risque de petit à-coup. À mesurer sur le téléphone (DBG pendant un scan) avant toute correction.
-
-**Point 5, à trancher** : voir les options dans la réponse de la séance et dans SUIVI.
 
 ---

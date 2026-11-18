@@ -2,6 +2,31 @@
 
 Déplacés tels quels depuis `docs/JOURNAL.md` à la séance 51 (le plus récent en haut). Les 5 derniers rapports et le tableau des étapes validées restent dans `docs/JOURNAL.md`.
 
+## Séance 62 — 16/11/2026 — Robustesse des changements de lieu
+
+**Demande de l'auteur** : 7 points (fichier SEANCE_ROBUSTESSE), un commit par point, avant A7. Rien de visible quand tout va bien, jamais d'écran noir bloqué.
+
+**Fait** :
+1. **Un lieu qui ne se charge pas** : retour au lieu de départ, le héros là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti). Annonce [TEMP] « Cher Client, ce rayon est momentanément inaccessible. Merci de votre compréhension. », et l'erreur est notée au diagnostic (F3). Si même le lieu de départ échoue : écran « Réessayer » (doigt, souris, Entrée, manette A), qui ramène au jeu. L'état « transition » se termine toujours.
+2. **`loadImages`** libère ce qu'il avait préparé (mémoire, adresses temporaires, compteurs) avant de relancer l'erreur. Test unitaire : un échec à la 3ᵉ image.
+3. **L'historique des temps d'image** repart de zéro à chaque lieu ; le diagnostic l'indique. Vérifié dans le test de mémoire.
+4. **La règle d'échange du panier** est dans `core/world.js` (`planSwap`, `applySwap`), sans changer le comportement. Tests.
+5. Une question pour l'auteur (ci-dessous).
+6. Une mesure, sans correction (ci-dessous).
+7. **Test de mémoire** : il existait ; ajout du cas avec un échec de chargement au milieu des 5 allers-retours. Images, pixels et écouteurs reviennent exactement au départ ; +12 éléments de page (marge : 30).
+
+**Vérifié** : 171 tests de logique, Knip, 91 essais navigateur (PC et téléphone simulé). Nouveaux essais avec une image bloquée (retour au hall ; écran « Réessayer »).
+
+**Point 6 (mesuré dans le navigateur de test, sans correction)** : oui, il y a un vrai écart à la règle « rien n'est créé pendant le jeu ».
+- À chaque scan, **2 cartes sont construites** : la petite carte du Panier (dans le panneau caché) et la carte qui vole vers le Panier (visible). Cela fait environ 28 éléments.
+- Le texte du haut-parleur **remplace ses morceaux de texte à chaque lettre** (~230 par réplique). Ce ne sont pas des éléments, mais du travail pour le ramasse-miettes.
+- Le test des comptages ne le voit pas : le banc d'essai ne scanne pas.
+- Coût probable : faible pour la carte cachée ; la carte qui vole est construite au moment où elle part, d'où un risque de petit à-coup. À mesurer sur le téléphone (DBG pendant un scan) avant toute correction.
+
+**Point 5, à trancher** : voir les options dans la réponse de la séance et dans SUIVI.
+
+---
+
 ## Séance 61 — 16/11/2026 — Un seul mécanisme de poses ; règle « un personnage = un calque »
 
 **Demande de l'auteur** : l'agent clignote encore. Son diagnostic : le héros a un seul calque et ses poses sont cachées ou montrées à l'intérieur ; l'agent (séance 60) avait un calque par pose, que Chrome ne prépare pas quand il est invisible. Corriger avec le même code que le héros, remplacer l'essai, écrire la règle. Et le demi-tour du héros seulement après la fin de la bulle de l'agent.
