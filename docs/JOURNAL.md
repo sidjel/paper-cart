@@ -18,6 +18,25 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 73 — 18/11/2026 — Le chariot redéfini
+
+**Demandes de l'auteur** :
+- ce que disent les documents sur le chariot (trop peu précis) ;
+- quatre décisions : le nom « chariot » ; poussé par le héros ; persistant d'une pièce à l'autre et en papier 2D ; panier ou chariot, jamais les deux ;
+- il doit avoir une vraie utilité et être fun.
+
+**Fait** (`fea623b`) :
+- « Caddie » devient « chariot » partout : textes du jeu, données, code, documents. Le journal et l'archive gardent l'ancien mot.
+- Les décisions sont notées dans `docs/GAME_DESIGN.md` (section « Le Chariot »). L'essai de la séance 72 (le chariot qui suit derrière) est marqué abandonné ; son code sera remplacé par le chariot poussé.
+
+**Conflit relevé** : « persistant quand il change de pièce » (séance 73) contre « il ne suit pas d'un lieu à l'autre, il reste garé » (séance 50). Question posée.
+
+**Vérifié** : 205 tests de logique, Knip ; 84 essais navigateur (A1, A8, départs, comptages), sans erreur.
+
+**Proposition pour la séance suivante** : le chariot poussé (1/3), selon les réponses.
+
+---
+
 ## Séance 72 — 18/11/2026 — A8 (1/3) : le caddie qui suit
 
 **Demande de l'auteur** : séance suivante. Rappel donné : tester A7 et les commandes sur PC.
