@@ -11,14 +11,14 @@
 
 ## Interface, menus, dialogues ✅ VALIDÉ (séance 64 ; règles de code : `src/ui/CLAUDE.md`)
 - **Un menu ouvert fige le monde derrière** (héros, temps, compteurs de scène, sons du monde), sauf décision contraire notée. Un seul menu à la fois, au plus deux niveaux.
-- **Fermer marche partout pareil** : le bouton qui l'a ouvert, Échap, B à la manette, toucher à côté. La dernière position est gardée ; au clavier et à la manette, la sélection est toujours visible.
-- **Confirmation** (Oui / Non) seulement pour une action **irréversible** (recommencer, écraser, quitter une partie) ; la fermer annule et rend la sélection au bouton qui l'a ouverte.
+- **Fermer marche partout pareil** : le bouton qui l'a ouvert, Échap, B à la manette, toucher à côté (qui **ne valide jamais** une action). À la fermeture, la sélection revient au bouton qui a ouvert (s'il existe encore) ; la dernière position est gardée ; au clavier et à la manette, la sélection est toujours visible.
+- **Confirmation** (Oui / Non) seulement pour une action **irréversible** (recommencer, écraser, quitter une partie) ; la fermer annule.
 - Sur téléphone : boutons importants **à portée de pouce** (bas et côtés) ; aucun texte de menu sous la taille minimale réglée.
-- **Chargements** : jamais d'écran noir muet ; au-delà d'environ 0,3 s, un petit signe d'attente dans le style du jeu ; en cas d'échec, un message clair et « Réessayer ».
+- **Chargements** : jamais d'écran noir muet ; au-delà d'environ 0,3 s, un petit signe d'attente dans le style du jeu, qui ne clignote pas (pas d'apparition trop brève) ; en cas d'échec, un message clair et « Réessayer ».
 - **Une seule voix à la fois.** Une parole déclenchée par le joueur (l'agent qui bloque, un objet examiné) passe avant une remarque d'ambiance, coupée ou mise en attente ; les **moments importants** (apartés, première rencontre) ne sont jamais coupés ni perdus.
 - **Tout texte s'accélère d'un toucher** (touche, bouton) et se ferme d'un second, même geste partout, avec un court délai anti-faux-clic.
-- Une bulle qui se ferme seule reste ouverte **selon la longueur de son texte**, jamais une durée fixe : [TEMP] 2,5 s au moins et environ 50 ms par caractère, réglables dans ⚙.
-- Une bulle **reste dans l'écran**, ne cache pas le visage de celui qui parle, sa pointe tournée vers lui.
+- Une bulle qui se ferme seule reste ouverte **selon la longueur de son texte**, jamais une durée fixe : [TEMP] 2,5 s au moins et environ 50 ms par caractère, réglables dans ⚙ ; avec une **durée maximum** (❓ À DÉFINIR : valeur). Un texte important peut rester ouvert jusqu'au geste du joueur.
+- Une bulle **reste dans l'écran**, ne cache pas le visage de celui qui parle, sa pointe tournée vers lui. Au changement de lieu ou en pause, aucune bulle ne reste accrochée à un élément disparu ni ne reprend de façon incohérente.
 - Le héros n'est figé par une bulle **que si la situation l'impose** (l'agent qui le repousse, une introduction) ; les remarques du narrateur laissent marcher. Les **apartés** gardent leur règle (temps du magasin figé).
 - Les dialogues restent relisibles dans l'historique.
 
