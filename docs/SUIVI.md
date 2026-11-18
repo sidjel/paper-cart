@@ -178,6 +178,14 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Publication : `main` (CLAUDE.md) ou branche de session (cet environnement) | 70 | ✅ | Choix 1 de l'auteur : pousser sur `main`, maintenant et pour les séances suivantes. |
 | **À rappeler à l'auteur** : tester A7 et les entrées sur PC (avec une manette) | 70 | 👀 | L'auteur est sur téléphone (séance 70). Rappeler en début de séance suivante. A7 validée provisoirement en attendant. |
 
+### Séance 72 : A8 (1/3), le caddie qui suit
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| A8 (1/3) : caddie qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | 👀 | Départ de test « caddie » (dernier de la liste). Réglages ⚙ › Caddie (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
+| Garer près d'un produit : le bouton d'action dit « Scanner » | 72 | ❓ | Le scan passe avant. Question posée à l'auteur. |
+| Qui donne le jeton, échange au comptoir (hôtesse) | 72 | ❓ | Étape 2/3, question posée à l'auteur. |
+| Scanner quand le caddie est garé loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question posée à l'auteur. |
+
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
 

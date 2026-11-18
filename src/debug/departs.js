@@ -2,7 +2,7 @@
 // Le jeu se recharge, puis se met dans l'état choisi (data/departs.json). Recalculé à partir du jeu
 // actuel : reste valable après une mise à jour (ce n'est pas une sauvegarde). Sorti de main.js à la séance 54.
 //
-// game : { sm, equipAll(), markSaid(moment), skipArrival(), products(), capacity(), giveCard(indice), refreshCount() }
+// game : { sm, equipAll(), giveCaddie(), markSaid(moment), skipArrival(), products(), capacity(), giveCard(indice), refreshCount() }
 
 import departsFile from '../data/departs.json';
 import { findDepart, cardCount, pickProducts, saidFor } from '../core/departs.js';
@@ -50,6 +50,7 @@ export function createDepartTools(game) {
   function apply(def) {
     game.sm.go('play'); // sans écran titre ni intro
     if (def.equip) game.equipAll();
+    if (def.caddie) game.giveCaddie();
     for (const t of saidFor(def)) game.markSaid(t);
     if (def.equip) game.skipArrival(); // pas d'annonce d'arrivée ni de premières pensées
     // Cartes déjà dans le panier : des produits du rayon, retirés de l'étagère (sans effet de scan).

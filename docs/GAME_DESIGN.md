@@ -56,6 +56,7 @@
 - ❓ À DÉFINIR (séance 50) : plus tard, le joueur trouvera un **plan du magasin** (une affiche ou un dépliant, rangé dans les Objets) qui l'aidera notamment à retrouver son caddie. On dit « **plan** » et non « carte », pour ne pas confondre avec les cartes de jeu.
 - Ne le bloque pas ; pas de physique complexe. Peut être **garé** et **repris** ; change de visuel selon son remplissage ; accueillera plus tard la Glacière.
 - 🧪 À TESTER plus tard : interactions avec le décor (présentoirs, étagères hautes).
+- 🧪 À TESTER (séance 72, étape 1/3) : il roule **derrière le héros, sur son chemin** (il passe où le héros est passé, jamais à travers une étagère), à ~140 px ; aucune collision. **Garer / Reprendre** : le bouton d'action quand rien n'est à scanner ni à prendre (Entrée, A, ou le bouton au doigt). Le menu s'appelle « Caddie ». [TEMP] capacité 12. Obtenu pour l'instant par le départ de test « caddie » seulement.
 
 ## Systèmes repris de l'ancien jeu 🧪 À TESTER (prototype C et suite)
 - **Glacière** : 3 places qui figent l'âge des cartes.

@@ -63,6 +63,13 @@ export const config = {
   },
   carry: {
     panier: 6, // [TEMP] capacité du panier à main (nombre de cartes) — à régler par l'auteur
+    caddie: 12, // [TEMP] capacité du caddie (A8) — à régler par l'auteur
+  },
+  caddie: {
+    follow: 140, // distance à laquelle le caddie suit le héros, sur son chemin (px du monde)
+    ease: 10, // vitesse à laquelle il rattrape son retard (part par seconde)
+    range: 200, // distance pour le garer ou le reprendre (px du monde ; plus que la distance de suivi)
+    size: 0.8, // [TEMP] taille du caddie à côté du héros
   },
   access: {
     textSize: 'normale', // taille du texte de l'interface : petite, normale, grande
@@ -264,6 +271,11 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.hallRain', label: 'Pluie animée du hall', type: 'bool' },
   { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
+  { group: 'Caddie', key: 'carry.caddie', label: 'Capacité du caddie (cartes)', min: 1, max: 40, step: 1 },
+  { group: 'Caddie', key: 'caddie.follow', label: 'Distance de suivi', min: 30, max: 200, step: 5, unit: 'px' },
+  { group: 'Caddie', key: 'caddie.ease', label: 'Souplesse du suivi (rattrapage)', min: 2, max: 30, step: 1 },
+  { group: 'Caddie', key: 'caddie.size', label: 'Taille du caddie', min: 0.4, max: 1.4, step: 0.05 },
+  { group: 'Caddie', key: 'caddie.range', label: 'Portée pour garer ou reprendre', min: 50, max: 350, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
   { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou caddie : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },

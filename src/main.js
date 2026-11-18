@@ -22,6 +22,7 @@ import { createWorld, planSwap, applySwap, swapEntry } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
+import { createCaddieWiring, CADDIE_IMAGE, CADDIE_SIZE } from './game/caddie.js';
 import { createGuardWiring } from './game/guard.js';
 import { exitTarget } from './core/places.js';
 import { quality } from './scene/quality.js';
@@ -70,7 +71,7 @@ window.addEventListener('error', (e) => logError(e.message || String(e.error)));
 window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.reason?.message ?? e.reason}`));
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
-let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust;
+let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust, caddie;
 // Dernière position affichée du personnage (pour placer la poussière d'un pas).
 const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
 const DUST_IMAGE = 'art/placeholder/poussiere.svg';
@@ -206,6 +207,7 @@ let pendingList = null; // productState ou pickupState
 const gear = createGear();
 let pickupState = null; // objets à prendre, visés comme les produits posés ailleurs
 let pickupReach = -1;
+let caddieAction = ''; // 'garer', 'reprendre' ou '' (bouton d'action)
 const BLOCKED_LINE = { sans_scanette: 'sans_scanette', sans_panier: 'sans_panier', plein: 'panier_plein' };
 
 // Action (Entrée, Espace, A, bouton) : prendre ce qui est à portée au présentoir, sinon scanner.
@@ -217,6 +219,11 @@ function tryScan() {
     return;
   }
   const i = nearestProduct(productState, walker, config.scan);
+  if (i < 0 && caddie.toggle()) {
+    audio.play('prise');
+    vibrate('leger');
+    return;
+  }
   if (i < 0) say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
   else tryScanProduct(i);
 }
@@ -357,6 +364,18 @@ function productScales() {
   return m;
 }
 
+// Le caddie remplace le panier (A8 ; point de départ de test, en attendant le comptoir de l'accueil).
+function giveCaddie() {
+  gear.panier = false;
+  gear.caddie = true;
+  sprite.setHeld('panier', false);
+  basketUi.removeObject('panier');
+  basketUi.addObject('caddie');
+  basketUi.setName('Caddie');
+  basketUi.setCapacity(capacity(gear, config.carry));
+  caddie.give();
+}
+
 // Prendre tout ce qui est au présentoir (Scanette, panier), sans marcher : tests et points de départ.
 function equipAll() {
   for (const id of Object.keys(gear)) {
@@ -459,6 +478,7 @@ const diag = measure.diag;
 const departs = createDepartTools({
   sm,
   equipAll: () => equipAll(),
+  giveCaddie: () => giveCaddie(),
   markSaid: (t) => voices.markSaid(t),
   skipArrival: () => voices.skipArrival(),
   products: () => productState,
@@ -736,12 +756,13 @@ function render() {
   shown.x = worldToStageX(proj, x);
   shown.y = worldToStageY(proj, z);
   shown.scale = scaleAt(proj, z);
-  shown.level = actorLevel(depthRefs, z);
+  shown.level = actorLevel(depthRefs, z, caddie.heroNearer(z));
   shown.time = time;
   const emotion = voices.emotion(walker.moving);
   sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
   sprite.setLevel(shown.level);
   guard.render(a);
+  caddie.render(a, depthRefs);
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
   // Au présentoir, ce qu'on peut prendre passe avant les produits.
@@ -752,8 +773,11 @@ function render() {
   if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
   if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, storeTime);
   else products.setMarker(reach, storeTime);
-  if (reach !== highlighted || pk !== pickupReach) {
-    hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : '');
+  // Rien à prendre ni à scanner : garer ou reprendre le caddie, s'il est à côté.
+  const ca = free && pk < 0 && reach < 0 ? caddie.action() : '';
+  if (reach !== highlighted || pk !== pickupReach || ca !== caddieAction) {
+    caddieAction = ca;
+    hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : ca);
     highlighted = reach;
     pickupReach = pk;
   }
@@ -817,6 +841,7 @@ function frame(now) {
         intent.moveZ = 0;
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step);
+      caddie.step(stepper.step);
       guard.step(walker, intent, stepper.step);
       stepPendingScan();
       onScanEvent(stepScan(scan, stepper.step, config.scan));
@@ -851,7 +876,7 @@ const places = createPlaces(uiEl, gameEl, {
   catalog,
   getValue,
   commonImages: () => loadedImages,
-  actors: () => [marker, dust, sprite],
+  actors: () => [marker, dust, sprite, caddie],
   walker: () => walker,
   // On ne quitte un lieu que héros libre : ni scan, ni aparté, ni approche en cours.
   canLeave: () => !scan.active && !heroAside() && pendingScan < 0,
@@ -865,6 +890,7 @@ const places = createPlaces(uiEl, gameEl, {
     pickupState = here.pickups;
     markTaken();
     guard.attach(place, view, proj);
+    caddie.attach(proj);
     ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;
@@ -875,6 +901,7 @@ const places = createPlaces(uiEl, gameEl, {
   },
   onLeaving() {
     marker.hide();
+    caddie.leaving(); // il ne suit pas le héros d'un lieu à l'autre : il reste garé ici
     stage = null;
   },
   // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
@@ -893,6 +920,8 @@ async function start() {
     // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
     ...characterImageEntries(heroData, rasterScale * frontScale).map((e) => ({ ...e, url: BASE + e.url })),
     { id: BASE + DUST_IMAGE, url: BASE + DUST_IMAGE, w: DUST_SIZE[0], h: DUST_SIZE[1], scale: rasterScale * heroData.scale * config.character.dustSize },
+    // Le caddie (A8), préparé à sa taille maximale, tout devant.
+    { id: BASE + CADDIE_IMAGE, url: BASE + CADDIE_IMAGE, w: CADDIE_SIZE[0], h: CADDIE_SIZE[1], scale: rasterScale * frontScale * 1.4 },
     // Produits à scanner (préparés à leur plus grande taille d'affichage).
     ...[...productScales()].map(([id, k]) => {
       const def = catalog.products[id];
@@ -903,6 +932,7 @@ async function start() {
   marker = createTargetMarker(places.backstage);
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
+  caddie = createCaddieWiring({ walker: () => walker, place: () => place.id }, loadedImages.get(BASE + CADDIE_IMAGE), places.backstage);
   await places.load(place.id);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind) });
 
@@ -925,7 +955,7 @@ async function start() {
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
-    if (key === 'carry.panier') basketUi.setCapacity(capacity(gear, config.carry));
+    if (key === 'carry.panier' || key === 'carry.caddie') basketUi.setCapacity(capacity(gear, config.carry));
     if (key === 'narrator.enabled' && !value) voices.silence();
     if (key === 'narrator.asides' && !value) voices.silence(true);
   });
@@ -957,6 +987,7 @@ async function start() {
     version: VERSION,
     state: () => sm.get(),
     guard: () => guard.info(),
+    caddie: () => caddie.info(),
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),

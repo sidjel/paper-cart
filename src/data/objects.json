@@ -6,6 +6,11 @@
       "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits en cartes.",
       "image": "art/placeholder/objets/scanette.svg"
     },
+    "caddie": {
+      "name": "[TEMP] Caddie",
+      "text": "[TEMP] Plus de place que le panier. Il vous suit partout dans le rayon, mais pas d'un rayon à l'autre : garez-le, et n'oubliez pas où.",
+      "image": "art/placeholder/caddie-vide.svg"
+    },
     "panier": {
       "name": "[TEMP] Panier à main",
       "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir.",

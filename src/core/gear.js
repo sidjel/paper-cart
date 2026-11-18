@@ -17,14 +17,16 @@ export function takeItem(gear, pickups, i) {
 }
 
 // Capacité du contenant porté (0 sans contenant). p : config.carry.
+// Le caddie (A8) remplace le panier : il a sa propre capacité.
 export function capacity(gear, p) {
+  if (gear.caddie) return p.caddie;
   return gear.panier ? p.panier : 0;
 }
 
 // Peut-on scanner maintenant ? '' si oui, sinon la raison : 'sans_scanette', 'sans_panier' ou 'plein'.
 export function scanBlocked(gear, cardCount, p) {
   if (!gear.scanette) return 'sans_scanette';
-  if (!gear.panier) return 'sans_panier';
+  if (!gear.panier && !gear.caddie) return 'sans_panier';
   if (cardCount >= capacity(gear, p)) return 'plein';
   return '';
 }

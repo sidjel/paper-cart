@@ -25,6 +25,7 @@ const HELP = {
   pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
 };
 const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
+const LABEL = { scanner: 'Scanner', prendre: 'Prendre', garer: 'Garer', reprendre: 'Reprendre' };
 const KEY = { touch: '', keys: 'Entrée', pad: 'A' };
 
 export function createHud(root, { version, onAction, device, muted }) {
@@ -95,7 +96,7 @@ export function createHud(root, { version, onAction, device, muted }) {
   let shownDevice = device;
   // Texte du bouton d'action : son nom, et la touche qui le déclenche sur l'appareil utilisé.
   function labelAction() {
-    const label = shownAction === 'prendre' ? 'Prendre' : 'Scanner';
+    const label = LABEL[shownAction] ?? 'Scanner';
     const key = KEY[shownDevice];
     scanBtn.replaceChildren(label);
     if (key) {
@@ -130,7 +131,7 @@ export function createHud(root, { version, onAction, device, muted }) {
       hintGone = true;
       hint.classList.add('gone');
     },
-    // Bouton d'action au doigt : 'scanner', 'prendre' ou '' (caché).
+    // Bouton d'action au doigt : 'scanner', 'prendre', 'garer', 'reprendre' ou '' (caché).
     setAction(kind) {
       scanBtn.classList.toggle('visible', kind !== '');
       if (!kind || kind === shownAction) return;

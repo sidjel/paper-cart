@@ -94,6 +94,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     onOpen();
   });
   const count = button.querySelector('.panier-count');
+  let name = 'Panier'; // le menu porte le nom du contenant : « Panier », puis « Caddie » (A8)
 
   const panel = document.createElement('div');
   panel.className = 'panier panel';
@@ -390,6 +391,20 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
       li.append(img, txt);
       objList.appendChild(li);
     },
+    // Le contenant change (le caddie remplace le panier) : nom du menu et du bouton.
+    setName(n) {
+      name = n;
+      button.setAttribute('aria-label', `${n} (I)`);
+      button.title = `${n} (I)`;
+      panel.setAttribute('aria-label', n);
+    },
+    // Un objet n'est plus porté (le panier, rendu contre le caddie).
+    removeObject(id) {
+      const k = owned.indexOf(id);
+      if (k < 0) return;
+      owned.splice(k, 1);
+      objList.children[k]?.remove();
+    },
     setCount(n) {
       setText(count, `${n}/${cap}`);
       button.classList.remove('bump');
@@ -404,7 +419,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     open(onChoose = null) {
       choose = onChoose;
       panel.classList.toggle('choosing', !!choose);
-      title.textContent = choose ? 'Panier plein' : `Panier — ${shown} carte${shown > 1 ? 's' : ''} sur ${cap}`;
+      title.textContent = choose ? `${name} plein` : `${name} — ${shown} carte${shown > 1 ? 's' : ''} sur ${cap}`;
       hint.hidden = !choose;
       hint.textContent = 'Touche une carte pour la reposer et faire de la place, ou ferme pour annuler.';
       showTab(choose ? 'cards' : tab);

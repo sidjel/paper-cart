@@ -47,11 +47,12 @@ describe('retournement de la feuille', () => {
 describe('ordre d’affichage selon la profondeur', () => {
   const refs = [140, 127];
   it('les objets lointains sont dessinés en premier', () => {
-    expect(propLevels(refs)).toEqual([2, 4]);
+    expect(propLevels(refs)).toEqual([3, 6]);
   });
   it('le personnage passe devant ou derrière selon sa profondeur', () => {
-    expect(actorLevel(refs, 50)).toBe(5); // devant les deux
-    expect(actorLevel(refs, 130)).toBe(3); // derrière le caddie, devant le présentoir
+    expect(actorLevel(refs, 50)).toBe(7); // devant les deux
+    expect(actorLevel(refs, 50, true)).toBe(8); // le plus proche des deux personnages, dans la même bande
+    expect(actorLevel(refs, 130)).toBe(4); // derrière le caddie, devant le présentoir
     expect(actorLevel(refs, 200)).toBe(1); // derrière les deux
   });
 });
