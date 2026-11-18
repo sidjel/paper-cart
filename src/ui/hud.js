@@ -16,7 +16,18 @@ function button(label, title, action, onAction) {
   return b;
 }
 
-export function createHud(root, { version, onAction, touch, muted }) {
+// Aides selon le dernier appareil utilisé (src/input/CLAUDE.md) : 'keys' (clavier et souris),
+// 'touch' (doigt) ou 'pad' (manette).
+const HELP = {
+  touch:
+    'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.',
+  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
+  pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
+};
+const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
+const KEY = { touch: '', keys: 'Entrée', pad: 'A' };
+
+export function createHud(root, { version, onAction, device, muted }) {
   const bar = document.createElement('div');
   bar.className = 'hud-bar';
   const soundBtn = button('♪', 'Couper ou remettre le son', 'mute', onAction);
@@ -50,17 +61,12 @@ export function createHud(root, { version, onAction, touch, muted }) {
   resume.addEventListener('click', () => onAction('pause'));
   const help = document.createElement('p');
   help.className = 'help';
-  help.innerHTML = touch
-    ? 'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.'
-    : 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>Manette : stick gauche, A scanner, Y Panier, B retour, Start pause.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche';
   card.append(h, resume, help);
   pause.appendChild(card);
 
   // Bouton « Scanner » : visible seulement quand un produit est à portée (utile surtout au doigt).
   const scanBtn = document.createElement('button');
   scanBtn.className = 'scan-button';
-  scanBtn.innerHTML = touch ? 'Scanner' : 'Scanner <small>Entrée</small>';
-  scanBtn.setAttribute('aria-label', 'Scanner le produit (Entrée, Espace, bouton A)');
   scanBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     scanBtn.blur();
@@ -69,7 +75,6 @@ export function createHud(root, { version, onAction, touch, muted }) {
 
   const hint = document.createElement('div');
   hint.className = 'hint';
-  hint.textContent = touch ? 'Touche le sol pour marcher' : 'ZQSD, flèches ou clic pour marcher';
 
   const rotate = document.createElement('div');
   rotate.className = 'overlay rotate';
@@ -87,6 +92,25 @@ export function createHud(root, { version, onAction, touch, muted }) {
 
   let hintGone = false;
   let shownAction = 'scanner';
+  let shownDevice = device;
+  // Texte du bouton d'action : son nom, et la touche qui le déclenche sur l'appareil utilisé.
+  function labelAction() {
+    const label = shownAction === 'prendre' ? 'Prendre' : 'Scanner';
+    const key = KEY[shownDevice];
+    scanBtn.replaceChildren(label);
+    if (key) {
+      const small = document.createElement('small');
+      small.textContent = key;
+      scanBtn.append(' ', small);
+    }
+    scanBtn.setAttribute('aria-label', `${label} (Entrée, Espace, bouton A)`);
+  }
+  function showDevice() {
+    help.innerHTML = HELP[shownDevice];
+    hint.textContent = HINT[shownDevice];
+    labelAction();
+  }
+  showDevice();
   return {
     bar, // boutons du haut (la bande du narrateur ne passe pas dessous)
     pauseCard: card, // l'écran Pause (l'historique des dialogues s'y ajoute)
@@ -111,9 +135,13 @@ export function createHud(root, { version, onAction, touch, muted }) {
       scanBtn.classList.toggle('visible', kind !== '');
       if (!kind || kind === shownAction) return;
       shownAction = kind;
-      const label = kind === 'prendre' ? 'Prendre' : 'Scanner';
-      scanBtn.innerHTML = touch ? label : `${label} <small>Entrée</small>`;
-      scanBtn.setAttribute('aria-label', `${label} (Entrée, Espace, bouton A)`);
+      labelAction();
+    },
+    // Dernier appareil utilisé : 'keys', 'touch' ou 'pad' (aides à l'écran).
+    setDevice(kind) {
+      if (kind === shownDevice || !HELP[kind]) return;
+      shownDevice = kind;
+      showDevice();
     },
     setMuted(m) {
       soundBtn.classList.toggle('off', m);

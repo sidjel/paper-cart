@@ -82,7 +82,7 @@ const tmpWorld = { x: 0, z: 0 };
 let renderLine = '';
 
 const audio = createAudio(config.audio, song);
-const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, touch, muted: config.audio.muted });
+const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, device: touch ? 'touch' : 'keys', muted: config.audio.muted });
 // Historique des dialogues (Pause → Dialogues), pour relire une réplique passée trop vite.
 const journal = createJournal(hud.pauseCard, config.narrator.logMax, { onFirstButton: () => hud.focusResume() });
 
@@ -482,7 +482,7 @@ function owner() {
 }
 
 function handleAction(action) {
-  voices.acted();
+  if (action !== 'padLost') voices.acted(); // un débranchement n'est pas un geste du joueur
   const who = owner();
   const dir = action === 'up' || action === 'left' ? -1 : 1;
   switch (action) {
@@ -501,6 +501,9 @@ function handleAction(action) {
       if (who === 'bench') measure.cancel();
       else if (who === 'pause') sm.go('play');
       else if (inGame(who)) sm.go('pause');
+      break;
+    case 'padLost': // la manette utilisée est débranchée : pause (src/input/CLAUDE.md)
+      if (inGame(who)) sm.go('pause');
       break;
     case 'settings':
       if (sm.is('menu')) sm.back();
@@ -901,7 +904,7 @@ async function start() {
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
   await places.load(place.id);
-  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag });
+  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind) });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();

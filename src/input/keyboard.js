@@ -27,7 +27,8 @@ const ACTIONS = {
 // Gauche et droite servent aussi dans les menus et les réponses (onglets, choix) : une action à l'appui.
 const SIDE = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down' };
 
-export function createKeyboard(onAction) {
+// onUsed() : le clavier vient de servir (aides à l'écran).
+export function createKeyboard(onAction, onUsed = () => {}) {
   const down = new Set();
 
   function isTyping(e) {
@@ -43,6 +44,7 @@ export function createKeyboard(onAction) {
       if (e.code !== 'Escape') return;
     }
     const action = ACTIONS[e.code];
+    if (action || MOVE.has(e.code)) onUsed();
     // Sur un bouton ou un réglage, Entrée et Espace gardent leur rôle habituel (cliquer, cocher).
     if (action === 'action' && e.target && /^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (action) {
@@ -52,13 +54,14 @@ export function createKeyboard(onAction) {
     }
     if (MOVE.has(e.code) && !isTyping(e)) {
       e.preventDefault();
+      // Seul un nouvel appui compte : une touche gardée enfoncée pendant un relâchement général
+      // (focus perdu, pause) ne refait pas marcher le héros par ses répétitions.
+      if (e.repeat) return;
       down.add(e.code);
-      if (SIDE[e.code] && !e.repeat) onAction(SIDE[e.code]);
+      if (SIDE[e.code]) onAction(SIDE[e.code]);
     }
   });
   window.addEventListener('keyup', (e) => down.delete(e.code));
-  // Fenêtre quittée : on relâche tout, pour éviter une touche « collée ».
-  window.addEventListener('blur', () => down.clear());
 
   const any = (codes) => down.has(codes[0]) || down.has(codes[1]);
 
