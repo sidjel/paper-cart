@@ -143,14 +143,30 @@ export function createPlaces(ui, container, game) {
     }
   }
 
-  // « Réessayer » (écran d'erreur) : on retente le lieu de départ.
+  // « Réessayer » (écran d'erreur) : on retente le lieu de départ. L'écran d'erreur passe le relais à
+  // l'écran de fondu (docs/ARCHITECTURE.md §11) : le noir des lieux, plein, est remis dessous dès l'appui ;
+  // l'écran d'erreur reste devant pendant le chargement (signe d'attente si cela dure), n'est retiré que
+  // le lieu prêt, sur le noir déjà plein, puis la scène se dévoile comme après un changement de lieu.
+  let retrying = false;
   async function retry() {
-    if (errorEl.hidden) return;
-    errorEl.hidden = true;
-    if (await backToStart(null)) {
+    if (errorEl.hidden || retrying) return; // un seul essai à la fois (double appui)
+    retrying = true;
+    retryBtn.disabled = true;
+    fadeEl.style.opacity = '1';
+    fadeEl.hidden = false;
+    const ok = await backToStart(null);
+    retrying = false;
+    retryBtn.disabled = false;
+    if (ok) {
       game.render();
+      errorEl.hidden = true; // dessous, le noir est déjà plein : rien ne clignote
       game.sm.go('play');
-    } else errorEl.hidden = false;
+      revealT = 0; // la scène se dévoile depuis le noir (revealStep, à chaque image de jeu)
+      revealFade = config.places.fade;
+    } else {
+      fadeEl.hidden = true; // toujours sous l'écran d'erreur : invisible
+      retryBtn.focus({ preventScroll: true });
+    }
   }
 
   return {

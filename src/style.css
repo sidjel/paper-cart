@@ -1263,6 +1263,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .place-error[hidden] { display: none; }
 .place-error p { margin: 0; font-size: calc(18px * var(--ts, 1)); }
 .place-error button { font: inherit; font-size: calc(18px * var(--ts, 1)); padding: 12px 28px; border-radius: 10px; border: 2px solid #f3ecdc; background: #2e2820; color: #f3ecdc; }
+.place-error button:disabled { opacity: 0.6; }
 /* Signe d'attente dans le noir d'un changement de lieu (src/game/places.js) : trois points de papier. */
 .place-wait { position: absolute; left: 50%; bottom: 18%; display: flex; gap: 12px; transform: translateX(-50%); }
 .place-wait[hidden] { display: none; }

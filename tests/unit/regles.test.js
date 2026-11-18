@@ -73,6 +73,14 @@ describe('garde-fous : règles du code', () => {
   });
 });
 
+describe('garde-fous : gestes du navigateur (src/input/CLAUDE.md)', () => {
+  it("le zoom du navigateur reste bloqué sur toute la page, et tirer l'écran ne recharge pas (choix A de l'auteur, séance 70)", () => {
+    expect(read('index.html')).toMatch(/<meta name="viewport"[^>]*user-scalable=no/);
+    expect(read('src/style.css')).toMatch(/html, body \{[^}]*overscroll-behavior: none/);
+    expect(read('src/style.css')).toMatch(/#game \{[^}]*touch-action: none/);
+  });
+});
+
 describe('garde-fous : liens entre documents', () => {
   it('l’index « Où sont les règles » de CLAUDE.md cite des fichiers qui existent, et tous les src/*/CLAUDE.md', () => {
     const index = read('CLAUDE.md').split('## Où sont les règles')[1] ?? '';

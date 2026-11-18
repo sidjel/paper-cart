@@ -54,9 +54,21 @@ test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au
   await expect(page.locator('.place-error')).toBeVisible();
   await page.screenshot({ path: 'test-results/captures/robustesse-erreur.png' });
   await page.unroute('**/accueil-fond.svg');
-  await page.locator('.place-error button').click();
+  // Relais (docs/ARCHITECTURE.md §11, séance 70) : au moment où l'écran d'erreur est retiré, l'écran noir
+  // des lieux est déjà là, plein, dessous ; ensuite il s'efface et disparaît.
+  await page.evaluate(() => {
+    const err = document.querySelector('.place-error');
+    const fade = document.querySelector('.place-fade');
+    window.__relay = null;
+    new MutationObserver(() => {
+      if (err.hidden && !window.__relay) window.__relay = { fadeShown: !fade.hidden, opacity: fade.style.opacity };
+    }).observe(err, { attributes: true, attributeFilter: ['hidden'] });
+  });
+  await page.locator('.place-error button').dblclick(); // un double appui ne lance qu'un essai
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'accueil', null, { timeout: 15000 });
   await expect(page.locator('.place-error')).toBeHidden();
+  expect(await page.evaluate(() => window.__relay)).toEqual({ fadeShown: true, opacity: '1' });
+  await expect(page.locator('.place-fade')).toBeHidden(); // puis la scène se dévoile, le noir est retiré
 });
 
 test('un chargement lent : un signe d’attente apparaît dans le noir, puis le lieu s’ouvre', async ({ page }) => {

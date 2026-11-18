@@ -164,7 +164,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Écart | Séance | État | Notes |
 |---|---|---|---|
 | Gestes du navigateur neutralisés partout, pas seulement dans la zone de jeu | 69 | ✅ | Séance 70, choix A : on garde le blocage partout, la règle est adaptée. |
-| L'écran d'erreur ne passe pas le relais à l'écran de fondu | 69 | ❓ | Règle : `docs/ARCHITECTURE.md` §11. À vérifier et corriger dans une séance de code. |
+| L'écran d'erreur ne passe pas le relais à l'écran de fondu | 69 | ✅ | Séance 71 : à « Réessayer », le noir des lieux est remis plein sous l'écran d'erreur ; celui-ci reste devant pendant le chargement, n'est retiré que le lieu prêt, puis la scène se dévoile. Un double appui ne lance qu'un essai. Essai automatique (échoue sans la correction). L'écran « Le jeu n'a pas pu démarrer » n'a rien dessous ni de sortie : pas concerné. |
 | Durée maximum d'une bulle qui se ferme seule | 69 | ✅ | Choix A de l'auteur : 6 s au plus (`narrator.timedMax`, réglable dans ⚙). Textes importants ouverts jusqu'au geste : à décider lesquels le jour où il y en aura. |
 | Sauvegarde : ne jamais écraser celle d'une version plus récente ; essai « mémoire pleine » | 69 | ❓ | Règles ajoutées (§13) ; la sauvegarde n'est pas encore construite. |
 
