@@ -10,7 +10,28 @@
 export function createPoses(images, parent, [w, h], className) {
   const els = new Map(); // une image par source distincte
   let shown = null;
+  let warming = 0; // images restantes du préchauffage
   return {
+    // Préchauffage (séance 68, règle « rien n'apparaît à froid ») : pendant quelques images, toutes les poses
+    // sont montrées, presque transparentes, pour que le téléphone les prépare toutes ; sinon chaque pose
+    // montrée pour la première fois manquait une image (le héros clignait à ses premiers clignements d'yeux).
+    warm(frames = 3) {
+      warming = frames;
+      for (const el of els.values()) {
+        if (el === shown) continue;
+        el.style.opacity = '0.01';
+        el.hidden = false;
+      }
+    },
+    // À chaque image affichée : termine le préchauffage quand il est fini.
+    tick() {
+      if (warming <= 0 || --warming > 0) return;
+      for (const el of els.values()) {
+        if (el === shown) continue;
+        el.hidden = true;
+        el.style.opacity = '';
+      }
+    },
     // L'élément d'une pose (préparé au chargement, caché).
     el(url) {
       if (!els.has(url)) {
@@ -31,6 +52,7 @@ export function createPoses(images, parent, [w, h], className) {
       if (el === shown) return false;
       if (shown) shown.hidden = true;
       el.hidden = false;
+      el.style.opacity = ''; // (si elle était en préchauffage)
       shown = el;
       return true;
     },

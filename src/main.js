@@ -303,6 +303,14 @@ const voices = createVoices(uiEl, {
   guardHead: () => guard.head(),
 });
 const say = voices.say;
+// La partie commence (après l'écran titre ou l'intro, passée ou non) : préchauffer les poses du héros et de
+// l'agent pendant que le noir couvre encore la scène (séance 68 : le héros clignait à ses premiers clignements d'yeux).
+sm.onChange((now, before) => {
+  if (now === 'play' && (before === 'intro' || before === 'title')) {
+    sprite.warm(6);
+    guard.warm();
+  }
+});
 // Agent de sécurité du hall (src/game/guard.js) : il barre les portiques de sortie.
 const guardHeadPt = { x: 0, y: 0 };
 const guard = createGuardWiring({

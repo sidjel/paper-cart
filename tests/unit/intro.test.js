@@ -53,9 +53,9 @@ describe('fin de l’intro : le noir reste plein un instant (séance 68)', () =>
     const it = createIntro([{ text: 'a', hold: 1 }]);
     skipAll(it);
     stepIntro(it, 0.2, p);
-    expect(blackOpacity(it, p)).toBe(1);
+    expect(blackOpacity(it, p)).toBe(0.98); // presque plein : la scène se dessine derrière, sans se voir
     stepIntro(it, 0.2, p); // 0,4 s
-    expect(blackOpacity(it, p)).toBeLessThan(1);
+    expect(blackOpacity(it, p)).toBeLessThan(0.98);
     stepIntro(it, 2, p);
     expect(it.done).toBe(true);
   });

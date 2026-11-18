@@ -42,7 +42,9 @@ export function lineOpacity(it, p) {
 // clignotait à la première apparition du hall), puis il s'efface sur la partie.
 export function blackOpacity(it, p) {
   if (it.phase === 'line') return 1;
-  return Math.max(0, Math.min(1, 1 - (it.t - p.endHold) / p.endFade));
+  // Pendant endHold : presque plein (0,98, invisible à l'œil) : un noir tout à fait opaque empêcherait le
+  // navigateur de dessiner la scène derrière, donc de préparer les poses (séance 68).
+  return Math.max(0, Math.min(0.98, 1 - (it.t - p.endHold) / p.endFade));
 }
 
 // Toucher, Entrée, A : la ligne suivante tout de suite ; « Passer » : directement la fin.

@@ -206,6 +206,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
     const frame = anim.els[i];
+    poses.tick(); // préchauffage des poses, s'il est en cours
     if (poses.show(frame)) stats.frameChanges++;
     placeHeld(anim.srcs[i], anim.away);
 
@@ -268,5 +269,5 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     to.appendChild(root);
   }
 
-  return { el: root, shadowEl: shadow, render, setLevel, setHeld, mount, stats };
+  return { el: root, shadowEl: shadow, render, setLevel, setHeld, mount, stats, warm: (n) => poses.warm(n) };
 }
