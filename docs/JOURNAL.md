@@ -18,6 +18,33 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 72 — 18/11/2026 — A8 (1/3) : le caddie qui suit
+
+**Demande de l'auteur** : séance suivante. Rappel donné : tester A7 et les commandes sur PC.
+
+**Fait** (`9a78d12`) :
+- **Le caddie roule derrière le héros, sur son chemin.** Il passe là où le héros est passé et contourne les présentoirs avec lui ; il ne le bloque jamais.
+- **Garer / Reprendre** : le bouton d'action, quand rien n'est à scanner ni à prendre (Entrée, A, ou le bouton au doigt).
+- **Il ne change pas de lieu** : en partant, il reste garé là où il était, et on le retrouve au retour.
+- Le menu s'appelle « Caddie » (0/12). Image : le caddie du décor, vidé.
+- Ordre d'affichage : le héros et le caddie passent l'un devant l'autre selon leur profondeur.
+- Pour l'instant, on l'obtient seulement par le **départ de test « caddie »** (dernier de la liste).
+- Réglages : ⚙ › Caddie (capacité, distance de suivi, souplesse, portée pour garer, taille).
+
+**Décisions prises seul** (détails) :
+- garer avec le bouton d'action, le scan passant avant ;
+- distance de suivi 140 px ;
+- taille 0,8 ;
+- l'icône du bouton reste le panier rouge.
+
+**Vérifié** : 205 tests de logique, dont 6 nouveaux (le suivi sur le chemin, le demi-tour, garer et reprendre, la capacité) ; Knip. 116 essais navigateur (PC et téléphone simulé), dont 2 nouveaux : il suit, se gare, reste garé, se reprend ; il reste dans le rayon quand on va dans le hall. Comptages dans les limites, aucune erreur console. **Pas vérifié** : la fluidité sur le téléphone (une image de plus qui bouge).
+
+**À vérifier par l'auteur** : le départ « caddie ». Le suivi est-il agréable (distance, souplesse) ? Garer et reprendre se trouvent-ils facilement ?
+
+**Proposition pour la séance suivante** : A8 (2/3), le jeton et l'échange au comptoir, selon les réponses.
+
+---
+
 ## Séance 71 — 18/11/2026 — Gestes du navigateur ; l'écran d'erreur passe le relais
 
 **Demandes de l'auteur** : régler les gestes du navigateur selon le choix A ; l'écran d'erreur passe le relais à l'écran de fondu (règle de `docs/ARCHITECTURE.md` §11).
