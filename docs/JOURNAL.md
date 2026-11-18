@@ -17,6 +17,23 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 69 — 18/11/2026 — Règles v3 ; bulle de 6 s au plus
+
+**Demandes de l'auteur** : compléter les règles de la séance 64 avec les nouveautés v3 (documentation seulement) ; clignotement du début validé sur son téléphone ; durée maximum des bulles : choix A (6 s).
+
+**Fait** :
+- Règles (`a699216`) : conflits entre règles (`CLAUDE.md`), écran de fondu unique (`docs/ARCHITECTURE.md` §11), précisions scène, entrées, interface (`docs/GAME_DESIGN.md`), sauvegarde (§13), profils (§14), leçons. Aucune contradiction trouvée.
+- Bulle qui se ferme seule : 6 s au plus (`narrator.timedMax`, ⚙ › Narrateur) (`afa1c12`).
+- SUIVI : clignotement ✅ ; écarts entre règles et code notés (zoom bloqué sur toute la page, écran d'erreur sans relais, sauvegarde pas encore construite).
+
+**Vérifié** : tests automatiques (198) et tests dans le navigateur (PC et téléphone simulé, 107) verts. Rien de visible ne change aujourd'hui (répliques courtes). À vérifier par l'auteur : rien de neuf.
+
+**Proposition pour la séance suivante** : validation d'A7 (rayon 2, passages, échange de carte), puis la séance des entrées (manette, gestes du navigateur seulement dans la zone de jeu).
+
+Lien : https://sidjel.github.io/paper-cart/?v=afa1c12
+
+---
+
 ## Séance 68 — 18/11/2026 — Rayon 2 au doigt ; écran titre ; le clignotement du début enfin expliqué
 
 **Demandes de l'auteur** :
