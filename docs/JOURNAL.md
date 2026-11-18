@@ -12,7 +12,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 | A4 — le narrateur, les apartés et la première rencontre | `c32eedd` (« A4 validée : c32eedd ») — dernière version avant le début d'A6 | 15/11/2026 |
 | A5 — Scanette et panier à main | `c32eedd` (« A5 validée : c32eedd ») — dernière version avant le début d'A6 | 15/11/2026 |
 | A6 — l'accueil (hall, agent de sécurité, portiques, pluie) | `379f554` (« A6 validée : 379f554 ») — **validation temporaire, sur le principe** : l'auteur y reviendra | 17/11/2026 |
-| A7 — le deuxième rayon (deux passages, arrivée du bon côté, échange d'une carte venue de l'autre rayon) | `215dd8f` (« A7 validée : 215dd8f ») — dernière version avant la séance des entrées | 18/11/2026 |
+| A7 — le deuxième rayon (deux passages, arrivée du bon côté, échange d'une carte venue de l'autre rayon) | `215dd8f` (« A7 validée : 215dd8f ») — **validation provisoire** (l'auteur la testera plus tard) ; dernière version avant la séance des entrées | 18/11/2026 |
 
 ---
 
@@ -37,7 +37,9 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 **Décisions prises seul** (détails) : textes des aides manette ; le clavier et la souris partagent les mêmes aides.
 
-**Proposition pour la séance suivante** : finir les gestes du navigateur (selon la réponse), puis l'écran d'erreur qui passe le relais à l'écran de fondu.
+**Réponses de l'auteur** : zoom bloqué partout (choix A, règle adaptée) ; pousser sur `main` (choix 1) ; A7 validée provisoirement ; tests sur PC plus tard (**à lui rappeler**).
+
+**Proposition pour la séance suivante** : l'écran d'erreur qui passe le relais à l'écran de fondu.
 
 ---
 
