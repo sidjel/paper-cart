@@ -18,6 +18,27 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 71 — 18/11/2026 — Gestes du navigateur ; l'écran d'erreur passe le relais
+
+**Demandes de l'auteur** : régler les gestes du navigateur selon le choix A ; l'écran d'erreur passe le relais à l'écran de fondu (règle de `docs/ARCHITECTURE.md` §11).
+
+**Fait** (`1d84610`) :
+- **Gestes du navigateur** : rien à changer dans le jeu (zoom déjà bloqué partout). Un garde-fou vérifie maintenant à chaque `npm test` que le zoom reste bloqué, que tirer l'écran ne recharge pas et que la zone de jeu ignore les gestes.
+- **Écran d'erreur** (« Impossible de charger ce lieu · Réessayer ») :
+  - à l'appui, le noir des changements de lieu est remis, plein, dessous ;
+  - l'écran d'erreur reste devant pendant le chargement et n'est retiré que le lieu prêt ;
+  - la scène se dévoile ensuite comme après un changement de lieu, au lieu d'apparaître d'un coup ;
+  - un double appui ne lance qu'un essai.
+- L'écran « Le jeu n'a pas pu démarrer » n'est pas concerné : il n'a rien dessous et pas de sortie.
+
+**Vérifié** : 199 tests de logique et Knip ; 114 essais navigateur (PC et téléphone simulé), sans erreur console. L'essai « Réessayer » contrôle qu'au retrait de l'écran d'erreur, le noir est déjà plein dessous ; il échoue sans la correction. **Pas vérifiable ici** : l'absence de clignotement à l'œil. L'écran n'apparaît que si le chargement du lieu échoue deux fois, donc presque jamais en jouant.
+
+**À vérifier par l'auteur** : rien de neuf à l'écran. **Rappel** : tester A7 et les commandes (séance 70) sur PC, avec une manette si possible.
+
+**Proposition pour la séance suivante** : après ce test sur PC, valider définitivement A7 ou noter tes retours.
+
+---
+
 ## Séance 70 — 18/11/2026 — A7 validée ; séance des entrées
 
 **Demandes de l'auteur** : valider A7, puis la séance des entrées.
