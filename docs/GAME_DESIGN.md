@@ -51,14 +51,14 @@
 - Dehors : parking de nuit sous la pluie ; tapis mouillé. ✅ (séance 58) Le héros sursaute (« !! ») quand l'agent l'interpelle, puis pense « Hum… étrange… ». L'hôtesse du comptoir viendra avec A8.
 
 ## Le Chariot (A8)
-- ✅ VALIDÉ (séance 73) : il s'appelle **chariot** dans le jeu et les documents (plus « caddie »). **L'un ou l'autre** : panier ou chariot, jamais les deux ; le chariot remplace le panier (échange au comptoir de l'accueil).
-- ✅ VALIDÉ (séance 73) : **poussé par le héros**, en **papier 2D comme lui**. Il doit avoir une **vraie utilité** et être **agréable et fun à jouer**, pas seulement suivre (l'essai de la séance 72, chariot qui suit derrière, est abandonné).
-- ✅ VALIDÉ (séance 74, choix A) : **poussé**, il passe les portes avec le héros ; **lâché**, il reste dans sa pièce (le joueur en est responsable).
-- ✅ VALIDÉ (séance 74, choix A) : **lourd** : démarre et freine plus lentement que le héros seul, dérape un peu au demi-tour, grince ; il se retourne comme une feuille avec le héros.
-- ✅ VALIDÉ (séance 74, choix A, B et C) : ses utilités, chacune à son prototype : **A, explorer** (prototype A : l'élan renverse des piles de cartons, on monte dessus pour une étagère haute, lâché il roule seul) ; **B, garde-manger** (prototype B, quand les cartes pourriront : le rythme de pourriture dépend de lui et de l'endroit où il est garé) ; **C, allié en combat** (prototype B : il charge, il abrite).
-- ❓ À DÉFINIR (séance 50) : plus tard, un **plan du magasin** (affiche ou dépliant, dans les Objets) aidera à retrouver son chariot. On dit « **plan** » et non « carte ».
-- ✅ (séance 50) Ne le bloque pas ; pas de physique complexe. Peut être **garé** et **repris** ; change de visuel selon son remplissage ; accueillera plus tard la Glacière. 🧪 Plus tard : interactions avec le décor (présentoirs, étagères hautes). [TEMP] capacité 12.
-- 🧪 À TESTER (séance 74, étape 1) : poussé devant le héros (Lâcher / Pousser : bouton d'action quand rien n'est à scanner) ; il bute contre le décor ; grince au demi-tour. Pas encore : héros penché (dessin), élan, cartons, comptoir.
+- ✅ (séances 73-74) Nom **chariot** ; **panier ou chariot**, jamais les deux. **Poussé** devant le héros, en papier 2D comme lui ; **lourd** (démarre et freine lentement, dérape au demi-tour, grince, se retourne comme une feuille). Poussé, il passe les portes ; lâché, il reste dans sa pièce. Vraie utilité, fun à jouer.
+- ✅ (séance 74) Utilités : **explorer** (prototype A) ; **garde-manger** (prototype B : sa pourriture dépend de lui et d'où il est garé) ; **allié en combat** (prototype B : il charge, il abrite).
+- ✅ (séance 75) Explorer, d'abord : **l'élan renverse une pile de cartons** qui cache un recoin (produit rare), et **on monte sur le chariot** pour une étagère haute.
+- ✅ (séance 75) Lâcher / pousser **aussi près d'un produit** : double toucher sur le chariot, R au clavier, X à la manette. Scanner loin du chariot : **pas trop loin** (❓ distance exacte).
+- ✅ (séance 75) L'**hôtesse** du comptoir donne le chariot **contre une monnaie d'échange trouvée quelque part** (❓ laquelle). Elle est **trop souriante, récite des slogans, ne cligne jamais des yeux**.
+- ✅ (séance 75) **Roue folle** : en poussant de côté, il tire vers le fond ; réglable (⚙, 0 = réparée). L'histoire permettra de **la réparer** (❓ comment).
+- ✅ (séance 75) Le haut-parleur le commente, rarement : on le prend, on le lâche, il cogne trop, on l'oublie dans une autre pièce. Le héros **pousse à bras tendus** (pose [TEMP]). **Le chariot se remplit** : une silhouette de papier par carte, qui s'empilent jusqu'à déborder.
+- ✅ (séance 50) Garé et repris ; accueillera la Glacière. ❓ Un **plan du magasin** (Objets) aidera à le retrouver. [TEMP] capacité 12.
 
 ## Systèmes repris de l'ancien jeu 🧪 À TESTER (prototype C et suite)
 - **Glacière** : 3 places qui figent l'âge des cartes.

@@ -207,6 +207,7 @@ let pendingList = null; // productState ou pickupState
 const gear = createGear();
 let pickupState = null; // objets à prendre, visés comme les produits posés ailleurs
 let pickupReach = -1;
+let shownPush = false; // le héros est montré en train de pousser
 let chariotAction = ''; // 'pousser', 'lacher' ou '' (bouton d'action)
 const BLOCKED_LINE = { sans_scanette: 'sans_scanette', sans_panier: 'sans_panier', plein: 'panier_plein' };
 
@@ -219,13 +220,19 @@ function tryScan() {
     return;
   }
   const i = nearestProduct(productState, walker, config.scan);
-  if (i < 0 && chariot.toggle()) {
-    audio.play('prise');
-    vibrate('leger');
-    return;
-  }
+  if (i < 0 && toggleChariot()) return;
   if (i < 0) say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
   else tryScanProduct(i);
+}
+
+// Lâcher ou pousser le chariot, s'il est à côté (bouton d'action loin des produits, R, X, double toucher).
+function toggleChariot() {
+  const a = chariot.toggle();
+  if (!a) return '';
+  audio.play('prise');
+  vibrate('leger');
+  say(a === 'lacher' ? 'chariot_lache' : 'chariot_pris');
+  return a;
 }
 
 // Scanner seulement avec une Scanette et de la place dans le panier (sinon, le haut-parleur explique).
@@ -567,6 +574,9 @@ function handleAction(action) {
       else if (who === 'play') tryScan();
       else if (who === 'erreur') places.retry(); // manette (A), Entrée : « Réessayer »
       break;
+    case 'chariot':
+      if (who === 'play' && !scan.active) toggleChariot();
+      break;
     case 'choice1':
     case 'choice2':
       if (who === 'choice') voices.answer(action === 'choice1' ? 0 : 1);
@@ -701,6 +711,12 @@ function onDoubleTap(cx, cy) {
   stage.clientToStage(cx, cy, tmpStage);
   const wx = stageToWorldX(proj, tmpStage.x);
   const margin = config.input.doubleTapMargin;
+  // Le chariot, s'il est à portée : le lâcher ou le pousser (choix 1A de l'auteur, séance 75).
+  if (chariot.hit(tmpStage.x, tmpStage.y, margin) && chariot.action()) {
+    clearTarget(walker); // le premier toucher ne l'envoie pas marcher dans le chariot
+    toggleChariot();
+    return;
+  }
   // D'abord le présentoir de l'accueil (si l'on touche une Scanette ou un panier pas encore pris).
   let list = pickupState;
   let i = pickTapped(pickupState, tmpStage.x, tmpStage.y, wx, margin, config.scan);
@@ -763,6 +779,13 @@ function render() {
   sprite.setLevel(shown.level);
   guard.render(a);
   chariot.render(a, depthRefs);
+  // Le héros pousse : ses deux bras tendus vers la poignée, la Scanette rangée (sauf pendant un scan).
+  const pushing = chariot.pushing && !scan.active;
+  if (pushing !== shownPush) {
+    shownPush = pushing;
+    sprite.setHeld('chariot', pushing);
+    if (gear.scanette) sprite.setHeld('scanette', !pushing);
+  }
   dust.update(time);
   // Scanner : produit à portée mis en évidence, effets du scan, carte qui file dans le Panier.
   // Au présentoir, ce qu'on peut prendre passe avant les produits.
@@ -934,7 +957,7 @@ async function start() {
   marker = createTargetMarker(places.backstage);
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
-  chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
+  chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince'), onBumps: () => say('chariot_cogne'), onForgot: () => say('chariot_oublie') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind) });
 

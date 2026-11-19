@@ -5,10 +5,11 @@
 // autour du héros (largeur qui passe par une tranche fine). Rangé en profondeur comme un personnage ;
 // à égalité avec le héros (poussé), le héros passe devant.
 //
-// game : { walker(), place() → id du lieu affiché, onTurn() → il grince }
+// game : { walker(), place() → id du lieu affiché, onTurn() → il grince, onBumps() → il cogne trop,
+//          onForgot() → le héros a changé de lieu sans lui }
 
 import { config } from '../config.js';
-import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot } from '../core/chariot.js';
+import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift } from '../core/chariot.js';
 import { worldToStageX, worldToStageY, scaleAt } from '../scene/projection.js';
 import { actorLevel } from '../scene/depth.js';
 
@@ -31,7 +32,9 @@ export function createChariotWiring(game, image, parent) {
   parent.appendChild(el);
   let proj = null;
   let shownHere = false;
+  let lastPlace = null; // lieu d'où vient le héros (chariot oublié derrière lui ?)
   let lastLevel = -1;
+  const box = { x: 0, y: 0, s: 1 }; // dernière position affichée (pour le double toucher)
   const show = () => {
     shownHere = state !== null && state.place === game.place();
     if (el.hidden === shownHere) el.hidden = !shownHere;
@@ -51,6 +54,7 @@ export function createChariotWiring(game, image, parent) {
       const w = game.walker();
       state = createChariot(game.place(), w.x + config.chariot.offset, w.z);
       pushChariot(state, w);
+      lastPlace = game.place();
       show();
     },
     // Un lieu vient d'être construit.
@@ -61,6 +65,8 @@ export function createChariotWiring(game, image, parent) {
     // Le héros vient d'être posé dans le nouveau lieu : poussé, le chariot arrive avec lui.
     arrived() {
       if (state) arriveChariot(state, game.place(), game.walker(), config.chariot);
+      if (state && !state.pushed && state.place === lastPlace && lastPlace !== game.place()) game.onForgot();
+      lastPlace = game.place();
       show();
     },
     // Bouton d'action : 'lacher', 'pousser' ou '' (rien à faire avec le chariot ici).
@@ -82,7 +88,9 @@ export function createChariotWiring(game, image, parent) {
     // Après le pas du héros : le chariot bute contre le décor, puis suit.
     step(mask, dt) {
       if (!state || !shownHere) return;
-      bump(state, game.walker(), mask, config.chariot);
+      const w = game.walker();
+      wheelDrift(state, w, mask, config.chariot, config.walk.maxSpeed * config.chariot.speed, dt);
+      if (noteBump(state, bump(state, w, mask, config.chariot), config.chariot, dt) === 'cogne') game.onBumps();
       if (stepChariot(state, game.walker(), config.chariot, dt) === 'tourne') game.onTurn();
     },
     // Le héros est-il plus proche que le chariot (il passe alors devant lui, dans une même bande) ?
@@ -97,6 +105,9 @@ export function createChariotWiring(game, image, parent) {
       const s = scaleAt(proj, z) * config.chariot.size;
       const fx = worldToStageX(proj, x);
       const fy = worldToStageY(proj, z);
+      box.x = fx;
+      box.y = fy;
+      box.s = s;
       // Poignée vers le héros (l'image l'a à gauche) ; en se retournant, la feuille passe par sa tranche.
       const sx = Math.sign(side || 1) * Math.max(Math.abs(side), config.character.edgeThickness);
       el.style.transform = `translate3d(${fx - ANCHOR[0]}px, ${fy - ANCHOR[1]}px, 0) scale(${s * sx}, ${s})`;
@@ -105,6 +116,12 @@ export function createChariotWiring(game, image, parent) {
         el.style.zIndex = level;
         lastLevel = level;
       }
+    },
+    // Double toucher (coordonnées de la scène) : le chariot est-il touché ? margin : marge (px).
+    hit(sx, sy, margin) {
+      if (!shownHere) return false;
+      const w = image.w * box.s;
+      return sx >= box.x - w / 2 - margin && sx <= box.x + w / 2 + margin && sy >= box.y - image.h * box.s - margin && sy <= box.y + margin;
     },
     info: () => (state ? { place: state.place, x: state.x, z: state.z, pushed: state.pushed, side: state.side } : null),
   };

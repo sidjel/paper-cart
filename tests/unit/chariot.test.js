@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot } from '../../src/core/chariot.js';
+import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift } from '../../src/core/chariot.js';
 import { compileMask } from '../../src/core/walkmask.js';
 
 const P = { offset: 120, flipTime: 0.25, speed: 0.8, weight: 0.4 };
@@ -72,5 +72,38 @@ describe('chariot poussé (A8)', () => {
     releaseChariot(c);
     arriveChariot(c, 'rayon', { x: 100, z: 50, facing: 1 }, P);
     expect(c.place).toBe('hall');
+  });
+
+  it('cogner trois fois en peu de temps fait réagir le haut-parleur (une fois)', () => {
+    const c = createChariot('rayon', 0, 0);
+    const p = { bumpCount: 3, bumpWindow: 4 };
+    const events = [];
+    for (let k = 0; k < 3; k++) {
+      events.push(noteBump(c, true, p, 0.1), noteBump(c, true, p, 0.1), noteBump(c, false, p, 0.3));
+    }
+    expect(events.filter((e) => e === 'cogne')).toHaveLength(1);
+    // Trop espacés : rien.
+    const slow = createChariot('rayon', 0, 0);
+    const ev2 = [];
+    for (let k = 0; k < 3; k++) ev2.push(noteBump(slow, true, p, 0.1), noteBump(slow, false, p, 3));
+    expect(ev2).not.toContain('cogne');
+  });
+
+  it('la roue folle tire vers le fond quand il pousse de côté ; rien à l’arrêt, rien si elle est réparée', () => {
+    const mask = compileMask({ area: [[0, 0], [1000, 0], [1000, 300], [0, 300]], obstacles: [] });
+    const c = createChariot('rayon', 220, 50);
+    const hero = { x: 100, z: 50, facing: 1, vx: 400 };
+    pushChariot(c, hero);
+    wheelDrift(c, hero, mask, { drift: 20, offset: 120 }, 400, 1);
+    expect(hero.z).toBeCloseTo(70);
+    hero.vx = 0;
+    wheelDrift(c, hero, mask, { drift: 20, offset: 120 }, 400, 1);
+    expect(hero.z).toBeCloseTo(70);
+    hero.vx = 400;
+    wheelDrift(c, hero, mask, { drift: 0, offset: 120 }, 400, 1);
+    expect(hero.z).toBeCloseTo(70);
+    hero.z = 295; // au bord de la zone : la roue ne l'en fait pas sortir
+    wheelDrift(c, hero, mask, { drift: 20, offset: 120 }, 400, 1);
+    expect(hero.z).toBe(295);
   });
 });

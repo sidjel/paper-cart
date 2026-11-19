@@ -47,7 +47,7 @@
 - **Elle peut casser** (usure, combat, chute dans un rayon) et devient l'**Extracteur** (« Scanette modifiée ») : réparée, bricolée, plus puissante, elle n'obéit plus tout à fait au magasin. Elle évolue ensuite comme une arme de *Final Fantasy* (Scanette → Extracteur → …).
 - ❓ À DÉFINIR : l'événement qui la casse et quand (Acte I ? avant la Révélation ?) ; qui la modifie (le héros avec du Scotch ? Kévin ? un employé oublié de l'Acte II ?) ; ce que l'Extracteur permet de plus (avec B et C) ; les versions suivantes et leurs noms.
 - ❓ À DÉFINIR : peut-on scanner des êtres vivants ? (piste : les humains donnent leur **carte de fidélité**, qui contient leur essence).
-- ❓ À DÉFINIR : qui donne le **jeton de chariot** (pistes : le Vieux Monsieur juste avant sa mort ; ou à la Caisse Finale on rend son chariot et on récupère sa pièce, comme celle du passeur des morts).
+- ✅ (séance 75) L'**hôtesse** du comptoir échange le panier contre un chariot, **contre une monnaie d'échange** que le héros doit trouver (❓ laquelle ; le troc du jeu est en Papier Toilette). ❓ Réparer la **roue folle** du chariot : qui, où, avec quoi ?
 - Le magasin garde son nom, **Maxi-Gouffre** ✅ (❓ vérifier plus tard la marque « Maxi », chaîne québécoise).
 
 ## Progression en 3 actes

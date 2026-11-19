@@ -40,6 +40,7 @@
 - **La Cheffe de Rayon Surgelés** : adversaire.
 - **Le Vigile Syndiqué** : adversaire.
 - **Le Soldeur** : marchand de troc ; échange contre du Papier Toilette.
+- **L'hôtesse du comptoir** (✅ séance 75) : trop souriante, récite des slogans, ne cligne jamais des yeux. Échange le panier contre un chariot, contre une monnaie d'échange.
 
 ## Acte III
 - **Le Gérant** : boss de la Caisse Finale.

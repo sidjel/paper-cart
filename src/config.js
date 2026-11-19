@@ -72,6 +72,9 @@ export const config = {
     flipTime: 0.3, // durée du retournement du chariot quand le héros fait demi-tour (s)
     range: 200, // distance pour le prendre ou le lâcher (px du monde)
     size: 0.8, // [TEMP] taille du chariot à côté du héros
+    drift: 22, // roue folle : il tire vers le fond en poussant de côté (px/s à pleine vitesse ; 0 = roue réparée)
+    bumpCount: 3, // chocs contre le décor avant que le haut-parleur s'en mêle…
+    bumpWindow: 4, // …en moins de tant de secondes
   },
   access: {
     textSize: 'normale', // taille du texte de l'interface : petite, normale, grande
@@ -278,6 +281,7 @@ export const TUNABLES = [
   { group: 'Chariot', key: 'chariot.speed', label: 'Vitesse en poussant (× marche)', min: 0.4, max: 1.2, step: 0.05 },
   { group: 'Chariot', key: 'chariot.weight', label: 'Lourdeur (démarrage, freinage ; petit = lourd)', min: 0.1, max: 1, step: 0.05 },
   { group: 'Chariot', key: 'chariot.flipTime', label: 'Retournement du chariot', min: 0, max: 0.8, step: 0.05, unit: 's' },
+  { group: 'Chariot', key: 'chariot.drift', label: 'Roue folle (0 = réparée)', min: 0, max: 80, step: 2, unit: 'px/s' },
   { group: 'Chariot', key: 'chariot.size', label: 'Taille du chariot', min: 0.4, max: 1.4, step: 0.05 },
   { group: 'Chariot', key: 'chariot.range', label: 'Portée pour le prendre ou le lâcher', min: 50, max: 350, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },

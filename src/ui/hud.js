@@ -20,9 +20,9 @@ function button(label, title, action, onAction) {
 // 'touch' (doigt) ou 'pad' (manette).
 const HELP = {
   touch:
-    'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche.<br>Option « joystick virtuel » dans ⚙.',
-  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
-  pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
+    'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche. Touche deux fois le chariot pour le lâcher ou le pousser.<br>Option « joystick virtuel » dans ⚙.',
+  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>R : lâcher ou pousser le chariot<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
+  pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · X : lâcher ou pousser le chariot · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
 };
 const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
 const LABEL = { scanner: 'Scanner', prendre: 'Prendre', lacher: 'Lâcher', pousser: 'Pousser' };

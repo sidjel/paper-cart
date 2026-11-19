@@ -19,6 +19,7 @@ const ACTIONS = {
   NumpadEnter: 'action',
   Space: 'action',
   KeyI: 'panier',
+  KeyR: 'chariot', // lâcher ou pousser le chariot
   Digit1: 'choice1',
   Numpad1: 'choice1',
   Digit2: 'choice2',

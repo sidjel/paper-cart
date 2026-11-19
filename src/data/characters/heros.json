@@ -163,6 +163,33 @@
         ],
         "front": true
       }
+    },
+    "chariot": {
+      "hand": "right",
+      "face": {
+        "src": "art/placeholder/tenu-chariot.svg",
+        "pivot": [
+          146,
+          172
+        ],
+        "offset": [
+          0,
+          0
+        ],
+        "front": true
+      },
+      "dos": {
+        "src": "art/placeholder/tenu-chariot.svg",
+        "pivot": [
+          146,
+          172
+        ],
+        "offset": [
+          0,
+          0
+        ],
+        "front": true
+      }
     }
   },
   "hands": {

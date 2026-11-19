@@ -15,6 +15,9 @@ export function createChariot(place, x, z) {
     prevX: x, prevZ: z, prevSide: 1, // au pas précédent (affichage lissé)
     pushed: false,
     side: 1, // de -1 (à gauche du héros) à 1 (à droite) ; entre les deux : il se retourne
+    bumped: false, // il bute en ce moment
+    bumps: 0, // chocs récents (pour le haut-parleur)
+    bumpAge: 0, // temps depuis le premier de ces chocs (s)
   };
 }
 
@@ -68,6 +71,32 @@ export function bump(c, hero, mask, p) {
   }
   hero.vx = 0;
   return true;
+}
+
+// Après bump : compte les chocs (un choc = il se met à buter). Renvoie 'cogne' quand il y en a eu
+// p.bumpCount en moins de p.bumpWindow secondes (le haut-parleur s'en mêle), sinon ''.
+export function noteBump(c, bumped, p, dt) {
+  c.bumpAge += dt;
+  if (c.bumpAge > p.bumpWindow) c.bumps = 0;
+  const hit = bumped && !c.bumped;
+  c.bumped = bumped;
+  if (!hit) return '';
+  if (c.bumps === 0) c.bumpAge = 0;
+  c.bumps++;
+  if (c.bumps < p.bumpCount) return '';
+  c.bumps = 0;
+  return 'cogne';
+}
+
+// La roue folle (choix 6A de l'auteur, séance 75) : poussé en marchant de côté, le chariot tire
+// légèrement vers le fond ; le joueur corrige. p.drift : px/s à pleine vitesse (0 = roue réparée).
+// maxSpeed : vitesse du héros qui pousse. Ne fait jamais sortir de la zone de marche.
+export function wheelDrift(c, hero, mask, p, maxSpeed, dt) {
+  if (!c.pushed || p.drift <= 0 || maxSpeed <= 0) return;
+  const k = Math.min(1, Math.abs(hero.vx) / maxSpeed);
+  if (k < 0.1) return;
+  const z = hero.z + p.drift * k * dt;
+  if (isWalkable(mask, hero.x, z) && isWalkable(mask, hero.x + hero.facing * p.offset, z)) hero.z = z;
 }
 
 // Un pas de jeu. p : { offset (distance devant le héros, px), flipTime (durée du retournement, s) }.

@@ -145,6 +145,24 @@
       "voice": "heros",
       "must": true,
       "comment": "le joueur fait changer le héros de sens trop souvent, trop vite : étoiles autour de la tête, et il s'en plaint (une réplique différente à chaque fois, la plus ancienne d'abord)"
+    },
+    "chariot_pris": {
+      "every": 4,
+      "comment": "le héros reprend son chariot (une fois sur quatre)"
+    },
+    "chariot_lache": {
+      "every": 4,
+      "from": 2,
+      "comment": "le héros lâche son chariot (une fois sur quatre, à partir de la 2e)"
+    },
+    "chariot_cogne": {
+      "every": 2,
+      "comment": "le chariot a cogné le décor plusieurs fois de suite (chariot.bumpCount en chariot.bumpWindow s)"
+    },
+    "chariot_oublie": {
+      "strong": true,
+      "cooldown": 90,
+      "comment": "le héros change de lieu sans son chariot (il l'a lâché derrière lui)"
     }
   },
   "lines": [
@@ -473,6 +491,46 @@
       "trigger": "tournis",
       "text": "[TEMP] Si je vomis sur le carrelage, c'est toi qui nettoies. Je te préviens.",
       "emotion": "complice"
+    },
+    {
+      "id": "chariot_pris_1",
+      "trigger": "chariot_pris",
+      "text": "[TEMP] Le Maxi-Gouffre vous remercie de reprendre votre chariot. Il commençait à se sentir seul."
+    },
+    {
+      "id": "chariot_pris_2",
+      "trigger": "chariot_pris",
+      "text": "[TEMP] Chariot récupéré. Les chariots du Maxi-Gouffre ont une excellente mémoire des clients qui les abandonnent."
+    },
+    {
+      "id": "chariot_lache_1",
+      "trigger": "chariot_lache",
+      "text": "[TEMP] Rappel : un chariot non surveillé sera détruit. Ou adopté. Nous ne savons plus très bien."
+    },
+    {
+      "id": "chariot_lache_2",
+      "trigger": "chariot_lache",
+      "text": "[TEMP] Votre chariot attendra ici. Il a l'habitude."
+    },
+    {
+      "id": "chariot_cogne_1",
+      "trigger": "chariot_cogne",
+      "text": "[TEMP] Cher Client, le mobilier du Maxi-Gouffre n'est pas une piste d'auto-tamponneuses."
+    },
+    {
+      "id": "chariot_cogne_2",
+      "trigger": "chariot_cogne",
+      "text": "[TEMP] Les dégâts causés aux rayons seront facturés. D'une façon ou d'une autre."
+    },
+    {
+      "id": "chariot_oublie_1",
+      "trigger": "chariot_oublie",
+      "text": "[TEMP] Avis aux Clients : un chariot non surveillé a été signalé. Il vous attend. Il sait où vous êtes."
+    },
+    {
+      "id": "chariot_oublie_2",
+      "trigger": "chariot_oublie",
+      "text": "[TEMP] Vous avez oublié quelque chose, cher Client. Quelque chose avec des roues."
     }
   ]
 }
