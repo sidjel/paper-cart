@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach, waitingName, answerName } from '../../src/core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, answer, waitingAnswer, waitingTap, inScene, endLine, approach, waitingName, answerName, skipAll, canSkip } from '../../src/core/narrator.js';
 import file from '../../src/data/narrator.json';
 
 const P = { enabled: true, speed: 40, hold: 2, holdPerChar: 0, minGap: 20, lineCooldown: 600, inactivity: 30, asides: true, asideGap: 90, breath: 4, followDelay: 0.8, glanceGap: 25, followWait: 20, timedMax: 99 };
@@ -508,3 +508,35 @@ describe('mise en scène', () => {
     expect(approach(0.5, 0, 0.2)).toBeCloseTo(0.3);
   });
 });
+
+describe('bouton « Passer » (séance 77)', () => {
+  const SK = {
+    triggers: { conv: {}, seule: {} },
+    lines: [
+      { id: 'c', trigger: 'conv', steps: [{ text: 'Un' }, { text: 'Deux' }, { text: 'Question ?', choices: [{ text: 'Oui', reply: 'Bien.' }, { text: 'Non', reply: 'Tant pis.' }] }, { text: 'Fin' }] },
+      { id: 'd', trigger: 'seule', steps: [{ text: 'A' }, { text: 'B' }, { text: 'C' }] },
+    ],
+  };
+  it('passe toutes les répliques jusqu’à la question, écrite en entier ; elles restent dans l’historique', () => {
+    const n = createNarrator();
+    narrate(n, SK, 'conv', P);
+    expect(canSkip(n)).toBe(true);
+    expect(skipAll(n, SK, P)).toBe(true);
+    expect(n.line.text).toBe('Question ?');
+    expect(waitingAnswer(n)).toBe(true);
+    expect(canSkip(n)).toBe(false); // il faut choisir
+    expect(n.log.map((l) => l.text)).toEqual(['Un', 'Deux', 'Question ?']);
+    answer(n, 0, P);
+    skipAll(n, SK, P); // après la réponse : la suite passe, jusqu'à la fin
+    expect(n.line).toBe(null);
+    expect(n.log.map((l) => l.text)).toEqual(['Un', 'Deux', 'Question ?', 'Oui', 'Bien.', 'Fin']);
+  });
+  it('sans question, toute la conversation passe d’un coup', () => {
+    const n = createNarrator();
+    narrate(n, SK, 'seule', P);
+    skipAll(n, SK, P);
+    expect(n.line).toBe(null);
+    expect(inScene(n)).toBe(false);
+  });
+});
+

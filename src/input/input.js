@@ -10,14 +10,14 @@ import { createPointer } from './pointer.js';
 // onTarget(clientX, clientY) : un point de l'écran a été touché ou cliqué.
 // onDoubleTap(clientX, clientY) : double toucher ou double clic.
 // onDevice(kind) : le dernier appareil utilisé change : 'keys' (clavier et souris), 'touch' ou 'pad'.
-export function createInput({ surface, ui, settings, onAction, onTarget, onDoubleTap, onDrag, device = 'keys', onDevice = () => {} }) {
+export function createInput({ surface, ui, settings, onAction, onTarget, onDoubleTap, onDrag, device = 'keys', onDevice = () => {}, canSkip = () => false }) {
   let current = device;
   const use = (kind) => {
     if (kind === current) return;
     current = kind;
     onDevice(kind);
   };
-  const keyboard = createKeyboard(onAction, () => use('keys'));
+  const keyboard = createKeyboard(onAction, () => use('keys'), canSkip);
   const gamepad = createGamepad(onAction, settings, () => use('pad'));
   const pointer = createPointer(surface, ui, settings, onTarget, onDoubleTap, onDrag);
   window.addEventListener('pointerdown', (e) => use(e.pointerType === 'mouse' ? 'keys' : 'touch'), true);

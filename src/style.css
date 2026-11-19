@@ -158,8 +158,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 
 .version {
   position: absolute;
-  right: var(--safe-right);
-  bottom: var(--safe-bottom);
+  left: var(--safe-left);
+  top: var(--safe-top);
   font-size: calc(11px * var(--ts, 1));
   color: rgb(61 53 42 / 0.75);
   background: rgb(251 248 238 / 0.6);
@@ -508,23 +508,42 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .panier.choosing .card:hover, .panier.choosing .card:focus-visible { outline: 3px solid #c0503f; outline-offset: 2px; }
 .panier-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 4px 0 8px; }
 
+/* ---------- Bouton « Passer » (dialogues) : en bas à droite, au-dessus du bouton Scanner ---------- */
+.skip-button {
+  position: absolute;
+  right: calc(var(--safe-right) + 4px);
+  bottom: calc(var(--safe-bottom) + 56px);
+  min-height: 44px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  background: rgb(251 248 238 / 0.92);
+  font-size: calc(14px * var(--ts, 1));
+  font-weight: 700;
+  box-shadow: 2px 2px 0 rgb(61 53 42 / 0.35);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 45;
+}
+#ui > .skip-button.visible { opacity: 1; pointer-events: auto; }
+
 /* ---------- Bouton Scanner ---------- */
 .scan-button {
   position: absolute;
-  right: calc(var(--safe-right) + 6px);
-  bottom: calc(var(--safe-bottom) + 30px);
-  min-width: 112px;
-  min-height: 56px;
+  right: calc(var(--safe-right) + 4px);
+  bottom: calc(var(--safe-bottom) + 4px);
+  min-width: 84px;
+  min-height: 44px; /* 44 px : taille minimale au doigt (src/input/CLAUDE.md) */
+  padding: 2px 12px;
   border-radius: 999px;
   background: var(--accent);
-  font-size: calc(18px * var(--ts, 1));
+  font-size: calc(15px * var(--ts, 1));
   font-weight: 700;
   box-shadow: 3px 3px 0 rgb(61 53 42 / 0.4);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s;
 }
-.scan-button small { display: block; font-size: calc(11px * var(--ts, 1)); font-weight: 400; }
+.scan-button small { display: block; font-size: calc(10px * var(--ts, 1)); font-weight: 400; }
 #ui > .scan-button.visible { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .panier-button.bump { animation: none; } }
 
@@ -810,6 +829,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 
 /* ---------- Écran titre ---------- */
 .title-screen { position: absolute; inset: 0; z-index: 70; background: #151827; overflow: hidden; }
+.title-version { position: absolute; left: var(--safe-left); top: var(--safe-top); z-index: 2; font-size: calc(11px * var(--ts, 1)); color: rgb(220 228 245 / 0.75); padding: 1px 6px; pointer-events: none; }
 .title-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .title-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(10 10 20 / 0.55) 0%, rgb(10 10 20 / 0) 45%, rgb(10 10 20 / 0.6) 100%); }
 .title-content {

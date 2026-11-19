@@ -21,11 +21,12 @@ function button(label, title, action, onAction) {
 const HELP = {
   touch:
     'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche. Touche deux fois le chariot pour le lâcher ou le pousser.<br>Option « joystick virtuel » dans ⚙.',
-  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>R : lâcher ou pousser le chariot<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
-  pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · X : lâcher ou pousser le chariot · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
+  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>R : lâcher ou pousser le chariot<br>Tab : passer les dialogues<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
+  pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · X : lâcher ou pousser le chariot · Select : passer les dialogues · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
 };
 const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
 const LABEL = { scanner: 'Scanner', prendre: 'Prendre', lacher: 'Lâcher', pousser: 'Pousser' };
+const SKIP_KEY = { touch: '', keys: 'Tab', pad: 'Select' };
 const KEY = { touch: '', keys: 'Entrée', pad: 'A' };
 
 export function createHud(root, { version, onAction, device, muted }) {
@@ -89,7 +90,19 @@ export function createHud(root, { version, onAction, device, muted }) {
   error.className = 'overlay error';
   error.hidden = true;
 
-  root.append(bar, ver, scanBtn, hint, pause, loading, rotate, error);
+  // Bouton « Passer » (séance 77) : toutes les répliques jusqu'à une question, ou toute la conversation.
+  // Préparé une fois ; montré ou caché par son opacité (sans fondu), comme ce qui passe par-dessus la scène.
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'skip-button';
+  skipBtn.setAttribute('aria-label', 'Passer les dialogues (Tab, bouton Select)');
+  skipBtn.addEventListener('pointerdown', (e) => e.stopPropagation()); // ne passe pas aussi la réplique touchée
+  skipBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skipBtn.blur();
+    onAction('skip');
+  });
+
+  root.append(bar, ver, scanBtn, skipBtn, hint, pause, loading, rotate, error);
 
   let hintGone = false;
   let shownAction = 'scanner';
@@ -106,7 +119,9 @@ export function createHud(root, { version, onAction, device, muted }) {
     }
     scanBtn.setAttribute('aria-label', `${label} (Entrée, Espace, bouton A)`);
   }
+  let skipShown = false;
   function showDevice() {
+    skipBtn.textContent = `Passer ⏭${SKIP_KEY[shownDevice] ? ` (${SKIP_KEY[shownDevice]})` : ''}`;
     help.innerHTML = HELP[shownDevice];
     hint.textContent = HINT[shownDevice];
     labelAction();
@@ -137,6 +152,12 @@ export function createHud(root, { version, onAction, device, muted }) {
       if (!kind || kind === shownAction) return;
       shownAction = kind;
       labelAction();
+    },
+    // Bouton « Passer » : visible quand une réplique peut être passée.
+    setSkip(on) {
+      if (on === skipShown) return;
+      skipShown = on;
+      skipBtn.classList.toggle('visible', on);
     },
     // Dernier appareil utilisé : 'keys', 'touch' ou 'pad' (aides à l'écran).
     setDevice(kind) {

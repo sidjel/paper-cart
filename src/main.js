@@ -138,6 +138,7 @@ applyCrt();
 // Écran titre (après le chargement) : Commencer, Options. Sur téléphone, Commencer passe en plein écran
 // paysage (le jeu ne doit pas démarrer à la verticale).
 const titleUi = createTitleScreen(uiEl, {
+  version: VERSION,
   departs: config.debug.devMode ? departButtons() : null, // mode dev : « Départ » sur l'écran titre
   image: `${BASE}art/placeholder/titre/titre.svg`,
   onStart: () => startGame(true),
@@ -547,6 +548,9 @@ function handleAction(action) {
       else if (who === 'pause') sm.go('play');
       else if (inGame(who)) sm.go('pause');
       break;
+    case 'skip': // « Passer » : les répliques jusqu'à une question, ou toute la conversation
+      voices.skipAll();
+      break;
     case 'padLost': // la manette utilisée est débranchée : pause (src/input/CLAUDE.md)
       if (inGame(who)) sm.go('pause');
       break;
@@ -798,6 +802,7 @@ function render() {
   guard.render(a);
   chariot.render(a, depthRefs);
   pile.render(time);
+  hud.setSkip(voices.canSkip() && !sm.is('pause') && !sm.is('menu'));
   // Le héros pousse : ses deux bras tendus vers la poignée, la Scanette rangée (sauf pendant un scan).
   const pushing = chariot.pushing && !scan.active;
   if (pushing !== shownPush) {
@@ -980,7 +985,7 @@ async function start() {
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
   chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince'), onBumps: () => say('chariot_cogne'), onForgot: () => say('chariot_oublie') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
-  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind) });
+  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind), canSkip: () => voices.canSkip() });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();

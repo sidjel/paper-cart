@@ -286,6 +286,31 @@ export function skipNarrator(n, data, p) {
   } else end(n, data, p);
 }
 
+// Bouton « Passer » (demande de l'auteur, séance 77) : toutes les répliques d'un coup, jusqu'à une
+// question (deux réponses, ou le nom du joueur), qui reste affichée en entier pour qu'on choisisse ;
+// sans question, toute la conversation passe. Une réplique seule (haut-parleur, pensée) passe aussi.
+// Chaque réplique passée reste dans l'historique (Pause › Dialogues) : rien n'est perdu.
+// Renvoie true si quelque chose a été passé.
+export function skipAll(n, data, p) {
+  if (!n.line || waitingAnswer(n) || waitingName(n)) return false;
+  for (let k = 0; k < 64 && n.line; k++) {
+    if ((n.line.choices && n.answered < 0) || (n.line.pickName && n.answered < 0)) {
+      n.shown = n.line.text.length; // la question, écrite en entier : au joueur de choisir
+      n.hold = holdFor(n.line.text, p);
+      return true;
+    }
+    const inConversation = n.scene !== null;
+    end(n, data, p);
+    if (!inConversation) break;
+  }
+  return true;
+}
+
+// Peut-on passer ? Une réplique est là, et elle n'attend pas une réponse du joueur.
+export function canSkip(n) {
+  return !!n.line && !waitingAnswer(n) && !waitingName(n);
+}
+
 // Le jeu signale la fin d'une étape (le héros est arrivé au bout de sa marche).
 export function endLine(n, data, p) {
   if (n.line) end(n, data, p);

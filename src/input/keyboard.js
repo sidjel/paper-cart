@@ -29,7 +29,8 @@ const ACTIONS = {
 const SIDE = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down' };
 
 // onUsed() : le clavier vient de servir (aides à l'écran).
-export function createKeyboard(onAction, onUsed = () => {}) {
+// canSkip() : une réplique peut être passée (Tab sert alors à « Passer », sinon à son rôle habituel).
+export function createKeyboard(onAction, onUsed = () => {}, canSkip = () => false) {
   const down = new Set();
 
   function isTyping(e) {
@@ -43,6 +44,12 @@ export function createKeyboard(onAction, onUsed = () => {}) {
     if (e.target?.tagName === 'INPUT' && e.target.type === 'text') {
       if (e.code === 'Enter' || e.code === 'NumpadEnter') e.target.blur();
       if (e.code !== 'Escape') return;
+    }
+    if (e.code === 'Tab' && canSkip()) {
+      e.preventDefault();
+      onUsed();
+      if (!e.repeat) onAction('skip');
+      return;
     }
     const action = ACTIONS[e.code];
     if (action || MOVE.has(e.code)) onUsed();

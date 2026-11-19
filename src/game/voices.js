@@ -10,7 +10,7 @@
 import { config, setValue } from '../config.js';
 import narratorFile from '../data/narrator.json';
 import playerFile from '../data/joueur.json';
-import { createNarrator, narrate, stepNarrator, skipNarrator, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from '../core/narrator.js';
+import { createNarrator, narrate, stepNarrator, skipNarrator, skipAll, canSkip, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from '../core/narrator.js';
 import { playerName, fillName, OTHER, MAX_NAME } from '../core/names.js';
 import { createDizzy, stepDizzy, dizzyActive } from '../core/dizzy.js';
 import { clearTarget, faceScreen } from '../core/movement.js';
@@ -267,6 +267,9 @@ export function createVoices(ui, game) {
     },
     // Toucher, Entrée : la réplique passe (texte entier, puis suivante).
     skip: () => skipNarrator(narrator, data, config.narrator),
+    // Bouton « Passer » : toutes les répliques jusqu'à une question (ou la fin de la conversation).
+    skipAll: () => skipAll(narrator, data, config.narrator),
+    canSkip: () => canSkip(narrator),
     answer: (k) => answer(narrator, k, config.narrator),
     answerFocused: () => answer(narrator, choiceFocus, config.narrator),
     focusChoice(k) {

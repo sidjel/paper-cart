@@ -2,7 +2,7 @@
 // Doigt, souris, clavier (Tab ou flèches, Entrée) et manette (croix ou LB/RB, A).
 
 // departs : boutons des points de départ (mode dev : config.debug.devMode), ou null.
-export function createTitleScreen(root, { image, onStart, onOptions, departs = null }) {
+export function createTitleScreen(root, { image, onStart, onOptions, departs = null, version = '' }) {
   const el = document.createElement('div');
   el.className = 'title-screen';
   el.hidden = true;
@@ -17,6 +17,11 @@ export function createTitleScreen(root, { image, onStart, onOptions, departs = n
       </nav>
     </div>`;
   el.querySelector('.title-image').src = image;
+  // Version du jeu, en haut à gauche (comme en jeu) : l'auteur sait à quelle version il joue.
+  const ver = document.createElement('div');
+  ver.className = 'title-version';
+  ver.textContent = version ? `v ${version}` : '';
+  el.appendChild(ver);
   const main = [...el.querySelectorAll('.title-button')];
   main[0].addEventListener('click', () => onStart());
   main[1].addEventListener('click', () => onOptions());

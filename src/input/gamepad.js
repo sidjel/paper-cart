@@ -1,6 +1,6 @@
 // Manette (API Gamepad, disposition standard) → actions abstraites.
 // Stick gauche ou croix pour marcher ; A : scanner ; B : retour ; Y : Panier ; X : lâcher ou pousser le
-// chariot ; Start : pause ;
+// chariot ; Select : passer les dialogues ; Start : pause ;
 // croix gauche/droite et LB/RB : gauche/droite dans les menus (onglets) et les réponses.
 // On n'interroge la manette que si une manette est branchée.
 // Règles (src/input/CLAUDE.md) : après un relâchement général (focus perdu, onglet caché) ou un
@@ -8,16 +8,17 @@
 // la manette utilisée débranchée → action 'padLost' (pause).
 
 const START = 9;
+const SELECT = 8; // « Passer » les dialogues
 const BUTTON_A = 0, BUTTON_B = 1, BUTTON_X = 2, BUTTON_Y = 3, BUTTON_LB = 4, BUTTON_RB = 5;
-const BUTTON_ACTIONS = ['action', 'back', 'panier', 'left', 'right', 'up', 'down', 'chariot'];
+const BUTTON_ACTIONS = ['action', 'back', 'panier', 'left', 'right', 'up', 'down', 'chariot', 'skip'];
 const DPAD_UP = 12, DPAD_DOWN = 13, DPAD_LEFT = 14, DPAD_RIGHT = 15;
 
 // onUsed() : la manette vient de servir (aides à l'écran).
 export function createGamepad(onAction, settings, onUsed = () => {}) {
   let connected = 0;
   let startWasDown = false;
-  const buttons = [false, false, false, false, false, false, false, false];
-  const wasDown = [false, false, false, false, false, false, false, false]; // A, B, Y, gauche, droite, haut, bas, X
+  const buttons = [false, false, false, false, false, false, false, false, false];
+  const wasDown = [false, false, false, false, false, false, false, false, false]; // A, B, Y, gauche, droite, haut, bas, X, Select
   let x = 0;
   let z = 0;
   let latched = true; // au repos exigé avant de compter (au départ, au branchement, après un relâchement)
@@ -75,6 +76,7 @@ export function createGamepad(onAction, settings, onUsed = () => {}) {
         if (pressed(pad, DPAD_UP)) buttons[5] = true;
         if (pressed(pad, DPAD_DOWN)) buttons[6] = true;
         if (pressed(pad, BUTTON_X)) buttons[7] = any = true;
+        if (pressed(pad, SELECT)) buttons[8] = any = true;
         if (any) user = pad.index;
       }
       const active = user !== -1;
