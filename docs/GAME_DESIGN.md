@@ -53,11 +53,11 @@
 ## Le Chariot (A8)
 - ✅ (séances 73-74) Nom **chariot** ; **panier ou chariot**, jamais les deux. **Poussé** devant le héros, en papier 2D comme lui ; **lourd** (démarre et freine lentement, dérape au demi-tour, grince, se retourne comme une feuille). Poussé, il passe les portes ; lâché, il reste dans sa pièce. Vraie utilité, fun à jouer.
 - ✅ (séance 74) Utilités : **explorer** (prototype A) ; **garde-manger** (prototype B : sa pourriture dépend de lui et d'où il est garé) ; **allié en combat** (prototype B : il charge, il abrite).
-- ✅ (séance 75) Explorer, d'abord : **l'élan renverse une pile de cartons** qui cache un recoin (produit rare), et **on monte sur le chariot** pour une étagère haute.
-- ✅ (séance 75) Lâcher / pousser **aussi près d'un produit** : double toucher sur le chariot, R au clavier, X à la manette. Scanner loin du chariot : **pas trop loin** (❓ distance exacte).
-- ✅ (séance 75) L'**hôtesse** du comptoir donne le chariot **contre une monnaie d'échange trouvée quelque part** (❓ laquelle). Elle est **trop souriante, récite des slogans, ne cligne jamais des yeux**.
-- ✅ (séance 75) **Roue folle** : en poussant de côté, il tire vers le fond ; réglable (⚙, 0 = réparée). L'histoire permettra de **la réparer** (❓ comment).
-- ✅ (séance 75) Le haut-parleur le commente, rarement : on le prend, on le lâche, il cogne trop, on l'oublie dans une autre pièce. Le héros **pousse à bras tendus** (pose [TEMP]). **Le chariot se remplit** : une silhouette de papier par carte, qui s'empilent jusqu'à déborder.
+- ✅ (séances 75-76) Explorer, d'abord : **l'élan renverse une pile de cartons** ; sans chariot, **à la main, plus lentement**. [TEMP] Dessous : la monnaie d'échange (plus tard : autre chose, un produit rare). **Monter sur le chariot lâché** contre une étagère (double toucher) pour scanner en haut.
+- ✅ (séance 75) Lâcher / pousser **aussi près d'un produit** : double toucher sur le chariot, R au clavier, X à la manette. Scanner loin du chariot : au plus **un rayon d'écart** (même pièce ou pièce voisine) (séance 76).
+- ✅ (séances 75-76) L'**hôtesse** du comptoir donne le chariot **contre une monnaie d'échange** trouvée quelque part : [TEMP] **un rouleau de Papier Toilette** (❓ pourquoi rare et précieux ici : à rendre logique). Trop souriante, slogans, ne cligne jamais des yeux.
+- ✅ (séance 75) **Roue folle** : en poussant de côté, il tire vers le fond ; réglable (⚙, 0 = réparée). L'histoire permettra de **la réparer** : une **burette d'huile** (objet) dans un futur rayon Bricolage (séance 76).
+- ✅ (séance 75) Le haut-parleur le commente, rarement : on le prend, on le lâche, il cogne trop, on l'oublie dans une autre pièce. Le héros **pousse à bras tendus** (pose [TEMP]). **Le chariot se remplit** : 3 dessins de tas (petit, moyen, gros) (séance 76).
 - ✅ (séance 50) Garé et repris ; accueillera la Glacière. ❓ Un **plan du magasin** (Objets) aidera à le retrouver. [TEMP] capacité 12.
 
 ## Systèmes repris de l'ancien jeu 🧪 À TESTER (prototype C et suite)

@@ -13,6 +13,7 @@ import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
+import { createPile } from '../core/pile.js';
 import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
@@ -38,7 +39,8 @@ export function createPlaces(ui, container, game) {
     const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
     const here = enterPlace(game.world, place.id, () => ({
       products: buildProducts(place, game.catalog, (z) => worldToStageY(proj, z)),
-      pickups: buildPickups(place, back),
+      pickups: buildPickups(place, back, (z) => worldToStageY(proj, z)),
+      pile: place.pile ? createPile() : null, // pile de cartons (A8) : debout ou tombée
     }));
     view = createPlaceView(container, place, images, game.commonImages(), here, proj, config, game.getValue);
     // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.

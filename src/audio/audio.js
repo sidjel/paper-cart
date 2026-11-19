@@ -49,6 +49,7 @@ export function createAudio(settings, song) {
     carte: 'scanner',
     prise: 'scanner',
     grince: 'chariot',
+    chute: 'chariot',
     annonce: 'voix',
     ding: 'voix',
     aparte: 'aparte',
@@ -299,6 +300,14 @@ export function createAudio(settings, song) {
     tone('sawtooth', 2250, 1750, t + 0.1, 0.12, 0.016);
   }
 
+  // [TEMP] Une pile de cartons tombe : trois chocs sourds.
+  function chute() {
+    const t = ctx.currentTime;
+    tone('triangle', 140, 70, t, 0.18, 0.3);
+    tone('triangle', 120, 60, t + 0.12, 0.2, 0.26);
+    tone('triangle', 100, 50, t + 0.27, 0.26, 0.22);
+  }
+
   // [TEMP] Annonce au haut-parleur : « ding-dong » de magasin, deux notes douces.
   function annonce() {
     const t = ctx.currentTime;
@@ -434,7 +443,7 @@ export function createAudio(settings, song) {
     return [src, lp, g];
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, grince, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, grince, chute, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.

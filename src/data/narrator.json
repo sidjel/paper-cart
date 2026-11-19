@@ -163,6 +163,22 @@
       "strong": true,
       "cooldown": 90,
       "comment": "le héros change de lieu sans son chariot (il l'a lâché derrière lui)"
+    },
+    "pile_tombe": {
+      "strong": true,
+      "once": true,
+      "comment": "une pile de cartons tombe (A8), la première fois"
+    },
+    "prise_papier_toilette": {
+      "voice": "pensee",
+      "strong": true,
+      "once": true,
+      "comment": "le héros ramasse le rouleau de Papier Toilette (monnaie d'échange [TEMP])"
+    },
+    "chariot_loin": {
+      "strong": true,
+      "cooldown": 8,
+      "comment": "scan refusé : le chariot est à plus d'un rayon d'écart"
     }
   },
   "lines": [
@@ -531,6 +547,26 @@
       "id": "chariot_oublie_2",
       "trigger": "chariot_oublie",
       "text": "[TEMP] Vous avez oublié quelque chose, cher Client. Quelque chose avec des roues."
+    },
+    {
+      "id": "pile_tombe_1",
+      "trigger": "pile_tombe",
+      "text": "[TEMP] Incident au rayon 8 : chute de cartons. Un employé va intervenir. Il n'y a pas d'employé."
+    },
+    {
+      "id": "prise_papier_toilette_1",
+      "trigger": "prise_papier_toilette",
+      "text": "[TEMP] Un rouleau… intact. Ici, j'ai l'impression que ça vaut une fortune."
+    },
+    {
+      "id": "chariot_loin_1",
+      "trigger": "chariot_loin",
+      "text": "[TEMP] Article égaré, Client distrait. Votre chariot est trop loin pour recevoir vos achats."
+    },
+    {
+      "id": "chariot_loin_2",
+      "trigger": "chariot_loin",
+      "text": "[TEMP] Le Maxi-Gouffre rappelle que les achats voyagent mal. Rapprochez-vous de votre chariot."
     }
   ]
 }

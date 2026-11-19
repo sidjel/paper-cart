@@ -4,10 +4,11 @@ import { nearestProduct } from '../../src/core/scan.js';
 import place from '../../src/data/places/rayon-essai.json';
 import catalog from '../../src/data/products.json';
 import accueil from '../../src/data/places/accueil.json';
+import rayon2 from '../../src/data/places/rayon-2.json';
 
 const stageY = (z) => place.projection.floorFrontY - z * place.projection.depthToScreen;
 // Les produits viennent du rayon ; le présentoir (Scanette, panier) est dans le hall d'accueil depuis la séance 55.
-const build = () => ({ products: buildProducts(place, catalog, stageY), pickups: buildPickups(accueil, 264) });
+const build = () => ({ products: buildProducts(place, catalog, stageY), pickups: buildPickups(accueil, 264, stageY) });
 
 describe('état du monde', () => {
   it('produits et objets à prendre d’un lieu, d’après ses données', () => {
@@ -21,6 +22,10 @@ describe('état du monde', () => {
     expect(here.pickups.map((p) => p.id)).toEqual(['scanette', 'panier']);
     expect(buildPickups(place, 264)).toEqual([]); // plus de présentoir dans le rayon
     expect(buildProducts(accueil, catalog, stageY)).toEqual([]); // pas de produit dans le hall
+    // Rayon 2 : le rouleau sous la pile de cartons (A8), indisponible tant qu'elle est debout.
+    const pt = buildPickups(rayon2, 264, stageY);
+    expect(pt).toHaveLength(1);
+    expect(pt[0]).toMatchObject({ id: 'papier_toilette', x: 1700, z: 230, scanned: true });
   });
   it('le monde se souvient : en revenant dans un lieu, un produit scanné est toujours scanné', () => {
     const w = createWorld();

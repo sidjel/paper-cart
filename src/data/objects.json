@@ -15,6 +15,11 @@
       "name": "[TEMP] Panier à main",
       "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir.",
       "image": "art/placeholder/objets/panier.svg"
+    },
+    "papier_toilette": {
+      "name": "[TEMP] Rouleau de Papier Toilette",
+      "text": "[TEMP] Ici, ça vaut plus cher que l'or. Personne ne sait pourquoi. L'hôtesse de l'accueil en voudrait bien un.",
+      "image": "art/placeholder/papier-toilette.svg"
     }
   }
 }

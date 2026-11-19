@@ -9,6 +9,14 @@
     "scalePerDepth": 0.0012
   },
   "images": {
+    "cartons": {
+      "src": "art/placeholder/cartons.svg",
+      "size": [260, 300]
+    },
+    "papier-toilette": {
+      "src": "art/placeholder/papier-toilette.svg",
+      "size": [80, 80]
+    },
     "rayon-lointain": {
       "src": "art/placeholder/rayon-lointain.svg",
       "size": [3600, 470]
@@ -74,9 +82,39 @@
       [3510, 264],
       [90, 264]
     ],
-    "obstacles": []
+    "obstacles": [
+      { "name": "Pile de cartons", "points": [[1590, 165], [1810, 165], [1810, 270], [1590, 270]] }
+    ]
   },
-  "props": [],
+  "props": [
+    {
+      "id": "papier-toilette",
+      "image": "papier-toilette",
+      "at": [1700, 230],
+      "anchor": [40, 74],
+      "depthRef": 232,
+      "comment": "[TEMP] Rouleau caché sous la pile de cartons (dessiné derrière elle) : on le voit quand elle tombe."
+    },
+    {
+      "id": "cartons",
+      "image": "cartons",
+      "at": [1700, 215],
+      "anchor": [130, 292],
+      "depthRef": 215,
+      "comment": "Pile de cartons à renverser (A8) : obstacle « Pile de cartons » de la zone de marche."
+    }
+  ],
+  "pile": {
+    "comment": "A8 (séances 75-76) : pile de cartons à renverser, au chariot avec élan ou à la main (plus lentement). prop : son dessin ; obstacle : son obstacle de la zone de marche (retiré quand elle tombe) ; hides : l'objet à prendre qu'elle cache (pris seulement une fois tombée) ; hidesProp : son dessin.",
+    "prop": "cartons",
+    "obstacle": "Pile de cartons",
+    "hides": "papier_toilette",
+    "hidesProp": "papier-toilette"
+  },
+  "pickups": {
+    "comment": "Objets à prendre posés au sol (pas des produits : on ne les scanne pas). at = [x, z] au sol ; w, h : taille du dessin (repère, double toucher) ; standAt : où se placer.",
+    "items": [{ "id": "papier_toilette", "at": [1700, 230], "w": 80, "h": 80, "standAt": [[1700, 150]] }]
+  },
   "speakers": {
     "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
     "items": [

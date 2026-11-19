@@ -22,6 +22,7 @@ import { createWorld, planSwap, applySwap, swapEntry } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
 import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
 import { createPlaces } from './game/places.js';
+import { createPileWiring } from './game/pile.js';
 import { createChariotWiring, CHARIOT_IMAGE, CHARIOT_SIZE } from './game/chariot.js';
 import { createGuardWiring } from './game/guard.js';
 import { exitTarget } from './core/places.js';
@@ -225,6 +226,17 @@ function tryScan() {
   else tryScanProduct(i);
 }
 
+// Pile de cartons (A8) : poussée à la main ou renversée par l'élan du chariot.
+const pile = createPileWiring({
+  onPush: () => audio.play('froissement'),
+  onFall() {
+    audio.play('chute');
+    vibrate('fort');
+    say('pile_tombe');
+  },
+  owns: (id) => !!gear[id],
+});
+
 // Lâcher ou pousser le chariot, s'il est à côté (bouton d'action loin des produits, R, X, double toucher).
 function toggleChariot() {
   const a = chariot.toggle();
@@ -238,6 +250,11 @@ function toggleChariot() {
 // Scanner seulement avec une Scanette et de la place dans le panier (sinon, le haut-parleur explique).
 function tryScanProduct(i) {
   pendingScan = -1;
+  // Le chariot resté trop loin (plus d'un rayon d'écart) : la carte ne peut pas l'atteindre.
+  if (gear.chariot && !chariot.inReach(place.exits?.items ?? [])) {
+    say('chariot_loin');
+    return;
+  }
   const why = scanBlocked(gear, basket.cards.length, config.carry);
   if (why === 'plein') chooseCardToDrop(i);
   else if (why) say(BLOCKED_LINE[why]);
@@ -289,6 +306,7 @@ function takePickup(k) {
   sprite.setHeld(it.id, true);
   if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
   basketUi.addObject(it.id);
+  pile.taken(it.id);
   audio.play('prise');
   vibrate('leger');
   say(`prise_${it.id}`);
@@ -779,6 +797,7 @@ function render() {
   sprite.setLevel(shown.level);
   guard.render(a);
   chariot.render(a, depthRefs);
+  pile.render(time);
   // Le héros pousse : ses deux bras tendus vers la poignée, la Scanette rangée (sauf pendant un scan).
   const pushing = chariot.pushing && !scan.active;
   if (pushing !== shownPush) {
@@ -865,6 +884,7 @@ function frame(now) {
       }
       stepWalker(walker, intent, mask, chariot.walk(config.walk), stepper.step);
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
+      pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
       guard.step(walker, intent, stepper.step);
       stepPendingScan();
       onScanEvent(stepScan(scan, stepper.step, config.scan));
@@ -914,6 +934,7 @@ const places = createPlaces(uiEl, gameEl, {
     markTaken();
     guard.attach(place, view, proj);
     chariot.attach(proj);
+    pile.attach(place, view, here, mask);
     ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;
@@ -1013,6 +1034,7 @@ async function start() {
     state: () => sm.get(),
     guard: () => guard.info(),
     chariot: () => chariot.info(),
+    pile: () => pile.info(),
     chariotToggle: () => chariot.toggle(), // tests : lâcher ou reprendre le chariot (s'il est à côté)
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.

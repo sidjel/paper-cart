@@ -18,6 +18,7 @@ export function createChariot(place, x, z) {
     bumped: false, // il bute en ce moment
     bumps: 0, // chocs récents (pour le haut-parleur)
     bumpAge: 0, // temps depuis le premier de ces chocs (s)
+    impact: 0, // vitesse du héros au dernier pas (px/s) : l'élan
   };
 }
 
@@ -57,11 +58,13 @@ export function pushWalk(walk, p) {
   return pushed;
 }
 
-// Après le pas du héros : si le chariot entrerait dans le décor, le héros recule d'autant (le chariot
+// Après le pas du héros : si l'avant du chariot (p.front devant son milieu) entrerait dans le décor, le héros recule d'autant (le chariot
 // bute). Renvoie true s'il a buté. prevX, prevZ : position du héros avant son pas.
 export function bump(c, hero, mask, p) {
   if (!c.pushed) return false;
-  const front = (x, z) => isWalkable(mask, x + hero.facing * p.offset, z);
+  c.impact = Math.abs(hero.vx); // vitesse au moment du choc (une pile de cartons tombe avec assez d'élan)
+  const reach = p.offset + p.front;
+  const front = (x, z) => isWalkable(mask, x + hero.facing * reach, z);
   if (front(hero.x, hero.z)) return false;
   if (front(hero.prevX, hero.z)) hero.x = hero.prevX; // glisse en profondeur
   else if (front(hero.x, hero.prevZ)) hero.z = hero.prevZ; // glisse de côté
@@ -116,4 +119,11 @@ export function stepChariot(c, hero, p, dt) {
   c.x = hero.x + c.side * p.offset;
   c.z = hero.z;
   return event;
+}
+
+// Scanner loin du chariot (choix de l'auteur, séance 76) : au plus un rayon d'écart, c'est-à-dire dans la
+// même pièce ou dans une pièce voisine (une sortie y mène). exits : sorties du lieu où est le héros.
+export function chariotInReach(c, place, exits) {
+  if (!c || c.place === place) return true;
+  return exits.some((e) => e.to === c.place);
 }

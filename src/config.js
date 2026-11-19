@@ -67,6 +67,7 @@ export const config = {
   },
   chariot: {
     offset: 125, // distance entre le héros et le milieu du chariot qu'il pousse (px du monde)
+    front: 95, // distance entre le milieu du chariot et son avant (il bute par là)
     speed: 0.8, // vitesse du héros qui pousse (× vitesse de marche)
     weight: 0.35, // lourdeur : démarrage et freinage (× ceux du héros seul ; plus petit = plus lourd)
     flipTime: 0.3, // durée du retournement du chariot quand le héros fait demi-tour (s)
@@ -75,6 +76,13 @@ export const config = {
     drift: 22, // roue folle : il tire vers le fond en poussant de côté (px/s à pleine vitesse ; 0 = roue réparée)
     bumpCount: 3, // chocs contre le décor avant que le haut-parleur s'en mêle…
     bumpWindow: 4, // …en moins de tant de secondes
+  },
+  pile: {
+    reach: 30, // distance à laquelle on touche la pile (devant le héros, ou devant le chariot) (px)
+    handTime: 1.5, // à la main (ou chariot poussé doucement) : temps à pousser avant qu'elle tombe (s)
+    ramSpeed: 260, // élan du chariot qui la renverse d'un coup (vitesse du héros, px/s)
+    fallTime: 0.45, // durée de la chute (s)
+    wobble: 4, // vacillement pendant qu'on pousse (degrés)
   },
   access: {
     textSize: 'normale', // taille du texte de l'interface : petite, normale, grande
@@ -278,9 +286,14 @@ export const TUNABLES = [
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
   { group: 'Chariot', key: 'carry.chariot', label: 'Capacité du chariot (cartes)', min: 1, max: 40, step: 1 },
   { group: 'Chariot', key: 'chariot.offset', label: 'Distance au héros', min: 60, max: 220, step: 5, unit: 'px' },
+  { group: 'Chariot', key: 'chariot.front', label: 'Longueur avant (butée)', min: 0, max: 160, step: 5, unit: 'px' },
   { group: 'Chariot', key: 'chariot.speed', label: 'Vitesse en poussant (× marche)', min: 0.4, max: 1.2, step: 0.05 },
   { group: 'Chariot', key: 'chariot.weight', label: 'Lourdeur (démarrage, freinage ; petit = lourd)', min: 0.1, max: 1, step: 0.05 },
   { group: 'Chariot', key: 'chariot.flipTime', label: 'Retournement du chariot', min: 0, max: 0.8, step: 0.05, unit: 's' },
+  { group: 'Pile de cartons', key: 'pile.handTime', label: 'À la main : temps pour la renverser', min: 0.3, max: 5, step: 0.1, unit: 's' },
+  { group: 'Pile de cartons', key: 'pile.ramSpeed', label: 'Élan du chariot pour la renverser d’un coup', min: 50, max: 500, step: 10, unit: 'px/s' },
+  { group: 'Pile de cartons', key: 'pile.fallTime', label: 'Durée de la chute', min: 0.1, max: 1.5, step: 0.05, unit: 's' },
+  { group: 'Pile de cartons', key: 'pile.wobble', label: 'Vacillement', min: 0, max: 12, step: 0.5, unit: '°' },
   { group: 'Chariot', key: 'chariot.drift', label: 'Roue folle (0 = réparée)', min: 0, max: 80, step: 2, unit: 'px/s' },
   { group: 'Chariot', key: 'chariot.size', label: 'Taille du chariot', min: 0.4, max: 1.4, step: 0.05 },
   { group: 'Chariot', key: 'chariot.range', label: 'Portée pour le prendre ou le lâcher', min: 50, max: 350, step: 10, unit: 'px' },

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift } from '../../src/core/chariot.js';
+import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift, chariotInReach } from '../../src/core/chariot.js';
 import { compileMask } from '../../src/core/walkmask.js';
 
-const P = { offset: 120, flipTime: 0.25, speed: 0.8, weight: 0.4 };
+const P = { offset: 120, front: 0, flipTime: 0.25, speed: 0.8, weight: 0.4 };
 const DT = 1 / 60;
 
 describe('chariot poussé (A8)', () => {
@@ -105,5 +105,13 @@ describe('chariot poussé (A8)', () => {
     hero.z = 295; // au bord de la zone : la roue ne l'en fait pas sortir
     wheelDrift(c, hero, mask, { drift: 20, offset: 120 }, 400, 1);
     expect(hero.z).toBe(295);
+  });
+
+  it('scanner loin du chariot : au plus un rayon d’écart (même pièce ou pièce voisine)', () => {
+    const c = createChariot('rayon-2', 0, 0);
+    expect(chariotInReach(c, 'rayon-2', [])).toBe(true);
+    expect(chariotInReach(c, 'rayon-essai', [{ to: 'accueil' }, { to: 'rayon-2' }])).toBe(true);
+    expect(chariotInReach(c, 'accueil', [{ to: 'rayon-essai' }])).toBe(false);
+    expect(chariotInReach(null, 'accueil', [])).toBe(true); // pas de chariot : pas de limite
   });
 });

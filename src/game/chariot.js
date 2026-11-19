@@ -9,7 +9,7 @@
 //          onForgot() → le héros a changé de lieu sans lui }
 
 import { config } from '../config.js';
-import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift } from '../core/chariot.js';
+import { chariotInReach, createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot, noteBump, wheelDrift } from '../core/chariot.js';
 import { worldToStageX, worldToStageY, scaleAt } from '../scene/projection.js';
 import { actorLevel } from '../scene/depth.js';
 
@@ -123,6 +123,10 @@ export function createChariotWiring(game, image, parent) {
       const w = image.w * box.s;
       return sx >= box.x - w / 2 - margin && sx <= box.x + w / 2 + margin && sy >= box.y - image.h * box.s - margin && sy <= box.y + margin;
     },
+    // Assez près pour scanner (au plus un rayon d'écart) ? exits : sorties du lieu affiché.
+    inReach: (exits) => chariotInReach(state, game.place(), exits),
+    // État du chariot poussé ici (pour la pile de cartons), ou null.
+    core: () => (state && shownHere ? state : null),
     info: () => (state ? { place: state.place, x: state.x, z: state.z, pushed: state.pushed, side: state.side } : null),
   };
 }

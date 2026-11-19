@@ -48,6 +48,14 @@
       "met": true,
       "chariot": true,
       "place": "rayon-essai"
+    },
+    {
+      "id": "chariot-pile",
+      "label": "Avec le chariot, rayon 8 : la pile de cartons (A8)",
+      "equip": true,
+      "met": true,
+      "chariot": true,
+      "place": "rayon-2"
     }
   ]
 }

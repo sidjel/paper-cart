@@ -33,11 +33,17 @@ export function buildProducts(place, catalog, stageY) {
   return out;
 }
 
-// Objets à prendre au présentoir : au fond (backZ), contre l'étagère ; on s'y présente de face.
-export function buildPickups(place, backZ) {
-  return (place.accueil?.items ?? []).map((it) => ({
+// Objets à prendre : au présentoir (au fond, backZ, contre l'étagère ; on s'y présente de face), et posés
+// au sol (place.pickups : at = [x, z] ; stageY(z) : hauteur sur la scène). Un objet caché par une pile de
+// cartons (place.pile.hides) n'est pas disponible tant qu'elle n'est pas tombée (scanned : indisponible).
+export function buildPickups(place, backZ, stageY) {
+  const desk = (place.accueil?.items ?? []).map((it) => ({
     id: it.id, x: it.at[0], z: backZ, loose: true, scanned: false, standAt: [[it.at[0], backZ - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
   }));
+  const floor = (place.pickups?.items ?? []).map((it) => ({
+    id: it.id, x: it.at[0], z: it.at[1], loose: true, scanned: place.pile?.hides === it.id, standAt: it.standAt, y: stageY(it.at[1]), w: it.w, h: it.h,
+  }));
+  return [...desk, ...floor];
 }
 
 // Échange (panier plein) : le produit `from` (reposé) prend la place du produit `to` (qu'on vient de scanner).

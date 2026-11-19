@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="260" height="300" viewBox="0 0 260 300">
+  <!-- [TEMP] Pile de cartons du rayon 8 (A8, séance 76) : trois cartons empilés de travers, à renverser. Pied de la pile en (130, 292). Généré, provisoire. -->
+  <defs>
+    <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="9"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter>
+    <g id="pile">
+      <path d="M22 196 h214 v96 h-214 z" fill="#b08a5a"/>
+      <path d="M40 106 h176 v90 h-176 z" fill="#c19a66" transform="rotate(-3 128 150)"/>
+      <path d="M62 22 h140 v84 h-140 z" fill="#b8915f" transform="rotate(4 132 64)"/>
+    </g>
+  </defs>
+  <g filter="url(#crayon)">
+    <use href="#pile" xlink:href="#pile" stroke="#fbf8ee" stroke-width="10" stroke-linejoin="round"/>
+    <use href="#pile" xlink:href="#pile" stroke="#4a4236" stroke-width="2.6" stroke-linejoin="round"/>
+    <path d="M118 196 v96 M124 106 v90 M130 22 v84" stroke="#d8c39a" stroke-width="10" opacity="0.8"/>
+    <text x="60" y="258" font-family="sans-serif" font-size="20" font-weight="700" fill="#5a4630">FRAGILE</text>
+    <text x="78" y="164" font-family="sans-serif" font-size="15" font-weight="700" fill="#5a4630" transform="rotate(-3 128 150)">CE CÔTÉ ↑</text>
+    <text x="96" y="70" font-family="sans-serif" font-size="13" font-weight="700" fill="#5a4630" transform="rotate(4 132 64)">RAYON 8</text>
+  </g>
+</svg>
