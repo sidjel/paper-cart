@@ -521,7 +521,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   font-size: calc(14px * var(--ts, 1));
   font-weight: 700;
   box-shadow: 2px 2px 0 rgb(61 53 42 / 0.35);
-  opacity: 0;
+  /* Séance 77 : garde son calque en permanence (jamais tout à fait transparent, jamais retiré), comme la
+     bande du haut-parleur (séance 68) : sinon il en gagnait et perdait un à la fin de l'intro (test des comptages). */
+  opacity: 0.001;
+  will-change: opacity;
   pointer-events: none;
   z-index: 45;
 }

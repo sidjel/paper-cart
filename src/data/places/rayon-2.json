@@ -9,6 +9,10 @@
     "scalePerDepth": 0.0012
   },
   "images": {
+    "carton-haut": {
+      "src": "art/placeholder/carton-haut.svg",
+      "size": [360, 100]
+    },
     "cartons": {
       "src": "art/placeholder/cartons.svg",
       "size": [260, 300]
@@ -88,6 +92,14 @@
   },
   "props": [
     {
+      "id": "carton-haut",
+      "image": "carton-haut",
+      "at": [1700, 264],
+      "anchor": [180, 542],
+      "depthRef": 300,
+      "comment": "[TEMP] Le dernier carton, encore en haut de l'étagère, au-dessus du tas (les trois autres sont tombés) : posé sur le haut de l'étagère (y 170 sur la scène), au fond de tout."
+    },
+    {
       "id": "papier-toilette",
       "image": "papier-toilette",
       "at": [1700, 230],
@@ -101,7 +113,7 @@
       "at": [1700, 215],
       "anchor": [130, 292],
       "depthRef": 215,
-      "comment": "Pile de cartons à renverser (A8) : obstacle « Pile de cartons » de la zone de marche."
+      "comment": "Tas de cartons tombés du haut de l'étagère (A8, séance 77 : il en reste un en haut), à renverser : obstacle « Pile de cartons » de la zone de marche."
     }
   ],
   "pile": {
