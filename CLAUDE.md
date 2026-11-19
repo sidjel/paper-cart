@@ -24,7 +24,9 @@
 ## Communication
 - **Début de séance** : l'auteur écrit librement (par exemple « Séance suivante : … », ses impressions en vrac, un rapport du diagnostic collé). Claude reformule en 2 ou 3 lignes ce qu'il a compris et ce qu'il va faire, puis enchaîne.
 - **Retours de l'auteur** : les classer en « ce qui plaît / ce qui gêne / ce qui manque ». Pour un ressenti vague (« la marche est molle »), proposer 2 ou 3 réglages ou pistes concrètes à essayer plutôt qu'une longue analyse.
-- **Questions** : au plus 3 à la fois, regroupées en fin de message. Choix numérotés avec une recommandation, pour que l'auteur puisse répondre « 1 » ou « B ».
+- **Questions** (règle de l'auteur, séance 74) : **aucune limite de nombre**, mais chaque question doit être **utile et efficace** : elle complète le jeu (art, game design, histoire, ou tout autre élément qui le fait évoluer). Regroupées en fin de message, numérotées, avec des choix en lettres et une recommandation : l'auteur répond avec **une ou deux lettres** (« 1A », « 2AB »).
+  - Si une partie du jeu (faite ou à faire) semble **trop limitée, pas assez développée, pas assez fun ou pas assez détaillée**, poser des questions pour **enrichir l'univers**, sans attendre qu'on le demande.
+  - Toujours **cohérent** avec le jeu, **dans le scope**, logique, et **réalisable ensemble** sans difficulté extrême.
 - **Pendant le travail** : pas de commentaire pas à pas. Prévenir seulement en cas de blocage, de changement de plan ou de décision à prendre.
 - **Vocabulaire simple**, sans jargon non expliqué : l'auteur est amateur.
 - **Toujours finir** une réponse de fin de séance (et chaque fin de conversation) par le lien pour jouer avec la version : `https://sidjel.github.io/paper-cart/?v=<commit>` (détail : skill `fin-seance`).

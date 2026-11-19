@@ -15,7 +15,7 @@ description: À utiliser à la fin de chaque séance de travail sur Paper Cart (
 - Ce qui est jouable maintenant.
 - **Ce qui a été vérifié, et comment** : tests automatiques, navigateur en taille téléphone simulée, mesures (images par seconde, erreurs console). **Ce qui reste à vérifier par l'auteur** sur son vrai téléphone et avec sa manette.
 - Comment tester : sur PC (touches) et sur téléphone (adresse, gestes), en 5 étapes au plus.
-- **Quoi essayer et à quoi faire attention** : 2 ou 3 questions de ressenti pour l'auteur.
+- **Quoi essayer et à quoi faire attention** : les questions de ressenti utiles pour l'auteur (règle des questions : `CLAUDE.md`, « Communication »).
 - Réglages disponibles dans le panneau (touche F2 ou bouton « ⚙ »).
 - Décisions prises seul (détails mineurs uniquement) et pourquoi.
 - Ce que l'auteur doit préparer pour la suite (dessins, sons, textes), seulement si c'est utile maintenant, avec le format exact.

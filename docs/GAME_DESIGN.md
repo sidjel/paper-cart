@@ -53,8 +53,9 @@
 ## Le Chariot (A8)
 - ✅ VALIDÉ (séance 73) : il s'appelle **chariot** dans le jeu et les documents (plus « caddie »). **L'un ou l'autre** : panier ou chariot, jamais les deux ; le chariot remplace le panier (échange au comptoir de l'accueil).
 - ✅ VALIDÉ (séance 73) : **poussé par le héros**, en **papier 2D comme lui**. Il doit avoir une **vraie utilité** et être **agréable et fun à jouer**, pas seulement suivre (l'essai de la séance 72, chariot qui suit derrière, est abandonné).
-- ❓ À DÉFINIR (séance 73) : son utilité dans le jeu (pistes proposées à l'auteur en séance 73).
-- ❓ CONFLIT (séance 73, à trancher par l'auteur) : « le chariot est persistant quand il change de pièce » (séance 73) contre « il ne suit pas le héros d'un lieu à l'autre ; il reste garé là où le joueur l'a laissé » (séance 50).
+- ✅ VALIDÉ (séance 74, choix A) : **poussé**, il passe les portes avec le héros ; **lâché**, il reste dans sa pièce (le joueur en est responsable).
+- ✅ VALIDÉ (séance 74, choix A) : **lourd** : démarre et freine plus lentement que le héros seul, dérape un peu au demi-tour, grince ; il se retourne comme une feuille avec le héros.
+- ✅ VALIDÉ (séance 74, choix A, B et C) : ses utilités, chacune à son prototype : **A, explorer** (prototype A : l'élan renverse des piles de cartons, on monte dessus pour une étagère haute, lâché il roule seul) ; **B, garde-manger** (prototype B, quand les cartes pourriront : le rythme de pourriture dépend de lui et de l'endroit où il est garé) ; **C, allié en combat** (prototype B : il charge, il abrite).
 - ❓ À DÉFINIR (séance 50) : plus tard, un **plan du magasin** (affiche ou dépliant, dans les Objets) aidera à retrouver son chariot. On dit « **plan** » et non « carte ».
 - ✅ (séance 50) Ne le bloque pas ; pas de physique complexe. Peut être **garé** et **repris** ; change de visuel selon son remplissage ; accueillera plus tard la Glacière. 🧪 Plus tard : interactions avec le décor (présentoirs, étagères hautes). [TEMP] capacité 12.
 
