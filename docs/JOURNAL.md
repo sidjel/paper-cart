@@ -18,6 +18,32 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 74 — 19/11/2026 — Le chariot poussé ; nouvelle règle des questions
+
+**Réponses de l'auteur** :
+- 1A : poussé, le chariot passe les portes ; lâché, il reste dans sa pièce ;
+- 2ABC : trois utilités (explorer, garde-manger, allié en combat), chacune à son prototype ;
+- 3A : le chariot est lourd.
+
+**Nouvelle règle** : questions sans limite de nombre, mais utiles, avec une réponse en une ou deux lettres ; enrichir l'univers sans attendre (`CLAUDE.md`).
+
+**Fait** (`315eb71`) :
+- Le héros **pousse** le chariot devant lui. Il est **lourd** : plus lent, démarre et freine moins vite, dérape un peu au demi-tour.
+- Au demi-tour, il **se retourne comme une feuille** autour du héros, et **grince**.
+- Il **bute** contre le décor.
+- **Lâcher / Pousser** : le bouton d'action, quand rien n'est à scanner.
+- **Poussé, il passe les portes** avec le héros ; **lâché, il reste** dans sa pièce.
+- L'essai de la séance 72 (le chariot qui suit derrière) est retiré du code.
+- Réglages : ⚙ › Chariot (distance, vitesse, lourdeur, retournement, portée, taille, capacité).
+
+**Pas encore** : le héros penché (il faut un dessin), l'élan et ses usages, le comptoir.
+
+**Vérifié** : 205 tests de logique (dont 5 sur le chariot poussé : côté, retournement et grincement, lourdeur, butée, portes), Knip. 117 essais navigateur (PC et téléphone simulé), dont 2 nouveaux : pousser, demi-tour, lâcher, reprendre ; passer la porte poussé, rester lâché. Aucune erreur console. **Pas vérifié** : la lourdeur dans le navigateur (temps trop irréguliers : vérifiée par les tests de logique seulement) ; la fluidité sur le téléphone.
+
+**Proposition pour la séance suivante** : selon les réponses, l'élan (première utilité) ou le comptoir.
+
+---
+
 ## Séance 73 — 18/11/2026 — Le chariot redéfini
 
 **Demandes de l'auteur** :
