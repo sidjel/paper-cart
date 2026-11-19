@@ -18,6 +18,36 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 76 — 19/11/2026 — La pile de cartons et le rouleau
+
+**Réponses de l'auteur** :
+- 1 : l'hôtesse donne le chariot contre une monnaie d'échange ; le Papier Toilette est à rendre logique ;
+- 2A : un rouleau [TEMP] ;
+- 3A : sous la pile de cartons [TEMP] ;
+- 4B : un rayon d'écart au plus ;
+- 5A : la burette d'huile ;
+- 6AB : dessous, la monnaie pour l'instant ;
+- 7A : monter sur le chariot lâché ;
+- 8B : 3 dessins de tas ;
+- 9A : je propose les slogans.
+
+**Fait** (`49b2262`) :
+- **Une pile de cartons au rayon 8**, le rayon d'entretien. Avec le chariot lancé, elle tombe d'un coup. À la main, il faut pousser un moment : elle vacille, puis tombe.
+- **Dessous, un rouleau de Papier Toilette** à prendre (onglet Objets). Le héros pense : « Ici, j'ai l'impression que ça vaut une fortune. »
+- Une fois tombée, la pile le reste, même quand on revient.
+- **Scanner loin du chariot** : au plus un rayon d'écart ; au-delà, le haut-parleur refuse en se moquant.
+- Le chariot bute maintenant par **son avant**, et non plus par son milieu.
+- Nouveau départ de test : « chariot-pile ».
+- Réglages : ⚙ › Pile de cartons.
+
+**Décision prise seule** : la pile est au rayon 8 (entretien), où des cartons ont du sens, et le rayon 7 est déjà à sa limite d'images.
+
+**Vérifié** : 212 tests de logique, Knip ; 121 essais navigateur (à la main, au chariot, retour au rayon) ; aucune erreur console. **Pas vérifié** : le ressenti de la chute, la fluidité sur le téléphone.
+
+**Proposition pour la séance suivante** : l'hôtesse du comptoir et l'échange du rouleau contre le chariot, puis monter sur le chariot.
+
+---
+
 ## Séance 75 — 19/11/2026 — Le chariot : lâcher partout, bras tendus, roue folle, haut-parleur
 
 **Réponses de l'auteur** : 1A, 2AB, 3 (l'hôtesse, contre une monnaie d'échange à trouver), 4B, 5 (pas trop loin), 6A (et réparable dans l'histoire), 7A, 8A, 9A.

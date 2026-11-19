@@ -182,10 +182,10 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Héros qui pousse à bras tendus | 75 | 👀 | Pose [TEMP] (une image de bras par-dessus le héros) ; la Scanette est rangée en poussant, ressortie pour scanner. |
-| Roue folle, réparable dans l'histoire | 75 | 👀 | Il tire vers le fond en poussant de côté (⚙ › Chariot › Roue folle, 0 = réparée). Réparation : question posée. |
+| Roue folle, réparable dans l'histoire | 75 | 👀 | Il tire vers le fond en poussant de côté (⚙ › Chariot › Roue folle, 0 = réparée). Réparation (5A, séance 76) : burette d'huile dans un futur rayon Bricolage. |
 | Le haut-parleur commente le chariot | 75 | 👀 | 8 répliques [TEMP] : pris, lâché, cogne 3 fois en 4 s, oublié dans une autre pièce. |
-| Élan qui renverse des cartons ; monter sur le chariot | 75 | ❓ | Choix 2AB ; à construire (séances suivantes). |
-| Chariot qui se remplit (silhouettes de papier) | 75 | ❓ | Choix 9A ; à construire. |
+| Élan qui renverse des cartons ; monter sur le chariot | 75 | 👀 | Pile de cartons au rayon 8 (séance 76) : élan du chariot ou à la main ; dessous, le rouleau. À tester (départs « rayon-2 » et « chariot-pile »). Monter sur le chariot : à construire. |
+| Chariot qui se remplit | 75 | ❓ | Choix 8B (séance 76) : 3 dessins de tas ; à construire. |
 | Limite des comptages : images du rayon à 40/40 | 75 | 👀 | Les bras qui poussent tiennent en une seule image pour ne pas dépasser la limite. Le remplissage du chariot demandera d'en parler (limite relevée seulement avec l'accord de l'auteur). |
 
 ### Séance 73 : le chariot redéfini par l'auteur
@@ -202,8 +202,8 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 |---|---|---|---|
 | A8 (1/3) : chariot qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | ❌ abandonné (séance 73 : poussé par le héros) | Départ de test « chariot » (dernier de la liste). Réglages ⚙ › Chariot (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
 | Lâcher près d'un produit : le bouton d'action dit « Scanner » | 72 | 👀 | Choix 1A (séance 75) : double toucher sur le chariot, R, X. Construit. |
-| Qui donne le chariot, échange au comptoir (hôtesse) | 72 | ❓ | Séance 75 : l'hôtesse, contre une monnaie d'échange trouvée quelque part ; laquelle ? question posée. |
-| Scanner quand le chariot est lâché loin, ou dans un autre rayon | 72 | ❓ | Séance 75 : « pas trop loin » ; distance exacte : question posée. [TEMP] permis pour l'instant. |
+| Qui donne le chariot, échange au comptoir (hôtesse) | 72 | ❓ | Séance 76 : l'hôtesse, contre un rouleau de Papier Toilette [TEMP] trouvé sous la pile de cartons. Le rouleau se trouve (fait) ; l'hôtesse et l'échange : à construire. Pourquoi le PQ est précieux : question posée. |
+| Scanner quand le chariot est lâché loin, ou dans un autre rayon | 72 | 👀 | Choix 4B (séance 76) : au plus un rayon d'écart. Construit (refus du haut-parleur au-delà). |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
