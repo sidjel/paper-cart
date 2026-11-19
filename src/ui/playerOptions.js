@@ -4,6 +4,7 @@
 // Doigt, souris, clavier et manette : haut/bas pour choisir, gauche/droite pour changer, A ou Entrée
 // pour cocher, B ou Échap pour revenir.
 
+import helpFile from '../data/aide-reglages.json';
 import { TUNABLES, getValue, setValue, onConfigChange } from '../config.js';
 
 const SECTIONS = [
@@ -78,6 +79,10 @@ export function createPlayerOptions(root, { onClose }) {
       const out = document.createElement('span');
       out.className = 'po-value';
       row.append(label, input, out);
+      const help = document.createElement('span');
+      help.className = 'po-help';
+      help.textContent = helpFile.aide[key] ?? '';
+      row.appendChild(help);
       list.appendChild(row);
       rows.push({ t, input, out });
     }

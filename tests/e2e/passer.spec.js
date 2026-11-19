@@ -46,3 +46,19 @@ test('Passer : la rencontre défile d’un coup jusqu’au choix du nom ; les r�
   expect(after.length).toBeGreaterThan(before + 3); // les répliques passées sont gardées
   expect(after.join(' ')).toMatch(/Qui es-tu/);
 });
+
+test('Pause › Options : les réglages des joueurs, chacun expliqué ; Retour ramène à la pause', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.keyboard.press('Escape');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('pause');
+  await page.locator('.pause-card button', { hasText: 'Options' }).click();
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('options');
+  const opts = page.locator('.player-options');
+  await expect(opts).toBeVisible();
+  await expect(opts.locator('.po-help').first()).not.toBeEmpty();
+  await opts.locator('.po-back').click();
+  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('pause');
+  // Le panneau des développeurs (⚙) a aussi une explication sous chaque réglage.
+  await page.keyboard.press('F2');
+  await expect(page.locator('.settings .setting-help').first()).not.toBeEmpty();
+});

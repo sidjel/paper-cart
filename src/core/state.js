@@ -6,12 +6,12 @@ export const TRANSITIONS = {
   loading: ['title', 'play'],
   title: ['play', 'menu', 'options', 'intro'], // écran titre : Commencer, Options
   intro: ['play'], // texte d'introduction (noir et blanc), puis la partie
-  options: ['title'], // options du joueur (depuis l'écran titre)
+  options: ['title', 'pause'], // options du joueur (depuis l'écran titre, ou la pause en jeu)
   play: ['pause', 'menu', 'panier', 'transition'],
   transition: ['play', 'erreur'], // changement de lieu : fondu au noir, rien ne bouge
   erreur: ['play'], // un lieu n'a pas pu être chargé, même le lieu de départ : écran « Réessayer »
   panier: ['play'], // écran du Panier (les cartes obtenues)
-  pause: ['play', 'menu'],
+  pause: ['play', 'menu', 'options'],
   menu: ['play', 'pause', 'bench', 'title'],
   bench: ['play'], // banc d'essai : le personnage se déplace tout seul, on mesure
 };

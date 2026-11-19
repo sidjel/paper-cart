@@ -265,6 +265,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .presets button.active { background: var(--accent); font-weight: 700; }
 .presets button.active::before { content: '✓ '; }
 .settings-note { margin: 10px 0 0; font-size: calc(13px * var(--ts, 1)); }
+.setting-help { margin: -2px 0 10px; font-size: calc(12px * var(--ts, 1)); line-height: 1.35; opacity: 0.75; }
 
 .overlay {
   position: absolute;
@@ -931,7 +932,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   border-bottom: 1px solid rgb(143 211 255 / 0.35);
   padding-bottom: 3px;
 }
-.po-row { display: grid; grid-template-columns: 1fr minmax(120px, 42%) 64px; align-items: center; gap: 10px; min-height: 40px; }
+.po-row { display: grid; grid-template-columns: 1fr minmax(120px, 42%) 64px; align-items: center; gap: 4px 10px; min-height: 40px; }
+.po-help { grid-column: 1 / -1; font-size: calc(12px * var(--ts, 1)); line-height: 1.35; opacity: 0.7; margin-bottom: 6px; }
 .po-label { font-size: calc(15px * var(--ts, 1)); }
 .po-value { font-size: calc(13px * var(--ts, 1)); color: #b9c7d6; text-align: right; font-variant-numeric: tabular-nums; }
 .player-options input, .player-options select { accent-color: #8fd3ff; }

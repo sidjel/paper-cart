@@ -4,6 +4,8 @@ import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import catalog from '../../src/data/products.json';
 import place from '../../src/data/places/rayon-essai.json';
 import hero from '../../src/data/characters/heros.json';
+import help from '../../src/data/aide-reglages.json';
+import { TUNABLES } from '../../src/config.js';
 
 // Les données se citent entre elles (produits, images, objets) : une référence cassée doit
 // échouer ici, pas planter le jeu au chargement.
@@ -36,3 +38,12 @@ describe('données : références entre fichiers', () => {
     }
   });
 });
+
+describe('réglages : chacun a son explication (séance 77)', () => {
+  it('chaque réglage de TUNABLES a une explication dans data/aide-reglages.json, et rien en trop', () => {
+    const keys = TUNABLES.map((t) => t.key);
+    expect(keys.filter((k) => !help.aide[k])).toEqual([]);
+    expect(Object.keys(help.aide).filter((k) => !keys.includes(k))).toEqual([]);
+  });
+});
+

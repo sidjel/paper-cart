@@ -1,6 +1,8 @@
-// Panneau de réglages (F2 ou bouton « ⚙ »), construit d'après TUNABLES (src/config.js).
+// Panneau de réglages des développeurs (F2 ou bouton « ⚙ », en mode dev seulement), construit d'après
+// TUNABLES (src/config.js), avec l'explication de chaque réglage. Les joueurs ont les Options (ui/playerOptions.js).
 // Les réglages modifiés sont gardés dans le navigateur (localStorage) d'une partie à l'autre.
 
+import helpFile from '../data/aide-reglages.json';
 import { WALK_PRESETS, TUNABLES, getValue, getDefault, setValue, overrides, applyOverrides, resetAll, onConfigChange } from '../config.js';
 
 const STORAGE_KEY = 'paper-cart.reglages.v1';
@@ -36,7 +38,7 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
   panel.setAttribute('aria-label', 'Réglages');
 
   const title = document.createElement('h2');
-  title.textContent = 'Réglages';
+  title.textContent = 'Réglages (développeurs)';
   panel.appendChild(title);
 
   const controls = new Map(); // clé → fonction de mise à jour de l'affichage
@@ -159,6 +161,11 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
     input.dataset.key = t.key;
     row.append(name, input, out);
     section.appendChild(row);
+    // Explication du réglage (data/aide-reglages.json), sous son nom.
+    const help = document.createElement('p');
+    help.className = 'setting-help';
+    help.textContent = helpFile.aide[t.key] ?? '';
+    section.appendChild(help);
 
     controls.set(t.key, () => {
       const v = getValue(t.key);

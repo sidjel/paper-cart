@@ -84,7 +84,7 @@ const tmpWorld = { x: 0, z: 0 };
 let renderLine = '';
 
 const audio = createAudio(config.audio, song);
-const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, device: touch ? 'touch' : 'keys', muted: config.audio.muted });
+const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, device: touch ? 'touch' : 'keys', muted: config.audio.muted, dev: config.debug.devMode });
 // Historique des dialogues (Pause → Dialogues), pour relire une réplique passée trop vite.
 const journal = createJournal(hud.pauseCard, config.narrator.logMax, { onFirstButton: () => hud.focusResume() });
 
@@ -536,7 +536,7 @@ function handleAction(action) {
       if (who === 'intro') skipAll(introRun);
       else if (who === 'bench') measure.cancel();
       else if (who === 'menu') sm.back();
-      else if (who === 'options') sm.go('title');
+      else if (who === 'options') sm.back(); // vers l'écran titre ou la pause, d'où l'on vient
       else if (who === 'title') titleUi.back(); // liste des départs (mode dev)
       else if (who === 'confirm') confirm.no();
       else if (who === 'card') basketUi.closeDetail(); // d'abord la grande carte
@@ -551,18 +551,23 @@ function handleAction(action) {
     case 'skip': // « Passer » : les répliques jusqu'à une question, ou toute la conversation
       voices.skipAll();
       break;
+    case 'options': // écran Pause › Options (les réglages des joueurs)
+      if (who === 'pause') sm.go('options');
+      break;
     case 'padLost': // la manette utilisée est débranchée : pause (src/input/CLAUDE.md)
       if (inGame(who)) sm.go('pause');
       break;
     case 'settings':
+      if (!config.debug.devMode) break; // panneau des développeurs (les joueurs ont les Options)
       if (sm.is('menu')) sm.back();
       else sm.go('menu');
       break;
     case 'diagnostic':
-      diag.toggle();
+      if (config.debug.devMode) diag.toggle(); // outil des développeurs
+
       break;
     case 'debugMask':
-      setValue('debug.showWalkMask', !config.debug.showWalkMask);
+      if (config.debug.devMode) setValue('debug.showWalkMask', !config.debug.showWalkMask);
       break;
     case 'fullscreen':
       toggleFullscreen();

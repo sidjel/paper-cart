@@ -21,7 +21,7 @@ function button(label, title, action, onAction) {
 const HELP = {
   touch:
     'Touche le sol pour marcher, garde le doigt pour guider.<br>Touche deux fois un produit pour aller le scanner (ou « Scanner » quand tu es devant). Bouton « Panier » en bas à gauche. Touche deux fois le chariot pour le lâcher ou le pousser.<br>Option « joystick virtuel » dans ⚙.',
-  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>R : lâcher ou pousser le chariot<br>Tab : passer les dialogues<br>Échap : pause · F2 : réglages · F3 : diagnostic · F4 : zone de marche',
+  keys: 'ZQSD ou flèches, ou clic sur le sol pour marcher.<br>Entrée ou Espace : scanner un produit (ou double clic sur le produit) · I : Panier.<br>R : lâcher ou pousser le chariot<br>Tab : passer les dialogues<br>Échap : pause',
   pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · X : lâcher ou pousser le chariot · Select : passer les dialogues · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
 };
 const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
@@ -29,7 +29,8 @@ const LABEL = { scanner: 'Scanner', prendre: 'Prendre', lacher: 'Lâcher', pouss
 const SKIP_KEY = { touch: '', keys: 'Tab', pad: 'Select' };
 const KEY = { touch: '', keys: 'Entrée', pad: 'A' };
 
-export function createHud(root, { version, onAction, device, muted }) {
+// dev : mode développeur (boutons ⚙ et DBG ; sinon, les joueurs ont Pause › Options).
+export function createHud(root, { version, onAction, device, muted, dev = true }) {
   const bar = document.createElement('div');
   bar.className = 'hud-bar';
   const soundBtn = button('♪', 'Couper ou remettre le son', 'mute', onAction);
@@ -37,9 +38,8 @@ export function createHud(root, { version, onAction, device, muted }) {
   bar.append(
     button('II', 'Pause (Échap)', 'pause', onAction),
     soundBtn,
-    button('⚙', 'Réglages (F2)', 'settings', onAction),
-    button('DBG', 'Diagnostic (F3)', 'diagnostic', onAction),
   );
+  if (dev) bar.append(button('⚙', 'Réglages des développeurs (F2)', 'settings', onAction), button('DBG', 'Diagnostic (F3)', 'diagnostic', onAction));
   if (document.fullscreenEnabled) bar.append(button('⛶', 'Plein écran', 'fullscreen', onAction));
 
   const ver = document.createElement('div');
@@ -61,9 +61,12 @@ export function createHud(root, { version, onAction, device, muted }) {
   resume.className = 'primary';
   resume.textContent = 'Reprendre';
   resume.addEventListener('click', () => onAction('pause'));
+  const optionsBtn = document.createElement('button');
+  optionsBtn.textContent = 'Options';
+  optionsBtn.addEventListener('click', () => onAction('options'));
   const help = document.createElement('p');
   help.className = 'help';
-  card.append(h, resume, help);
+  card.append(h, resume, optionsBtn, help);
   pause.appendChild(card);
 
   // Bouton « Scanner » : visible seulement quand un produit est à portée (utile surtout au doigt).
@@ -122,7 +125,7 @@ export function createHud(root, { version, onAction, device, muted }) {
   let skipShown = false;
   function showDevice() {
     skipBtn.textContent = `Passer ⏭${SKIP_KEY[shownDevice] ? ` (${SKIP_KEY[shownDevice]})` : ''}`;
-    help.innerHTML = HELP[shownDevice];
+    help.innerHTML = HELP[shownDevice] + (dev && shownDevice === 'keys' ? ' · F2 : réglages (dév.) · F3 : diagnostic · F4 : zone de marche' : '');
     hint.textContent = HINT[shownDevice];
     labelAction();
   }
