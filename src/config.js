@@ -66,9 +66,11 @@ export const config = {
     chariot: 12, // [TEMP] capacité du chariot (A8) — à régler par l'auteur
   },
   chariot: {
-    follow: 140, // distance à laquelle le chariot suit le héros, sur son chemin (px du monde)
-    ease: 10, // vitesse à laquelle il rattrape son retard (part par seconde)
-    range: 200, // distance pour le garer ou le reprendre (px du monde ; plus que la distance de suivi)
+    offset: 125, // distance entre le héros et le milieu du chariot qu'il pousse (px du monde)
+    speed: 0.8, // vitesse du héros qui pousse (× vitesse de marche)
+    weight: 0.35, // lourdeur : démarrage et freinage (× ceux du héros seul ; plus petit = plus lourd)
+    flipTime: 0.3, // durée du retournement du chariot quand le héros fait demi-tour (s)
+    range: 200, // distance pour le prendre ou le lâcher (px du monde)
     size: 0.8, // [TEMP] taille du chariot à côté du héros
   },
   access: {
@@ -272,10 +274,12 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
   { group: 'Chariot', key: 'carry.chariot', label: 'Capacité du chariot (cartes)', min: 1, max: 40, step: 1 },
-  { group: 'Chariot', key: 'chariot.follow', label: 'Distance de suivi', min: 30, max: 200, step: 5, unit: 'px' },
-  { group: 'Chariot', key: 'chariot.ease', label: 'Souplesse du suivi (rattrapage)', min: 2, max: 30, step: 1 },
+  { group: 'Chariot', key: 'chariot.offset', label: 'Distance au héros', min: 60, max: 220, step: 5, unit: 'px' },
+  { group: 'Chariot', key: 'chariot.speed', label: 'Vitesse en poussant (× marche)', min: 0.4, max: 1.2, step: 0.05 },
+  { group: 'Chariot', key: 'chariot.weight', label: 'Lourdeur (démarrage, freinage ; petit = lourd)', min: 0.1, max: 1, step: 0.05 },
+  { group: 'Chariot', key: 'chariot.flipTime', label: 'Retournement du chariot', min: 0, max: 0.8, step: 0.05, unit: 's' },
   { group: 'Chariot', key: 'chariot.size', label: 'Taille du chariot', min: 0.4, max: 1.4, step: 0.05 },
-  { group: 'Chariot', key: 'chariot.range', label: 'Portée pour garer ou reprendre', min: 50, max: 350, step: 10, unit: 'px' },
+  { group: 'Chariot', key: 'chariot.range', label: 'Portée pour le prendre ou le lâcher', min: 50, max: 350, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
   { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou chariot : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },

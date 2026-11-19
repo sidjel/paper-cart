@@ -1,71 +1,76 @@
 import { describe, it, expect } from 'vitest';
-import { createChariot, takeChariot, parkChariot, nearChariot, leaveChariot, stepChariot } from '../../src/core/chariot.js';
+import { createChariot, pushChariot, releaseChariot, nearChariot, arriveChariot, pushWalk, bump, stepChariot } from '../../src/core/chariot.js';
+import { compileMask } from '../../src/core/walkmask.js';
 
-const P = { follow: 60, ease: 12 };
+const P = { offset: 120, flipTime: 0.25, speed: 0.8, weight: 0.4 };
 const DT = 1 / 60;
 
-// Le héros marche de (x0, z) vers la droite à 200 px/s pendant `sec` secondes ; le chariot suit.
-function walk(c, hero, vx, vz, sec) {
-  for (let t = 0; t < sec; t += DT) {
-    hero.x += vx * DT;
-    hero.z += vz * DT;
+describe('chariot poussé (A8)', () => {
+  it('pris, il passe devant le héros, du côté où il regarde ; lâché, il ne bouge plus', () => {
+    const c = createChariot('rayon', 220, 50);
+    const hero = { x: 100, z: 50, facing: -1 };
+    pushChariot(c, hero);
+    expect(hero.facing).toBe(1); // il se tourne vers le chariot
+    hero.x = 150;
     stepChariot(c, hero, P, DT);
-  }
-}
-
-describe('chariot (A8)', () => {
-  it('garé, il ne bouge pas quand le héros s’éloigne', () => {
-    const c = createChariot('rayon', 100, 50);
-    const hero = { x: 120, z: 50 };
-    walk(c, hero, 200, 0, 1);
-    expect([c.x, c.z]).toEqual([100, 50]);
+    expect([c.x, c.z]).toEqual([270, 50]);
+    releaseChariot(c);
+    hero.x = 400;
+    stepChariot(c, hero, P, DT);
+    expect(c.x).toBe(270);
   });
 
-  it('repris, il suit le héros à la distance voulue, derrière lui', () => {
-    const c = createChariot('rayon', 100, 50);
-    const hero = { x: 130, z: 50 };
-    takeChariot(c, hero);
-    walk(c, hero, 200, 0, 2);
-    expect(hero.x - c.x).toBeGreaterThan(P.follow - 10);
-    expect(hero.x - c.x).toBeLessThan(P.follow + 25);
-    expect(c.facing).toBe(1);
-  });
-
-  it('il reprend le chemin du héros : après un virage, il passe par le coin (jamais en diagonale)', () => {
-    const c = createChariot('rayon', 0, 0);
-    const hero = { x: 20, z: 0 };
-    takeChariot(c, hero);
-    walk(c, hero, 200, 0, 1); // vers la droite jusqu'à x ≈ 220
-    let maxZWhileLeft = 0;
-    for (let t = 0; t < 1; t += DT) {
-      hero.z += 200 * DT; // puis vers le fond
-      stepChariot(c, hero, P, DT);
-      if (c.x < 180) maxZWhileLeft = Math.max(maxZWhileLeft, c.z);
+  it('demi-tour : il se retourne comme une feuille (côté de 1 à -1 en passant par 0), et grince une fois', () => {
+    const c = createChariot('rayon', 220, 50);
+    const hero = { x: 100, z: 50, facing: 1 };
+    pushChariot(c, hero);
+    hero.facing = -1;
+    const events = [];
+    const sides = [];
+    for (let t = 0; t < 0.4; t += DT) {
+      events.push(stepChariot(c, hero, P, DT));
+      sides.push(c.side);
     }
-    expect(maxZWhileLeft).toBeLessThan(15); // tant qu'il n'est pas au coin, il reste sur la première ligne
-    expect(Math.abs(c.x - hero.x)).toBeLessThan(15); // ensuite, il monte derrière le héros
+    expect(events.filter((e) => e === 'tourne')).toHaveLength(1);
+    expect(sides.some((s) => Math.abs(s) < 0.2)).toBe(true);
+    expect(c.side).toBe(-1);
+    expect(c.x).toBe(100 - P.offset);
   });
 
-  it('demi-tour du héros : le chariot le laisse passer (aucune collision) et se retrouve derrière lui', () => {
-    const c = createChariot('rayon', 0, 0);
-    const hero = { x: 20, z: 0 };
-    takeChariot(c, hero);
-    walk(c, hero, 200, 0, 1);
-    walk(c, hero, -200, 0, 1.5);
-    expect(c.x).toBeGreaterThan(hero.x + P.follow - 15);
-    expect(c.facing).toBe(-1);
+  it('lourd : le héros pousse moins vite, démarre et freine plus lentement', () => {
+    const walk = { maxSpeed: 500, acceleration: 10000, deceleration: 12000, depthFactor: 0.8 };
+    const w = pushWalk(walk, P);
+    expect(w.maxSpeed).toBe(400);
+    expect(w.acceleration).toBe(4000);
+    expect(w.deceleration).toBe(4800);
+    expect(w.depthFactor).toBe(0.8);
+    expect(walk.maxSpeed).toBe(500); // les réglages de marche ne changent pas
   });
 
-  it('garer, reprendre : seulement à côté, et dans le même lieu ; en partant, il reste garé', () => {
-    const c = createChariot('rayon', 100, 50);
-    expect(nearChariot(c, { x: 150, z: 50 }, 'rayon', 80)).toBe(true);
-    expect(nearChariot(c, { x: 300, z: 50 }, 'rayon', 80)).toBe(false);
-    expect(nearChariot(c, { x: 150, z: 50 }, 'accueil', 80)).toBe(false);
-    takeChariot(c, { x: 150, z: 50 });
-    leaveChariot(c);
-    expect(c.following).toBe(false);
-    takeChariot(c, { x: 150, z: 50 });
-    parkChariot(c);
-    expect(c.following).toBe(false);
+  it('il bute contre le décor : le héros ne peut pas l’enfoncer dans un mur', () => {
+    const mask = compileMask({ area: [[0, 0], [500, 0], [500, 300], [0, 300]], obstacles: [] });
+    const c = createChariot('rayon', 420, 50);
+    const hero = { x: 300, z: 50, facing: 1, prevX: 300, prevZ: 50, vx: 300 };
+    pushChariot(c, hero);
+    hero.x = 390; // le chariot serait à 510, hors de la zone
+    expect(bump(c, hero, mask, P)).toBe(true);
+    expect(hero.x).toBe(300);
+    expect(hero.vx).toBe(0);
+    hero.x = 350;
+    hero.prevX = 350;
+    expect(bump(c, hero, mask, P)).toBe(false);
+  });
+
+  it('poussé, il passe la porte avec le héros ; lâché, il reste dans sa pièce', () => {
+    const c = createChariot('rayon', 220, 50);
+    const hero = { x: 100, z: 50, facing: 1 };
+    expect(nearChariot(c, hero, 'rayon', 150)).toBe(true);
+    expect(nearChariot(c, hero, 'hall', 150)).toBe(false);
+    pushChariot(c, hero);
+    arriveChariot(c, 'hall', { x: 600, z: 80, facing: -1 }, P);
+    expect([c.place, c.x, c.z, c.side]).toEqual(['hall', 480, 80, -1]);
+    releaseChariot(c);
+    arriveChariot(c, 'rayon', { x: 100, z: 50, facing: 1 }, P);
+    expect(c.place).toBe('hall');
   });
 });

@@ -207,7 +207,7 @@ let pendingList = null; // productState ou pickupState
 const gear = createGear();
 let pickupState = null; // objets à prendre, visés comme les produits posés ailleurs
 let pickupReach = -1;
-let chariotAction = ''; // 'garer', 'reprendre' ou '' (bouton d'action)
+let chariotAction = ''; // 'pousser', 'lacher' ou '' (bouton d'action)
 const BLOCKED_LINE = { sans_scanette: 'sans_scanette', sans_panier: 'sans_panier', plein: 'panier_plein' };
 
 // Action (Entrée, Espace, A, bouton) : prendre ce qui est à portée au présentoir, sinon scanner.
@@ -773,7 +773,7 @@ function render() {
   if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
   if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, storeTime);
   else products.setMarker(reach, storeTime);
-  // Rien à prendre ni à scanner : garer ou reprendre le chariot, s'il est à côté.
+  // Rien à prendre ni à scanner : lâcher ou pousser le chariot, s'il est à côté.
   const ca = free && pk < 0 && reach < 0 ? chariot.action() : '';
   if (reach !== highlighted || pk !== pickupReach || ca !== chariotAction) {
     chariotAction = ca;
@@ -840,8 +840,8 @@ function frame(now) {
         intent.moveX = 0;
         intent.moveZ = 0;
       }
-      stepWalker(walker, intent, mask, config.walk, stepper.step);
-      chariot.step(stepper.step);
+      stepWalker(walker, intent, mask, chariot.walk(config.walk), stepper.step);
+      chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       guard.step(walker, intent, stepper.step);
       stepPendingScan();
       onScanEvent(stepScan(scan, stepper.step, config.scan));
@@ -901,11 +901,13 @@ const places = createPlaces(uiEl, gameEl, {
   },
   onLeaving() {
     marker.hide();
-    chariot.leaving(); // il ne suit pas le héros d'un lieu à l'autre : il reste garé ici
     stage = null;
   },
   // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
-  onArrived: () => voices.arrivedInPlace(),
+  onArrived() {
+    chariot.arrived(); // poussé, le chariot arrive avec le héros
+    voices.arrivedInPlace();
+  },
   logError,
   onLoadFailed: () => say('lieu_inaccessible'),
   render: () => render(),
@@ -932,7 +934,7 @@ async function start() {
   marker = createTargetMarker(places.backstage);
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
-  chariot = createChariotWiring({ walker: () => walker, place: () => place.id }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
+  chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
   input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind) });
 
@@ -988,6 +990,7 @@ async function start() {
     state: () => sm.get(),
     guard: () => guard.info(),
     chariot: () => chariot.info(),
+    chariotToggle: () => chariot.toggle(), // tests : lâcher ou reprendre le chariot (s'il est à côté)
     hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),

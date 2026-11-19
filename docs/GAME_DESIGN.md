@@ -58,6 +58,7 @@
 - ✅ VALIDÉ (séance 74, choix A, B et C) : ses utilités, chacune à son prototype : **A, explorer** (prototype A : l'élan renverse des piles de cartons, on monte dessus pour une étagère haute, lâché il roule seul) ; **B, garde-manger** (prototype B, quand les cartes pourriront : le rythme de pourriture dépend de lui et de l'endroit où il est garé) ; **C, allié en combat** (prototype B : il charge, il abrite).
 - ❓ À DÉFINIR (séance 50) : plus tard, un **plan du magasin** (affiche ou dépliant, dans les Objets) aidera à retrouver son chariot. On dit « **plan** » et non « carte ».
 - ✅ (séance 50) Ne le bloque pas ; pas de physique complexe. Peut être **garé** et **repris** ; change de visuel selon son remplissage ; accueillera plus tard la Glacière. 🧪 Plus tard : interactions avec le décor (présentoirs, étagères hautes). [TEMP] capacité 12.
+- 🧪 À TESTER (séance 74, étape 1) : poussé devant le héros (Lâcher / Pousser : bouton d'action quand rien n'est à scanner) ; il bute contre le décor ; grince au demi-tour. Pas encore : héros penché (dessin), élan, cartons, comptoir.
 
 ## Systèmes repris de l'ancien jeu 🧪 À TESTER (prototype C et suite)
 - **Glacière** : 3 places qui figent l'âge des cartes.

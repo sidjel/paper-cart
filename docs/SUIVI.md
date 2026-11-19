@@ -182,18 +182,18 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | Renommer « caddie » en « chariot » (jeu et documentation) | 73 | ✅ | Fait partout (textes, données, code, images provisoires) ; le journal et l'archive gardent l'ancien mot (historique). |
-| Chariot poussé par le héros, en papier 2D comme lui | 73 | ✅ | Décision ; à construire. Détails du ressenti : questions posées à l'auteur. |
+| Chariot poussé par le héros, en papier 2D comme lui | 73 | 👀 | Séance 74 : construit (lourd, se retourne comme une feuille, bute contre le décor, grince). À tester par l'auteur (départ « chariot »). Pas encore : héros penché. |
 | Chariot et panier : l'un ou l'autre | 73 | ✅ | Décision ; déjà le cas dans le départ de test (le panier est rendu). |
-| Chariot persistant quand on change de pièce | 73 | ❓ | Conflit avec la décision de la séance 50 (il reste garé dans son lieu) : question posée à l'auteur. |
-| Une vraie utilité, agréable et fun | 73 | ❓ | Rien de précis dans les documents : pistes proposées à l'auteur. |
+| Chariot persistant quand on change de pièce | 73 | 👀 | Choix A (séance 74) : poussé, il passe les portes ; lâché, il reste. Construit. |
+| Une vraie utilité, agréable et fun | 73 | ✅ | Choix A, B et C (séance 74) : explorer (prototype A, à construire), garde-manger et allié en combat (prototype B). |
 
 ### Séance 72 : A8 (1/3), le chariot qui suit
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | A8 (1/3) : chariot qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | ❌ abandonné (séance 73 : poussé par le héros) | Départ de test « chariot » (dernier de la liste). Réglages ⚙ › Chariot (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
-| Garer près d'un produit : le bouton d'action dit « Scanner » | 72 | ❓ | Le scan passe avant. Question posée à l'auteur. |
-| Qui donne le jeton, échange au comptoir (hôtesse) | 72 | ❓ | Étape 2/3, question posée à l'auteur. |
-| Scanner quand le chariot est garé loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question posée à l'auteur. |
+| Lâcher près d'un produit : le bouton d'action dit « Scanner » | 72 | ❓ | Le scan passe avant. Question reposée (séance 74). |
+| Qui donne le jeton, échange au comptoir (hôtesse) | 72 | ❓ | Question reposée (séance 74). |
+| Scanner quand le chariot est lâché loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question reposée (séance 74). |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
@@ -203,6 +203,7 @@ Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait part
 3. A6 (1/3) : l'accueil, lieu séparé ; aller-retour rayon ↔ accueil avec fondu *(Documentation et architecture (séance 29))*
 
 ## Règles de travail ajoutées par l'auteur
+- Questions sans limite de nombre, utiles, réponse en une ou deux lettres ; enrichir l'univers sans attendre (séance 74, `CLAUDE.md`).
 - Donner le lien pour jouer à chaque fin de conversation (séance 4).
 - Noter tous les changements et modifications pour ne pas se perdre : ce fichier (séance 4).
 - Garder toutes les options dans le menu des réglages, même validées (séances 5 et 7).

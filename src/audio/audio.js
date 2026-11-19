@@ -48,6 +48,7 @@ export function createAudio(settings, song) {
     aspire: 'scanner',
     carte: 'scanner',
     prise: 'scanner',
+    grince: 'chariot',
     annonce: 'voix',
     ding: 'voix',
     aparte: 'aparte',
@@ -291,6 +292,13 @@ export function createAudio(settings, song) {
     tone('sine', 600, 1200, t + 0.03, 0.12, 0.18);
   }
 
+  // [TEMP] Le chariot grince (il se retourne, on le prend) : deux petits crissements aigus.
+  function grince() {
+    const t = ctx.currentTime;
+    tone('sawtooth', 1900, 2350, t, 0.09, 0.02);
+    tone('sawtooth', 2250, 1750, t + 0.1, 0.12, 0.016);
+  }
+
   // [TEMP] Annonce au haut-parleur : « ding-dong » de magasin, deux notes douces.
   function annonce() {
     const t = ctx.currentTime;
@@ -426,7 +434,7 @@ export function createAudio(settings, song) {
     return [src, lp, g];
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, grince, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.
