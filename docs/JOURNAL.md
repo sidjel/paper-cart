@@ -18,6 +18,25 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 75 — 19/11/2026 — Le chariot : lâcher partout, bras tendus, roue folle, haut-parleur
+
+**Réponses de l'auteur** : 1A, 2AB, 3 (l'hôtesse, contre une monnaie d'échange à trouver), 4B, 5 (pas trop loin), 6A (et réparable dans l'histoire), 7A, 8A, 9A.
+
+**Fait** (`19ccbe6`) :
+- **Lâcher ou pousser partout**, même devant un produit : double toucher sur le chariot, R au clavier, X à la manette. Les aides à l'écran le disent.
+- **Le héros pousse à bras tendus** (pose provisoire). La Scanette est rangée pendant qu'il pousse, et ressort pour scanner.
+- **Roue folle** : en poussant de côté, le chariot tire doucement vers le fond ; le joueur corrige. Réglable (⚙ › Chariot › Roue folle ; 0 = réparée).
+- **Le haut-parleur commente**, rarement : le chariot repris, lâché, qui cogne 3 fois en 4 s, ou oublié dans une autre pièce. 8 répliques [TEMP].
+- Les réponses sont notées : `docs/GAME_DESIGN.md`, `docs/HISTOIRE.md` (hôtesse, monnaie, réparation), `docs/PERSONNAGES.md` (l'hôtesse).
+
+**Décision prise seule** (détail) : les deux bras tiennent en une seule image, pour rester dans la limite des comptages (40 images dans le rayon). Le remplissage du chariot (9A) demandera d'en parler.
+
+**Vérifié** : 207 tests de logique, dont la roue folle et les chocs ; Knip. 119 essais navigateur (PC et téléphone simulé), dont R, double toucher au doigt et bras tendus ; comptages dans les limites ; aucune erreur console. **Pas vérifié** : le ressenti de la roue folle, la fluidité sur le téléphone.
+
+**Proposition pour la séance suivante** : l'élan qui renverse une pile de cartons (2A).
+
+---
+
 ## Séance 74 — 19/11/2026 — Le chariot poussé ; nouvelle règle des questions
 
 **Réponses de l'auteur** :

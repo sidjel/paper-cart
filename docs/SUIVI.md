@@ -178,6 +178,16 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Publication : `main` (CLAUDE.md) ou branche de session (cet environnement) | 70 | ✅ | Choix 1 de l'auteur : pousser sur `main`, maintenant et pour les séances suivantes. |
 | **À rappeler à l'auteur** : tester A7 et les entrées sur PC (avec une manette) | 70 | 👀 | L'auteur est sur téléphone (séance 70). Rappeler en début de séance suivante. A7 validée provisoirement en attendant. |
 
+### Séance 75 : le chariot, suite
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Héros qui pousse à bras tendus | 75 | 👀 | Pose [TEMP] (une image de bras par-dessus le héros) ; la Scanette est rangée en poussant, ressortie pour scanner. |
+| Roue folle, réparable dans l'histoire | 75 | 👀 | Il tire vers le fond en poussant de côté (⚙ › Chariot › Roue folle, 0 = réparée). Réparation : question posée. |
+| Le haut-parleur commente le chariot | 75 | 👀 | 8 répliques [TEMP] : pris, lâché, cogne 3 fois en 4 s, oublié dans une autre pièce. |
+| Élan qui renverse des cartons ; monter sur le chariot | 75 | ❓ | Choix 2AB ; à construire (séances suivantes). |
+| Chariot qui se remplit (silhouettes de papier) | 75 | ❓ | Choix 9A ; à construire. |
+| Limite des comptages : images du rayon à 40/40 | 75 | 👀 | Les bras qui poussent tiennent en une seule image pour ne pas dépasser la limite. Le remplissage du chariot demandera d'en parler (limite relevée seulement avec l'accord de l'auteur). |
+
 ### Séance 73 : le chariot redéfini par l'auteur
 | Demande | Séance | État | Notes |
 |---|---|---|---|
@@ -191,9 +201,9 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Demande | Séance | État | Notes |
 |---|---|---|---|
 | A8 (1/3) : chariot qui suit le héros sur son chemin, garé / repris, reste dans son lieu | 72 | ❌ abandonné (séance 73 : poussé par le héros) | Départ de test « chariot » (dernier de la liste). Réglages ⚙ › Chariot (capacité, distance de suivi, souplesse, portée, taille). À tester par l'auteur. |
-| Lâcher près d'un produit : le bouton d'action dit « Scanner » | 72 | ❓ | Le scan passe avant. Question reposée (séance 74). |
-| Qui donne le jeton, échange au comptoir (hôtesse) | 72 | ❓ | Question reposée (séance 74). |
-| Scanner quand le chariot est lâché loin, ou dans un autre rayon | 72 | ❓ | [TEMP] permis pour l'instant ; question reposée (séance 74). |
+| Lâcher près d'un produit : le bouton d'action dit « Scanner » | 72 | 👀 | Choix 1A (séance 75) : double toucher sur le chariot, R, X. Construit. |
+| Qui donne le chariot, échange au comptoir (hôtesse) | 72 | ❓ | Séance 75 : l'hôtesse, contre une monnaie d'échange trouvée quelque part ; laquelle ? question posée. |
+| Scanner quand le chariot est lâché loin, ou dans un autre rayon | 72 | ❓ | Séance 75 : « pas trop loin » ; distance exacte : question posée. [TEMP] permis pour l'instant. |
 
 ## Points 👀 restants (à revoir avec A6)
 Séance 53 : l'auteur m'a laissé trancher. Règle appliquée : ce qui fait partie d'une étape validée (A1 à A5) ou a été accepté ensuite → ✅ validé (archive) ; ce qui ne se juge qu'en mesurant sur le téléphone (chargement, son) → 🔧 à mesurer ; ce qui fait partie d'A6, en cours → reste 👀 jusqu'à la validation d'A6. Aucun point abandonné.
