@@ -178,6 +178,16 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | Publication : `main` (CLAUDE.md) ou branche de session (cet environnement) | 70 | ✅ | Choix 1 de l'auteur : pousser sur `main`, maintenant et pour les séances suivantes. |
 | **À rappeler à l'auteur** : tester A7 et les entrées sur PC (avec une manette) | 70 | 👀 | L'auteur est sur téléphone (séance 70). Rappeler en début de séance suivante. A7 validée provisoirement en attendant. |
 
+### Séance 77 : retours de l'auteur après test
+| Demande | Séance | État | Notes |
+|---|---|---|---|
+| Bouton « Passer » : tout jusqu'à une question, sinon toute la conversation | 77 | 👀 | Bouton en bas à droite, Tab, Select à la manette ; les répliques passées restent dans l'historique (Pause › Dialogues). Il garde son calque en permanence (sinon : calque gagné et perdu à la fin de l'intro, vu par le test des comptages). |
+| Réglages : ⚙ réservé aux développeurs, Options pour les joueurs, explications | 77 | 👀 | ⚙, DBG, F2 à F4 seulement en mode dev ; Pause › Options ; une explication sous chaque réglage (`src/data/aide-reglages.json`, vérifiée par les tests). |
+| Deux bulles de dialogue qui se chevauchent | 77 | ❓ | Règle déjà validée : une seule voix à la fois (GAME_DESIGN). Moment exact demandé à l'auteur ; solution proposée. |
+| Cartons : logique de leur présence | 77 | 👀 | Un dernier carton en haut de l'étagère, les traces des trois tombés, le tas en désordre au sol. |
+| Version en haut à gauche (jeu, écran titre) ; bouton Scanner plus petit, en bas à droite | 77 | 👀 | Fait. |
+| Le nombre de dialogues pèse-t-il sur la fluidité ? | 77 | ✅ | Réponse : non (texte léger, bulles préparées une fois) ; ce qui compte, c'est ce qui est à l'écran en même temps. |
+
 ### Séance 75 : le chariot, suite
 | Demande | Séance | État | Notes |
 |---|---|---|---|

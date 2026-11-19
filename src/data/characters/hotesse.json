@@ -1,0 +1,16 @@
+{
+  "comment": "L'hôtesse du comptoir de l'accueil (A8, séances 75-77 ; docs/PERSONNAGES.md). Slogans [TEMP] proposés par Claude, tous gardés par l'auteur (séance 77) ; elle les récite quand on lui parle sans rouleau. Pas encore dans le jeu (elle viendra avec l'échange au comptoir).",
+  "slogans": [
+    "[TEMP] Ici, chaque client est unique. Pour toujours.",
+    "[TEMP] Le Maxi-Gouffre : on y entre, c'est déjà ça.",
+    "[TEMP] Nos prix sont bas. Très bas. Plus bas que vous ne pouvez descendre.",
+    "[TEMP] Un sourire, c'est gratuit. Le reste, non.",
+    "[TEMP] Bienvenue ! Bienvenue ! Bienvenue !",
+    "[TEMP] Les sorties sont en cours de réapprovisionnement.",
+    "[TEMP] Prenez votre temps. Il ne vous appartient plus.",
+    "[TEMP] Le Maxi-Gouffre ne ferme jamais. Vous non plus.",
+    "[TEMP] Nos chariots sont garantis à vie. La vôtre.",
+    "[TEMP] Avez-vous pensé à notre carte de fidélité ? Elle pense à vous."
+  ],
+  "rouleau": "[TEMP] Un rouleau, un chariot ! Le Maxi-Gouffre vous remercie de votre confiance."
+}

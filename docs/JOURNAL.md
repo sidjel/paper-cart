@@ -18,6 +18,30 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 77 — 19/11/2026 — Passer, réglages expliqués, cartons logiques
+
+**Demandes de l'auteur** :
+- un bouton « Passer » ;
+- le panneau ⚙ réservé aux développeurs, avec plus d'explications ;
+- pas deux bulles en même temps (question) ;
+- des cartons logiques ;
+- la version en haut à gauche, un bouton Scanner plus petit en bas à droite.
+
+**Réponses** : 1A (le rayon Papier Toilette est vide depuis « la Grande Rupture »), 2A, 4 tous les slogans, 5A (et elle suit le héros du regard), 6A, 7A.
+
+**Fait** :
+- **Passer** : toutes les répliques jusqu'à une question, sinon toute la conversation. Bouton en bas à droite, Tab, Select à la manette. Les répliques passées restent dans l'historique (`b9f510b`).
+- **Réglages** : ⚙, DBG et F2 à F4 seulement en mode dev ; les joueurs ont **Pause › Options**. Une explication sous chaque réglage, en mots simples (147 réglages) (`16d1a1e`).
+- **Cartons** : un dernier carton encore en haut de l'étagère, les traces claires des trois tombés, et le tas en désordre au sol (`ca6ca16`).
+- Version en haut à gauche (en jeu et sur l'écran titre) ; bouton Scanner plus petit, tout en bas à droite.
+- Notés : le Papier Toilette, l'hôtesse (slogans dans `src/data/characters/hotesse.json`, regard, réaction au rouleau), monter sur le chariot, les tas du chariot.
+
+**Vérifié** : 215 tests de logique, Knip. 124 essais navigateur, dont « Passer » (jusqu'au choix du nom, rencontre gardée dans l'historique) et Pause › Options. Comptages ; aucune erreur console. Le test des comptages a relevé que le nouveau bouton gagnait puis perdait un calque à la fin de l'intro, comme le noir de l'intro à la séance 68 : corrigé avant de publier. **Pas vérifié** : l'absence de clignotement sur le téléphone, la fluidité.
+
+**Proposition pour la séance suivante** : l'hôtesse et l'échange du rouleau contre le chariot.
+
+---
+
 ## Séance 76 — 19/11/2026 — La pile de cartons et le rouleau
 
 **Réponses de l'auteur** :
