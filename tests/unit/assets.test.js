@@ -48,4 +48,25 @@ describe('chargement des images', () => {
     expect({ images: assetStats.images, pixels: assetStats.pixels }).toEqual(before);
     expect(live.size).toBe(0);
   });
+
+  it('un bitmap .webp proche de la taille cible est utilisé directement sans <canvas> ni blob', async () => {
+    vi.stubGlobal(
+      'Image',
+      class {
+        decode() {
+          this.naturalWidth = 100;
+          this.naturalHeight = 50;
+          return Promise.resolve();
+        }
+        removeAttribute() {}
+      },
+    );
+    const before = { images: assetStats.images, pixels: assetStats.pixels };
+    const imgs = await loadImages([{ id: 'bg', url: 'art/fond.webp', w: 100, h: 50, scale: 0.9 }]);
+    expect(assetStats.images).toBe(before.images + 1);
+    expect(live.size).toBe(0); // aucun blob créé : utilisé tel quel
+    expect(imgs.get('bg').url).toBeNull();
+    releaseImages(imgs);
+    expect({ images: assetStats.images, pixels: assetStats.pixels }).toEqual(before);
+  });
 });
