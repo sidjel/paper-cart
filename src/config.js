@@ -53,8 +53,8 @@ export const config = {
     speed: 260, // agent de sécurité du hall : vitesse de marche, quand il va de son poste à sa place au début (px/s)
   },
   places: {
-    fade: 0.06, // changement de lieu : durée du fondu au noir, puis du retour (s) ; 0 = passage direct sans fondu
-    waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît dans le noir
+    fade: 0.18, // changement de lieu : durée du volet papier (aller, puis retour, s) ; 0 = passage direct
+    waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît sur la feuille
   },
   intro: {
     enabled: true, // texte d'introduction après « Commencer »
@@ -372,7 +372,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
-  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
+  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du volet papier (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },

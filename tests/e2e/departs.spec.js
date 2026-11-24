@@ -95,7 +95,7 @@ test('A6 : du rayon à l’accueil et retour — fondu, le rayon se souvient, la
   };
   const assets = () => page.evaluate(() => window.paperCart.assets());
   const before = await assets();
-  // Tout à gauche du rayon : fondu (court par défaut : 0,06 s), puis l'accueil.
+  // Tout à gauche du rayon : volet papier (0,18 s), puis l'accueil.
   await page.keyboard.down('ArrowLeft');
   await page.waitForFunction(() => window.paperCart.state() === 'transition' && !document.querySelector('.place-fade').hidden, null, { timeout: 15000 });
   await page.keyboard.up('ArrowLeft');

@@ -14,7 +14,7 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -139,12 +139,26 @@ export function createPlaces(ui, container, game) {
     retry();
   });
 
+  function paintFade(tr) {
+    if (config.display.reduceMotion || config.places.fade <= 0) {
+      fadeEl.style.transform = '';
+      fadeEl.style.opacity = transitionBlack(tr, config.places);
+    } else {
+      const { x, y } = transitionWipe(tr, config.places, tr.dir);
+      fadeEl.style.opacity = '1';
+      fadeEl.style.transform = `translate3d(${x}%, ${y}%, 0)`;
+    }
+  }
+
   function leaveBy(exit) {
     cancelPrefetch();
     const w = game.walker();
     leftFrom = { id: place.id, x: w.x, z: w.z, facing: w.facing };
-    transition = createTransition(exit);
+    transition = createTransition(exit, transitionDirection(exit, place));
+    fadeEl.classList.add('paper-wipe');
+    paintFade(transition);
     fadeEl.hidden = false;
+    game.onTransitionStart?.();
     game.sm.go('transition');
   }
 
@@ -199,6 +213,8 @@ export function createPlaces(ui, container, game) {
     if (errorEl.hidden || retrying) return; // un seul essai à la fois (double appui)
     retrying = true;
     retryBtn.disabled = true;
+    fadeEl.classList.remove('paper-wipe');
+    fadeEl.style.transform = '';
     fadeEl.style.opacity = '1';
     fadeEl.hidden = false;
     const ok = await backToStart(null);
@@ -237,10 +253,10 @@ export function createPlaces(ui, container, game) {
       ignoredExit = null;
       if (exit && game.places[exit.to]) leaveBy(exit);
     },
-    // À chaque image pendant le changement de lieu : seul le fondu avance.
+    // À chaque image pendant le changement de lieu : seul le volet papier avance.
     update(dt) {
       if (stepTransition(transition, dt, config.places) === 'load') change(transition.exit);
-      fadeEl.style.opacity = transitionBlack(transition, config.places);
+      paintFade(transition);
       const wait = showWait(transition, config.places);
       if (waitEl.hidden === wait) {
         waitEl.hidden = !wait;
@@ -249,6 +265,8 @@ export function createPlaces(ui, container, game) {
       if (transition.phase === 'done') {
         transition = null;
         fadeEl.hidden = true;
+        fadeEl.style.transform = '';
+        fadeEl.classList.remove('paper-wipe');
         game.sm.go(view ? 'play' : 'erreur'); // sans lieu : l'écran d'erreur attend « Réessayer »
         if (!view) retryBtn.focus({ preventScroll: true });
       }
@@ -260,6 +278,8 @@ export function createPlaces(ui, container, game) {
     reveal(fade) {
       revealT = 0;
       revealFade = fade;
+      fadeEl.classList.remove('paper-wipe');
+      fadeEl.style.transform = '';
       fadeEl.hidden = false;
       fadeEl.style.opacity = '1';
     },

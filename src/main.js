@@ -1165,6 +1165,9 @@ const places = createPlaces(uiEl, gameEl, {
     voices.arrivedInPlace();
     resetCrowCalls(crowCalls);
   },
+  onTransitionStart() {
+    if (config.audio.rustle) audio.play('froissement');
+  },
   logError,
   onLoadFailed: () => say('lieu_inaccessible'),
   render: () => render(),

@@ -1526,8 +1526,17 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 /* Panier : pas de zoom du navigateur sur un double toucher (cartes, grande carte). */
 .panier-grid .card { touch-action: manipulation; }
 .card-detail { touch-action: none; }
-/* Changement de lieu : fondu au noir (au-dessus du jeu et des voix, sous les menus). */
-.place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; will-change: opacity; }
+/* Changement de lieu : volet papier directionnel (2A) ou fondu noir en relais d'intro / erreur. */
+.place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; will-change: transform, opacity; }
+.place-fade.paper-wipe {
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.34) 0% 49.6%, rgb(138 112 78 / 0.14) 50%, rgb(255 255 255 / 0) 54%),
+    linear-gradient(242deg, rgb(255 255 255 / 0.18) 0% 38%, rgb(120 96 66 / 0.08) 38.4%, rgb(255 255 255 / 0) 44%),
+    repeating-linear-gradient(94deg, rgb(120 92 58 / 0.03) 0 2px, rgb(0 0 0 / 0) 2px 9px),
+    #f4ebd6;
+  box-shadow: 0 0 28px rgb(42 32 20 / 0.32), inset 0 0 0 3px #d9c5a0;
+}
+.place-fade.paper-wipe .place-wait span { background: #5c4934; }
 .place-fade[hidden] { display: none; }
 
 /* Agent de sécurité du hall (A6) : placé par src/game/guard.js. */

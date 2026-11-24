@@ -22,10 +22,10 @@ export function exitTarget(exits, x, z) {
   return null;
 }
 
-// Fondu : 'out' (l'écran noircit) → 'load' (noir : on change de lieu) → 'in' (le noir s'efface) → 'done'.
-// p : { fade } (durée de chaque fondu, s).
-export function createTransition(exit) {
-  return { exit, phase: 'out', t: 0 };
+// Transition : 'out' (le volet papier recouvre l'écran) → 'load' (on change de lieu) → 'in' (il glisse hors écran) → 'done'.
+// p : { fade } (durée d'entrée et de sortie, s). dir : 'right' | 'left' | 'up' | 'down'.
+export function createTransition(exit, dir = 'right') {
+  return { exit, dir, phase: 'out', t: 0 };
 }
 
 // Avance le fondu. Renvoie 'load' une seule fois, quand l'écran est noir (c'est le moment de changer de lieu).
@@ -61,12 +61,68 @@ export function placeReady(tr) {
   }
 }
 
-// Opacité du noir (0 à 1).
+// Opacité du noir / fondu doux (0 à 1, utilisé pour le repli « Réduire les animations » et les tests).
 export function transitionBlack(tr, p) {
   if (tr.phase === 'out') return p.fade <= 0 ? 1 : Math.min(1, tr.t / p.fade);
   if (tr.phase === 'load') return 1;
   if (tr.phase === 'in') return p.fade <= 0 ? 0 : Math.max(0, 1 - tr.t / p.fade);
   return 0;
+}
+
+// Direction visuelle du volet papier selon le bord de la zone de marche où se trouve la sortie.
+export function transitionDirection(exit, place) {
+  if (exit?.dir) return exit.dir;
+  const area = place?.walkMask?.area;
+  if (!exit?.zone || !area?.length) return 'right';
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (const [x, z] of area) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+  }
+  const spanX = Math.max(1, maxX - minX);
+  const spanZ = Math.max(1, maxZ - minZ);
+  const cx = (exit.zone[0] + exit.zone[2]) / 2;
+  const cz = (exit.zone[1] + exit.zone[3]) / 2;
+  const dLeft = (cx - minX) / spanX;
+  const dRight = (maxX - cx) / spanX;
+  const dUp = (maxZ - cz) / spanZ;
+  const dDown = (cz - minZ) / spanZ;
+  const best = Math.min(dLeft, dRight, dUp, dDown);
+  if (best === dRight) return 'right';
+  if (best === dLeft) return 'left';
+  if (best === dUp) return 'up';
+  return 'down';
+}
+
+// Décalage (en % de l'écran) du volet papier : glisse dans le sens opposé à la marche (comme le décor).
+// Un léger dépassement (104 %) garantit que la bordure kraft disparaît entièrement hors champ.
+const WIPE_OVERSHOOT = 104;
+export function transitionWipe(tr, p, dir = tr.dir || 'right') {
+  let offset = 0; // +1 = bord d'entrée, 0 = couvre l'écran, -1 = sorti du côté opposé
+  if (tr.phase === 'out') {
+    if (p.fade > 0) {
+      const u = Math.min(1, Math.max(0, tr.t / p.fade));
+      offset = (1 - u) * (1 - u); // démarrage vif, pose douce au centre
+    }
+  } else if (tr.phase === 'in') {
+    if (p.fade <= 0) offset = -1;
+    else {
+      const u = Math.min(1, Math.max(0, tr.t / p.fade));
+      offset = -(u * u); // repart en douceur puis accélère hors écran
+    }
+  } else if (tr.phase === 'done') {
+    offset = -1;
+  }
+  const d = offset * WIPE_OVERSHOOT;
+  if (dir === 'left') return { x: -d, y: 0 };
+  if (dir === 'up') return { x: 0, y: -d };
+  if (dir === 'down') return { x: 0, y: d };
+  return { x: d, y: 0 };
 }
 
 // Pré-téléchargement silencieux des lieux voisins (docs/ARCHITECTURE.md §11) : logique pure.

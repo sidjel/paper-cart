@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -127,5 +127,38 @@ describe('pré-téléchargement silencieux des lieux voisins', () => {
     expect(new Set(urls).size).toBe(urls.length);
     // Ne répète pas les images déjà présentes dans l'accueil (ex. oiseau-1.webp).
     expect(urls.some((u) => u.endsWith('art/accueil/oiseau-1.webp'))).toBe(false);
+  });
+});
+
+describe('volet papier directionnel (2A)', () => {
+  it('déduit la direction selon le bord de sortie du lieu', () => {
+    expect(transitionDirection(accueil.exits.items[0], accueil)).toBe('right');
+    expect(transitionDirection(rayon.exits.items.find((e) => e.to === 'accueil'), rayon)).toBe('left');
+    expect(transitionDirection(rayon.exits.items.find((e) => e.to === 'rayon-2'), rayon)).toBe('up');
+    expect(transitionDirection(rayon2.exits.items.find((e) => e.to === 'rayon-essai'), rayon2)).toBe('down');
+  });
+
+  it('glisse de +104 % à 0 % puis à -104 % dans le sens opposé à la marche', () => {
+    const p = { fade: 0.18 };
+    const tr = createTransition({ to: 'rayon-essai' }, 'right');
+    expect(transitionWipe(tr, p)).toEqual({ x: 104, y: 0 });
+    stepTransition(tr, 0.09, p); // mi-parcours aller : 75 % couvert
+    expect(transitionWipe(tr, p).x).toBeCloseTo(26);
+    stepTransition(tr, 0.1, p); // passe en 'load'
+    expect(tr.phase).toBe('load');
+    expect(transitionWipe(tr, p)).toEqual({ x: 0, y: 0 });
+    placeReady(tr);
+    stepTransition(tr, 0.09, p); // mi-parcours sortie
+    expect(transitionWipe(tr, p).x).toBeCloseTo(-26);
+    stepTransition(tr, 0.1, p);
+    expect(tr.phase).toBe('done');
+    expect(transitionWipe(tr, p)).toEqual({ x: -104, y: 0 });
+  });
+
+  it('inverse correctement les axes pour left, up et down', () => {
+    const p = { fade: 0.18 };
+    expect(transitionWipe(createTransition({ to: 'accueil' }, 'left'), p)).toEqual({ x: -104, y: 0 });
+    expect(transitionWipe(createTransition({ to: 'rayon-2' }, 'up'), p)).toEqual({ x: 0, y: -104 });
+    expect(transitionWipe(createTransition({ to: 'rayon-essai' }, 'down'), p)).toEqual({ x: 0, y: 104 });
   });
 });
