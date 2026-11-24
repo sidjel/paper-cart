@@ -48,12 +48,12 @@ test('le rayon ne se charge pas : retour au hall, là où le héros est sorti ; 
 
 test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au jeu', async ({ page }) => {
   await page.route('**/rayon-fond.svg', (r) => r.abort());
-  await page.route('**/accueil-fond.svg', (r) => r.abort());
+  await page.route('**/accueil-fond.*', (r) => r.abort());
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
   await page.waitForFunction(() => window.paperCart.state() === 'erreur', null, { timeout: 15000 });
   await expect(page.locator('.place-error')).toBeVisible();
   await page.screenshot({ path: 'test-results/captures/robustesse-erreur.png' });
-  await page.unroute('**/accueil-fond.svg');
+  await page.unroute('**/accueil-fond.*');
   // Relais (docs/ARCHITECTURE.md §11, séance 70) : au moment où l'écran d'erreur est retiré, l'écran noir
   // des lieux est déjà là, plein, dessous ; ensuite il s'efface et disparaît.
   await page.evaluate(() => {

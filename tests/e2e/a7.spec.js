@@ -42,14 +42,14 @@ test('A7 : par l’ouverture de gauche, en marchant, on arrive dans le rayon 2 e
   expect((await hero(page)).x).toBe(2170);
 });
 
-test('A7 : l’ouverture de droite mène en face, de l’autre côté du rayon 2, et retour', async ({ page }) => {
-  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-b'));
+test('A7 : le passage central mène en face dans le rayon 2, et retour', async ({ page }) => {
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-a'));
   await arrivedIn(page, 'rayon-2');
-  expect((await hero(page)).x).toBe(3140);
-  await page.evaluate(() => window.paperCart.useExit('vers-rayon-b'));
+  expect((await hero(page)).x).toBe(2170);
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon-a'));
   await arrivedIn(page, 'rayon-essai');
   const h = await hero(page);
-  expect([h.x, h.z]).toEqual([3140, 220]);
+  expect([h.x, h.z]).toEqual([2170, 220]);
 });
 
 test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son produit prend la place du produit scanné', async ({ page }, info) => {
@@ -99,11 +99,11 @@ test('A7 : longer le fond du rayon 7 (ou le bord avant du rayon 2) devant les ou
   await page.keyboard.up('ArrowRight');
   expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
   // Rayon 2 : contre le bord avant, tout le long vers la gauche.
-  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-b'));
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon2-a'));
   await arrivedIn(page, 'rayon-2');
-  await page.keyboard.down('ArrowLeft'); // d'abord hors du prolongement de l'ouverture
-  await page.waitForFunction(() => window.paperCart.hero().x < 2900);
-  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.down('ArrowRight'); // d'abord hors du prolongement de l'ouverture
+  await page.waitForFunction(() => window.paperCart.hero().x > 2400);
+  await page.keyboard.up('ArrowRight');
   await page.keyboard.down('ArrowDown');
   await page.waitForFunction(() => window.paperCart.hero().z < -185);
   await page.keyboard.up('ArrowDown');

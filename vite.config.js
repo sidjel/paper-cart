@@ -21,7 +21,8 @@ function frenchDate(iso) {
 
 export default defineConfig(({ command }) => {
   const { commit, iso } = gitInfo();
-  const label = command === 'serve' ? `${commit} · dev` : `${commit} · ${frenchDate(iso)}`;
+  const dateStr = frenchDate(command === 'serve' ? new Date().toISOString() : iso);
+  const label = command === 'serve' ? `${commit} · ${dateStr} · dev` : `${commit} · ${dateStr}`;
   return {
     // Chemins relatifs : le jeu fonctionne dans le sous-dossier /paper-cart/ de GitHub Pages.
     base: './',

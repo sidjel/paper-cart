@@ -8,7 +8,7 @@ const HERO_BLIP = 0.05; // force du petit bip d'écriture du héros (séance 66 
 
 export function createAudio(settings, song) {
   let ctx = null;
-  let master, musicBus, sfxBus, scanBus, voiceBus, heroBus, noise, music;
+  let master, musicBus, sfxBus, birdsBus, scanBus, voiceBus, heroBus, noise, music;
   let paused = false;
   let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
@@ -53,7 +53,7 @@ export function createAudio(settings, song) {
     annonce: 'voix',
     ding: 'voix',
     aparte: 'aparte',
-    pluie: 'ambiance',
+    corbeau: 'ambiance',
     portes: 'ambiance',
   };
   const playing = {}; // famille → sons en cours [{ sources, left }], du plus ancien au plus récent
@@ -106,6 +106,8 @@ export function createAudio(settings, song) {
     musicBus.connect(lowCut).connect(speaker).connect(master);
     sfxBus = ctx.createGain();
     sfxBus.connect(master);
+    birdsBus = ctx.createGain(); // corbeaux / oiseaux dehors
+    birdsBus.connect(master);
     scanBus = ctx.createGain(); // sons du scanner (bip, aspiration, carte)
     scanBus.connect(master);
     voiceBus = ctx.createGain(); // narrateur (annonce, petits bips du texte)
@@ -133,6 +135,7 @@ export function createAudio(settings, song) {
     master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, 0.03);
     musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1) * (frozen ? 0 : 1), t, frozen ? 0.08 : 0.4);
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
+    birdsBus.gain.setTargetAtTime((settings.birdsVolume ?? 0.4) * (paused || frozen ? 0 : 1), t, 0.08);
     scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
     voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
     heroBus.gain.setTargetAtTime(settings.heroVolume, t, 0.03);
@@ -232,32 +235,95 @@ export function createAudio(settings, song) {
     tone('triangle', 1318, 1318, t + 0.1, 0.3, 0.12);
   }
 
-  // [TEMP] Pluie (intro) : bruit filtré en boucle, qui monte doucement ; arrêtée par stopRain().
-  let rain = null;
-  function pluie() {
-    if (rain) return;
-    const t = ctx.currentTime;
-    const src = ctx.createBufferSource();
-    src.buffer = noise;
-    src.loop = true;
+  // [TEMP] Corbeaux dehors (Accueil, Rayon 1) : 3 variantes de croassements graves et rauques
+  // (fondamentale grave 175-225 Hz + vibrato de gorge ~36 Hz + formant nasal + souffle rauque).
+  let crowN = 0;
+  function cawAt(at, f0, f1, dur, vol) {
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(f0, at);
+    o.frequency.exponentialRampToValueAtTime(f0 * 1.04, at + dur * 0.22);
+    o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+
+    // Modulation de gorge (grain rauque caractéristique du corbeau).
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.type = 'triangle';
+    lfo.frequency.value = 34 + (crowN % 3) * 4;
+    lfoGain.gain.value = 18;
+    lfo.connect(lfoGain).connect(o.frequency);
+
     const bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 1800;
-    bp.Q.value = 0.6;
+    bp.frequency.setValueAtTime(840, at);
+    bp.frequency.exponentialRampToValueAtTime(660, at + dur);
+    bp.Q.value = 2.4;
+
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 1550;
+
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.16, t + 1.5);
-    src.connect(bp).connect(g).connect(sfxBus);
-    track(src, [src, bp, g]);
-    src.start(t);
-    rain = { src, g };
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(vol, at + 0.032);
+    g.gain.exponentialRampToValueAtTime(vol * 0.78, at + dur * 0.62);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+
+    o.connect(bp).connect(lp).connect(g).connect(birdsBus);
+    o.start(at);
+    o.stop(at + dur + 0.02);
+    lfo.start(at);
+    lfo.stop(at + dur + 0.02);
+    track(o, [o, lfo, lfoGain, bp, lp, g]);
+
+    // Souffle rauque grave qui ajoute le côté organique / naturel.
+    const n = ctx.createBufferSource();
+    n.buffer = noise;
+    const nbp = ctx.createBiquadFilter();
+    nbp.type = 'bandpass';
+    nbp.frequency.value = 920;
+    nbp.Q.value = 1.9;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.0001, at);
+    ng.gain.exponentialRampToValueAtTime(vol * 0.55, at + 0.028);
+    ng.gain.exponentialRampToValueAtTime(0.0001, at + dur * 0.92);
+    n.connect(nbp).connect(ng).connect(birdsBus);
+    n.start(at, (crowN * 0.23) % 0.6, dur + 0.02);
+    track(n, [n, nbp, ng]);
   }
-  function stopRain() {
-    if (!rain || !ctx) return;
+  function corbeau() {
     const t = ctx.currentTime;
-    rain.g.gain.setTargetAtTime(0.0001, t, 0.5);
-    rain.src.stop(t + 2.5);
-    rain = null;
+    const v = crowN;
+    crowN = (crowN + 1) % 3;
+    if (v === 0) {
+      cawAt(t, 212, 168, 0.34, 0.32);
+      cawAt(t + 0.44, 198, 158, 0.38, 0.29);
+    } else if (v === 1) {
+      cawAt(t, 224, 178, 0.28, 0.24);
+      cawAt(t + 0.36, 214, 172, 0.28, 0.22);
+      cawAt(t + 0.74, 202, 160, 0.34, 0.21);
+    } else {
+      cawAt(t, 192, 152, 0.4, 0.3);
+    }
+  }
+
+  // [TEMP] Découverte d'un objet important (façon Zelda : fanfare montante + accord lumineux).
+  function decouverte() {
+    const t = ctx.currentTime;
+    const seq = [
+      [392.0, 0.0, 0.13, 0.16],  // Sol4
+      [440.0, 0.12, 0.13, 0.17], // La4
+      [493.9, 0.24, 0.13, 0.18], // Si4
+      [523.3, 0.36, 0.52, 0.22], // Do5
+    ];
+    for (const [f, at, dur, vol] of seq) {
+      tone('triangle', f, f, t + at, dur, vol, sfxBus);
+      tone('sine', f * 2, f * 2, t + at, dur * 0.75, vol * 0.25, sfxBus);
+    }
+    // Accord majeur lumineux sur la note finale (Do5 - Mi5 - Sol5 - Do6).
+    tone('triangle', 659.3, 659.3, t + 0.36, 0.56, 0.15, sfxBus);
+    tone('triangle', 784.0, 784.0, t + 0.36, 0.62, 0.16, sfxBus);
+    tone('sine', 1046.5, 1046.5, t + 0.39, 0.65, 0.11, sfxBus);
   }
 
   // [TEMP] Portes automatiques : souffle qui glisse.
@@ -443,7 +509,7 @@ export function createAudio(settings, song) {
     return [src, lp, g];
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, grince, chute, annonce, blip, froissement, blipHeros, aparte, pluie, portes, ding };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.
@@ -484,9 +550,6 @@ export function createAudio(settings, song) {
       };
     },
     applyVolumes,
-    stopRain() {
-      stopRain();
-    },
     // Pendant un aparté, le magasin est figé : sa musique se tait (et reprend doucement après).
     setFrozen(f) {
       if (f === frozen) return;

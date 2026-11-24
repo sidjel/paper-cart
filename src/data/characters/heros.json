@@ -114,7 +114,7 @@
     "scanette": {
       "hand": "right",
       "face": {
-        "src": "art/placeholder/tenu-scanette-face.svg",
+        "src": "art/accueil/tenu-scanette-face-origami.webp",
         "pivot": [
           146,
           172
@@ -126,7 +126,7 @@
         "front": true
       },
       "dos": {
-        "src": "art/placeholder/tenu-scanette-dos.svg",
+        "src": "art/accueil/tenu-scanette-dos-origami.webp",
         "pivot": [
           144,
           172
@@ -140,7 +140,7 @@
     "panier": {
       "hand": "left",
       "face": {
-        "src": "art/placeholder/tenu-panier.svg",
+        "src": "art/accueil/tenu-panier-origami.webp",
         "pivot": [
           72,
           172
@@ -152,7 +152,7 @@
         "front": true
       },
       "dos": {
-        "src": "art/placeholder/tenu-panier.svg",
+        "src": "art/accueil/tenu-panier-origami.webp",
         "pivot": [
           72,
           172
@@ -395,12 +395,12 @@
   "scanTip": {
     "comment": "Bout de la Scanette (dans l'image, vue tournée vers la droite) pendant le scan : départ du laser, arrivée des confettis.",
     "face": [
-      209,
-      162
+      207,
+      152
     ],
     "dos": [
-      204,
-      166
+      196,
+      157
     ]
   }
 }

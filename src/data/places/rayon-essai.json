@@ -1,16 +1,16 @@
 {
   "id": "rayon-essai",
-  "name": "[TEMP] Rayon 7 — rayon d'essai (version longue)",
+  "name": "[TEMP] Rayon 1 — Essentiels & Surprises (origami V2)",
   "size": [3600, 1080],
   "projection": {
-    "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond).",
-    "floorFrontY": 880,
-    "depthToScreen": 1,
+    "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond). Calé sur le rayon origami V1 (sol y ≈ 740–1076, arche centrale x = 2170).",
+    "floorFrontY": 933,
+    "depthToScreen": 0.73,
     "scalePerDepth": 0.0012
   },
   "images": {
     "rayon-fond": {
-      "src": "art/placeholder/rayon-fond.svg",
+      "src": "art/rayon-essai/rayon-fond.webp",
       "size": [3600, 1080]
     },
     "presentoir-crousti": {
@@ -26,64 +26,162 @@
       "size": [230, 140]
     },
     "rayon-avant": {
-      "src": "art/placeholder/rayon-avant.svg",
-      "size": [4300, 150]
+      "src": "art/rayon-essai/rayon-avant.webp",
+      "size": [4300, 175]
     },
     "rayon-lointain": {
-      "src": "art/placeholder/rayon-lointain.svg",
-      "size": [3600, 470]
+      "src": "art/rayon-essai/rayon-lointain.webp",
+      "size": [3600, 750]
+    },
+    "oiseau-1": {
+      "src": "art/accueil/oiseau-1.webp",
+      "size": [128, 96]
+    },
+    "oiseau-2": {
+      "src": "art/accueil/oiseau-2.webp",
+      "size": [128, 96]
+    },
+    "oiseau-3": {
+      "src": "art/accueil/oiseau-3.webp",
+      "size": [128, 96]
+    },
+    "oiseau-4": {
+      "src": "art/accueil/oiseau-4.webp",
+      "size": [128, 96]
+    },
+    "oiseau-5": {
+      "src": "art/accueil/oiseau-5.webp",
+      "size": [128, 96]
+    },
+    "oiseau-6": {
+      "src": "art/accueil/oiseau-6.webp",
+      "size": [128, 96]
+    },
+    "oiseau-marche-1": {
+      "src": "art/rayon-essai/oiseau-marche-1.webp",
+      "size": [128, 128]
+    },
+    "oiseau-marche-2": {
+      "src": "art/rayon-essai/oiseau-marche-2.webp",
+      "size": [128, 128]
+    },
+    "nuage-1": {
+      "src": "art/rayon-essai/nuage-1.webp",
+      "size": [320, 93]
+    },
+    "nuage-2": {
+      "src": "art/rayon-essai/nuage-2.webp",
+      "size": [340, 96]
     }
   },
   "layers": [
     {
       "id": "lointain",
       "image": "rayon-lointain",
-      "position": [0, 150],
-      "parallax": 0.55,
-      "contains": "rayons qui se perdent au loin (magasin sans fin)",
-      "hiddenBy": "le fond, sauf par les ouvertures de l'étagère (calque limité à la bande y 150–620)"
+      "position": [0, 0],
+      "parallax": 0.82,
+      "contains": "plan 3 origami HD V3 : ciel bleu, nuages origami dérivants, 2 oiseaux en vol et 2 oiseaux qui marchent par petits à-coups derrière les 4 verrières + panorama large du rayon 2 avec transition lumineuse douce au seuil de l'arche centrale",
+      "hiddenBy": "le fond, sauf par les 4 verrières du plafond et l'arche centrale"
     },
     {
       "id": "fond",
       "image": "rayon-fond",
-      "contains": "plafond, panneaux, étagère du fond avec deux ouvertures (les passages vers le rayon 2), sol",
-      "hiddenBy": "en partie par les objets et le personnage (petites surfaces)"
+      "contains": "plan 2 origami HD V4 (Krita) : plafond bleu voûté avec 4 verrières détourées, 5 haut-parleurs, barre de seuil d'arche, panneaux en lettrage papier courbé et intégré (← Accueil, Les essentiels, ↑ Épiceries, Les indispensables), gondole à 3 tablettes avec une grande arche centrale vers le rayon 2, sol carrelé brillant",
+      "hiddenBy": "en partie par les objets, les produits, le personnage et le rayon du premier plan"
     },
     {
       "id": "produits",
-      "contains": "produits à scanner, posés sur l'étagère du fond",
+      "contains": "produits à scanner, posés sur les 3 tablettes de l'étagère du fond",
       "hiddenBy": "en partie par les objets et le personnage"
     },
     {
       "id": "acteurs",
-      "contains": "personnage, ombre, poussière, présentoirs, chariot, repère du point visé — triés par profondeur",
-      "hiddenBy": "rien"
+      "contains": "personnage, ombre, poussière, présentoirs, chariot, petite table, repère du point visé — triés par profondeur",
+      "hiddenBy": "le premier plan (rayon d'en face) en bas de l'écran"
     },
     {
       "id": "premier-plan",
       "image": "rayon-avant",
-      "position": [0, 930],
+      "position": [0, 905],
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
-      "contains": "rayon d'en face (côté caméra), en transparence ; seulement sa partie haute (produits), deux fois moins haut depuis la séance 46",
+      "occluders": [
+        [0, 915, 4300, 1080]
+      ],
+      "contains": "plan 1 origami HD (haut de la gondole d'en face, opaque par défaut avec transparence dynamique quand le héros passe derrière)",
       "hiddenBy": "rien"
     }
   ],
+  "clouds": {
+    "layer": "lointain",
+    "span": [-300, 3900],
+    "items": [
+      { "image": "nuage-1", "y": 84, "scale": 0.86, "speed": 12, "dir": 1, "phase": 0.04, "opacity": 0.96 },
+      { "image": "nuage-2", "y": 68, "scale": 0.72, "speed": 9, "dir": 1, "phase": 0.19, "opacity": 0.90 },
+      { "image": "nuage-1", "y": 92, "scale": 0.94, "speed": 14, "dir": 1, "phase": 0.34, "opacity": 0.98 },
+      { "image": "nuage-2", "y": 74, "scale": 0.80, "speed": 11, "dir": 1, "phase": 0.49, "opacity": 0.94 },
+      { "image": "nuage-1", "y": 66, "scale": 0.68, "speed": 8, "dir": 1, "phase": 0.64, "opacity": 0.88 },
+      { "image": "nuage-2", "y": 88, "scale": 0.92, "speed": 15, "dir": 1, "phase": 0.79, "opacity": 0.97 },
+      { "image": "nuage-1", "y": 78, "scale": 0.78, "speed": 10, "dir": 1, "phase": 0.93, "opacity": 0.92 }
+    ]
+  },
+  "birds": {
+    "layer": "lointain",
+    "frames": [
+      "oiseau-1",
+      "oiseau-2",
+      "oiseau-3",
+      "oiseau-4",
+      "oiseau-5",
+      "oiseau-6",
+      "oiseau-marche-1",
+      "oiseau-marche-2"
+    ],
+    "cycle": [0, 1, 2, 3, 5, 4, 2, 1],
+    "size": [128, 96],
+    "span": [450, 3550],
+    "flock": [
+      { "y": 72, "scale": 0.44, "speed": 74, "dir": 1, "bob": 7, "flap": 6.8, "phase": 0.12 },
+      { "y": 102, "scale": 0.36, "speed": 58, "dir": -1, "bob": 6, "flap": 7.5, "phase": 0.62 },
+      {
+        "mode": "walk",
+        "size": [128, 128],
+        "cycle": [6, 7],
+        "walkSpan": [810, 1085],
+        "y": 107,
+        "scale": 0.72,
+        "speed": 36,
+        "pause": 1.0,
+        "flap": 6.8,
+        "bob": 2.2,
+        "phase": 0.14
+      },
+      {
+        "mode": "walk",
+        "size": [128, 128],
+        "cycle": [6, 7],
+        "walkSpan": [2670, 2945],
+        "y": 108,
+        "scale": 0.70,
+        "speed": 32,
+        "pause": 1.15,
+        "flap": 6.2,
+        "bob": 2.0,
+        "phase": 0.58
+      }
+    ]
+  },
   "spawn": [300, 60],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond, -195 = tout en bas de l'écran, derrière le rayon du premier plan). Les obstacles sont décollés de l'étagère : on peut passer derrière. Marges incluses pour la largeur du personnage. Séance 67 (A7) : le sol se prolonge dans les deux ouvertures de l'étagère du fond (jusqu'à z 330) ; le passage vers le rayon 2 est au fond de ces prolongements : longer l'étagère ne le déclenche jamais.",
+    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -195 = tout en bas de l'écran derrière le rayon du premier plan). Option 1A : une seule grande arche centrale (x 2050–2290, z 264–330) vers le rayon 2 + bout du rayon en cul-de-sac récompense.",
     "area": [
       [90, -195],
       [3510, -195],
       [3510, 264],
-      [3240, 264],
-      [3240, 330],
-      [3040, 330],
-      [3040, 264],
-      [2280, 264],
-      [2280, 330],
-      [2060, 330],
-      [2060, 264],
+      [2290, 264],
+      [2290, 330],
+      [2050, 330],
+      [2050, 264],
       [90, 264]
     ],
     "obstacles": [
@@ -157,7 +255,7 @@
     }
   ],
   "speakers": {
-    "comment": "Haut-parleurs du plafond, dessinés dans le décor du fond (rayon-fond.svg, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur. Quand le narrateur parle, le plus proche du personnage émet des ondes et le texte s'affiche juste en dessous.",
+    "comment": "Haut-parleurs origami du plafond, dessinés dans le décor du fond (rayon-fond.webp, mêmes x). items = [x, y] sur la scène : bouche du haut-parleur.",
     "items": [
       [600, 68],
       [1300, 68],
@@ -220,7 +318,7 @@
     "b": [2300, 40]
   },
   "looseProducts": {
-    "comment": "[ESSAI] Produits posés ailleurs que sur l'étagère du fond : on les scanne de profil, de face ou de dos selon où l'on se tient. at = [x, z] dans le monde ; lift = hauteur (px de scène) entre le sol en at et le bas du produit ; on = objet du décor qui le porte (le produit est dessiné juste au-dessus de lui) ; scale = taille ; standAt = endroits où se placer pour le scanner (double toucher).",
+    "comment": "[ESSAI] Produits posés ailleurs que sur l'étagère du fond : on les scanne de profil, de face ou de dos selon où l'on se tient.",
     "items": [
       {
         "product": "pomme",
@@ -248,59 +346,59 @@
     ]
   },
   "shelfProducts": {
-    "comment": "Produits à scanner : at = [x, y] sur la scène, y = dessus de la tablette (282, 394 ou 506). On les scanne depuis le pied de l'étagère.",
+    "comment": "Produits à scanner : at = [x, y] sur la scène, y = dessus de la tablette origami (486, 588 ou 692). On les scanne depuis le pied de l'étagère.",
     "items": [
       {
         "product": "banane",
-        "at": [720, 282]
+        "at": [790, 486]
       },
       {
         "product": "lait",
-        "at": [560, 394]
+        "at": [920, 588]
       },
       {
         "product": "cereales",
-        "at": [1000, 506]
+        "at": [1080, 692]
       },
       {
         "product": "baguette",
-        "at": [1180, 282]
+        "at": [1260, 486]
       },
       {
         "product": "steak",
-        "at": [1440, 394]
+        "at": [1440, 588]
       },
       {
         "product": "pile",
-        "at": [1720, 506]
+        "at": [1620, 692]
       },
       {
         "product": "glace",
-        "at": [1940, 282]
+        "at": [1760, 486]
       },
       {
         "product": "biere",
-        "at": [2440, 394]
+        "at": [2640, 588]
       },
       {
         "product": "plante",
-        "at": [2900, 282]
+        "at": [2960, 486]
       },
       {
         "product": "fromage",
-        "at": [3380, 394]
+        "at": [3380, 588]
       }
     ]
   },
   "aisleEndX": 3360,
   "exits": {
-    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; y entrer mène au lieu « to », où le héros arrive au point « arrive » (hors de toute zone de sortie), tourné vers « facing ». Les deux ouvertures de l'étagère du fond mènent au rayon 2 (A7, séance 67), qu'on rejoint au même x, côté avant. reach (facultatif) : toucher dans ce rectangle (l'ouverture) envoie au passage.",
+    "comment": "Sorties : zone = [x1, z1, x2, z2] au sol ; une seule grande arche centrale (x = 2170) mène au rayon 2, et la sortie gauche ramène à l'accueil.",
     "items": [
       {
         "id": "vers-accueil",
         "zone": [90, -195, 128, 264],
         "to": "accueil",
-        "arrive": [2580, 60],
+        "arrive": [1940, 60],
         "facing": -1
       },
       {
@@ -309,15 +407,7 @@
         "to": "rayon-2",
         "arrive": [2170, -150],
         "facing": 1,
-        "reach": [2060, 270, 2280, 2000]
-      },
-      {
-        "id": "vers-rayon2-b",
-        "zone": [3050, 300, 3230, 330],
-        "to": "rayon-2",
-        "arrive": [3140, -150],
-        "facing": -1,
-        "reach": [3040, 270, 3240, 2000]
+        "reach": [2050, 270, 2290, 2000]
       }
     ]
   }

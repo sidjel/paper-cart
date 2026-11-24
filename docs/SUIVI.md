@@ -38,7 +38,7 @@ Demande de l'auteur : le personnage pourra changer de plan ; garder ce qui sert 
 | L'accueil, un lieu à part (hall, portique, agent, comptoir) | 37 | 🔧 | Noté dans HISTOIRE, PERSONNAGES et PROTOTYPES (étape après A5, à proposer seulement après validation de A5). Rien de construit. Séance 51 : A6 en cours (1/3 construit). |
 | Nom du deck (« courses » provisoire) | 36 | ❓ | Pistes proposées en séance 36 ; renommer « Panier » dans le jeu une fois choisi. |
 | Capacités et panier plein | 36 | ❓ | [TEMP] panier = 6 (⚙ → Scanner) ; panier plein : scan refusé en attendant le choix de l'auteur (options proposées en séance 36). |
-| Qui donne le jeton de chariot | 36 | ❓ | Pistes : le Vieux Monsieur avant sa mort ; ou rendre son chariot à la Caisse Finale pour récupérer sa pièce (le passeur des morts). |
+| Qui donne le jeton de chariot | 36 | ✅ | Décision auteur (séance 79) : **1 rouleau de Papier Toilette = 1 échange contre 1 jeton** chez l'hôtesse à l'accueil, puis 1 jeton = 1 chariot. Implémenté dans `src/core/hotesse.js` et `src/game/hotesse.js` (branche `test/krita-mcp`). |
 | Narrateur A4 | 31 | 🔧 | Séance 32 : bande au haut-parleur, machine à écrire, annonce et petits bips, 12 répliques [TEMP] sur 8 moments, rare et sans répétition, fil « Client » → « Article non référencé » (choix A). **À tester par l'auteur.** Séance 33 : apartés du héros ajoutés. **Validation d'A4 proposée** (après un test rapide de fluidité si l'auteur le souhaite). |
 | Pourquoi mettre des cartes dans un Panier ? | 28 | ❓ | Toujours ouvert (docs/HISTOIRE.md). Le Chariot jouable (A5) en sera la forme physique. |
 | Adapter l'effet de transformation et les bruitages à l'histoire | 28 | 🔧 | Après le choix de la piste. |

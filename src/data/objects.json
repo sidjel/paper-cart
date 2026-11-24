@@ -1,24 +1,39 @@
 {
-  "comment": "Objets que le héros porte (onglet « Objets » du panier) : de vrais objets, pas des cartes. image : icône affichée dans l'onglet. Textes [TEMP], à réécrire par l'auteur.",
+  "comment": "Objets clés que le héros obtient (onglet « Objets » + fenêtre de découverte façon Zelda). Textes [TEMP], à réécrire par l'auteur.",
   "objects": {
     "scanette": {
       "name": "[TEMP] Scanette",
-      "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits en cartes.",
-      "image": "art/placeholder/objets/scanette.svg"
-    },
-    "chariot": {
-      "name": "[TEMP] Chariot",
-      "text": "[TEMP] Plus de place que le panier. Il vous suit partout dans le rayon, mais pas d'un rayon à l'autre : garez-le, et n'oubliez pas où.",
-      "image": "art/placeholder/chariot-vide.svg"
+      "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits des rayons pour les transformer en cartes.",
+      "usage": "[TEMP] Approche-toi d'un produit en rayon et appuie sur Entrée (ou double-clic sur le produit) pour le scanner.",
+      "hint": "[TEMP] Sous la gâchette, un second cran semble verrouillé… peut-être qu'un jour elle saura scanner bien plus que de simples codes-barres.",
+      "image": "art/accueil/objet-scanette-origami.webp"
     },
     "panier": {
       "name": "[TEMP] Panier à main",
-      "text": "[TEMP] Pour porter ses cartes. Peu de place : il faut choisir.",
-      "image": "art/placeholder/objets/panier.svg"
+      "text": "[TEMP] Un panier rouge léger pour ranger tes cartes de produits pendant tes courses. Sa capacité reste limitée : il faudra choisir avec soin.",
+      "usage": "[TEMP] Appuie sur I (ou clique sur le panier en bas à gauche) pour consulter tes cartes et tes objets.",
+      "hint": "[TEMP] Six emplacements, c'est vite plein… peut-être qu'au comptoir d'accueil quelqu'un propose quelque chose de bien plus grand.",
+      "image": "art/accueil/objet-panier-origami.webp"
+    },
+    "jeton": {
+      "name": "[TEMP] Jeton de chariot",
+      "text": "[TEMP] Un jeton doré gravé au logo du Maxi-Gouffre, indispensable pour débloquer un vrai chariot à l'accueil.",
+      "usage": "[TEMP] Parle à l'hôtesse au comptoir de l'accueil et réponds Oui quand elle te propose un chariot.",
+      "hint": "[TEMP] Certains clients jurent qu'au fond du magasin, ces jetons servent aussi à ouvrir des machines oubliées…",
+      "image": "art/placeholder/jeton.svg"
+    },
+    "chariot": {
+      "name": "[TEMP] Chariot",
+      "text": "[TEMP] Bien plus grand que le panier ! Il augmente ta capacité de cartes et roule avec toi dans les rayons.",
+      "usage": "[TEMP] Appuie sur R (ou double-clic sur le chariot) pour le garer ou le reprendre. Ouvre-le avec I.",
+      "hint": "[TEMP] Ses roues grincent déjà, mais sa grille d'acier a l'air taillée pour encaisser bien plus que de simples courses…",
+      "image": "art/placeholder/chariot-vide.svg"
     },
     "papier_toilette": {
       "name": "[TEMP] Rouleau de Papier Toilette",
-      "text": "[TEMP] Ici, ça vaut plus cher que l'or. Personne ne sait pourquoi. L'hôtesse de l'accueil en voudrait bien un.",
+      "text": "[TEMP] La véritable monnaie d'échange du Maxi-Gouffre ! Ici, un seul rouleau vaut de l'or.",
+      "usage": "[TEMP] Rapporte-le à l'hôtesse au comptoir de l'accueil pour l'échanger contre un jeton de chariot.",
+      "hint": "[TEMP] Garde toujours l'œil ouvert dans les rayons : les marchands d'ici ne jurent que par le triple épaisseur…",
       "image": "art/placeholder/papier-toilette.svg"
     }
   }

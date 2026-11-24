@@ -29,6 +29,7 @@ export function createTransition(exit) {
 }
 
 // Avance le fondu. Renvoie 'load' une seule fois, quand l'écran est noir (c'est le moment de changer de lieu).
+// Si p.fade <= 0, le fondu est supprimé : passage direct sur 'load' puis sur 'done'.
 export function stepTransition(tr, dt, p) {
   if (tr.phase === 'load') {
     tr.t += dt; // temps passé dans le noir à charger (pour le signe d'attente)
@@ -36,7 +37,7 @@ export function stepTransition(tr, dt, p) {
   }
   if (tr.phase === 'done') return '';
   tr.t += dt;
-  if (tr.t < p.fade) return '';
+  if (p.fade > 0 && tr.t < p.fade) return '';
   tr.t = 0;
   if (tr.phase === 'out') {
     tr.phase = 'load';
@@ -62,8 +63,8 @@ export function placeReady(tr) {
 
 // Opacité du noir (0 à 1).
 export function transitionBlack(tr, p) {
-  if (tr.phase === 'out') return Math.min(1, tr.t / p.fade);
+  if (tr.phase === 'out') return p.fade <= 0 ? 1 : Math.min(1, tr.t / p.fade);
   if (tr.phase === 'load') return 1;
-  if (tr.phase === 'in') return Math.max(0, 1 - tr.t / p.fade);
+  if (tr.phase === 'in') return p.fade <= 0 ? 0 : Math.max(0, 1 - tr.t / p.fade);
   return 0;
 }

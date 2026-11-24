@@ -8,6 +8,7 @@ function button(label, title, action, onAction) {
   b.textContent = label;
   b.title = title;
   b.setAttribute('aria-label', title);
+  b.addEventListener('pointerdown', (e) => e.stopPropagation());
   b.addEventListener('click', (e) => {
     e.stopPropagation();
     b.blur(); // pour que Espace/Entrée ne relancent pas le bouton
@@ -25,7 +26,7 @@ const HELP = {
   pad: 'Stick gauche ou croix : marcher.<br>A : scanner un produit · Y : Panier · X : lâcher ou pousser le chariot · Select : passer les dialogues · B : retour · Start : pause.<br>Dans les menus : croix pour choisir, A pour valider, LB/RB pour changer d’onglet.',
 };
 const HINT = { touch: 'Touche le sol pour marcher', keys: 'ZQSD, flèches ou clic pour marcher', pad: 'Stick gauche pour marcher' };
-const LABEL = { scanner: 'Scanner', prendre: 'Prendre', lacher: 'Lâcher', pousser: 'Pousser' };
+const LABEL = { scanner: 'Scanner', prendre: 'Prendre', parler: 'Parler', echanger: 'Échanger', lacher: 'Lâcher', pousser: 'Pousser' };
 const SKIP_KEY = { touch: '', keys: 'Tab', pad: 'Select' };
 const KEY = { touch: '', keys: 'Entrée', pad: 'A' };
 
@@ -40,7 +41,19 @@ export function createHud(root, { version, onAction, device, muted, dev = true }
     soundBtn,
   );
   if (dev) bar.append(button('⚙', 'Réglages des développeurs (F2)', 'settings', onAction), button('DBG', 'Diagnostic (F3)', 'diagnostic', onAction));
-  if (document.fullscreenEnabled) bar.append(button('⛶', 'Plein écran', 'fullscreen', onAction));
+  if (document.fullscreenEnabled) {
+    const fsBtn = button('⛶', 'Plein écran', 'fullscreen', onAction);
+    const syncFs = () => {
+      const on = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      fsBtn.setAttribute('aria-pressed', String(on));
+      fsBtn.title = on ? 'Quitter le plein écran' : 'Plein écran';
+      fsBtn.setAttribute('aria-label', fsBtn.title);
+    };
+    document.addEventListener('fullscreenchange', syncFs);
+    document.addEventListener('webkitfullscreenchange', syncFs);
+    syncFs();
+    bar.append(fsBtn);
+  }
 
   const ver = document.createElement('div');
   ver.className = 'version';

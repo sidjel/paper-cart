@@ -12,6 +12,8 @@ import { createSpeakerWaves } from './speakers.js';
 import { createDebugMask } from './debugMask.js';
 import { propLevels } from './depth.js';
 import { createPoses } from './poses.js';
+import { createBirds } from './birds.js';
+import { createClouds } from './clouds.js';
 import { quality } from './quality.js';
 
 export function createPlaceView(container, place, images, common, here, proj, config, getValue) {
@@ -31,13 +33,27 @@ export function createPlaceView(container, place, images, common, here, proj, co
   // de niveau avec un portique).
   const g = place.guard;
   const guard = g ? createGuardBox(images, g, acteurs) : null;
+  const h = place.hotesse;
+  const hotesse = h ? createHotesseEl(images, h, acteurs) : null;
   const depthRefs = props.map((p) => p.depthRef);
+  let guardIdx = -1;
+  let hotesseIdx = -1;
   if (guard) {
+    guardIdx = depthRefs.length;
     depthRefs.push(g.post[1]);
+  }
+  if (hotesse) {
+    hotesseIdx = depthRefs.length;
+    depthRefs.push(h.depthRef);
+  }
+  if (guard || hotesse) {
     const levels = propLevels(depthRefs);
     props.forEach((p, i) => (p.el.style.zIndex = levels[i]));
-    guard.box.style.zIndex = levels[levels.length - 1];
+    if (guard) guard.box.style.zIndex = levels[guardIdx];
+    if (hotesse) hotesse.el.style.zIndex = levels[hotesseIdx];
   }
+  const clouds = place.clouds ? createClouds(stage.layers[place.clouds.layer], place.clouds, images, config.display.reduceMotion) : null;
+  const birds = place.birds ? createBirds(stage.layers[place.birds.layer], place.birds, images, config.display.reduceMotion) : null;
   if (place.rain) {
     addRain(stage.layers[place.rain.layer], place.rain);
     if (place.rain.mat) addMatSheen(stage.layers[place.rain.mat.layer], place.rain.mat.points);
@@ -50,8 +66,11 @@ export function createPlaceView(container, place, images, common, here, proj, co
     depthRefs, // profondeurs de référence (objets du décor, et l'agent s'il y en a un)
     speakerWaves,
     products,
+    clouds,
+    birds,
     debugMask,
     guard, // images de l'agent de sécurité, au repos et geste d'arrêt (game/guard.js les place), ou null
+    hotesse, // image unique de l'hôtesse derrière le comptoir (game/hotesse.js l'oriente), ou null
     // En partant : tout ce qui a été construit pour ce lieu quitte la page.
     // Les images perdent aussi leur source : sinon le navigateur garde chaque <img> inscrite pour suivre la
     // taille de l'écran, et avec elle tout l'ancien lieu (mesuré : +58 éléments par changement de lieu).
@@ -77,6 +96,21 @@ function createGuardBox(images, g, parent) {
   poses.show(idle);
   parent.appendChild(box);
   return { box, idle, stop, poses };
+}
+
+// L'hôtesse d'accueil (A8) : un seul élément image posé sur le calque des acteurs (derrière le héros
+// grâce à depthRef). Son orientation (miroir CSS) est mise à jour par game/hotesse.js.
+function createHotesseEl(images, h, parent) {
+  const rec = images.get(h.image);
+  const el = rec.el;
+  el.className = 'hotesse';
+  el.width = rec.w;
+  el.height = rec.h;
+  el.alt = '';
+  el.draggable = false;
+  el.style.transformOrigin = `${h.anchor[0]}px ${h.anchor[1]}px`;
+  parent.appendChild(el);
+  return { el, size: [rec.w, rec.h] };
 }
 
 // Pluie (calque du dehors, découpée par le mur vitré) : deux voiles de gouttes qui glissent en biais,

@@ -28,7 +28,7 @@ export function createPlaces(ui, container, game) {
 
   async function load(id) {
     place = game.places[id];
-    const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
+    const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
     assetStats.rasterScale = rasterScale;
     // Décodées avant l'affichage. L'historique des temps d'image repart de zéro à chaque lieu (il ne grossit plus).
     assetStats.perImage.length = 0;
@@ -222,7 +222,7 @@ export function createPlaces(ui, container, game) {
     revealStep(dt) {
       if (revealT < 0) return;
       revealT += dt;
-      const o = 1 - revealT / revealFade;
+      const o = revealFade <= 0 ? 0 : 1 - revealT / revealFade;
       if (o <= 0) {
         revealT = -1;
         fadeEl.hidden = true;

@@ -1,0 +1,58 @@
+// Orientation sur 8 directions (logique pure, sans page web).
+// Coordonnées du monde : x > 0 = droite (E), z > 0 = vers le fond (N), z < 0 = vers l'écran (S).
+// Les 5 vues dessinées sont S, SE, E, NE, N ; les 3 vues de gauche (SW, W, NW) sont obtenues en miroir.
+
+const SECTORS = ['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'];
+const DIR_DEADZONE = 0.2;
+
+const VIEW_MAP = {
+  S: { view: 'S', flip: 1 },
+  SE: { view: 'SE', flip: 1 },
+  E: { view: 'E', flip: 1 },
+  NE: { view: 'NE', flip: 1 },
+  N: { view: 'N', flip: 1 },
+  SW: { view: 'SE', flip: -1 },
+  W: { view: 'E', flip: -1 },
+  NW: { view: 'NE', flip: -1 },
+};
+
+// Renvoie la direction parmi 8 à partir d'un vecteur (dx, dz), ou `current` si trop faible.
+export function directionFromVector(dx, dz, current = 'S') {
+  if (Math.hypot(dx, dz) < DIR_DEADZONE) return current;
+  const angle = Math.atan2(dz, dx); // 0 = E, +pi/2 = N, -pi/2 = S
+  const idx = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
+  return SECTORS[idx];
+}
+
+// Associe une des 8 directions à l'une des 5 vues dessinées et son miroir horizontal (1 ou -1).
+export function directionToView(dir) {
+  return VIEW_MAP[dir] ?? VIEW_MAP.S;
+}
+
+function sideOf(dir) {
+  if (dir === 'E' || dir === 'SE' || dir === 'NE') return 1;
+  if (dir === 'W' || dir === 'SW' || dir === 'NW') return -1;
+  return 0;
+}
+
+function depthOf(dir) {
+  if (dir === 'N' || dir === 'NE' || dir === 'NW') return 1;
+  if (dir === 'S' || dir === 'SE' || dir === 'SW') return -1;
+  return 0;
+}
+
+// Faut-il jouer le pivot de la feuille (effet Paper Mario) entre deux directions ?
+// Oui en cas d'inversion gauche ↔ droite franche (ou face ↔ dos si flipOnFrontBack est actif).
+// Non pour un virage progressif d'un cran (ex. E → SE → S), qui reste fluide.
+export function needsPaperFlip(prevDir, nextDir, flipOnFrontBack = false) {
+  if (!prevDir || prevDir === nextDir) return false;
+  const s1 = sideOf(prevDir);
+  const s2 = sideOf(nextDir);
+  if (s1 !== 0 && s2 !== 0 && s1 !== s2) return true;
+  if (flipOnFrontBack) {
+    const d1 = depthOf(prevDir);
+    const d2 = depthOf(nextDir);
+    if (d1 !== 0 && d2 !== 0 && d1 !== d2) return true;
+  }
+  return false;
+}

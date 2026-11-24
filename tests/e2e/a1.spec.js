@@ -756,25 +756,36 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   await expect(page.locator('.scan-button')).toContainText('Prendre');
   await page.keyboard.press('Enter'); // la Scanette (le mur, tout près)
   await expect.poll(async () => (await state(page)).gear.scanette).toBe(true);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.locator('.item-reveal-ok').click();
+  await expect(page.locator('.item-reveal')).toBeHidden();
+  await expect(page.locator('.scanette-button')).toBeVisible();
   // Le panier est un peu plus loin à droite.
   await page.keyboard.down('ArrowRight');
   await page.waitForFunction(() => window.paperCart.scanState().pickup === 1, null, { timeout: 6000 });
   await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await state(page)).gear).toEqual({ scanette: true, panier: true });
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.locator('.item-reveal-ok').click();
+  await expect(page.locator('.item-reveal')).toBeHidden();
   await expect(page.locator('.panier-button')).toBeVisible();
   await expect(page.locator('.panier-count')).toHaveText('0/6');
-  await expect(page.locator('.actor-held:visible')).toHaveCount(2);
+  // Hors scan, ni la Scanette ni le panier ne sont tenus en main sur le héros (ils sont dans le HUD).
+  await expect(page.locator('.actor-held:visible')).toHaveCount(0);
   await page.waitForTimeout(400);
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-accueil.png` });
 });
 
 test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
-  const p = await page.evaluate(() => window.paperCart.worldToClient(1602, 300)); // pile de paniers, dans le hall
+  const p = await page.evaluate(() => window.paperCart.worldToClient(1585, 250)); // pile de paniers, dans le hall
   await page.touchscreen.tap(p.x, p.y);
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.locator('.item-reveal-ok').tap();
+  await expect(page.locator('.item-reveal')).toBeHidden();
   expect((await state(page)).gear.scanette).toBe(false);
   // Dans le rayon, sans Scanette : un double toucher sur un produit ne scanne rien.
   await page.evaluate(() => window.paperCart.useExit());
@@ -871,6 +882,9 @@ test('A5a : Scanette sans panier, le héros s’interroge lui-même (pensée, bu
   await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter'); // la Scanette
   await expect.poll(async () => (await state(page)).gear.scanette).toBe(true);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.locator('.item-reveal-ok').click();
+  await expect(page.locator('.item-reveal')).toBeHidden();
   // Puis le rayon, sans panier : devant la banane.
   await page.evaluate(() => window.paperCart.useExit());
   await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play');
@@ -1047,7 +1061,7 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   const said = async () => (await page.evaluate(() => window.paperCart.journal())).join(' ');
   expect((await hero(page)).x).toBeGreaterThan(1000); // la partie commence à droite des portiques
   // Au début, l'agent va de son poste à sa place, au milieu, puis ne bouge plus.
-  await expect.poll(async () => Math.round((await guard()).x), { timeout: 5000 }).toBe(709);
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 5000 }).toBe(460);
   const z0 = (await guard()).z;
   // Vers la gauche : il lève le bras et parle (bulle au-dessus de lui) ; le héros sursaute et s'arrête.
   await page.keyboard.down('ArrowLeft');
@@ -1084,8 +1098,8 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   }
   await page.keyboard.up('ArrowLeft');
   expect(back, 'demi-tour de quelques pas').toBe(true);
-  expect(minX).toBeGreaterThan(860);
+  expect(minX).toBeGreaterThan(700);
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-stop.png` });
   const gd = await guard();
-  expect([Math.round(gd.x), gd.z]).toEqual([709, z0]); // l'agent n'a pas bougé
+  expect([Math.round(gd.x), gd.z]).toEqual([460, z0]); // l'agent n'a pas bougé
 });

@@ -7,11 +7,14 @@ import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, clearTarget, faceProduct } from './core/movement.js';
+import { directionFromVector, directionToView } from './core/direction.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
 import { createGear, takeItem, capacity, scanBlocked } from './core/gear.js';
 import { createConfirm } from './ui/confirm.js';
+import { createItemReveal } from './ui/itemReveal.js';
+import { createTreadmillUi } from './ui/treadmill.js';
 import { createTitleScreen } from './ui/title.js';
 import { createPlayerOptions } from './ui/playerOptions.js';
 import { createIntro, stepIntro, lineOpacity, blackOpacity, skipLine, skipAll } from './core/intro.js';
@@ -25,11 +28,14 @@ import { createPlaces } from './game/places.js';
 import { createPileWiring } from './game/pile.js';
 import { createChariotWiring, CHARIOT_IMAGE, CHARIOT_SIZE } from './game/chariot.js';
 import { createGuardWiring } from './game/guard.js';
+import { createHotesseWiring } from './game/hotesse.js';
 import { exitTarget } from './core/places.js';
 import { quality } from './scene/quality.js';
 import { createVoices } from './game/voices.js';
 import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
+import { behindFactor, stepFade, foregroundOpacity } from './core/occlusion.js';
+import { createCrowCalls, resetCrowCalls, stepCrowCalls } from './core/birds.js';
 import { createTargetMarker } from './scene/targetMarker.js';
 import { actorLevel } from './scene/depth.js';
 import { createDust } from './scene/dust.js';
@@ -46,17 +52,20 @@ import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
 import accueilPlace from './data/places/accueil.json';
 import rayon2 from './data/places/rayon-2.json';
-import heroData from './data/characters/heros.json';
+import salleTest from './data/places/salle-test.json';
+import heroClassicData from './data/characters/heros.json';
+import heroTestData from './data/characters/heros-test.json';
 import catalog from './data/products.json';
 
 // Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
-const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace, [rayon2.id]: rayon2 };
+const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace, [rayon2.id]: rayon2, [salleTest.id]: salleTest };
 let place = PLACES[startPlaceId(Object.keys(PLACES), accueilPlace.id)]; // la partie commence dans le hall d'accueil
 const VERSION = __VERSION__;
 const BASE = import.meta.env.BASE_URL;
 const touch = matchMedia('(pointer: coarse)').matches;
 
 loadSavedSettings();
+const heroData = config.character.heroStyle === 'classique' ? heroClassicData : heroTestData;
 
 const gameEl = document.getElementById('game');
 const uiEl = document.getElementById('ui');
@@ -73,6 +82,9 @@ window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.re
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
 let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust, chariot;
+let fgOccluders = null;
+let fgOpacityKey = 'display.hallForegroundOpacity';
+let behindAmount = 0;
 // Dernière position affichée du personnage (pour placer la poussière d'un pas).
 const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
 const DUST_IMAGE = 'art/placeholder/poussiere.svg';
@@ -96,13 +108,40 @@ const world = createWorld(); // ce dont le jeu se souvient, lieu par lieu
 const scan = createScan();
 const basket = createBasket();
 let flips = 0; // cartes retournées (bruitage ; compté pour les tests)
-const basketUi = createBasketUi(uiEl, { onOpen: () => handleAction('panier'), onClose: () => handleAction('back'), onFlip: () => {
+const basketUi = createBasketUi(uiEl, {
+  onOpen: () => handleAction('panier'),
+  onClose: () => handleAction('back'),
+  onFlip: () => {
     flips++;
     audio.play('retourne');
-  }, objects: objectsFile.objects, base: BASE });
+  },
+  onInspectScanette: () => {
+    if (sm.is('play') && !itemReveal.open && !heroAside() && !scan.active) {
+      itemReveal.show('scanette', { isNew: false, reduceMotion: config.display.reduceMotion });
+    }
+  },
+  objects: objectsFile.objects,
+  base: BASE,
+});
 basketUi.setReduceMotion(() => config.display.reduceMotion);
 const flyingCard = createFlyingCard(uiEl);
 const confirm = createConfirm(uiEl);
+const itemReveal = createItemReveal(uiEl, { objects: objectsFile.objects, base: BASE });
+const DIR_VEC = { S: [0, -1], SE: [Math.SQRT1_2, -Math.SQRT1_2], E: [1, 0], NE: [Math.SQRT1_2, Math.SQRT1_2], N: [0, 1], NW: [-Math.SQRT1_2, Math.SQRT1_2], W: [-1, 0], SW: [-Math.SQRT1_2, -Math.SQRT1_2] };
+const treadmill = createTreadmillUi(uiEl, {
+  onDirection(dir) {
+    if (!walker) return;
+    walker.dir = dir;
+    walker.facing = directionToView(dir).flip;
+    walker.away = dir === 'N' || dir === 'NE' || dir === 'NW';
+    clearTarget(walker);
+  },
+  onPerspective(on) {
+    if (!proj || !place) return;
+    proj.perDepth = on ? (place.treadmillPerspective ?? 0.00022) : 0;
+    if (stage) render();
+  },
+});
 // Filtre « écran cathodique » : un calque par-dessus tout (lignes de balayage, bords sombres), sans clic.
 const crt = document.createElement('div');
 crt.className = 'crt';
@@ -113,6 +152,7 @@ const TEXT_SCALE = { petite: 0.85, normale: 1, grande: 1.2, 'tres-grande': 1.4 }
 function applyAccess() {
   document.documentElement.style.setProperty('--ts', TEXT_SCALE[config.access.textSize] ?? 1);
   document.documentElement.style.setProperty('--narrator-alpha', config.display.narratorAlpha);
+  document.documentElement.style.setProperty('--menu-alpha', config.display.menuAlpha);
   const { brightness: b, contrast: c } = config.access;
   gameEl.style.filter = b === 1 && c === 1 ? '' : `brightness(${b}) contrast(${c})`;
 }
@@ -143,6 +183,7 @@ const titleUi = createTitleScreen(uiEl, {
   image: `${BASE}art/placeholder/titre/titre.svg`,
   onStart: () => startGame(true),
   onOptions: () => sm.go('options'),
+  onFullscreen: () => toggleFullscreen(),
 });
 // Options du joueur (écran titre) : assorties au titre, sans réglages de développement.
 const playerOptions = createPlayerOptions(uiEl, { onClose: () => handleAction('back') });
@@ -192,7 +233,6 @@ function updateIntro(dt) {
   const line = introRun.phase === 'line' ? introLines[introRun.i] : null;
   introUi.set(line, introRun.phase === 'line' ? introRun.i : -1, lineOpacity(introRun, config.intro), blackOpacity(introRun, config.intro));
   if (introRun.phase === 'end' && sm.is('intro')) {
-    audio.stopRain();
     audio.setFrozen(false);
     sm.go('play'); // l'écran noir des lieux prend le relais, plein (places.reveal) : le retrait de l'intro ne se voit pas
     introRun.handoff = 2;
@@ -211,9 +251,10 @@ let pickupState = null; // objets à prendre, visés comme les produits posés a
 let pickupReach = -1;
 let shownPush = false; // le héros est montré en train de pousser
 let chariotAction = ''; // 'pousser', 'lacher' ou '' (bouton d'action)
+let hotesseAction = ''; // 'parler', 'echanger' ou '' (bouton d'action devant le comptoir)
 const BLOCKED_LINE = { sans_scanette: 'sans_scanette', sans_panier: 'sans_panier', plein: 'panier_plein' };
 
-// Action (Entrée, Espace, A, bouton) : prendre ce qui est à portée au présentoir, sinon scanner.
+// Action (Entrée, Espace, A, bouton) : prendre ce qui est à portée au présentoir, sinon scanner, sinon hôtesse ou chariot.
 function tryScan() {
   if (!sm.is('play') || scan.active) return;
   const k = nearestProduct(pickupState, walker, config.scan);
@@ -222,9 +263,69 @@ function tryScan() {
     return;
   }
   const i = nearestProduct(productState, walker, config.scan);
-  if (i < 0 && toggleChariot()) return;
-  if (i < 0) say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
-  else tryScanProduct(i);
+  if (i >= 0) {
+    tryScanProduct(i);
+    return;
+  }
+  if (hotesse.action(walker, gear)) {
+    talkHotesse();
+    return;
+  }
+  if (toggleChariot()) return;
+  say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
+}
+
+function talkHotesse() {
+  const pt = hotesse.point();
+  if (pt) faceProduct(walker, pt.x, pt.z + 40, config.scan.awayDepth);
+  const res = hotesse.interact(gear);
+  if (!res) return;
+  if (res.kind === 'token_offer') {
+    voices.sayDirect('hotesse', res.text, {
+      choices: res.choices,
+      onChoice(_k, picked) {
+        if (!picked?.grantToken) return;
+        voices.silence();
+        hotesse.exchangeForToken(gear);
+        basketUi.removeObject('papier_toilette');
+        basketUi.addObject('jeton');
+        audio.play('decouverte');
+        vibrate('fort');
+        itemReveal.show('jeton', {
+          isNew: true,
+          reduceMotion: config.display.reduceMotion,
+          onClose() {
+            if (picked.grantReply) voices.sayDirect('hotesse', picked.grantReply);
+          },
+        });
+      },
+    });
+  } else if (res.kind === 'chariot_offer') {
+    voices.sayDirect('hotesse', res.text, {
+      choices: res.choices,
+      onChoice(_k, picked) {
+        if (!picked?.grantChariot) return;
+        voices.silence();
+        hotesse.consumeToken(gear);
+        basketUi.removeObject('jeton');
+        giveChariot();
+        audio.play('decouverte');
+        vibrate('fort');
+        itemReveal.show('chariot', {
+          isNew: true,
+          reduceMotion: config.display.reduceMotion,
+          onClose() {
+            basketUi.bumpBasket();
+            if (picked.grantReply) voices.sayDirect('hotesse', picked.grantReply);
+          },
+        });
+      },
+    });
+  } else {
+    voices.sayDirect('hotesse', res.text);
+  }
+  marker.hide();
+  hud.playerMoved();
 }
 
 // Pile de cartons (A8) : poussée à la main ou renversée par l'élan du chariot.
@@ -298,26 +399,41 @@ function chooseCardToDrop(i) {
   });
 }
 
-// Prendre une Scanette ou un panier au présentoir.
+// Prendre une Scanette, un panier ou un objet clé : fanfare de découverte + fiche au centre de l'écran,
+// puis apparition dans l'interface en bas à gauche.
 function takePickup(k) {
   pendingScan = -1;
   const it = pickupState[k];
   faceProduct(walker, it.x, it.z, config.scan.awayDepth);
   if (!takeItem(gear, pickupState, k)) return;
-  sprite.setHeld(it.id, true);
-  if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
+  if (it.id === 'scanette') sprite.setHeld('scanette', true);
   basketUi.addObject(it.id);
   pile.taken(it.id);
-  audio.play('prise');
-  vibrate('leger');
-  say(`prise_${it.id}`);
+  audio.play('decouverte');
+  vibrate('fort');
   marker.hide();
   hud.playerMoved();
+  itemReveal.show(it.id, {
+    isNew: true,
+    reduceMotion: config.display.reduceMotion,
+    onClose() {
+      if (it.id === 'panier') {
+        basketUi.setCapacity(capacity(gear, config.carry));
+        basketUi.bumpBasket();
+      } else if (it.id === 'scanette') {
+        basketUi.setScanette(true, true);
+      }
+      say(`prise_${it.id}`);
+    },
+  });
 }
 
 // ---------- Voix (src/game/voices.js) : haut-parleur, pensées, apartés, rencontre, tournis ----------
 let endOfAisleX = Infinity;
 let speakerWaves = null; // ondes sous le haut-parleur qui parle (propres au lieu affiché)
+let clouds = null; // nuages origami animés dans le ciel (propres au lieu affiché)
+let birds = null; // oiseaux origami animés dehors (propres au lieu affiché)
+const crowCalls = createCrowCalls(); // cris de corbeaux déterministes dans les lieux avec oiseaux dehors
 let storeTime = 0; // temps du magasin (figé pendant un aparté)
 const HEAD_HEIGHT = 330; // hauteur de la tête du héros au-dessus de ses pieds (px du dessin)
 const voices = createVoices(uiEl, {
@@ -340,6 +456,7 @@ const voices = createVoices(uiEl, {
   walkTo: (pt) => walkTo(pt),
   hideMarker: () => marker.hide(),
   guardHead: () => guard.head(),
+  hostessHead: () => hotesse.head(),
 });
 const say = voices.say;
 // La partie commence (après l'écran titre, ou l'intro passée ou non) : la scène se dévoile depuis l'écran noir
@@ -368,6 +485,7 @@ const guard = createGuardWiring({
   },
   back: (dx) => setPath(walker, [[walker.x + dx, walker.z]]),
 });
+const hotesse = createHotesseWiring();
 const heroAside = voices.heroAside;
 
 function scanProduct(i) {
@@ -406,9 +524,10 @@ function giveChariot() {
 function equipAll() {
   for (const id of Object.keys(gear)) {
     gear[id] = true;
-    sprite.setHeld(id, true);
+    if (id === 'scanette') sprite.setHeld(id, true);
     basketUi.addObject(id);
   }
+  basketUi.setScanette(true);
   markTaken();
   basketUi.setCapacity(capacity(gear, config.carry));
 }
@@ -519,6 +638,7 @@ const settings = createSettingsPanel(uiEl, { onClose: () => handleAction('back')
 // Qui a la main ? (core/focus.js) : une seule règle de priorité pour toutes les commandes.
 function owner() {
   return focusOwner(sm.get(), {
+    reveal: itemReveal.open,
     confirm: confirm.open,
     card: basketUi.detailOpen,
     name: voices.namePicker.visible,
@@ -534,6 +654,7 @@ function handleAction(action) {
   switch (action) {
     case 'back':
       if (who === 'intro') skipAll(introRun);
+      else if (who === 'reveal') itemReveal.close();
       else if (who === 'bench') measure.cancel();
       else if (who === 'menu') sm.back();
       else if (who === 'options') sm.back(); // vers l'écran titre ou la pause, d'où l'on vient
@@ -587,6 +708,7 @@ function handleAction(action) {
       break;
     case 'action':
       if (who === 'intro') skipLine(introRun);
+      else if (who === 'reveal') itemReveal.close();
       else if (who === 'pause') {
         // Manette (A) : le bouton mis en avant de l'écran Pause (Reprendre ou Dialogues).
         const el = document.activeElement;
@@ -598,6 +720,7 @@ function handleAction(action) {
       else if (who === 'name') voices.namePicker.press();
       else if (who === 'choice') voices.answerFocused();
       else if (who === 'scene') voices.skip();
+      else if (who === 'play' && voices.typing()) voices.skip(); // finir d'écrire le texte en cours avant toute autre action
       else if (who === 'play') tryScan();
       else if (who === 'erreur') places.retry(); // manette (A), Entrée : « Réessayer »
       break;
@@ -622,7 +745,7 @@ function handleAction(action) {
     case 'panier':
       if (sm.is('panier')) sm.go('play');
       // Pas de Panier pendant un aparté ou une conversation (rien ne les interrompt).
-      else if (heroFree(who) && !scan.active && gear.panier) sm.go('panier');
+      else if (heroFree(who) && !scan.active && (gear.panier || gear.chariot)) sm.go('panier');
       break;
   }
 }
@@ -647,18 +770,20 @@ function wantsFullscreen() {
 }
 
 function exitFullscreen() {
-  if (document.fullscreenElement) document.exitFullscreen?.()?.catch?.(() => {});
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
 }
 
 function toggleFullscreen() {
-  if (document.fullscreenElement) {
-    document.exitFullscreen?.();
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsEl) {
+    (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
     return;
   }
-  document.documentElement
-    .requestFullscreen?.({ navigationUI: 'hide' })
-    .then(() => screen.orientation?.lock?.('landscape'))
-    .catch(() => {});
+  const root = document.documentElement;
+  (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root, { navigationUI: 'hide' })
+    ?.then?.(() => screen.orientation?.lock?.('landscape'))
+    ?.catch?.(() => {});
 }
 
 sm.onChange((now, before) => {
@@ -693,7 +818,7 @@ function onTarget(cx, cy) {
   dragPending = false;
   if (!sm.is('play')) return;
   voices.acted();
-  if (scan.active) return; // pendant une action (scan), le héros ne se déplace pas
+  if (scan.active || itemReveal.open || voices.waitingAnswer()) return; // pendant un scan, une fiche ou un choix, le héros ne se déplace pas
   if (guard.holding()) return; // l'agent de sécurité parle (ou le héros fait demi-tour) : il ne bouge pas
   if (heroAside()) {
     voices.skip(); // toucher : la réplique passe
@@ -734,7 +859,7 @@ function walkTo(target) {
 // Double toucher (ou double clic) sur un produit : le personnage va se placer et le scanne à
 // l'arrivée (logique dans core/scan.js). Ailleurs : rien de plus que « aller là ».
 function onDoubleTap(cx, cy) {
-  if (!sm.is('play') || scan.active || heroAside() || guard.holding()) return;
+  if (!sm.is('play') || scan.active || itemReveal.open || voices.waitingAnswer() || heroAside() || guard.holding()) return;
   stage.clientToStage(cx, cy, tmpStage);
   const wx = stageToWorldX(proj, tmpStage.x);
   const margin = config.input.doubleTapMargin;
@@ -742,6 +867,17 @@ function onDoubleTap(cx, cy) {
   if (chariot.hit(tmpStage.x, tmpStage.y, margin) && chariot.action()) {
     clearTarget(walker); // le premier toucher ne l'envoie pas marcher dans le chariot
     toggleChariot();
+    return;
+  }
+  // L'hôtesse d'accueil : lui parler ou échanger le rouleau (ou s'avancer jusqu'au comptoir).
+  if (hotesse.hit(tmpStage.x, tmpStage.y, margin)) {
+    if (hotesse.action(walker, gear)) {
+      clearTarget(walker);
+      talkHotesse();
+    } else {
+      const pt = hotesse.point();
+      if (pt) walkTo({ x: pt.x, z: pt.z });
+    }
     return;
   }
   // D'abord le présentoir de l'accueil (si l'on touche une Scanette ou un panier pas encore pris).
@@ -802,9 +938,10 @@ function render() {
   shown.level = actorLevel(depthRefs, z, chariot.heroNearer(z));
   shown.time = time;
   const emotion = voices.emotion(walker.moving);
-  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion);
+  sprite.render(shown.x, shown.y, shown.scale, walker.facing, walker.away, walker.moving, time, walker.distance, scan.active, emotion, walker.dir);
   sprite.setLevel(shown.level);
   guard.render(a);
+  hotesse.render(walker.x);
   chariot.render(a, depthRefs);
   pile.render(time);
   hud.setSkip(voices.canSkip() && !sm.is('pause') && !sm.is('menu'));
@@ -825,11 +962,13 @@ function render() {
   if (asideP === 0) storeTime = time; // pendant un aparté, le temps du magasin est figé
   if (pk >= 0) products.markAt(1000 + pk, pickupState[pk].x, pickupState[pk].y - pickupState[pk].h, storeTime);
   else products.setMarker(reach, storeTime);
-  // Rien à prendre ni à scanner : lâcher ou pousser le chariot, s'il est à côté.
-  const ca = free && pk < 0 && reach < 0 ? chariot.action() : '';
-  if (reach !== highlighted || pk !== pickupReach || ca !== chariotAction) {
+  // Rien à prendre ni à scanner : hôtesse d'accueil, sinon lâcher ou pousser le chariot.
+  const ha = free && pk < 0 && reach < 0 ? hotesse.action(walker, gear) : '';
+  const ca = free && pk < 0 && reach < 0 && !ha ? chariot.action() : '';
+  if (reach !== highlighted || pk !== pickupReach || ha !== hotesseAction || ca !== chariotAction) {
+    hotesseAction = ha;
     chariotAction = ca;
-    hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : ca);
+    hud.setAction(pk >= 0 ? 'prendre' : reach >= 0 ? 'scanner' : ha || ca);
     highlighted = reach;
     pickupReach = pk;
   }
@@ -858,6 +997,16 @@ function render() {
     camera.y += (gy - camera.y) * k;
   } else if (!measure.cameraFrozen()) updateCamera(camera, config.camera, shown.x, shown.y - 140 * shown.scale, walker.facing, v.viewW, v.viewH, place.size[0], place.size[1], camDt);
   stage.setCamera(camera.x, camera.y);
+  clouds?.update(storeTime, config.display.reduceMotion);
+  birds?.update(storeTime, config.display.reduceMotion, stage.parallaxOffset(birds.layer));
+  if (fgOccluders && !sm.is('bench')) {
+    const target = behindFactor(shown.x, shown.y, shown.scale, fgOccluders, stage.parallaxOffset('premier-plan'));
+    behindAmount = stepFade(behindAmount, target, 10, camDt, config.display.reduceMotion);
+    stage.setLayerOpacity(
+      'premier-plan',
+      foregroundOpacity(getValue(fgOpacityKey), config.display.behindPlantsOpacity, behindAmount),
+    );
+  }
   if (!walker.hasTarget) marker.hide();
 }
 
@@ -880,8 +1029,8 @@ function frame(now) {
     const n = stepper.advance(dt / 1000);
     for (let i = 0; i < n; i++) {
       input.read(intent);
-      if (scan.active || heroAside()) {
-        // Pendant un scan ou un aparté, le personnage ne bouge pas (ni au clavier, ni vers un point touché),
+      if (scan.active || heroAside() || itemReveal.open || voices.waitingAnswer()) {
+        // Pendant un scan, un aparté, une fiche d'objet ou un choix Oui/Non, le personnage ne bouge pas,
         // sauf la marche d'une conversation (il s'avance tout seul).
         intent.moveX = 0;
         intent.moveZ = 0;
@@ -892,7 +1041,29 @@ function frame(now) {
         intent.moveX = 0;
         intent.moveZ = 0;
       }
-      stepWalker(walker, intent, mask, chariot.walk(config.walk), stepper.step);
+      if (treadmill.active) {
+        clearTarget(walker);
+        walker.prevX = walker.x;
+        walker.prevZ = walker.z;
+        if (intent.moveX !== 0 || intent.moveZ !== 0) {
+          const dir = directionFromVector(intent.moveX, intent.moveZ);
+          if (dir) {
+            walker.dir = dir;
+            walker.facing = directionToView(dir).flip;
+            walker.away = dir === 'N' || dir === 'NE' || dir === 'NW';
+          }
+        }
+        walker.moving = !treadmill.paused;
+        if (walker.moving) {
+          // Même vitesse réelle que stepWalker selon la direction (depthFactor sur l'axe avant/arrière).
+          const [ux, uz] = DIR_VEC[walker.dir] ?? DIR_VEC.S;
+          const dirSpeed = Math.hypot(ux, uz * config.walk.depthFactor) * config.walk.maxSpeed;
+          walker.distance += dirSpeed * (treadmill.slow ? 0.4 : 1) * stepper.step;
+        }
+      } else {
+        const walkCfg = treadmill.slow ? { ...config.walk, maxSpeed: config.walk.maxSpeed * 0.4 } : config.walk;
+        stepWalker(walker, intent, mask, chariot.walk(walkCfg), stepper.step);
+      }
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
       guard.step(walker, intent, stepper.step);
@@ -907,6 +1078,7 @@ function frame(now) {
     voices.watch(sec);
     voices.update(sec);
     voices.updateAside(sec);
+    if (birds && voices.asideP === 0 && stepCrowCalls(crowCalls, sec)) audio.play('corbeau');
     render();
     voices.updateStars();
   } else if (sm.is('intro')) {
@@ -943,11 +1115,19 @@ const places = createPlaces(uiEl, gameEl, {
     pickupState = here.pickups;
     markTaken();
     guard.attach(place, view, proj);
+    hotesse.attach(place, view);
+    treadmill.setVisible(!!place.treadmill);
     chariot.attach(proj);
     pile.attach(place, view, here, mask);
-    ({ stage, props, depthRefs, products, speakerWaves, debugMask } = view);
+    ({ stage, props, depthRefs, products, speakerWaves, debugMask, clouds, birds } = view);
+    const fgLayer = place.layers.find((l) => l.id === 'premier-plan');
+    fgOccluders = fgLayer?.occluders ?? null;
+    fgOpacityKey = fgLayer?.opacity ?? 'display.hallForegroundOpacity';
+    behindAmount = 0;
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;
+    hotesseAction = '';
+    chariotAction = '';
     pendingScan = -1;
     camera.ready = false;
     lastCamTime = -1;
@@ -955,12 +1135,17 @@ const places = createPlaces(uiEl, gameEl, {
   },
   onLeaving() {
     marker.hide();
+    fgOccluders = null;
+    behindAmount = 0;
+    clouds = null;
+    birds = null;
     stage = null;
   },
   // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
   onArrived() {
     chariot.arrived(); // poussé, le chariot arrive avec le héros
     voices.arrivedInPlace();
+    resetCrowCalls(crowCalls);
   },
   logError,
   onLoadFailed: () => say('lieu_inaccessible'),
@@ -969,8 +1154,8 @@ const places = createPlaces(uiEl, gameEl, {
 
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
-  const frontScale = Math.max(1, 1 - nearestZ * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
-  const rasterScale = computeRasterScale(place.size[1], config.camera.zoom, quality().pixelRatio);
+  const frontScale = Math.max(1, 1 - (nearestZ - (place.projection.refZ ?? 0)) * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
+  const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio);
   // Images communes à tous les lieux.
   loadedImages = await loadImages([
     // Le personnage est un peu plus grand tout devant : on prépare ses images à sa taille maximale.
@@ -996,14 +1181,19 @@ async function start() {
     if (key === 'camera.zoom') layout();
     if (key === 'debug.showWalkMask') debugMask?.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
-    if (key === 'display.foregroundOpacity' || key === 'display.hallForegroundOpacity') stage?.applyOpacity();
+    if (key === 'display.foregroundOpacity' || key === 'display.hallForegroundOpacity') {
+      stage?.applyOpacity();
+      if (stage) render();
+    }
+    if (key === 'display.behindPlantsOpacity' && stage) render();
     if (key === 'display.fullscreenMode') {
       // Le choix se fait d'un geste (dans le panneau) : on peut entrer en plein écran tout de suite.
       if (value === 'oui') enterLandscape();
       else if (value === 'non') exitFullscreen();
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
-    if (key.startsWith('access.') || key === 'display.narratorAlpha') applyAccess();
+    if (key.startsWith('access.') || key === 'display.narratorAlpha' || key === 'display.menuAlpha') applyAccess();
+    if ((key.startsWith('character.') || key === 'scene.depthScale' || key.startsWith('camera.')) && stage) render();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
     if (key === 'display.hallRain') stage?.el.classList.toggle('no-rain', !quality().rain);
@@ -1043,10 +1233,11 @@ async function start() {
     version: VERSION,
     state: () => sm.get(),
     guard: () => guard.info(),
+    hotesse: () => hotesse.info(),
     chariot: () => chariot.info(),
     pile: () => pile.info(),
     chariotToggle: () => chariot.toggle(), // tests : lâcher ou reprendre le chariot (s'il est à côté)
-    hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, hasTarget: walker.hasTarget }),
+    hero: () => ({ x: walker.x, z: walker.z, facing: walker.facing, away: walker.away, dir: walker.dir, hasTarget: walker.hasTarget }),
     // Scanner : produit à portée, scan en cours, cartes du Panier.
     scanState: () => ({ reach: highlighted, pickup: pickupReach, active: scan.active, phase: scan.phase, cards: basket.cards.map((c) => c.name), gear: { ...gear } }),
     // Tests automatiques : le héros prend tout au présentoir (Scanette et panier), sans s'y rendre.

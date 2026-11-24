@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- [TEMP] Jeton de chariot Maxi-Gouffre (monnaie obtenue en échange d'un rouleau de papier toilette). -->
+  <circle cx="64" cy="64" r="54" fill="#faf8f2"/>
+  <circle cx="64" cy="64" r="47" fill="#d99f2b" stroke="#2d241d" stroke-width="3.5"/>
+  <circle cx="64" cy="64" r="38" fill="#f2c957" stroke="#9e6d14" stroke-width="2.5"/>
+  <!-- Reflet origami facetté -->
+  <path d="M38 38 L78 28 L56 64 L28 60 Z" fill="#fae28f" opacity="0.55"/>
+  <!-- Petit chariot gravé au centre -->
+  <g fill="none" stroke="#6f4a0c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 48 L48 48 L54 74 L82 74 L88 55 L50 55"/>
+    <circle cx="58" cy="83" r="3.5" fill="#6f4a0c" stroke="none"/>
+    <circle cx="78" cy="83" r="3.5" fill="#6f4a0c" stroke="none"/>
+  </g>
+</svg>

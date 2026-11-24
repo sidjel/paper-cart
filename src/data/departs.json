@@ -56,6 +56,13 @@
       "met": true,
       "chariot": true,
       "place": "rayon-2"
+    },
+    {
+      "id": "salle-test",
+      "label": "Salle de test libre (animations 8 directions, sans décor)",
+      "equip": true,
+      "met": true,
+      "place": "salle-test"
     }
   ]
 }

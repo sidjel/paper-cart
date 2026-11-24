@@ -164,11 +164,11 @@ test(`mémoire : 5 allers-retours rayon ↔ accueil${withFailure ? ', avec un é
   for (let k = 0; k < 5; k++) {
     if (withFailure && k === 2) {
       // L'image du hall ne se charge pas : retour au rayon, là où le héros est sorti.
-      await page.route('**/accueil-fond.svg', (r) => r.abort());
+      await page.route('**/accueil-fond.*', (r) => r.abort());
       await page.evaluate(() => window.paperCart.useExit());
       await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.journal().some((l) => l.includes('momentanément inaccessible')), null, { timeout: 15_000 });
       expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
-      await page.unroute('**/accueil-fond.svg');
+      await page.unroute('**/accueil-fond.*');
     }
     await travel('accueil');
     await travel('rayon-essai');
@@ -211,7 +211,7 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
   };
   const containers = new Set([...(await ids('.guard')), ...(await ids('.actor')), ...(await ids('.prop'))]);
   const poses = new Set([...(await ids('.guard-pose')), ...(await ids('.actor-frame'))]);
-  expect(containers.size).toBe(6); // l'agent, le héros, les 4 portiques
+  expect(containers.size).toBe(2); // l'agent et le héros (portiques intégrés au décor Krita)
   expect(poses.size).toBeGreaterThan(10); // 2 poses de l'agent, les images du héros
   let sig = null;
   let changes = 0;

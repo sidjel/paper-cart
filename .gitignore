@@ -10,3 +10,5 @@ coverage/
 Thumbs.db
 .env
 .env.*
+_assets_stock/
+_krita_mcp_test/

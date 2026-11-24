@@ -9,6 +9,7 @@ export function createProjection(data, settings) {
     floorY: data.floorFrontY,
     k: data.depthToScreen,
     perDepth: data.scalePerDepth ?? 0, // perte de taille par unité de profondeur
+    refZ: data.refZ ?? 0, // profondeur de référence (taille = 1 à z = refZ)
     settings,
   };
 }
@@ -21,10 +22,10 @@ export function worldToStageY(proj, z) {
   return proj.floorY - z * proj.k;
 }
 
-// Taille d'affichage d'un élément selon sa profondeur : 1 au bord avant du sol (z = 0),
+// Taille d'affichage d'un élément selon sa profondeur : 1 au bord avant du sol (z = refZ),
 // plus petit vers le fond, un peu plus grand tout devant.
 export function scaleAt(proj, z) {
-  return Math.max(0.2, 1 - z * proj.perDepth * proj.settings.depthScale);
+  return Math.max(0.2, 1 - (z - (proj.refZ ?? 0)) * proj.perDepth * proj.settings.depthScale);
 }
 
 export function stageToWorldX(proj, sx) {

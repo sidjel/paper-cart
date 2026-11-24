@@ -164,12 +164,13 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().cut).toBe(3);
   });
 
-  it('la pluie de l’intro (son en boucle) est libérée quand on l’arrête', () => {
+  it('les cris de corbeaux libèrent tous leurs nœuds audio à leur fin', () => {
     const a = createAudio(settings, song);
     a.unlock();
-    a.play('pluie');
-    expect(a.counters().sfx).toBe(3);
-    a.stopRain();
+    a.play('corbeau');
+    a.play('corbeau');
+    a.play('corbeau');
+    expect(a.counters().sfx).toBeGreaterThan(0);
     end();
     expect(a.counters().sfx).toBe(0);
   });

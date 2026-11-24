@@ -18,6 +18,7 @@ export const config = {
     arrivalRadius: 4, // distance à laquelle on considère être arrivé au point touché (px)
   },
   character: {
+    heroStyle: 'test8dir', // apparence du héros : 'test8dir' (origami 8 directions) ou 'classique' (provisoire 2 vues)
     flipDuration: 0.18, // durée du retournement de la feuille (s) ; 0 = instantané
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
@@ -52,7 +53,7 @@ export const config = {
     speed: 260, // agent de sécurité du hall : vitesse de marche, quand il va de son poste à sa place au début (px/s)
   },
   places: {
-    fade: 0.25, // changement de lieu : durée du fondu au noir, puis du retour (s)
+    fade: 0.06, // changement de lieu : durée du fondu au noir, puis du retour (s) ; 0 = passage direct sans fondu
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît dans le noir
   },
   intro: {
@@ -146,8 +147,9 @@ export const config = {
   },
   display: {
     reduceMotion: false, // réduire les animations (retournement instantané)
-    foregroundOpacity: 0.55, // opacité du rayon du premier plan (0 = invisible, 1 = opaque)
-    hallForegroundOpacity: 0.9, // opacité du premier plan du hall (plante, chariots)
+    foregroundOpacity: 1, // opacité par défaut du rayon du premier plan (opaque + transparence dynamique quand le héros passe derrière)
+    hallForegroundOpacity: 1, // opacité du premier plan du hall (plantes en pots Krita)
+    behindPlantsOpacity: 0.45, // opacité des plantes quand le héros passe derrière
     hallRain: true, // pluie animée du hall (et reflet du tapis) ; l'éteindre aide à chercher la cause d'un clignotement
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
     // Profil de qualité (ARCHITECTURE §14) : 'leger', 'normal' ou 'fin'. [TEMP] « Fin » par défaut (comme
@@ -165,6 +167,7 @@ export const config = {
     // Plein écran : 'auto' (téléphone : oui, en paysage, en touchant « Commencer » ; PC : non), 'oui', 'non'.
     fullscreenMode: 'auto',
     narratorAlpha: 0.78, // opacité du fond des annonces du haut-parleur (1 = opaque)
+    menuAlpha: 0.94, // opacité du fond des menus (⚙, Pause, Options, Panier ; 1 = opaque)
     crt: false, // filtre « écran cathodique » (lignes de balayage, bords sombres) ; coûte un peu sur téléphone
     crtStrength: 0.6, // force du filtre cathodique (0 à 1)
   },
@@ -173,6 +176,7 @@ export const config = {
     master: 0.8, // volume général
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
+    birdsVolume: 0.4, // volume des corbeaux / oiseaux dehors
     scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
     heroVolume: 0.5, // volume des sons du héros (bips, froissement, aparté) ; plus dans le panneau (séance 66, demande de l'auteur : remplacé par les deux interrupteurs ci-dessous)
@@ -235,6 +239,10 @@ export const TUNABLES = [
   { group: 'Marche', key: 'walk.deceleration', label: 'Freinage', min: 300, max: 20000, step: 100, unit: 'px/s²' },
   { group: 'Marche', key: 'walk.depthFactor', label: 'Vitesse vers le fond', min: 0.3, max: 1.5, step: 0.05, unit: '×' },
   { group: 'Marche', key: 'walk.arrivalRadius', label: "Précision d'arrivée", min: 1, max: 40, step: 1, unit: 'px' },
+  {
+    group: 'Personnage', key: 'character.heroStyle', label: 'Apparence du héros (test)', type: 'choice', reload: true,
+    options: [['test8dir', 'Héros test origami (8 directions)'], ['classique', 'Héros provisoire (2 vues)']],
+  },
   { group: 'Personnage', key: 'character.flipDuration', label: 'Durée du retournement', min: 0, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Personnage', key: 'character.edgeThickness', label: 'Épaisseur de la tranche', min: 0, max: 0.25, step: 0.01 },
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
@@ -268,21 +276,23 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.maxPapier', label: 'Sons en même temps : papier', min: 1, max: 6, step: 1 },
   { group: 'Son', key: 'audio.maxScanner', label: 'Sons en même temps : scanner', min: 1, max: 8, step: 1 },
   { group: 'Son', key: 'audio.maxVoix', label: 'Sons en même temps : haut-parleur', min: 1, max: 4, step: 1 },
-  { group: 'Son', key: 'audio.heroBlips', label: 'Bip du héros', type: 'bool' },
-  { group: 'Son', key: 'audio.rustle', label: 'Froissement', type: 'bool' },
+  { group: 'Son', key: 'audio.heroBlips', label: 'Bips d’écriture du héros', type: 'bool' },
+  { group: 'Son', key: 'audio.rustle', label: 'Froissement de papier', type: 'bool' },
   { group: 'Son', key: 'audio.preparedSounds', label: 'Essai : sons courts préparés', type: 'bool' },
   { group: 'Son', key: 'audio.musicBass', label: 'Musique : basse', type: 'bool' },
   { group: 'Son', key: 'audio.musicPiano', label: 'Musique : piano', type: 'bool' },
   { group: 'Son', key: 'audio.musicMelody', label: 'Musique : mélodie', type: 'bool' },
   { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
+  { group: 'Son', key: 'audio.birdsVolume', label: 'Corbeaux / oiseaux dehors', min: 0, max: 1, step: 0.05 },
   {
     group: 'Son', key: 'audio.latency', label: 'Réserve de son (anti-grésillement)', type: 'choice', reload: true,
     options: [['interactive', 'Petite (réactive)'], ['balanced', 'Moyenne'], ['playback', 'Grande (la plus stable)']],
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
-  { group: 'Affichage', key: 'display.hallRain', label: 'Pluie animée du hall', type: 'bool' },
+  { group: 'Affichage', key: 'display.hallRain', label: 'Pluie animée du hall (ancien décor)', type: 'bool' },
   { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
+  { group: 'Affichage', key: 'display.behindPlantsOpacity', label: 'Opacité du premier plan devant le héros', min: 0.15, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
   { group: 'Chariot', key: 'carry.chariot', label: 'Capacité du chariot (cartes)', min: 1, max: 40, step: 1 },
   { group: 'Chariot', key: 'chariot.offset', label: 'Distance au héros', min: 60, max: 220, step: 5, unit: 'px' },
@@ -298,7 +308,7 @@ export const TUNABLES = [
   { group: 'Chariot', key: 'chariot.size', label: 'Taille du chariot', min: 0.4, max: 1.4, step: 0.05 },
   { group: 'Chariot', key: 'chariot.range', label: 'Portée pour le prendre ou le lâcher', min: 50, max: 350, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.range', label: 'Portée du scanner', min: 40, max: 400, step: 10, unit: 'px' },
-  { group: 'Scanner', key: 'scan.minDepth', label: 'Distance à l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
+  { group: 'Scanner', key: 'scan.minDepth', label: 'Proximité de l’étagère (profondeur mini)', min: 0, max: 260, step: 5 },
   { group: 'Scanner', key: 'scan.looseRange', label: 'Produit sur table ou chariot : portée de côté', min: 60, max: 300, step: 10, unit: 'px' },
   { group: 'Scanner', key: 'scan.looseDepth', label: 'Produit sur table ou chariot : portée en profondeur', min: 30, max: 200, step: 5 },
   { group: 'Scanner', key: 'scan.raise', label: 'Lever la Scanette', min: 0.05, max: 0.6, step: 0.01, unit: 's' },
@@ -362,7 +372,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
-  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu', min: 0.05, max: 1, step: 0.05, unit: 's' },
+  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
@@ -372,6 +382,7 @@ export const TUNABLES = [
     options: [['auto', 'Automatique (téléphone : oui)'], ['oui', 'Oui'], ['non', 'Non']],
   },
   { group: 'Affichage', key: 'display.narratorAlpha', label: 'Opacité des annonces du haut-parleur', min: 0.3, max: 1, step: 0.05 },
+  { group: 'Affichage', key: 'display.menuAlpha', label: 'Opacité des menus', min: 0.25, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.crt', label: 'Filtre écran cathodique', type: 'bool' },
   { group: 'Affichage', key: 'display.crtStrength', label: 'Force du filtre cathodique', min: 0.1, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },

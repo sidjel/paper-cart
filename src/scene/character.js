@@ -10,6 +10,7 @@
 
 import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
+import { directionToView, needsPaperFlip } from '../core/direction.js';
 
 export function characterImageEntries(data, rasterScale) {
   const entries = [];
@@ -23,7 +24,10 @@ export function characterImageEntries(data, rasterScale) {
   }
   for (const [name, item] of Object.entries(data.held ?? {})) {
     if (name === 'comment') continue;
-    for (const v of ['face', 'dos']) entries.push({ id: item[v].src, url: item[v].src, w: data.size[0], h: data.size[1], scale: rasterScale * data.scale });
+    for (const [v, def] of Object.entries(item)) {
+      if (v === 'hand' || v === 'comment' || v === 'onlyWhenScanning' || !def?.src) continue;
+      entries.push({ id: def.src, url: def.src, w: data.size[0], h: data.size[1], scale: rasterScale * data.scale });
+    }
   }
   return entries;
 }
@@ -63,8 +67,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   for (const [name, item] of Object.entries(data.held ?? {})) {
     if (name === 'comment') continue;
     const views = {};
-    for (const v of ['face', 'dos']) {
-      const src = item[v].src;
+    for (const [v, def] of Object.entries(item)) {
+      if (v === 'hand' || v === 'comment' || v === 'onlyWhenScanning' || !def?.src) continue;
+      const src = def.src;
       if (!heldEls.has(src)) {
         const img = images.get(src).el;
         img.className = 'actor-held';
@@ -76,9 +81,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
         flip.appendChild(img);
         heldEls.set(src, img);
       }
-      views[v] = { ...item[v], el: heldEls.get(src) };
+      views[v] = { ...def, el: heldEls.get(src) };
     }
-    held.push({ name, hand: item.hand, views, on: false, shownEl: null, src: '', away: null });
+    held.push({ name, hand: item.hand, onlyWhenScanning: !!item.onlyWhenScanning, views, on: false, shownEl: null, src: '', viewName: '', scanning: false });
   }
   const NO_HANDS = { right: [0, 0, 0], left: [0, 0, 0] };
 
@@ -88,24 +93,28 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     if (it) it.on = on;
   }
 
-  // Place les objets tenus pour l'image affichée (seulement quand l'image ou la vue change).
-  function placeHeld(src, away) {
+  // Place les objets tenus pour l'image affichée (seulement quand l'image, la vue ou le scan change).
+  function placeHeld(src, viewName, away, scanning) {
     for (const it of held) {
-      const view = it.views[away ? 'dos' : 'face'];
-      const el = it.on ? view.el : null;
+      const view = it.views[viewName] ?? it.views[away ? 'dos' : 'face'];
+      const visible = it.on && (!it.onlyWhenScanning || scanning);
+      const el = visible && view ? view.el : null;
       if (el !== it.shownEl) {
         if (it.shownEl) it.shownEl.hidden = true;
         if (el) el.hidden = false;
         it.shownEl = el;
         it.src = '';
       }
-      if (!el || (src === it.src && away === it.away)) continue;
+      if (!el || (src === it.src && viewName === it.viewName && scanning === it.scanning)) continue;
       it.src = src;
-      it.away = away;
+      it.viewName = viewName;
+      it.scanning = scanning;
       const [dx, dy, rot] = (data.hands?.[src] ?? NO_HANDS)[it.hand];
       const [px, py] = view.pivot;
       const [ox, oy] = view.offset;
-      el.style.transform = `translate(${dx + ox}px, ${dy + oy}px) translate(${px}px, ${py}px) rotate(${rot}deg) translate(${-px}px, ${-py}px)`;
+      const [sox, soy] = scanning && view.scanOffset ? view.scanOffset : [0, 0];
+      const srot = scanning && view.scanRot ? view.scanRot : 0;
+      el.style.transform = `translate(${dx + ox + sox}px, ${dy + oy + soy}px) translate(${px}px, ${py}px) rotate(${rot + srot}deg) translate(${-px}px, ${-py}px)`;
       el.classList.toggle('front', !!view.front); // devant le héros : l'objet dessine la main qui le tient
     }
   }
@@ -113,15 +122,18 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const anims = {};
   for (const [viewName, view] of Object.entries(data.views)) {
     for (const [animName, def] of Object.entries(view)) {
-      anims[`${viewName}.${animName}`] = { ...compileAnimation(def), els: def.frames.map((f) => imageEl(frameSrc(f))), srcs: def.frames.map(frameSrc), away: viewName === 'dos' };
+      anims[`${viewName}.${animName}`] = { ...compileAnimation(def), els: def.frames.map((f) => imageEl(frameSrc(f))), srcs: def.frames.map(frameSrc), viewName, away: viewName === 'dos' || viewName === 'N' || viewName === 'NE' };
     }
   }
 
+  // Mode 8 directions (ex. heros-test.json) ou classique 2 vues (face / dos).
+  const is8Dir = data.mode === '8dir';
+
   // Une animation absente des données retombe sur l'image à l'arrêt.
-  const faceIdle = anims['face.idle'];
-  const dosIdle = anims['dos.idle'] ?? faceIdle;
-  const faceWalk = anims['face.walk'] ?? faceIdle;
-  const dosWalk = anims['dos.walk'] ?? dosIdle;
+  const faceIdle = anims['face.idle'] ?? anims['S.idle'];
+  const dosIdle = anims['dos.idle'] ?? anims['N.idle'] ?? faceIdle;
+  const faceWalk = anims['face.walk'] ?? anims['S.walk'] ?? faceIdle;
+  const dosWalk = anims['dos.walk'] ?? anims['N.walk'] ?? dosIdle;
   const faceScan = anims['face.scan'] ?? faceIdle;
   const dosScan = anims['dos.scan'] ?? dosIdle;
   // Apartés : tête de face, une image par émotion (face.aparte_<émotion>).
@@ -131,6 +143,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   // État de l'affichage (distinct de la logique : la feuille met un instant à se retourner).
   let shownFacing = 1;
   let shownAway = false;
+  let shownDir = 'S';
   let flipStart = -1;
   let swapped = false;
   let current = null; // animation en cours
@@ -151,10 +164,38 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let stopTime = -1;
   let idleStart = 0;
   const motion = { lift: 0, sx: 1, sy: 1 };
-  // Distance parcourue pendant un pas : 2 images de marche (pied gauche puis pied droit).
-  const walkStride = (data.views.face.walk?.stride ?? 40) * 2;
+  // Distance parcourue pendant un pas (un demi-cycle de marche : fonctionne en 4, 6 ou 8 images).
+  const firstWalk = data.views.face?.walk ?? data.views.S?.walk;
+  const walkStride = (firstWalk?.stride ?? 40) * Math.max(2, (firstWalk?.frames?.length ?? 4) / 2);
 
-  function flipScale(time, facing, away) {
+  function flipScale(time, facing, away, targetDir) {
+    if (is8Dir) {
+      const needed = targetDir !== shownDir;
+      if (flipStart < 0 && needed) {
+        const dur = display.reduceMotion ? 0 : settings.flipDuration;
+        if (dur <= 0 || !needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
+          shownDir = targetDir;
+          shownFacing = directionToView(shownDir).flip;
+          shownAway = shownDir === 'N' || shownDir === 'NE' || shownDir === 'NW';
+          return 1;
+        }
+        flipStart = time;
+        swapped = false;
+      }
+      if (flipStart < 0) return 1;
+      const p = (time - flipStart) / Math.max(settings.flipDuration, 1e-3);
+      if (p >= 0.5 && !swapped) {
+        shownDir = targetDir;
+        shownFacing = directionToView(shownDir).flip;
+        shownAway = shownDir === 'N' || shownDir === 'NE' || shownDir === 'NW';
+        swapped = true;
+      }
+      if (p >= 1) {
+        flipStart = -1;
+        return 1;
+      }
+      return flipWidth(p, settings.edgeThickness);
+    }
     const needed = facing !== shownFacing || away !== shownAway;
     if (flipStart < 0 && needed) {
       const dur = display.reduceMotion ? 0 : settings.flipDuration;
@@ -182,18 +223,28 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     return flipWidth(p, settings.edgeThickness);
   }
 
+  function pickAnim8(moving, scanning, aside) {
+    if (aside) return asides[aside] ?? anims['S.idle'] ?? faceIdle;
+    const { view } = directionToView(shownDir);
+    if (scanning) return anims[`${view}.scan`] ?? anims[`${view}.idle`] ?? faceIdle;
+    return moving ? (anims[`${view}.walk`] ?? anims[`${view}.idle`] ?? faceIdle) : (anims[`${view}.idle`] ?? faceIdle);
+  }
+
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
   // scanning : Scanette levée (animation « scan » des données, si elle existe) ;
   // aside : émotion d'un aparté en cours ('' sinon) : il regarde le joueur, tête de face.
-  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false, aside = '') {
-    const width = flipScale(time, facing, away);
+  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false, aside = '', dir = 'S') {
+    const targetDir = aside ? 'S' : dir;
+    const width = flipScale(time, facing, away, targetDir);
     stats.flipping = flipStart >= 0;
 
-    const anim = aside && !shownAway && asides[aside]
-      ? asides[aside]
-      : scanning
-        ? (shownAway ? dosScan : faceScan)
-        : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
+    const anim = is8Dir
+      ? pickAnim8(moving, scanning, aside)
+      : aside && !shownAway && asides[aside]
+        ? asides[aside]
+        : scanning
+          ? (shownAway ? dosScan : faceScan)
+          : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
     if (anim !== current) {
       current = anim;
       animStartTime = time;
@@ -207,7 +258,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     const frame = anim.els[i];
     if (poses.show(frame)) stats.frameChanges++;
-    placeHeld(anim.srcs[i], anim.away);
+    placeHeld(anim.srcs[i], anim.viewName, anim.away, scanning);
 
     // Corps vivant (rebond, respiration, écrasement), sauf si l'on réduit les animations.
     if (moving !== wasMoving) {

@@ -11,10 +11,10 @@ const PLACES = { [rayon.id]: rayon, [accueil.id]: accueil, [rayon2.id]: rayon2 }
 const P = { fade: 0.25 };
 
 describe('lieux : sorties et fondu', () => {
-  it('A7 : deux passages entre le rayon 7 et le rayon 2, chacun fait arriver du bon côté (au même endroit, en face)', () => {
+  it('A7 : passage central entre le rayon 1 et le rayon 2, fait arriver du bon côté (au même endroit, en face)', () => {
     for (const [a, b] of [['rayon-essai', 'rayon-2'], ['rayon-2', 'rayon-essai']]) {
       const ways = PLACES[a].exits.items.filter((e) => e.to === b);
-      expect(ways.length, `${a} → ${b}`).toBe(2);
+      expect(ways.length, `${a} → ${b}`).toBe(1);
       for (const e of ways) {
         const mid = (e.zone[0] + e.zone[2]) / 2;
         expect(e.arrive[0]).toBe(mid); // même x : on arrive en face du passage
@@ -43,7 +43,7 @@ describe('lieux : sorties et fondu', () => {
   });
   it('on peut aller du rayon à l’accueil et en revenir', () => {
     expect(exitAt(rayon.exits.items, 100, 60).to).toBe('accueil');
-    expect(exitAt(accueil.exits.items, 2690, 0).to).toBe('rayon-essai');
+    expect(exitAt(accueil.exits.items, 2090, 0).to).toBe('rayon-essai');
     expect(exitAt(rayon.exits.items, 1500, 60)).toBeNull();
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {
@@ -60,6 +60,19 @@ describe('lieux : sorties et fondu', () => {
     stepTransition(tr, 0.2, P);
     expect(tr.phase).toBe('done');
     expect(transitionBlack(tr, P)).toBe(0);
+  });
+
+  it('fade à 0 : passage direct sans division par zéro ni blocage', () => {
+    const zero = { fade: 0, waitAfter: 0.3 };
+    const tr = createTransition({ to: 'rayon-essai' });
+    expect(transitionBlack(tr, zero)).toBe(1);
+    expect(stepTransition(tr, 1 / 60, zero)).toBe('load');
+    expect(tr.phase).toBe('load');
+    placeReady(tr);
+    expect(transitionBlack(tr, zero)).toBe(0);
+    stepTransition(tr, 1 / 60, zero);
+    expect(tr.phase).toBe('done');
+    expect(transitionBlack(tr, zero)).toBe(0);
   });
   it('la machine à états a un état « transition », entre deux moments de jeu', () => {
     expect(TRANSITIONS.play).toContain('transition');
@@ -92,8 +105,8 @@ describe('passages au doigt (séance 67)', () => {
     expect(exitTarget(rayon2.exits.items, 2170, -200)).toEqual(mid); // bas de l'écran, devant l'ouverture
     expect(exitTarget(rayon2.exits.items, 1500, -200)).toBe(null); // ailleurs : on marche, simplement
     expect(exitTarget(rayon2.exits.items, 2170, 100)).toBe(null); // le sol devant l'ouverture : on marche
-    const b = rayon.exits.items.find((e) => e.id === 'vers-rayon2-b');
-    expect(exitTarget(rayon.exits.items, 3140, 600)).toEqual([(b.zone[0] + b.zone[2]) / 2, (b.zone[1] + b.zone[3]) / 2]); // l'ouverture, au fond
+    const aOut = rayon.exits.items.find((e) => e.id === 'vers-rayon2-a');
+    expect(exitTarget(rayon.exits.items, 2170, 600)).toEqual([(aOut.zone[0] + aOut.zone[2]) / 2, (aOut.zone[1] + aOut.zone[3]) / 2]); // l'arche centrale, au fond
     expect(exitTarget(rayon.exits.items, 1000, 600)).toBe(null); // l'étagère : comme avant
   });
 });

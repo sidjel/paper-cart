@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="5400" height="3240" viewBox="0 0 5400 3240">
+  <!-- [TEMP] Grand studio libre sans décor (5400×3240) : longue piste verticale et horizontale quadrillée. -->
+  <defs>
+    <pattern id="grid" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#d5cfc2" stroke-width="1.5"/>
+    </pattern>
+    <pattern id="grid-major" width="480" height="480" patternUnits="userSpaceOnUse">
+      <path d="M 480 0 L 0 0 0 480" fill="none" stroke="#c2baa8" stroke-width="2.5"/>
+    </pattern>
+  </defs>
+  <rect width="5400" height="160" fill="#e6e2d8"/>
+  <rect y="160" width="5400" height="3080" fill="#efece4"/>
+  <rect y="160" width="5400" height="3080" fill="url(#grid)"/>
+  <rect y="160" width="5400" height="3080" fill="url(#grid-major)"/>
+  <line x1="0" y1="160" x2="5400" y2="160" stroke="#b8b09e" stroke-width="3"/>
+  <!-- Repère central au point de départ (2700, 1740) -->
+  <circle cx="2700" cy="1740" r="22" fill="none" stroke="#b8b09e" stroke-width="2.5" stroke-dasharray="6 6"/>
+  <line x1="2650" y1="1740" x2="2750" y2="1740" stroke="#b8b09e" stroke-width="2"/>
+  <line x1="2700" y1="1690" x2="2700" y2="1790" stroke="#b8b09e" stroke-width="2"/>
+</svg>

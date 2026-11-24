@@ -10,7 +10,8 @@ describe('qui a la main ?', () => {
     expect(focusOwner('panier', { ...NONE, card: true })).toBe('card');
     expect(focusOwner('panier', NONE)).toBe('panier');
   });
-  it('en jeu : le choix du nom, puis la réponse attendue, puis la conversation, puis le héros libre', () => {
+  it('en jeu : la fiche d’objet, puis le choix du nom, puis la réponse attendue, puis la conversation, puis le héros libre', () => {
+    expect(focusOwner('play', { ...NONE, reveal: true, name: true, choice: true, scene: true })).toBe('reveal');
     expect(focusOwner('play', { ...NONE, name: true, choice: true, scene: true })).toBe('name');
     expect(focusOwner('play', { ...NONE, choice: true, scene: true })).toBe('choice');
     expect(focusOwner('play', { ...NONE, scene: true })).toBe('scene');

@@ -15,7 +15,7 @@ describe('état du monde', () => {
     const here = build();
     expect(here.products.length).toBe(place.shelfProducts.items.length + place.looseProducts.items.length);
     const banane = here.products[0];
-    expect(banane).toMatchObject({ id: 'banane', x: 720, y: 282, loose: false, scanned: false });
+    expect(banane).toMatchObject({ id: 'banane', x: 790, y: 486, loose: false, scanned: false });
     const loose = here.products.find((p) => p.loose);
     expect(loose.z).toBeGreaterThan(0);
     expect(loose.standAt.length).toBeGreaterThan(0);

@@ -4,6 +4,7 @@ import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import catalog from '../../src/data/products.json';
 import place from '../../src/data/places/rayon-essai.json';
 import hero from '../../src/data/characters/heros.json';
+import heroTest from '../../src/data/characters/heros-test.json';
 import help from '../../src/data/aide-reglages.json';
 import { TUNABLES } from '../../src/config.js';
 
@@ -15,8 +16,11 @@ describe('données : références entre fichiers', () => {
   it('chaque image citée existe', () => {
     for (const im of Object.values(place.images)) expect(existsSync(art(im.src)), im.src).toBe(true);
     for (const def of Object.values(catalog.products)) expect(existsSync(art(def.image)), def.image).toBe(true);
-    const frames = JSON.stringify(hero.views).match(/art\/[^"]+\.svg/g);
+    const frames = JSON.stringify(hero.views).match(/art\/[^"]+\.(svg|webp|png)/g) ?? [];
     for (const f of new Set(frames)) expect(existsSync(art(f)), f).toBe(true);
+    const testFrames = JSON.stringify(heroTest.views).match(/art\/[^"]+\.(svg|webp|png)/g) ?? [];
+    expect(testFrames.length).toBeGreaterThan(0);
+    for (const f of new Set(testFrames)) expect(existsSync(art(f)), f).toBe(true);
   });
   it('chaque produit a une description [TEMP] pour le dos de sa carte (courte)', () => {
     for (const [id, def] of Object.entries(catalog.products)) {

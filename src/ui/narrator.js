@@ -97,10 +97,14 @@ export function createNarratorUi(root, { onSkip, onChoose }) {
         this.hide();
         return;
       }
-      const el = voice === 'heros' || voice === 'pensee' || voice === 'agent' ? bubble : voice === 'epaisseur' ? player : band;
+      const el = voice === 'heros' || voice === 'pensee' || voice === 'agent' || voice === 'hotesse' ? bubble : voice === 'epaisseur' ? player : band;
       bubble.classList.toggle('thought', voice === 'pensee');
       bubble.classList.toggle('agent', voice === 'agent'); // l'agent de sécurité parle (bulle au-dessus de lui)
-      if (current && current !== el) current.hidden = true;
+      bubble.classList.toggle('hotesse', voice === 'hotesse'); // l'hôtesse d'accueil parle (bulle au-dessus du comptoir)
+      if (current && current !== el) {
+        current.hidden = true;
+        current.classList.remove('visible');
+      }
       current = el;
       el.classList.remove('tap');
       if (el === player) {

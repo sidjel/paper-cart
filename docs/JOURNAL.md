@@ -18,6 +18,72 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 79 (branche `test/krita-mcp`) — 23–24/11/2026 — Héros origami 8 directions, marche vidéo 16 images, hôtesse & troc PQ→jeton→chariot, découverte Zelda et salle de test libre
+
+**Demandes & décisions de l'auteur** :
+- Travail strictement isolé dans `C:\Paper Cart - krita-codex-mcp` (branche locale `test/krita-mcp`, aucun push sur `main` sans accord).
+- **Héros & équipement** : ne plus afficher le panier ni la Scanette tenus en permanence sur le héros (la Scanette n'apparaît en main que pendant le scan, icône HUD en bas à gauche à droite du panier). **Clignement des yeux validé**.
+- **Découverte d'objets clés** : fenêtre centrale animée (petit → grand) + fanfare style Zelda (`decouverte`) + description, utilité et indice énigmatique d'évolution pour `scanette`, `panier`, `papier_toilette`, `jeton`, `chariot`.
+- **Hôtesse de l'accueil** : placeholder blonde bien proportionné (~1m72), agent de sécurité reproportionné (~1m85), 3 portiques antivol blancs reproportionnés (~1m70). Dialogues de l'hôtesse sans boucle infinie : 3 slogans puis question **« Vous voulez un chariot ? »** (`Oui` / `Non`) ; **1 rouleau de Papier Toilette = 1 jeton = 1 chariot**.
+- **Pipeline vidéo → sprites** : test concluant sur la marche avant issue d'une vidéo Gemini Omni 1.2 (`face_marche.mp4`) ; objectif fixé à **16 images uniques (0 doublon)** avec détails vivants. **FFmpeg 8.0.1** configuré en local (shims dans `PATH` + contrôle anti-doublon dans `_assets_stock/heros_test_v1/scripts/video_to_sprites.ps1`).
+- **Salle de test libre (`?depart=salle-test`)** : grande surface verticale (`5400×3240`), marche sur place à vitesse réelle, ralenti `×0,4`, bouton fixe, 8 directions et perspective (rétrécissement) désactivable à la volée. **Validée par l'auteur.**
+- **Son & ergonomie** : corbeaux plus graves et réalistes ; serveur MCP **Freesound** installé en local ; sortie plein écran corrigée (`Escape` + bouton ⛶) ; barre Espace / bouton A finit d'afficher la bulle en cours avant de passer au texte suivant.
+
+**Fait** :
+- **Héros origami (`heros-test`)** : 8 directions fixes + clignements (`heros-s/se/e-idle-blink.webp`) + marche avant fluide **16 images** extraites, détourées, harmonisées en couleur et alignées aux pieds (`public/art/heros-test/`, `src/data/characters/heros-test.json`, `src/core/direction.js`, `src/scene/character.js`).
+- **Accueil & Hôtesse** : `public/art/placeholder/hotesse.svg`, `jeton.svg`, `agent-securite*.svg` reproportionnés ; `src/core/hotesse.js` (+ `tests/unit/hotesse.test.js`), `src/game/hotesse.js`, `src/data/characters/hotesse.json`, `src/data/places/accueil.json` (portiques ~1m70).
+- **Découverte d'objet & HUD** : `src/ui/itemReveal.js`, `src/core/focus.js`, `src/ui/cards.js`, `src/data/objects.json`, `src/audio/audio.js` (`decouverte` + corbeau grave).
+- **Salle de test libre** : `src/data/places/salle-test.json`, `public/art/placeholder/salle-test-fond.svg`, `src/ui/treadmill.js`, `src/scene/projection.js` (`refZ`), `src/scene/stage.js` (`viewHeight`), `src/data/departs.json`.
+- **Correctifs** : plein écran (`src/input/keyboard.js`, `src/ui/hud.js`, `src/style.css`), machine à écrire sur Espace/A (`src/game/voices.js`, `src/main.js`), fermeture propre de la bande narrateur lors du passage aux bulles (`src/ui/narrator.js`), `.gitignore` (`_assets_stock/`, `_krita_mcp_test/`).
+
+**Ce qui reste ouvert** :
+- Choisir la personnalité définitive du héros (visage fixe + ton des dialogues) avant de générer les 5 poses fixes et cycles 16 images définitifs.
+- Renseigner `FREESOUND_API_KEY` pour activer la recherche Freesound MCP.
+- Validation sur smartphone (via Wi-Fi local ou après fusion/push sur `main` pour GitHub Pages).
+
+---
+
+## Séance 78 (branche `test/krita-mcp`) — 21/11/2026 — Refonte origami Rayon 1, ciel vivant Accueil, réglages agrandis et transitions rapides
+
+**Demandes & décisions de l'auteur** :
+- Travail strictement isolé dans `C:\Paper Cart - krita-codex-mcp` (branche locale `test/krita-mcp`, aucun push GitHub, `c:\Paper Cart` non touché).
+- **Option 1A** : une seule grande arche centrale vers `rayon-2` à `x = 2170` (bout droit en cul-de-sac récompense).
+- **Option 4A** : gondole du premier plan (`premier-plan`) opaque par défaut (`1.0`) avec transparence dynamique (`core/occlusion.js`) quand le héros passe derrière.
+- **Signalétique Rayon 1 validée** : `← Accueil`, `Les essentiels`, `↑ Épiceries`, `Les indispensables` en lettrage chaleureux (`Segoe Print Bold`, cohérent avec *« Bienvenue chez Maxi Gouffre ! »*), déformé pour suivre les courbes/plis/perspectives des panneaux et incrusté en mode Produit.
+- **Produits scannables** : conservés en SVG provisoires pour cette passe (remplacement prévu à une étape dédiée).
+- **Chariot abandonné** (pour la passe `props` à venir) : pensée automatique du héros prévue (*« Pourquoi je ne prends pas celui-là ? Hum… les roues sont bloquées. »*).
+
+**Fait** :
+- **Rayon 1 (`rayon-essai`, 3600×1080, 3 plans parallaxe origami HD)** :
+  - Plan 3 (`public/art/rayon-essai/rayon-lointain.webp`, parallaxe `0.82`) : ciel bleu + panorama large du Rayon 2 upscalé ×4 (Real-ESRGAN `realesrgan-x4plus-anime`) avec transition lumineuse douce au ras du sol pour éviter tout conflit de carrelage au seuil.
+  - Plan 2 (`public/art/rayon-essai/rayon-fond.webp`) : 4 verrières + arche centrale détourées, sol carrelé prolongé en perspective droite, barre de seuil origami au pied de l'arche, 5 haut-parleurs et signalétique courbée V4.
+  - Plan 1 (`public/art/rayon-essai/rayon-avant.webp`, parallaxe `1.25`) : gondole avant détourée, opaque par défaut (`display.foregroundOpacity = 1`), fondu dynamique au passage du héros (`src/main.js`, `core/occlusion.js`).
+  - Archive complète + `.kra` Krita multi-calques éditable dans `_assets_stock/rayon_essai_v1_origami/` (`_assets_stock/rayon_essai_v1_origami/INDEX.md` et `CREDITS.md` à jour).
+- **Vie extérieure (Accueil + Rayon 1)** :
+  - **Nuages origami dérivants** (`src/core/clouds.js`, `src/scene/clouds.js`, `tests/unit/clouds.test.js`) : 7 nuages au Rayon 1 (`nuage-1/2.webp`), 8 nuages à l'Accueil (`nuage-1/2/3.webp`) après nettoyage complet des nuages figés dans `accueil-dehors.webp`.
+  - **Oiseaux marcheurs** (`src/core/birds.js`, `src/scene/birds.js`, `tests/unit/birds.test.js`) : 2 sprites à pattes courtes/fines et cou continu (`oiseau-marche-1/2.webp`), marche irrégulière par petits à-coups et micro-pauses, suivi de courbe de rebord (`walkPoints`) pour rester posé sur la crête de l'enseigne *Maxi Gouffre* (Accueil) et les rebords des verrières (Rayon 1). Respecte `Réduire les animations`.
+- **Accueil (`accueil-fond.webp`)** : bord supérieur de l'enseigne *Maxi Gouffre* lissé proprement (arêtes polygonales anti-aliasées ×4, archive `plan2_final_v3_2160x1080.png`).
+- **Menu de configuration (`⚙` et `Options`)** : fenêtre agrandie (`980 px` en 2 colonnes avec barre latérale d'onglets et compteurs, recherche instantanée multi-onglets, filtre `Modifiés (N)`, bouton `↺` par réglage ; `760 px` pour `Options` joueur) dans `src/ui/settings.js` et `src/style.css` ; audit et correction de 7 libellés/descriptions dans `src/config.js` et `src/data/aide-reglages.json` (tous les réglages conservés).
+- **Transitions entre lieux** : `places.fade` réduit par défaut de `0,25 s` à **`0,06 s`** et réglable jusqu'à **`0 s`** (coupure directe sans fondu, garde `fade <= 0` dans `src/core/places.js` et `src/game/places.js`, testé dans `tests/unit/places.test.js`).
+
+**Ce qui fonctionne / Vérifié** :
+- `npm.cmd test` : **30/30 fichiers, 228/228 tests unitaires + Knip** verts (inclut `regles.test.js`, `data.test.js`, `places.test.js`, `birds.test.js`, `clouds.test.js`, `occlusion.test.js`).
+- `npm.cmd run build` : build Vite OK (`dist/`).
+- Vérifications visuelles en direct sur `http://127.0.0.1:5173/?lieu=accueil` et `/?lieu=rayon-essai` : 0 erreur console, 0 requête réseau échouée, parallaxe sans couture, signalétique courbée validée, nuages dérivants, oiseaux marcheurs calés sur les rebords, menu `⚙` agrandi et transition `0,06 s` vérifiés.
+
+**Ce qui reste à faire / Limites connues (pas encore vérifié)** :
+- `props` du Rayon 1 (`chariot` abandonné + chariot du héros, `presentoir-crousti`, `petite-table`) encore en SVG provisoires — en attente des visuels de l'auteur (+ ajout de la pensée du héros près du chariot abandonné ; attention `src/data/narrator.json` est à 572/600 lignes).
+- Produits scannables encore en SVG provisoires (passe dédiée ultérieure).
+- Limites E2E `comptages-limites.json` et suite Playwright complète (`npm run test:e2e`) non relancées après l'ajout des sprites de nuages/oiseaux marcheurs ; fluidité sur téléphone non mesurée sur cette passe.
+- Changements locaux non commités sur `test/krita-mcp` (à commiter localement si l'auteur souhaite un point de retour).
+
+**Prochaine étape demandée (nouvelle session)** :
+1. Tester un nouveau sprite multi-directions pour le héros (8 directions fixes : face, dos, profil G/D, diagonales avant G/D, diagonales arrière G/D + sprites de marche).
+2. Rechercher et évaluer `Ludo.ai`, `AutoSprite`, `SpriteCanvas`, `SpriteFrame` (et serveurs MCP / skills associés) pour créer les animations du jeu.
+3. Analyser l'opportunité d'une migration vers **Godot / GDScript** (optimisation matérielle CPU/GPU, export Web HTML/JS + Android) vs rester en **HTML/JavaScript**.
+
+---
+
 ## Séance 77 — 19/11/2026 — Passer, réglages expliqués, cartons logiques
 
 **Demandes de l'auteur** :

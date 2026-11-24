@@ -8,7 +8,7 @@
 
 export function focusOwner(state, f) {
   if (state === 'panier') return f.confirm ? 'confirm' : f.card ? 'card' : 'panier';
-  if (state === 'play') return f.name ? 'name' : f.choice ? 'choice' : f.scene ? 'scene' : 'play';
+  if (state === 'play') return f.reveal ? 'reveal' : f.name ? 'name' : f.choice ? 'choice' : f.scene ? 'scene' : 'play';
   if (state === 'loading') return 'none';
   return state; // intro, bench, menu, options, title, pause
 }

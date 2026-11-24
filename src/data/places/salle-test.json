@@ -1,0 +1,62 @@
+{
+  "id": "salle-test",
+  "name": "[TEMP] Salle de test libre (animations)",
+  "size": [5400, 3240],
+  "viewHeight": 1080,
+  "treadmill": true,
+  "treadmillPerspective": 0.00022,
+  "projection": {
+    "comment": "Grand studio vertical et horizontal (5400×3240, vue 1080p) : perspective désactivée par défaut (scalePerDepth = 0) et activable à la volée.",
+    "floorFrontY": 3180,
+    "depthToScreen": 0.72,
+    "scalePerDepth": 0,
+    "refZ": 2000
+  },
+  "images": {
+    "salle-test-fond": {
+      "src": "art/placeholder/salle-test-fond.svg",
+      "size": [5400, 3240]
+    }
+  },
+  "layers": [
+    {
+      "id": "fond",
+      "image": "salle-test-fond",
+      "contains": "fond neutre et immense sol quadrillé vertical + horizontal (sans décor ni premier plan)",
+      "hiddenBy": "le personnage"
+    },
+    {
+      "id": "acteurs",
+      "contains": "personnage, ombre, poussière, repère du point visé",
+      "hiddenBy": "rien"
+    }
+  ],
+  "spawn": [2700, 2000],
+  "walkMask": {
+    "comment": "Immense zone libre (5160×4120) : ~14 secondes de marche continue avant/arrière avec suivi vertical de la caméra.",
+    "area": [
+      [120, -20],
+      [5280, -20],
+      [5280, 4100],
+      [120, 4100]
+    ],
+    "obstacles": []
+  },
+  "props": [],
+  "exits": {
+    "items": []
+  },
+  "bench": {
+    "start": [2700, 2000],
+    "route": [
+      { "to": [3300, 2000] },
+      { "to": [3300, 1200] },
+      { "to": [2100, 2800] },
+      { "to": [2700, 2000] }
+    ]
+  },
+  "diagnostic": {
+    "a": [2100, 2000],
+    "b": [3300, 2000]
+  }
+}

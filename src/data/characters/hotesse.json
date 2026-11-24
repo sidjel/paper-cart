@@ -1,5 +1,6 @@
 {
-  "comment": "L'hôtesse du comptoir de l'accueil (A8, séances 75-77 ; docs/PERSONNAGES.md). Slogans [TEMP] proposés par Claude, tous gardés par l'auteur (séance 77) ; elle les récite quand on lui parle sans rouleau. Pas encore dans le jeu (elle viendra avec l'échange au comptoir).",
+  "comment": "L'hôtesse du comptoir de l'accueil (A8, séances 75-77 ; docs/PERSONNAGES.md). Les slogans ne bouclent pas : après slogansBeforeOffer slogans (3), elle propose le chariot (Oui / Non). Un rouleau de papier toilette s'échange contre un jeton de chariot.",
+  "slogansBeforeOffer": 3,
   "slogans": [
     "[TEMP] Ici, chaque client est unique. Pour toujours.",
     "[TEMP] Le Maxi-Gouffre : on y entre, c'est déjà ça.",
@@ -12,5 +13,20 @@
     "[TEMP] Nos chariots sont garantis à vie. La vôtre.",
     "[TEMP] Avez-vous pensé à notre carte de fidélité ? Elle pense à vous."
   ],
-  "rouleau": "[TEMP] Un rouleau, un chariot ! Le Maxi-Gouffre vous remercie de votre confiance."
+  "tokenExchange": {
+    "question": "[TEMP] Oh ! Un rouleau de papier toilette ! Vous voulez l'échanger contre un jeton de chariot ?",
+    "yes": "Oui",
+    "no": "Non",
+    "refuse": "[TEMP] Comme vous voudrez… le cours du rouleau est très volatil !",
+    "grant": "[TEMP] Affaire conclue ! Un jeton tout neuf contre votre précieux rouleau."
+  },
+  "chariotOffer": {
+    "question": "[TEMP] Vous voulez un chariot ?",
+    "yes": "Oui",
+    "no": "Non",
+    "noToken": "[TEMP] Dommage, il faut un jeton !",
+    "refuse": "[TEMP] Très bien… vos bras me remercieront plus tard. Ou pas.",
+    "grant": "[TEMP] Et voilà votre bolide ! Attention aux accidents dans les virages !",
+    "after": "[TEMP] Attention aux accidents ! Les assurances du Maxi-Gouffre ne couvrent pas les carambolages."
+  }
 }

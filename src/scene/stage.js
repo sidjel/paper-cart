@@ -50,12 +50,25 @@ export function createStage(container, place, images, getValue) {
   container.appendChild(el);
 
   // Opacité des calques qui la déclarent (par exemple le premier plan en transparence).
+  const opacities = {};
+  function setLayerOpacity(id, value) {
+    const elLayer = layers[id];
+    if (!elLayer) return;
+    const v = Math.round(value * 1000) / 1000;
+    if (opacities[id] === v) return;
+    opacities[id] = v;
+    elLayer.style.opacity = String(v);
+  }
   function applyOpacity() {
     for (const def of place.layers) {
-      if (def.opacity) layers[def.id].style.opacity = getValue(def.opacity);
+      if (def.opacity) setLayerOpacity(def.id, getValue(def.opacity));
     }
   }
   applyOpacity();
+  function parallaxOffset(id) {
+    const p = parallax.find((x) => x.id === id);
+    return p && Number.isFinite(p.last) ? p.last : 0;
+  }
 
   // scale : taille d'un pixel de scène à l'écran ; viewW/viewH : partie visible (pixels de scène).
   const view = { scale: 1, offX: 0, offY: 0, viewW: W, viewH: H, camX: 0, camY: 0 };
@@ -97,10 +110,11 @@ export function createStage(container, place, images, getValue) {
     scaleTo();
   }
 
+  const refH = place.viewHeight ?? H;
   function layout(zoom) {
     vw = container.clientWidth;
     vh = container.clientHeight;
-    baseScale = (vh / H) * zoom;
+    baseScale = (vh / refH) * zoom;
     scaleTo();
   }
 
@@ -129,5 +143,5 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity };
+  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity, setLayerOpacity, parallaxOffset };
 }

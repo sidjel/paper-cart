@@ -15,7 +15,7 @@ import { createGuard, stepGuard } from '../core/guard.js';
 import { worldToStageX, worldToStageY, scaleAt } from '../scene/projection.js';
 
 const BACK_TIME = 0.6; // pendant le demi-tour, les commandes attendent (s)
-const HEAD = 290; // haut de la tête de l'agent, au-dessus de ses pieds (px de l'image)
+const HEAD = 316; // haut de la tête de l'agent, au-dessus de ses pieds (px de l'image 240×340)
 const SURPRISE_TIME = 1.4; // durée du « !! » du héros (s)
 const SURPRISE_SVG =
   '<svg viewBox="0 0 90 70" width="90" height="70" aria-hidden="true">' +

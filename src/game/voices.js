@@ -10,7 +10,7 @@
 import { config, setValue } from '../config.js';
 import narratorFile from '../data/narrator.json';
 import playerFile from '../data/joueur.json';
-import { createNarrator, narrate, stepNarrator, skipNarrator, skipAll, canSkip, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from '../core/narrator.js';
+import { createNarrator, narrate, sayDirect as narrateDirect, stepNarrator, skipNarrator, skipAll, canSkip, silenceNarrator, stepIdle, nearestSpeaker, waitingAnswer, waitingTap, answer, inScene, endLine, approach, waitingName, answerName } from '../core/narrator.js';
 import { playerName, fillName, OTHER, MAX_NAME } from '../core/names.js';
 import { createDizzy, stepDizzy, dizzyActive } from '../core/dizzy.js';
 import { clearTarget, faceScreen } from '../core/movement.js';
@@ -38,7 +38,18 @@ export function createVoices(ui, game) {
   });
   const data = { triggers: narratorFile.triggers, lines: narratorFile.lines.map(cleanLine) };
   const narrator = createNarrator();
-  const narratorUi = createNarratorUi(ui, { onSkip: () => skipNarrator(narrator, data, config.narrator), onChoose: (k) => answer(narrator, k, config.narrator) });
+  let directChoiceCb = null; // rappel optionnel quand le joueur répond à un choix direct (ex. hôtesse Oui / Non)
+  function chooseAnswer(k) {
+    const picked = narrator.line?.choices?.[k] ?? null;
+    const cb = directChoiceCb;
+    const res = answer(narrator, k, config.narrator);
+    if (res && cb) {
+      directChoiceCb = null;
+      cb(k, picked);
+    }
+    return res;
+  }
+  const narratorUi = createNarratorUi(ui, { onSkip: () => skipNarrator(narrator, data, config.narrator), onChoose: chooseAnswer });
   // Effet des mots du joueur (l'écran qui parle) ; « réduire les animations » : aucun.
   function applyScreenFx() {
     narratorUi.setScreenFx(config.display.reduceMotion ? 'aucun' : config.narrator.screenFx);
@@ -73,7 +84,17 @@ export function createVoices(ui, game) {
 
   // Un moment du jeu : renvoie true si une voix prend la parole.
   function say(trigger) {
-    return narrate(narrator, data, trigger, config.narrator) !== null;
+    const ok = narrate(narrator, data, trigger, config.narrator) !== null;
+    if (ok) directChoiceCb = null;
+    return ok;
+  }
+
+  // Réplique directe d'un personnage (ex. hôtesse d'accueil, texte dans data/characters/hotesse.json).
+  function sayDirect(voice, rawText, { choices = null, onChoice = null } = {}) {
+    const cleanedChoices = choices ? choices.map((c) => ({ ...c, text: clean(c.text), reply: clean(c.reply), grantReply: c.grantReply ? clean(c.grantReply) : '' })) : null;
+    const ok = narrateDirect(narrator, voice, clean(rawText), config.narrator, true, cleanedChoices) !== null;
+    directChoiceCb = ok ? onChoice : null;
+    return ok;
   }
 
   // Une réplique commence : bande ou bulle, son, et pour un aparté le héros se tourne vers l'écran
@@ -92,14 +113,15 @@ export function createVoices(ui, game) {
     choiceFocus = 0;
     if (thought) {
       if (config.audio.rustle) audio.play('froissement'); // réglage « Froissement » (séance 66)
-    } else if (!reply && (!glance || scene)) audio.play(hero ? 'aparte' : 'annonce');
+    } else if (!reply && (!glance || scene) && narrator.voice !== 'hotesse') audio.play(hero ? 'aparte' : 'annonce');
     if (hero && !reply && !thought) game.vibrate('fort');
     if (glance && sm.is('play') && narrator.asideOk) faceScreen(walker); // petit regard caméra, sans texte
     // Le joueur répond : un froissement de papier, seulement avec le réglage « Froissement » (séance 66).
     if (narrator.voice === 'epaisseur' && config.audio.rustle) audio.play('froissement');
+    const bubble = hero || narrator.voice === 'agent' || narrator.voice === 'hotesse';
     // L'annonce sort du haut-parleur le plus proche du personnage (le même jusqu'à la fin de la réplique).
     const sp = game.place().speakers?.items ?? [];
-    speaker = hero || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
+    speaker = bubble || sp.length === 0 ? null : sp[nearestSpeaker(sp, walker.x)];
     if (speaker) game.speakerWaves().show(speaker[0], speaker[1]);
     else game.speakerWaves().hide();
     hudLeft = hud.bar.getBoundingClientRect().left; // lu une fois par réplique
@@ -216,6 +238,10 @@ export function createVoices(ui, game) {
       const g = game.guardHead(); // l'agent de sécurité : bulle au-dessus de sa tête
       game.stage().stageToClient(g.x, g.y, head);
       narratorUi.placeBubble(head.x, head.y);
+    } else if (narrator.voice === 'hotesse') {
+      const h = game.hostessHead(); // l'hôtesse d'accueil : bulle au-dessus de sa tête
+      game.stage().stageToClient(h.x, h.y, head);
+      narratorUi.placeBubble(head.x, head.y);
     } else if (speaker) {
       game.stage().stageToClient(speaker[0], speaker[1], mouth);
       narratorUi.placeBand(mouth.x, mouth.y + 18, hudLeft);
@@ -246,6 +272,7 @@ export function createVoices(ui, game) {
     narrator, // (lecture : historique, tests)
     namePicker,
     say,
+    sayDirect,
     heroAside,
     update,
     watch,
@@ -257,6 +284,8 @@ export function createVoices(ui, game) {
     },
     inScene: () => inScene(narrator),
     waitingAnswer: () => waitingAnswer(narrator),
+    // Un texte est encore en train de s'écrire lettre par lettre dans une bulle ou bande.
+    typing: () => narrator.line !== null && narrator.shown < narrator.line.text.length,
     // Le héros s'avance tout seul (marche d'une conversation) : on ne l'arrête pas.
     walking: () => narrator.line?.walk !== undefined,
     // Expression du héros tourné vers le joueur ('' sinon). moving : il marche.
@@ -270,8 +299,8 @@ export function createVoices(ui, game) {
     // Bouton « Passer » : toutes les répliques jusqu'à une question (ou la fin de la conversation).
     skipAll: () => skipAll(narrator, data, config.narrator),
     canSkip: () => canSkip(narrator),
-    answer: (k) => answer(narrator, k, config.narrator),
-    answerFocused: () => answer(narrator, choiceFocus, config.narrator),
+    answer: (k) => chooseAnswer(k),
+    answerFocused: () => chooseAnswer(choiceFocus),
     focusChoice(k) {
       choiceFocus = k;
       narratorUi.focusChoice(k);

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="190" viewBox="0 0 200 190">
+  <!-- [TEMP] Hôtesse d'accueil (A8) — placeholder simple, blonde, proportionnée ~1m72 par rapport au héros origami, vue derrière le comptoir (base en y = 182). Orientée légèrement vers la droite (miroir CSS pour suivre le héros du regard). -->
+  <defs>
+    <g id="hotesse-body">
+      <!-- Chevelure blonde arrière (carré mi-long) -->
+      <path d="M62 42 L72 18 L104 14 L134 22 L140 50 L136 108 L122 114 L74 112 L60 98 Z" fill="#cfa246"/>
+      <!-- Épaules et chemisier crème -->
+      <path d="M56 112 L84 102 L116 102 L144 114 L152 182 L48 182 Z" fill="#f7f2e4"/>
+      <!-- Gilet bleu Maxi-Gouffre (assorti au comptoir Accueil) -->
+      <path d="M66 108 L86 102 L100 132 L114 102 L134 108 L138 182 L62 182 Z" fill="#1e5bb8"/>
+      <!-- Facette d'ombre sur le gilet -->
+      <path d="M66 108 L84 104 L82 182 L62 182 Z" fill="#174896"/>
+      <!-- Avant-bras posés poliment sur le comptoir -->
+      <path d="M52 146 L74 152 L82 182 L48 182 Z" fill="#f7f2e4"/>
+      <path d="M148 146 L126 152 L118 182 L152 182 Z" fill="#f7f2e4"/>
+      <!-- Mains jointes posées devant sur le comptoir -->
+      <path d="M74 170 L102 167 L126 170 L124 182 L76 182 Z" fill="#f0c7a2"/>
+      <!-- Cou -->
+      <path d="M90 86 L110 86 L112 106 L88 106 Z" fill="#e5b992"/>
+      <!-- Visage adulte proportionné (~52 px) -->
+      <path d="M74 44 L126 44 L128 68 L120 86 L102 93 L84 86 L74 68 Z" fill="#f0c7a2"/>
+      <!-- Mèche et frange blonde -->
+      <path d="M66 56 L72 20 L104 15 L134 26 L136 58 L124 44 L108 50 L88 42 L74 58 Z" fill="#e9c46a"/>
+      <path d="M72 22 L104 16 L126 24 L104 34 L78 34 Z" fill="#f4d88c"/>
+    </g>
+  </defs>
+  <!-- Bordure papier découpé blanc chaud -->
+  <use href="#hotesse-body" xlink:href="#hotesse-body" stroke="#faf8f2" stroke-width="10" stroke-linejoin="round"/>
+  <!-- Contours encrés -->
+  <use href="#hotesse-body" xlink:href="#hotesse-body" stroke="#2d241d" stroke-width="2.4" stroke-linejoin="round"/>
+  <!-- Détails visage et uniforme -->
+  <g stroke="#2d241d" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Col du chemisier -->
+    <path d="M86 103 L100 128 L114 103" fill="none" stroke-width="2.2"/>
+    <!-- Badge doré Maxi-Gouffre -->
+    <rect x="111" y="126" width="19" height="10" rx="2" fill="#f0c243" stroke-width="1.6"/>
+    <line x1="114" y1="131" x2="127" y2="131" stroke="#2d241d" stroke-width="1.5"/>
+    <!-- Sourcils doux blonds foncés -->
+    <path d="M84 55 Q91 52 97 55 M108 55 Q114 52 120 55" fill="none" stroke="#8a6524" stroke-width="2.2"/>
+    <!-- Yeux bleus, regard légèrement tourné vers la droite -->
+    <ellipse cx="92" cy="63" rx="3.4" ry="4" fill="#ffffff" stroke-width="1.5"/>
+    <circle cx="93.2" cy="63.2" r="2.2" fill="#255aa8" stroke="none"/>
+    <circle cx="94" cy="62.2" r="0.8" fill="#ffffff" stroke="none"/>
+    <ellipse cx="114" cy="63" rx="3.2" ry="4" fill="#ffffff" stroke-width="1.5"/>
+    <circle cx="115.2" cy="63.2" r="2.2" fill="#255aa8" stroke="none"/>
+    <circle cx="116" cy="62.2" r="0.8" fill="#ffffff" stroke="none"/>
+    <!-- Joues légèrement rosées -->
+    <ellipse cx="84" cy="72" rx="4.5" ry="2.2" fill="#e5988a" opacity="0.45" stroke="none"/>
+    <ellipse cx="120" cy="72" rx="4.2" ry="2.2" fill="#e5988a" opacity="0.45" stroke="none"/>
+    <!-- Petit nez -->
+    <path d="M104 65 L106 71 L103 72" fill="none" stroke-width="1.8"/>
+    <!-- Grand sourire commercial impeccable -->
+    <path d="M93 78 Q103 86 113 78" fill="#ffffff" stroke-width="2"/>
+    <path d="M93 78 Q103 80 113 78" fill="none" stroke-width="1.4"/>
+    <!-- Ligne de base propre au bord du comptoir -->
+    <line x1="44" y1="182" x2="156" y2="182" stroke="#2d241d" stroke-width="2.4"/>
+  </g>
+</svg>

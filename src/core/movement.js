@@ -5,6 +5,7 @@
 //    sans s'arrêter aux points intermédiaires, et s'arrête s'il bute malgré tout.
 
 import { isWalkable } from './walkmask.js';
+import { directionFromVector } from './direction.js';
 
 const FACE_THRESHOLD = 0.25; // part de direction nécessaire pour changer d'orientation
 const STUCK_STEPS = 6; // pas sans progrès avant d'abandonner le point visé
@@ -21,6 +22,7 @@ export function createWalker(x, z) {
     stuck: 0,
     facing: 1, // 1 = vers la droite, -1 = vers la gauche
     away: false, // true = de dos (vers le fond), false = de face
+    dir: 'S', // orientation sur 8 directions (S, SE, E, NE, N, NW, W, SW)
     moving: false,
     distance: 0, // distance totale parcourue (sert au rythme des pas)
   };
@@ -71,11 +73,18 @@ export function faceProduct(w, x, z, awayDepth = 30) {
   if (x > w.x + 1) w.facing = 1;
   else if (x < w.x - 1) w.facing = -1;
   w.away = z === undefined ? true : z - w.z > awayDepth;
+  if (z === undefined) {
+    const dx = x - w.x;
+    w.dir = Math.abs(dx) > 40 ? (dx > 0 ? 'NE' : 'NW') : 'N';
+  } else {
+    w.dir = directionFromVector(x - w.x, z - w.z, w.dir);
+  }
 }
 
 // Aparté : le héros se tourne vers l'écran (vue de face, le pivot de la feuille se fait tout seul).
 export function faceScreen(w) {
   w.away = false;
+  w.dir = 'S';
 }
 
 function face(w, dx, dz) {
@@ -84,6 +93,7 @@ function face(w, dx, dz) {
   // De dos seulement en allant vers le fond ; de côté ou vers l'avant, on voit son visage.
   if (dz > FACE_THRESHOLD) w.away = true;
   else if (dz < -FACE_THRESHOLD || dx > FACE_THRESHOLD || dx < -FACE_THRESHOLD) w.away = false;
+  w.dir = directionFromVector(dx, dz, w.dir);
 }
 
 // Rapproche la vitesse de la vitesse voulue, avec accélération ou freinage limités.

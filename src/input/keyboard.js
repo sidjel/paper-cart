@@ -51,6 +51,11 @@ export function createKeyboard(onAction, onUsed = () => {}, canSkip = () => fals
       if (!e.repeat) onAction('skip');
       return;
     }
+    if (e.code === 'Escape' && (document.fullscreenElement || document.webkitFullscreenElement)) {
+      // Laisser le navigateur sortir du plein écran d'un simple appui court sur Échap (sans maintenir la touche).
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
+      return;
+    }
     const action = ACTIONS[e.code];
     if (action || MOVE.has(e.code)) onUsed();
     // Sur un bouton ou un réglage, Entrée et Espace gardent leur rôle habituel (cliquer, cocher).

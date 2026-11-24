@@ -2,7 +2,7 @@
 // Doigt, souris, clavier (Tab ou flèches, Entrée) et manette (croix ou LB/RB, A).
 
 // departs : boutons des points de départ (mode dev : config.debug.devMode), ou null.
-export function createTitleScreen(root, { image, onStart, onOptions, departs = null, version = '' }) {
+export function createTitleScreen(root, { image, onStart, onOptions, onFullscreen = null, departs = null, version = '' }) {
   const el = document.createElement('div');
   el.className = 'title-screen';
   el.hidden = true;
@@ -22,6 +22,21 @@ export function createTitleScreen(root, { image, onStart, onOptions, departs = n
   ver.className = 'title-version';
   ver.textContent = version ? `v ${version}` : '';
   el.appendChild(ver);
+  // Bouton plein écran en haut à droite sur l'écran titre.
+  if (onFullscreen && document.fullscreenEnabled) {
+    const fs = document.createElement('button');
+    fs.type = 'button';
+    fs.className = 'hud-button title-fullscreen';
+    fs.textContent = '⛶';
+    fs.title = 'Plein écran';
+    fs.setAttribute('aria-label', 'Plein écran');
+    fs.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fs.blur();
+      onFullscreen();
+    });
+    el.appendChild(fs);
+  }
   const main = [...el.querySelectorAll('.title-button')];
   main[0].addEventListener('click', () => onStart());
   main[1].addEventListener('click', () => onOptions());

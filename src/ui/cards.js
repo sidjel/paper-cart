@@ -70,22 +70,18 @@ const CATEGORY = { alimentaire: 'Alimentaire', 'non-alimentaire': 'Non alimentai
 const TEMP = /^\[TEMP\]\s*/;
 
 // objects : data/objects.json ; base : chemin des images du jeu.
-// onFlip() : une carte se retourne (bruitage).
-export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objects, base = '' }) {
+// onFlip() : une carte se retourne (bruitage) ; onInspectScanette() : clic sur la Scanette en bas à gauche.
+export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, onInspectScanette = () => {}, objects, base = '' }) {
+  const gearBar = document.createElement('div');
+  gearBar.className = 'hud-gear';
+
   const button = document.createElement('button');
   button.className = 'hud-button panier-button';
   button.setAttribute('aria-label', 'Panier (I)');
   button.title = 'Panier (I)';
-  // Un petit panier rouge (mêmes formes que le panier tenu en main), avec le nombre de cartes dessus.
+  // Un petit panier rouge origami, avec le nombre de cartes dessus.
   button.innerHTML =
-    '<svg class="panier-icon" viewBox="0 0 80 64" aria-hidden="true">' +
-    '<g stroke-linejoin="round"><g stroke="#fbf8ee" stroke-width="7">' +
-    '<path d="M22 24 q0 -20 18 -20 q18 0 18 20 h-6 q0 -14 -12 -14 q-12 0 -12 14 z" fill="#b8473a"/>' +
-    '<path d="M6 22 h68 l-7 34 q-1 5 -6 5 h-42 q-5 0 -6 -5 z" fill="#c0503f"/></g>' +
-    '<g stroke="#3d352a" stroke-width="2.4">' +
-    '<path d="M22 24 q0 -20 18 -20 q18 0 18 20 h-6 q0 -14 -12 -14 q-12 0 -12 14 z" fill="#b8473a"/>' +
-    '<path d="M6 22 h68 l-7 34 q-1 5 -6 5 h-42 q-5 0 -6 -5 z" fill="#c0503f"/></g>' +
-    '<path d="M11 33 h58 M13 44 h54 M18 22 v36 M62 22 v36" stroke="#8e2f25" stroke-width="2" fill="none"/></g></svg>' +
+    `<img class="panier-icon" src="${base}art/accueil/bouton-panier-origami.webp" alt="" draggable="false">` +
     '<span class="panier-count">0</span>';
   button.hidden = true; // pas de panier au début : on le prend à l'accueil
   button.addEventListener('click', (e) => {
@@ -94,6 +90,21 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     onOpen();
   });
   const count = button.querySelector('.panier-count');
+
+  // Icône Scanette en bas à gauche, juste à droite du panier rouge.
+  const scanetteBtn = document.createElement('button');
+  scanetteBtn.className = 'hud-button scanette-button';
+  scanetteBtn.setAttribute('aria-label', 'Scanette');
+  scanetteBtn.title = 'Scanette (voir la fiche)';
+  scanetteBtn.innerHTML = `<img class="scanette-icon" src="${base}art/accueil/objet-scanette-origami.webp" alt="" draggable="false">`;
+  scanetteBtn.hidden = true;
+  scanetteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scanetteBtn.blur();
+    onInspectScanette();
+  });
+
+  gearBar.append(button, scanetteBtn);
   let name = 'Panier'; // le menu porte le nom du contenant : « Panier », puis « Chariot » (A8)
 
   const panel = document.createElement('div');
@@ -183,7 +194,7 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
     <p class="card-back-stage"></p>`;
   flipper.append(front, back);
   detail.append(flipper);
-  root.append(button, panel, detail);
+  root.append(gearBar, panel, detail);
   let detailCard = null;
   let backShown = false;
   let reduce = () => false;
@@ -349,6 +360,20 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, objec
       cap = c;
       button.hidden = c <= 0;
       setText(count, `${shown}/${cap}`);
+    },
+    setScanette(on, bump = false) {
+      scanetteBtn.hidden = !on;
+      if (on && bump) {
+        scanetteBtn.classList.remove('bump');
+        void scanetteBtn.offsetWidth;
+        scanetteBtn.classList.add('bump');
+      }
+    },
+    bumpBasket() {
+      if (button.hidden) return;
+      button.classList.remove('bump');
+      void button.offsetWidth;
+      button.classList.add('bump');
     },
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {

@@ -143,6 +143,15 @@ export function narrate(n, data, trigger, p, force = false) {
   return best;
 }
 
+// Réplique directe (hors triggers de narrator.json, ex. hôtesse d'accueil) : même machine à écrire,
+// même historique, même durée de lecture ; supporte des choix (Oui / Non) ; n'interrompt jamais une conversation.
+export function sayDirect(n, voice, text, p, timed = true, choices = null) {
+  if (n.scene || !p.enabled || !text) return null;
+  begin(n, { id: `direct:${voice}`, trigger: '', text, choices: choices ?? undefined }, voice, p);
+  if (timed && !choices) n.timed = Math.min(p.timedMax, Math.max(p.timedMin, text.length * p.timedPerChar));
+  return n.line;
+}
+
 // Une réplique s'affiche : machine à écrire depuis le début, et une ligne dans l'historique.
 function begin(n, line, voice, p) {
   n.answered = -1;
@@ -206,7 +215,7 @@ function end(n, data, p) {
   // premières pensées…), qui remplace l'attente en cours ; sinon un moment qui suit toute la voix
   // (« @heros »…), seulement si rien n'attend déjà.
   const entries = Object.entries(data.triggers);
-  const own = entries.find(([, tr]) => tr.follows === ended.trigger);
+  const own = ended.trigger ? entries.find(([, tr]) => tr.follows === ended.trigger) : null;
   const any = entries.find(([, tr]) => tr.follows === `@${voice}`);
   if (own) n.pending = { trigger: own[0], at: n.t + p.followDelay };
   else if (any && !n.pending) n.pending = { trigger: any[0], at: n.t + p.followDelay };
@@ -283,6 +292,8 @@ export function skipNarrator(n, data, p) {
   if (n.shown < n.line.text.length) {
     n.shown = n.line.text.length;
     n.hold = holdFor(n.line.text, p);
+    // Si la réplique était minutée (timed), lui laisser le temps d'être lue une fois entièrement affichée.
+    if (n.timed) n.timed = Math.max(n.timed, n.age + n.hold);
   } else end(n, data, p);
 }
 

@@ -1,0 +1,158 @@
+{
+  "id": "heros-test",
+  "name": "[TEMP] Héros origami (8 directions)",
+  "mode": "8dir",
+  "size": [240, 340],
+  "anchor": [120, 328],
+  "scale": 1.2,
+  "comment": "Héros test origami sur 8 directions (5 vues dessinées S, SE, E, NE, N ; les 3 vues gauche SW, W, NW sont obtenues en miroir). Taille calibrée ~1m80 ; stride 74 px ; clignement des yeux à l'arrêt (S, SE, E) ; Scanette et panier origami tenus en main sur les 8 directions.",
+  "views": {
+    "S": {
+      "idle": {
+        "frames": [
+          { "src": "art/heros-test/heros-s-idle.webp", "ms": 2600 },
+          { "src": "art/heros-test/heros-s-idle-blink.webp", "ms": 120 },
+          { "src": "art/heros-test/heros-s-idle.webp", "ms": 3300 },
+          { "src": "art/heros-test/heros-s-idle-blink.webp", "ms": 110 },
+          { "src": "art/heros-test/heros-s-idle.webp", "ms": 160 },
+          { "src": "art/heros-test/heros-s-idle-blink.webp", "ms": 110 }
+        ]
+      },
+      "walk": {
+        "stride": 18.5,
+        "frames": [
+          { "src": "art/heros-test/heros-s-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-s-walk-2.webp",
+          "art/heros-test/heros-s-walk-3.webp",
+          "art/heros-test/heros-s-walk-4.webp",
+          "art/heros-test/heros-s-walk-5.webp",
+          "art/heros-test/heros-s-walk-6.webp",
+          "art/heros-test/heros-s-walk-7.webp",
+          "art/heros-test/heros-s-walk-8.webp",
+          { "src": "art/heros-test/heros-s-walk-9.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-s-walk-10.webp",
+          "art/heros-test/heros-s-walk-11.webp",
+          "art/heros-test/heros-s-walk-12.webp",
+          "art/heros-test/heros-s-walk-13.webp",
+          "art/heros-test/heros-s-walk-14.webp",
+          "art/heros-test/heros-s-walk-15.webp",
+          "art/heros-test/heros-s-walk-16.webp"
+        ]
+      }
+    },
+    "SE": {
+      "idle": {
+        "frames": [
+          { "src": "art/heros-test/heros-se-idle.webp", "ms": 2600 },
+          { "src": "art/heros-test/heros-se-idle-blink.webp", "ms": 120 },
+          { "src": "art/heros-test/heros-se-idle.webp", "ms": 3300 },
+          { "src": "art/heros-test/heros-se-idle-blink.webp", "ms": 110 },
+          { "src": "art/heros-test/heros-se-idle.webp", "ms": 160 },
+          { "src": "art/heros-test/heros-se-idle-blink.webp", "ms": 110 }
+        ]
+      },
+      "walk": {
+        "stride": 74,
+        "frames": [
+          { "src": "art/heros-test/heros-se-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-se-walk-2.webp",
+          { "src": "art/heros-test/heros-se-walk-3.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-se-walk-4.webp"
+        ]
+      }
+    },
+    "E": {
+      "idle": {
+        "frames": [
+          { "src": "art/heros-test/heros-e-idle.webp", "ms": 2600 },
+          { "src": "art/heros-test/heros-e-idle-blink.webp", "ms": 120 },
+          { "src": "art/heros-test/heros-e-idle.webp", "ms": 3300 },
+          { "src": "art/heros-test/heros-e-idle-blink.webp", "ms": 110 },
+          { "src": "art/heros-test/heros-e-idle.webp", "ms": 160 },
+          { "src": "art/heros-test/heros-e-idle-blink.webp", "ms": 110 }
+        ]
+      },
+      "walk": {
+        "stride": 74,
+        "frames": [
+          { "src": "art/heros-test/heros-e-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-e-walk-2.webp",
+          { "src": "art/heros-test/heros-e-walk-3.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-e-walk-4.webp"
+        ]
+      }
+    },
+    "NE": {
+      "idle": {
+        "frames": ["art/heros-test/heros-ne-idle.webp"]
+      },
+      "walk": {
+        "stride": 74,
+        "frames": [
+          { "src": "art/heros-test/heros-ne-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-ne-walk-2.webp",
+          { "src": "art/heros-test/heros-ne-walk-3.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-ne-walk-4.webp"
+        ]
+      }
+    },
+    "N": {
+      "idle": {
+        "frames": ["art/heros-test/heros-n-idle.webp"]
+      },
+      "walk": {
+        "stride": 74,
+        "frames": [
+          { "src": "art/heros-test/heros-n-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-n-walk-2.webp",
+          { "src": "art/heros-test/heros-n-walk-3.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-n-walk-4.webp"
+        ]
+      }
+    }
+  },
+  "held": {
+    "comment": "La Scanette n'apparaît en main que pendant un scan (en attendant les poses fixes dédiées Scanette en main). Le panier reste dans l'interface.",
+    "scanette": {
+      "hand": "right",
+      "onlyWhenScanning": true,
+      "S":  { "src": "art/heros-test/tenu-scanette.webp", "pivot": [150, 128], "offset": [2, 2],   "front": true,  "scanRot": -42, "scanOffset": [6, -12] },
+      "SE": { "src": "art/heros-test/tenu-scanette.webp", "pivot": [142, 128], "offset": [-5, 3],  "front": true,  "scanRot": -42, "scanOffset": [6, -12] },
+      "E":  { "src": "art/heros-test/tenu-scanette.webp", "pivot": [116, 128], "offset": [-32, 3], "front": true,  "scanRot": -46, "scanOffset": [12, -14] },
+      "NE": { "src": "art/heros-test/tenu-scanette.webp", "pivot": [142, 128], "offset": [-3, 3],  "front": false, "scanRot": -42, "scanOffset": [8, -14] },
+      "N":  { "src": "art/heros-test/tenu-scanette.webp", "pivot": [150, 128], "offset": [3, 3],   "front": false, "scanRot": -42, "scanOffset": [6, -12] }
+    }
+  },
+  "hands": {
+    "art/heros-test/heros-s-walk-1.webp":  { "right": [0, -2, -5],  "left": [0, 2, 6] },
+    "art/heros-test/heros-s-walk-2.webp":  { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-s-walk-3.webp":  { "right": [0, 2, 5],    "left": [0, -2, -6] },
+    "art/heros-test/heros-s-walk-4.webp":  { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-se-walk-1.webp": { "right": [3, -2, -8],  "left": [-3, 2, 8] },
+    "art/heros-test/heros-se-walk-2.webp": { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-se-walk-3.webp": { "right": [-3, 2, 7],   "left": [4, -2, -8] },
+    "art/heros-test/heros-se-walk-4.webp": { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-e-walk-1.webp":  { "right": [8, -4, -14], "left": [-6, 2, 10] },
+    "art/heros-test/heros-e-walk-2.webp":  { "right": [0, -2, 0],   "left": [0, -2, 0] },
+    "art/heros-test/heros-e-walk-3.webp":  { "right": [-7, 2, 12],  "left": [6, -3, -10] },
+    "art/heros-test/heros-e-walk-4.webp":  { "right": [0, -2, 0],   "left": [0, -2, 0] },
+    "art/heros-test/heros-ne-walk-1.webp": { "right": [4, -2, -8],  "left": [-3, 2, 8] },
+    "art/heros-test/heros-ne-walk-2.webp": { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-ne-walk-3.webp": { "right": [-3, 2, 7],   "left": [4, -2, -8] },
+    "art/heros-test/heros-ne-walk-4.webp": { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-n-walk-1.webp":  { "right": [0, -2, -5],  "left": [0, 2, 6] },
+    "art/heros-test/heros-n-walk-2.webp":  { "right": [0, -3, 0],   "left": [0, -3, 0] },
+    "art/heros-test/heros-n-walk-3.webp":  { "right": [0, 2, 5],    "left": [0, -2, -6] },
+    "art/heros-test/heros-n-walk-4.webp":  { "right": [0, -3, 0],   "left": [0, -3, 0] }
+  },
+  "shadow": {
+    "comment": "Ombre au sol, séparée du dessin : ellipse sous les pieds (taille avant échelle).",
+    "width": 136,
+    "height": 32
+  },
+  "scanTip": {
+    "comment": "Bout de la Scanette levée pendant le scan : départ du laser, arrivée des confettis.",
+    "face": [200, 152],
+    "dos": [194, 158]
+  }
+}

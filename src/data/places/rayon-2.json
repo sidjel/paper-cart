@@ -71,17 +71,13 @@
   ],
   "spawn": [2170, -150],
   "walkMask": {
-    "comment": "Même repère que le rayon d'essai. Séance 67 (A7) : le sol se prolonge vers l'avant dans les deux ouvertures du rayon de devant (jusqu'à z −250) ; le passage vers le rayon 7 est au bout de ces prolongements : longer le bord avant ne le déclenche jamais.",
+    "comment": "Même repère que le rayon 1. Option 1A : un seul passage central vers le rayon 1 (x 2060–2280, prolongé jusqu'à z -250) aligné sur l'arche centrale.",
     "area": [
       [90, -195],
       [2060, -195],
       [2060, -250],
       [2280, -250],
       [2280, -195],
-      [3040, -195],
-      [3040, -250],
-      [3240, -250],
-      [3240, -195],
       [3510, -195],
       [3510, 264],
       [90, 264]
@@ -199,7 +195,7 @@
     ]
   },
   "exits": {
-    "comment": "Deux passages vers le rayon 7 (A7) : au sol, devant, au même x que les deux ouvertures de l'étagère du rayon 7 ; on y revient devant l'ouverture correspondante (le bon côté). reach : toucher l'ouverture du rayon de devant (bas de l'écran, à ce x) envoie au passage, trop bas pour être touché.",
+    "comment": "Passage unique vers le rayon 1 (Option 1A) : au sol, devant, au même x (2170) que l'arche centrale du rayon 1 ; on y revient devant l'arche.",
     "items": [
       {
         "id": "vers-rayon-a",
@@ -208,14 +204,6 @@
         "arrive": [2170, 220],
         "facing": 1,
         "reach": [2060, -260, 2280, -60]
-      },
-      {
-        "id": "vers-rayon-b",
-        "zone": [3050, -250, 3230, -225],
-        "to": "rayon-essai",
-        "arrive": [3140, 220],
-        "facing": -1,
-        "reach": [3040, -260, 3240, -60]
       }
     ]
   }
