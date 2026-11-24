@@ -95,7 +95,7 @@ const tmpStage = { x: 0, y: 0 };
 const tmpWorld = { x: 0, z: 0 };
 let renderLine = '';
 
-const audio = createAudio(config.audio, song);
+const audio = createAudio(config.audio, song, BASE);
 const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, device: touch ? 'touch' : 'keys', muted: config.audio.muted, dev: config.debug.devMode });
 // Historique des dialogues (Pause → Dialogues), pour relire une réplique passée trop vite.
 const journal = createJournal(hud.pauseCard, config.narrator.logMax, { onFirstButton: () => hud.focusResume() });

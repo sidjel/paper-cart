@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, exitTarget } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -108,5 +108,24 @@ describe('passages au doigt (séance 67)', () => {
     const aOut = rayon.exits.items.find((e) => e.id === 'vers-rayon2-a');
     expect(exitTarget(rayon.exits.items, 2170, 600)).toEqual([(aOut.zone[0] + aOut.zone[2]) / 2, (aOut.zone[1] + aOut.zone[3]) / 2]); // l'arche centrale, au fond
     expect(exitTarget(rayon.exits.items, 1000, 600)).toBe(null); // l'étagère : comme avant
+  });
+});
+
+describe('pré-téléchargement silencieux des lieux voisins', () => {
+  it('désactivé en profil Léger ou en mode économie de données (saveData)', () => {
+    expect(shouldPrefetch('fin', false)).toBe(true);
+    expect(shouldPrefetch('normal', false)).toBe(true);
+    expect(shouldPrefetch('leger', false)).toBe(false);
+    expect(shouldPrefetch('fin', true)).toBe(false);
+  });
+
+  it('liste les lieux voisins uniques et leurs images sans doublon', () => {
+    expect(neighborIds(accueil)).toEqual(['rayon-essai']);
+    expect(neighborIds(rayon)).toEqual(['accueil', 'rayon-2']);
+    const urls = neighborImageUrls(accueil, PLACES, '/paper-cart/');
+    expect(urls).toContain('/paper-cart/art/rayon-essai/rayon-fond.webp');
+    expect(new Set(urls).size).toBe(urls.length);
+    // Ne répète pas les images déjà présentes dans l'accueil (ex. oiseau-1.webp).
+    expect(urls.some((u) => u.endsWith('art/accueil/oiseau-1.webp'))).toBe(false);
   });
 });

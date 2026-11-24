@@ -14,7 +14,7 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait } from '../core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -25,6 +25,48 @@ export function createPlaces(ui, container, game) {
   let view = null; // vue du lieu affiché (scene/placeView.js)
   let images = null;
   const backstage = document.createElement('div'); // où attendent le héros, la poussière et le repère hors d'un lieu
+  // Pré-téléchargement réseau silencieux des lieux voisins (cache HTTP seulement, sans décodage ni calque).
+  const prefetched = new Set();
+  let prefetchTimer = 0;
+  let prefetchCtrl = null;
+
+  function cancelPrefetch() {
+    if (prefetchTimer) {
+      clearTimeout(prefetchTimer);
+      prefetchTimer = 0;
+    }
+    if (prefetchCtrl) {
+      prefetchCtrl.abort();
+      prefetchCtrl = null;
+    }
+  }
+
+  function schedulePrefetch() {
+    cancelPrefetch();
+    if (typeof fetch !== 'function') return;
+    if (!shouldPrefetch(config.display.profile, !!navigator.connection?.saveData)) return;
+    const urls = neighborImageUrls(place, game.places, game.base).filter((u) => !prefetched.has(u));
+    if (!urls.length) return;
+    prefetchTimer = setTimeout(async () => {
+      prefetchTimer = 0;
+      if (!view || transition || !game.sm.is('play')) return;
+      const ctrl = new AbortController();
+      prefetchCtrl = ctrl;
+      for (const url of urls) {
+        if (ctrl.signal.aborted) break;
+        try {
+          const res = await fetch(url, { priority: 'low', signal: ctrl.signal });
+          if (res.ok) {
+            await res.arrayBuffer();
+            prefetched.add(url);
+          }
+        } catch {
+          // Annulé ou hors-ligne : la transition normale reste fonctionnelle.
+        }
+      }
+      if (prefetchCtrl === ctrl) prefetchCtrl = null;
+    }, 2500);
+  }
 
   async function load(id) {
     place = game.places[id];
@@ -46,9 +88,11 @@ export function createPlaces(ui, container, game) {
     // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
     for (const a of game.actors()) a.mount(view.stage.layers.acteurs);
     game.onLoaded({ place, proj, mask, here, view });
+    schedulePrefetch();
   }
 
   function unload() {
+    cancelPrefetch();
     if (!view) return;
     game.onLeaving();
     for (const a of game.actors()) a.mount(backstage);
@@ -96,6 +140,7 @@ export function createPlaces(ui, container, game) {
   });
 
   function leaveBy(exit) {
+    cancelPrefetch();
     const w = game.walker();
     leftFrom = { id: place.id, x: w.x, z: w.z, facing: w.facing };
     transition = createTransition(exit);

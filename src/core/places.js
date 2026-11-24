@@ -68,3 +68,35 @@ export function transitionBlack(tr, p) {
   if (tr.phase === 'in') return p.fade <= 0 ? 0 : Math.max(0, 1 - tr.t / p.fade);
   return 0;
 }
+
+// Pré-téléchargement silencieux des lieux voisins (docs/ARCHITECTURE.md §11) : logique pure.
+// Désactivé en profil « Léger » ou si le téléphone demande d'économiser les données (saveData).
+export function shouldPrefetch(profile, saveData = false) {
+  return profile !== 'leger' && !saveData;
+}
+
+// Identifiants uniques des lieux voisins directs d'un lieu (d'après ses sorties).
+export function neighborIds(place) {
+  const out = [];
+  for (const e of place?.exits?.items ?? []) {
+    if (e.to && e.to !== place.id && !out.includes(e.to)) out.push(e.to);
+  }
+  return out;
+}
+
+// URLs uniques des images des lieux voisins à mettre en cache réseau (sans répéter celles du lieu actif).
+export function neighborImageUrls(place, allPlaces, base = '') {
+  const own = new Set(Object.values(place?.images ?? {}).map((im) => im.src));
+  const urls = [];
+  const seen = new Set();
+  for (const id of neighborIds(place)) {
+    const dest = allPlaces?.[id];
+    if (!dest) continue;
+    for (const im of Object.values(dest.images ?? {})) {
+      if (!im?.src || own.has(im.src) || seen.has(im.src)) continue;
+      seen.add(im.src);
+      urls.push(base + im.src);
+    }
+  }
+  return urls;
+}

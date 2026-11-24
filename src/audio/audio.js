@@ -3,12 +3,14 @@
 // Les navigateurs n'autorisent le son qu'après un premier geste (touche, clic, toucher) : unlock().
 
 import { createMusic } from './music.js';
+import { createSamples } from './samples.js';
 
 const HERO_BLIP = 0.05; // force du petit bip d'écriture du héros (séance 66 : adouci, 0,09 avant)
 
-export function createAudio(settings, song) {
+export function createAudio(settings, song, base = '') {
   let ctx = null;
   let master, musicBus, sfxBus, birdsBus, scanBus, voiceBus, heroBus, noise, music;
+  const samples = createSamples(base);
   let paused = false;
   let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
@@ -123,7 +125,8 @@ export function createAudio(settings, song) {
       data[i] = (x / 0x3fffffff) - 1;
     }
     music = createMusic(song, settings);
-    prepare().catch(() => {}); // sons courts préparés une fois (sinon : fabriqués en direct, comme avant)
+    samples.load(ctx);
+    prepare().catch(() => {});
     // Chaque changement d'état du son est noté (une interruption par un appel, une autre application…).
     ctx.onstatechange = () => stats.states.push(`${new Date().toLocaleTimeString('fr-FR')} ${ctx.state}${hidden ? ' (onglet caché)' : ''}`);
     applyVolumes();
@@ -202,8 +205,9 @@ export function createAudio(settings, song) {
     for (const nodes of live()) track(nodes[0], nodes);
   }
 
-  // [TEMP] Bip de caisse : deux notes courtes et nettes.
+  // Bip de caisse : échantillon CC0 (#202530) ou synthèse de secours.
   function bip() {
+    if (samples.playBip(ctx, scanBus, track)) return;
     const t = ctx.currentTime;
     tone('square', 1760, 1760, t, 0.07, 0.12);
     tone('square', 2350, 2350, t + 0.075, 0.09, 0.1);
@@ -292,6 +296,7 @@ export function createAudio(settings, song) {
     track(n, [n, nbp, ng]);
   }
   function corbeau() {
+    if (samples.playCrow(ctx, birdsBus, track)) return;
     const t = ctx.currentTime;
     const v = crowN;
     crowN = (crowN + 1) % 3;
@@ -543,7 +548,7 @@ export function createAudio(settings, song) {
         byName: { ...stats.byName },
         recent: stats.recent.slice(),
         clock: ctx ? Math.round(ctx.currentTime) : 0, // horloge du son (s)
-        song: music ? music.position() : '', // où en est la musique
+        song: samples.position() || (music ? music.position() : ''),
         prepared: !!prepared, // sons courts préparés une fois au démarrage
         cut: stats.cut, // sons arrêtés parce que leur famille était pleine
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
@@ -583,9 +588,10 @@ export function createAudio(settings, song) {
       for (const src of entry.sources) src.playing = entry;
       if (entry.left > 0) list.push(entry);
     },
-    // À chaque image affichée.
     update() {
-      if (running()) stats.notes += music.update(ctx, musicBus, (src, nodes) => track(src, nodes, 'music'));
+      if (!running()) return;
+      const trackMusic = (src, nodes) => track(src, nodes, 'music');
+      stats.notes += samples.hasMusic() ? samples.updateMusic(ctx, musicBus, trackMusic) : music.update(ctx, musicBus, trackMusic);
     },
   };
 }
