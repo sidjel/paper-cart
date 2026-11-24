@@ -375,6 +375,19 @@ export function createBasketUi(root, { onOpen, onClose, onFlip = () => {}, onIns
       void button.offsetWidth;
       button.classList.add('bump');
     },
+    bumpScanette() {
+      if (scanetteBtn.hidden) return;
+      scanetteBtn.classList.remove('bump');
+      void scanetteBtn.offsetWidth;
+      scanetteBtn.classList.add('bump');
+    },
+    // Position à l'écran du bouton cible dans le HUD (pour l'animation de vol après la fiche de découverte).
+    targetRect(id) {
+      const el = id === 'scanette' ? scanetteBtn : button;
+      if (el.hidden) return null;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 ? r : null;
+    },
     // Ajoute la carte à l'écran du Panier (créée une fois, au moment du scan, pas à chaque image).
     add(card, imageUrl) {
       const el = buildCard(card, imageUrl);

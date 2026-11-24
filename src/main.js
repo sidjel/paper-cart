@@ -298,6 +298,11 @@ function talkHotesse() {
         itemReveal.show('jeton', {
           isNew: true,
           reduceMotion: config.display.reduceMotion,
+          flyTo: () => basketUi.targetRect('jeton'),
+          onLand() {
+            basketUi.bumpBasket();
+            audio.play('prise');
+          },
           onClose() {
             if (picked.grantReply) voices.sayDirect('hotesse', picked.grantReply);
           },
@@ -318,8 +323,12 @@ function talkHotesse() {
         itemReveal.show('chariot', {
           isNew: true,
           reduceMotion: config.display.reduceMotion,
-          onClose() {
+          flyTo: () => basketUi.targetRect('chariot'),
+          onLand() {
             basketUi.bumpBasket();
+            audio.play('prise');
+          },
+          onClose() {
             if (picked.grantReply) voices.sayDirect('hotesse', picked.grantReply);
           },
         });
@@ -420,14 +429,16 @@ function takePickup(k) {
   itemReveal.show(it.id, {
     isNew: true,
     reduceMotion: config.display.reduceMotion,
+    flyTo: () => basketUi.targetRect(it.id),
     onClose() {
-      if (it.id === 'panier') {
-        basketUi.setCapacity(capacity(gear, config.carry));
-        basketUi.bumpBasket();
-      } else if (it.id === 'scanette') {
-        basketUi.setScanette(true, true);
-      }
+      if (it.id === 'panier') basketUi.setCapacity(capacity(gear, config.carry));
+      else if (it.id === 'scanette') basketUi.setScanette(true, false);
       say(`prise_${it.id}`);
+    },
+    onLand() {
+      if (it.id === 'scanette') basketUi.bumpScanette();
+      else basketUi.bumpBasket();
+      audio.play('prise');
     },
   });
 }

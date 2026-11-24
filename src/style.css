@@ -1065,6 +1065,17 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   color: #5a4419;
 }
 .item-reveal-card .panel-buttons { justify-content: center; margin-top: 2px; }
+.flying-item {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 68;
+  will-change: transform, opacity;
+}
 
 /* Smartphone en mode paysage (faible hauteur) : carte 2 colonnes compacte, bouton toujours visible. */
 @media (max-height: 560px) {
