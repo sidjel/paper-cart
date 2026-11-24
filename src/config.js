@@ -53,7 +53,8 @@ export const config = {
     speed: 260, // agent de sécurité du hall : vitesse de marche, quand il va de son poste à sa place au début (px/s)
   },
   places: {
-    fade: 0.18, // changement de lieu : durée du volet papier (aller, puis retour, s) ; 0 = passage direct
+    fade: 0.24, // changement de lieu : durée d'entrée et de sortie de la transition papier (s) ; 0 = direct
+    style: 'flip', // effet de transition : 'flip' (3A), 'double' (3B), 'strips' (lignes→cartes bleues), 'wipe' (2A)
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît sur la feuille
   },
   intro: {
@@ -373,6 +374,15 @@ export const TUNABLES = [
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du volet papier (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
+  {
+    group: 'Caméra', key: 'places.style', label: 'Changement de lieu : style de transition (test)', type: 'choice',
+    options: [
+      ['flip', '3A · Feuille origami qui se retourne'],
+      ['double', '3B · Double-volet origami'],
+      ['strips', 'Lignes blanches → cartes liseré bleu'],
+      ['wipe', '2A · Volet papier glissant'],
+    ],
+  },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },

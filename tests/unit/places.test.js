@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -160,5 +160,46 @@ describe('volet papier directionnel (2A)', () => {
     expect(transitionWipe(createTransition({ to: 'accueil' }, 'left'), p)).toEqual({ x: -104, y: 0 });
     expect(transitionWipe(createTransition({ to: 'rayon-2' }, 'up'), p)).toEqual({ x: 0, y: -104 });
     expect(transitionWipe(createTransition({ to: 'rayon-essai' }, 'down'), p)).toEqual({ x: 0, y: 104 });
+  });
+
+  it('3A (flip) : pivote depuis la tranche blanche puis se replie en sortie', () => {
+    const p = { fade: 0.24 };
+    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'flip');
+    expect(transitionFlip(tr, p).edge).toBe(true);
+    expect(transitionFlip(tr, p).sx).toBeCloseTo(0.045);
+    stepTransition(tr, 0.25, p);
+    expect(tr.phase).toBe('load');
+    expect(transitionFlip(tr, p)).toEqual({ x: 0, y: 0, sx: 1, sy: 1, edge: false });
+    placeReady(tr);
+    stepTransition(tr, 0.25, p);
+    expect(tr.phase).toBe('done');
+    expect(transitionFlip(tr, p).edge).toBe(true);
+  });
+
+  it('3B (double) : ferme les deux rabats vers le centre puis les rouvre', () => {
+    const p = { fade: 0.24 };
+    const tr = createTransition({ to: 'rayon-2' }, 'up', 'double');
+    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 0, b: 0 });
+    stepTransition(tr, 0.25, p);
+    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 1, b: 1 });
+    placeReady(tr);
+    stepTransition(tr, 0.25, p);
+    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 0, b: 0 });
+  });
+
+  it('strips : lignes blanches → élargissement en cartes → retournement', () => {
+    const p = { fade: 0.24 };
+    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'strips');
+    stepTransition(tr, 0.05, p); // début : lignes blanches fines
+    const early = transitionStrips(tr, p, 'right', 6);
+    expect(early.axis).toBe('x');
+    expect(early.items[0].white).toBe(true);
+    expect(early.items[0].s).toBeCloseTo(0.14);
+    stepTransition(tr, 0.25, p); // plein écran en cartes
+    const full = transitionStrips(tr, p, 'right', 6);
+    expect(full.items.every((it) => !it.white && it.s > 1)).toBe(true);
+    placeReady(tr);
+    stepTransition(tr, 0.25, p); // retournées et disparues
+    expect(transitionStrips(tr, p, 'right', 6).items.every((it) => it.opacity === 0)).toBe(true);
   });
 });

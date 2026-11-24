@@ -22,10 +22,10 @@ export function exitTarget(exits, x, z) {
   return null;
 }
 
-// Transition : 'out' (le volet papier recouvre l'écran) → 'load' (on change de lieu) → 'in' (il glisse hors écran) → 'done'.
+// Transition : 'out' (la feuille couvre l'écran) → 'load' (on change de lieu) → 'in' (elle s'ouvre) → 'done'.
 // p : { fade } (durée d'entrée et de sortie, s). dir : 'right' | 'left' | 'up' | 'down'.
-export function createTransition(exit, dir = 'right') {
-  return { exit, dir, phase: 'out', t: 0 };
+export function createTransition(exit, dir = 'right', style = 'flip') {
+  return { exit, dir, style, phase: 'out', t: 0 };
 }
 
 // Avance le fondu. Renvoie 'load' une seule fois, quand l'écran est noir (c'est le moment de changer de lieu).
@@ -123,6 +123,135 @@ export function transitionWipe(tr, p, dir = tr.dir || 'right') {
   if (dir === 'up') return { x: 0, y: -d };
   if (dir === 'down') return { x: 0, y: d };
   return { x: d, y: 0 };
+}
+
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+// 3A : feuille origami qui se retourne (scaleX / scaleY, comme le héros et les cartes), avec tranche papier.
+export function transitionFlip(tr, p, dir = tr.dir || 'right') {
+  const horiz = dir === 'right' || dir === 'left';
+  const sign = dir === 'left' || dir === 'up' ? -1 : 1;
+  let scale = 1;
+  let shift = 0;
+  if (tr.phase === 'out') {
+    if (p.fade > 0) {
+      const u = clamp01(tr.t / p.fade);
+      const e = 1 - (1 - u) * (1 - u);
+      scale = 0.045 + 0.955 * e;
+      shift = (1 - e) * 16 * sign;
+    }
+  } else if (tr.phase === 'in') {
+    if (p.fade <= 0) {
+      scale = 0.04;
+      shift = -16 * sign;
+    } else {
+      const u = clamp01(tr.t / p.fade);
+      const e = u * u;
+      scale = 1 - 0.96 * e;
+      shift = -e * 16 * sign;
+    }
+  } else if (tr.phase === 'done') {
+    scale = 0.04;
+    shift = -16 * sign;
+  }
+  return {
+    x: horiz ? shift : 0,
+    y: horiz ? 0 : shift,
+    sx: horiz ? scale : 1,
+    sy: horiz ? 1 : scale,
+    edge: scale < 0.2,
+  };
+}
+
+// 3B : double-volet origami (deux rabats qui se replient vers le centre puis se rouvrent).
+export function transitionFlaps(tr, p, dir = tr.dir || 'right') {
+  const axis = dir === 'right' || dir === 'left' ? 'x' : 'y';
+  const leadB = dir === 'right' || dir === 'down';
+  let a = 1;
+  let b = 1;
+  if (tr.phase === 'out' && p.fade > 0) {
+    const u = clamp01(tr.t / p.fade);
+    const fast = clamp01(u / 0.86);
+    const slow = clamp01((u - 0.14) / 0.86);
+    const eFast = 1 - (1 - fast) * (1 - fast);
+    const eSlow = 1 - (1 - slow) * (1 - slow);
+    a = leadB ? eSlow : eFast;
+    b = leadB ? eFast : eSlow;
+  } else if (tr.phase === 'in') {
+    if (p.fade <= 0) {
+      a = 0;
+      b = 0;
+    } else {
+      const u = clamp01(tr.t / p.fade);
+      const fast = clamp01(u / 0.86);
+      const slow = clamp01((u - 0.14) / 0.86);
+      const eFast = 1 - fast * fast;
+      const eSlow = 1 - slow * slow;
+      a = leadB ? eFast : eSlow;
+      b = leadB ? eSlow : eFast;
+    }
+  } else if (tr.phase === 'done') {
+    a = 0;
+    b = 0;
+  }
+  return { axis, a, b };
+}
+
+// Lignes blanches dans le sens de la marche → élargissement → retournement comme des cartes à liseré bleu.
+export function transitionStrips(tr, p, dir = tr.dir || 'right', count = 6) {
+  const axis = dir === 'right' || dir === 'left' ? 'x' : 'y';
+  const sign = dir === 'left' || dir === 'up' ? -1 : 1;
+  const items = [];
+  const denom = Math.max(1, count - 1);
+  for (let i = 0; i < count; i++) {
+    const delay = (i / denom) * 0.18;
+    const span = 0.82;
+    let t = 0;
+    let s = 1.03;
+    let white = false;
+    let opacity = 1;
+    if (tr.phase === 'out' && p.fade > 0) {
+      const u = clamp01(tr.t / p.fade);
+      const v = clamp01((u - delay) / span);
+      if (v <= 0) {
+        t = 106 * sign;
+        s = 0.14;
+        white = true;
+        opacity = 0;
+      } else if (v < 0.46) {
+        const q = v / 0.46;
+        t = (1 - (1 - (1 - q) * (1 - q))) * 106 * sign;
+        s = 0.14;
+        white = true;
+      } else {
+        const q = (v - 0.46) / 0.54;
+        const e = 1 - (1 - q) * (1 - q);
+        t = 0;
+        s = 0.14 + 0.89 * e;
+        white = q < 0.42;
+      }
+    } else if (tr.phase === 'in') {
+      if (p.fade <= 0) {
+        s = 0.03;
+        white = true;
+        opacity = 0;
+      } else {
+        const u = clamp01(tr.t / p.fade);
+        const v = clamp01((u - delay) / span);
+        const e = v * v;
+        t = 0;
+        s = 1.03 - e;
+        white = s < 0.28;
+        opacity = v >= 0.96 ? 0 : 1;
+      }
+    } else if (tr.phase === 'done') {
+      s = 0.03;
+      white = true;
+      opacity = 0;
+    }
+    items.push({ t, s, white, opacity });
+  }
+  return { axis, items };
 }
 
 // Pré-téléchargement silencieux des lieux voisins (docs/ARCHITECTURE.md §11) : logique pure.

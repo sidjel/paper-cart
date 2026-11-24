@@ -14,7 +14,7 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -101,13 +101,49 @@ export function createPlaces(ui, container, game) {
     releaseImages(images);
   }
 
-  // ---------- Changement de lieu : fondu au noir géré par la machine à états ----------
-  // En jeu, héros libre : entrer dans une zone de sortie lance le fondu. Dans le noir, on quitte le lieu
-  // (images libérées), on charge le suivant, on y pose le héros ; puis le noir s'efface et le jeu reprend.
+  // ---------- Changement de lieu : transition papier origami gérée par la machine à états ----------
+  // Un seul calque .place-fade pour tout le jeu : noir en relais d'intro/erreur (enfants cachés = 0 calque
+  // en plus), et transition origami (3A retournement, 3B double-volet, lignes→cartes bleues, ou 2A volet) entre lieux.
   const fadeEl = document.createElement('div');
   fadeEl.className = 'place-fade';
   fadeEl.hidden = true;
-  // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais de noir muet.
+  const artUrl = `${game.base}art/ui/transition-origami.webp`;
+  fadeEl.style.setProperty('--transition-img', `url("${artUrl}")`);
+  // Préchargement silencieux de l'illustration de transition pour éviter tout flash au premier passage.
+  if (typeof Image === 'function') {
+    const pre = new Image();
+    pre.src = artUrl;
+  }
+  const sheetEl = document.createElement('div');
+  sheetEl.className = 'place-sheet';
+  sheetEl.hidden = true;
+  fadeEl.appendChild(sheetEl);
+
+  const flapsEl = document.createElement('div');
+  flapsEl.className = 'place-flaps';
+  flapsEl.hidden = true;
+  const flapA = document.createElement('div');
+  flapA.className = 'place-flap place-flap-a';
+  const flapB = document.createElement('div');
+  flapB.className = 'place-flap place-flap-b';
+  flapsEl.append(flapA, flapB);
+  fadeEl.appendChild(flapsEl);
+
+  const STRIP_COUNT = 6;
+  const stripsEl = document.createElement('div');
+  stripsEl.className = 'place-strips';
+  stripsEl.hidden = true;
+  const stripEls = [];
+  for (let i = 0; i < STRIP_COUNT; i++) {
+    const s = document.createElement('div');
+    s.className = 'place-strip';
+    s.style.setProperty('--i', String(i));
+    stripsEl.appendChild(s);
+    stripEls.push(s);
+  }
+  fadeEl.appendChild(stripsEl);
+
+  // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais d'écran muet.
   const waitEl = document.createElement('div');
   waitEl.className = 'place-wait';
   waitEl.hidden = true;
@@ -120,6 +156,17 @@ export function createPlaces(ui, container, game) {
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
   let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
   let revealFade = 0.25;
+
+  function resetFx() {
+    fadeEl.classList.remove('paper-fx');
+    fadeEl.style.transform = '';
+    sheetEl.hidden = true;
+    sheetEl.style.transform = '';
+    sheetEl.style.opacity = '';
+    sheetEl.classList.remove('edge');
+    flapsEl.hidden = true;
+    stripsEl.hidden = true;
+  }
 
   // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
   // héros revient là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti), le
@@ -140,13 +187,57 @@ export function createPlaces(ui, container, game) {
   });
 
   function paintFade(tr) {
+    fadeEl.style.opacity = '1';
+    fadeEl.style.transform = '';
     if (config.display.reduceMotion || config.places.fade <= 0) {
-      fadeEl.style.transform = '';
-      fadeEl.style.opacity = transitionBlack(tr, config.places);
-    } else {
+      sheetEl.hidden = false;
+      flapsEl.hidden = true;
+      stripsEl.hidden = true;
+      sheetEl.classList.remove('edge');
+      sheetEl.style.transform = '';
+      sheetEl.style.opacity = String(transitionBlack(tr, config.places));
+      return;
+    }
+    if (tr.style === 'double') {
+      sheetEl.hidden = true;
+      stripsEl.hidden = true;
+      flapsEl.hidden = false;
+      const { axis, a, b } = transitionFlaps(tr, config.places, tr.dir);
+      flapsEl.classList.toggle('axis-x', axis === 'x');
+      flapsEl.classList.toggle('axis-y', axis === 'y');
+      flapA.style.transform = axis === 'x' ? `scaleX(${a})` : `scaleY(${a})`;
+      flapB.style.transform = axis === 'x' ? `scaleX(${b})` : `scaleY(${b})`;
+    } else if (tr.style === 'strips') {
+      sheetEl.hidden = true;
+      flapsEl.hidden = true;
+      stripsEl.hidden = false;
+      const { axis, items } = transitionStrips(tr, config.places, tr.dir, STRIP_COUNT);
+      stripsEl.classList.toggle('axis-x', axis === 'x');
+      stripsEl.classList.toggle('axis-y', axis === 'y');
+      for (let i = 0; i < STRIP_COUNT; i++) {
+        const it = items[i];
+        const el = stripEls[i];
+        el.style.transform = axis === 'x' ? `translate3d(${it.t}%, 0, 0) scaleY(${it.s})` : `translate3d(0, ${it.t}%, 0) scaleX(${it.s})`;
+        el.style.opacity = String(it.opacity);
+        el.classList.toggle('as-white', it.white);
+      }
+    } else if (tr.style === 'wipe') {
+      flapsEl.hidden = true;
+      stripsEl.hidden = true;
+      sheetEl.hidden = false;
+      sheetEl.classList.remove('edge');
       const { x, y } = transitionWipe(tr, config.places, tr.dir);
-      fadeEl.style.opacity = '1';
-      fadeEl.style.transform = `translate3d(${x}%, ${y}%, 0)`;
+      sheetEl.style.opacity = '1';
+      sheetEl.style.transform = `translate3d(${x}%, ${y}%, 0)`;
+    } else {
+      // 'flip' (3A par défaut) : feuille origami avec liseré blanc qui se retourne en scaleX/scaleY.
+      flapsEl.hidden = true;
+      stripsEl.hidden = true;
+      sheetEl.hidden = false;
+      const { x, y, sx, sy, edge } = transitionFlip(tr, config.places, tr.dir);
+      sheetEl.style.opacity = '1';
+      sheetEl.style.transform = `translate3d(${x}%, ${y}%, 0) scale(${sx}, ${sy})`;
+      sheetEl.classList.toggle('edge', edge);
     }
   }
 
@@ -154,8 +245,8 @@ export function createPlaces(ui, container, game) {
     cancelPrefetch();
     const w = game.walker();
     leftFrom = { id: place.id, x: w.x, z: w.z, facing: w.facing };
-    transition = createTransition(exit, transitionDirection(exit, place));
-    fadeEl.classList.add('paper-wipe');
+    transition = createTransition(exit, transitionDirection(exit, place), config.places.style);
+    fadeEl.classList.add('paper-fx');
     paintFade(transition);
     fadeEl.hidden = false;
     game.onTransitionStart?.();
@@ -213,8 +304,7 @@ export function createPlaces(ui, container, game) {
     if (errorEl.hidden || retrying) return; // un seul essai à la fois (double appui)
     retrying = true;
     retryBtn.disabled = true;
-    fadeEl.classList.remove('paper-wipe');
-    fadeEl.style.transform = '';
+    resetFx();
     fadeEl.style.opacity = '1';
     fadeEl.hidden = false;
     const ok = await backToStart(null);
@@ -265,8 +355,7 @@ export function createPlaces(ui, container, game) {
       if (transition.phase === 'done') {
         transition = null;
         fadeEl.hidden = true;
-        fadeEl.style.transform = '';
-        fadeEl.classList.remove('paper-wipe');
+        resetFx();
         game.sm.go(view ? 'play' : 'erreur'); // sans lieu : l'écran d'erreur attend « Réessayer »
         if (!view) retryBtn.focus({ preventScroll: true });
       }
@@ -278,8 +367,7 @@ export function createPlaces(ui, container, game) {
     reveal(fade) {
       revealT = 0;
       revealFade = fade;
-      fadeEl.classList.remove('paper-wipe');
-      fadeEl.style.transform = '';
+      resetFx();
       fadeEl.hidden = false;
       fadeEl.style.opacity = '1';
     },
