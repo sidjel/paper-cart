@@ -272,6 +272,10 @@ function tryScan() {
     return;
   }
   if (toggleChariot()) return;
+  if (voices.typing()) {
+    voices.skip();
+    return;
+  }
   say('rien_a_scanner') || say('aparte_vide'); // le haut-parleur d'abord, sinon le héros
 }
 
@@ -718,9 +722,11 @@ function handleAction(action) {
       else if (who === 'confirm') confirm.yes(); // manette : A = oui
       else if (who === 'card' || who === 'panier') basketUi.press(); // la carte mise en avant (ou retourner la grande)
       else if (who === 'name') voices.namePicker.press();
-      else if (who === 'choice') voices.answerFocused();
-      else if (who === 'scene') voices.skip();
-      else if (who === 'play' && voices.typing()) voices.skip(); // finir d'écrire le texte en cours avant toute autre action
+      else if (who === 'choice') {
+        if (voices.typing()) voices.skip();
+        else voices.answerFocused();
+      } else if (who === 'scene') voices.skip();
+      else if (who === 'play' && voices.typing() && voices.narrator.voice !== 'narrateur') voices.skip();
       else if (who === 'play') tryScan();
       else if (who === 'erreur') places.retry(); // manette (A), Entrée : « Réessayer »
       break;

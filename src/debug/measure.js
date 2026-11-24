@@ -70,7 +70,7 @@ export function createMeasureTools(ui, game) {
     const stage = game.stage();
     config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
     stage.applyOpacity(); // rayon de devant comme dans le jeu…
-    if (variant === 'T2' && stage.layers['premier-plan']) stage.layers['premier-plan'].style.opacity = 0; // … ou invisible (T2)
+    if (variant === 'T2') stage.setLayerOpacity('premier-plan', 0); // … ou invisible (T2)
   }
 
   async function startQuick(params, suite = 'T012') {

@@ -43,6 +43,9 @@ test('A8 : à la main, la pile vacille puis tombe ; on prend le rouleau ; elle r
   await expect(page.locator('.scan-button')).toContainText('Prendre');
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).gear.papier_toilette).toBe(true);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.locator('.item-reveal-ok').click();
+  await expect(page.locator('.item-reveal')).toBeHidden();
   // Au retour dans le rayon 8, la pile est toujours tombée et le rouleau n'y est plus.
   await page.evaluate(() => window.paperCart.useExit());
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'rayon-essai', null, { timeout: 15000 });

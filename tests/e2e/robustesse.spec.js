@@ -27,7 +27,7 @@ test.afterEach(() => expect(pageErrors, 'aucune erreur non rattrapée').toEqual(
 const said = (page) => page.evaluate(() => window.paperCart.journal().join(' '));
 
 test('le rayon ne se charge pas : retour au hall, là où le héros est sorti ; le haut-parleur prévient ; le jeu reste jouable', async ({ page }) => {
-  await page.route('**/rayon-fond.svg', (r) => r.abort());
+  await page.route('**/rayon-fond.*', (r) => r.abort());
   const before = await page.evaluate(() => window.paperCart.hero());
   expect(await page.evaluate(() => window.paperCart.useExit('vers-rayon'))).toBe(true);
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'accueil', null, { timeout: 15000 });
@@ -41,13 +41,13 @@ test('le rayon ne se charge pas : retour au hall, là où le héros est sorti ; 
   await page.keyboard.up('ArrowRight');
   expect((await page.evaluate(() => window.paperCart.hero())).x).toBeGreaterThan(after.x + 50);
   // L'image revient : le rayon s'ouvre normalement.
-  await page.unroute('**/rayon-fond.svg');
+  await page.unroute('**/rayon-fond.*');
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'rayon-essai', null, { timeout: 15000 });
 });
 
 test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au jeu', async ({ page }) => {
-  await page.route('**/rayon-fond.svg', (r) => r.abort());
+  await page.route('**/rayon-fond.*', (r) => r.abort());
   await page.route('**/accueil-fond.*', (r) => r.abort());
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
   await page.waitForFunction(() => window.paperCart.state() === 'erreur', null, { timeout: 15000 });
@@ -72,7 +72,7 @@ test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au
 });
 
 test('un chargement lent : un signe d’attente apparaît dans le noir, puis le lieu s’ouvre', async ({ page }) => {
-  await page.route('**/rayon-fond.svg', async (r) => {
+  await page.route('**/rayon-fond.*', async (r) => {
     await new Promise((res) => setTimeout(res, 1200)); // réseau lent (dans le test seulement)
     await r.continue();
   });

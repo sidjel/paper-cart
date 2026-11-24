@@ -173,6 +173,10 @@ test('la feuille se retourne quand il change de côté', async ({ page }, info) 
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
   // Largeur apparente de la feuille (négative = tournée vers la gauche), lue dans le style.
   const width = () => page.locator('.actor-flip').evaluate((el) => Number(/scale\((-?[\d.e-]+),/.exec(el.style.transform)?.[1] ?? 1));
+  // Se tourner d'abord à droite (E), puis à gauche (W) pour déclencher un retournement gauche ↔ droite.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(180);
+  await page.keyboard.up('ArrowRight');
   await page.keyboard.down('ArrowLeft');
   // Pendant le retournement, la feuille est nettement plus étroite qu'en entier.
   await expect.poll(async () => Math.abs(await width()), { timeout: 2000, intervals: [16] }).toBeLessThan(0.7);
@@ -330,8 +334,8 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   for (const k of ['A-T0', 'A-T1', 'B-T0', 'B-T1', 'B-T2']) expect(r).toContain(k);
   expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(4);
   expect(r.length).toBeLessThan(4000);
-  // Réglages remis comme avant, rien d'enregistré.
-  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('0.55');
+  // Réglages remis comme avant, rien d'enregistré (premier plan opaque par défaut : option 4A).
+  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('1');
   expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
 });
 

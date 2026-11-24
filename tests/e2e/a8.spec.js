@@ -77,16 +77,13 @@ test('A8 : poussé, il passe la porte avec le héros ; lâché, il reste dans so
   expect([c.place, c.pushed]).toEqual(['accueil', false]);
 });
 
-test('A8 : R lâche et reprend le chariot, même près d’un produit ; le héros pousse à bras tendus', async ({ page }, info) => {
+test('A8 : R lâche et reprend le chariot, même près d’un produit', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
-  // En poussant : les bras tendus (une image tenue), la Scanette rangée ; lâché : la Scanette.
-  const held = page.locator('img.actor-held:visible');
-  await expect(held).toHaveCount(1);
-  const pushArms = await held.getAttribute('src');
+  expect((await chariot(page)).pushed).toBe(true);
   await page.keyboard.press('KeyR');
   await expect.poll(async () => (await chariot(page)).pushed).toBe(false);
-  await expect(held).toHaveCount(1);
-  await expect.poll(() => held.getAttribute('src')).not.toBe(pushArms); // la Scanette, plus les bras tendus
+  // Hors scan, ni le panier ni la Scanette ne sont tenus en permanence sur le héros.
+  await expect(page.locator('img.actor-held:visible')).toHaveCount(0);
   await page.keyboard.press('KeyR');
   await expect.poll(async () => (await chariot(page)).pushed).toBe(true);
 });
