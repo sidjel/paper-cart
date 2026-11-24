@@ -788,6 +788,13 @@ test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan 
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
   await expect(page.locator('.item-reveal')).toBeVisible();
+  // Mode paysage smartphone : toute la fenêtre et le bouton « Continuer » tiennent dans l'écran sans être coupés.
+  const revCard = await page.locator('.item-reveal-card').boundingBox();
+  const revOk = await page.locator('.item-reveal-ok').boundingBox();
+  const vp = page.viewportSize();
+  expect(revCard.y).toBeGreaterThanOrEqual(0);
+  expect(revCard.y + revCard.height).toBeLessThanOrEqual(vp.height);
+  expect(revOk.y + revOk.height).toBeLessThanOrEqual(vp.height);
   await page.locator('.item-reveal-ok').tap();
   await expect(page.locator('.item-reveal')).toBeHidden();
   expect((await state(page)).gear.scanette).toBe(false);

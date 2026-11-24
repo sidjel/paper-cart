@@ -15,13 +15,15 @@ export function createItemReveal(root, { objects, base = '' }) {
   const card = document.createElement('div');
   card.className = 'item-reveal-card panel';
   card.innerHTML =
-    '<p class="item-reveal-kicker">Nouvel objet obtenu !</p>' +
     '<div class="item-reveal-art"><img class="item-reveal-img" alt="" draggable="false"></div>' +
-    '<h2 class="item-reveal-name"></h2>' +
-    '<p class="item-reveal-desc"></p>' +
-    '<p class="item-reveal-usage"><strong>Comment s’en servir :</strong> <span></span></p>' +
-    '<p class="item-reveal-hint"></p>' +
-    '<div class="panel-buttons"><button class="primary item-reveal-ok">Continuer</button></div>';
+    '<div class="item-reveal-body">' +
+      '<p class="item-reveal-kicker">Nouvel objet obtenu !</p>' +
+      '<h2 class="item-reveal-name"></h2>' +
+      '<p class="item-reveal-desc"></p>' +
+      '<p class="item-reveal-usage"><strong>Comment s’en servir :</strong> <span></span></p>' +
+      '<p class="item-reveal-hint"></p>' +
+      '<div class="panel-buttons"><button class="primary item-reveal-ok">Continuer</button></div>' +
+    '</div>';
 
   const kicker = card.querySelector('.item-reveal-kicker');
   const img = card.querySelector('.item-reveal-img');
