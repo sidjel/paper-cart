@@ -30,10 +30,14 @@ test('A7 : par l’ouverture de gauche, en marchant, on arrive dans le rayon 2 e
   await page.keyboard.up('ArrowRight');
   await page.keyboard.down('ArrowUp');
   await arrivedIn(page, 'rayon-2');
-  await page.keyboard.up('ArrowUp');
   const h = await hero(page);
   expect(h.x).toBe(2170);
-  expect(h.z).toBe(-150); // devant (le rayon 7 est devant le rayon 2)
+  expect(h.z).toBeGreaterThanOrEqual(-150); // devant (le rayon 7 est devant le rayon 2) ; continue d'avancer tant que la touche reste tenue
+  expect(h.z).toBeLessThan(0);
+  // Vérifie que la marche continue sans arrêt brutal tant que la flèche reste enfoncée.
+  await page.waitForTimeout(250);
+  expect((await hero(page)).z).toBeGreaterThan(h.z + 20);
+  await page.keyboard.up('ArrowUp');
   await page.screenshot({ path: `test-results/captures/a7-${info.project.name}-rayon2.png` });
   // Vers l'avant : retour au rayon 7, devant la même ouverture.
   await page.keyboard.down('ArrowDown');

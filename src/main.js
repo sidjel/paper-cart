@@ -826,7 +826,8 @@ sm.onChange((now, before) => {
   if (now === 'play' && before === 'panier') say('aparte_panier');
   if (now === 'bench') voices.reset(); // les mesures se font sans voix ni mise en scène
   if (before === 'panier') basketUi.close();
-  if (before === 'play') input?.clear(); // pas de touche « collée » à la reprise
+  // Pas de touche « collée » après pause/menu/panier ; mais on garde la direction tenue pendant un changement de lieu pour ne pas couper la marche.
+  if (before === 'play' && now !== 'transition') input?.clear();
   if (now === 'play' || now === 'bench') stepper.reset();
 });
 
