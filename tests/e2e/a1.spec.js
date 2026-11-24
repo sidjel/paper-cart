@@ -244,9 +244,9 @@ test('la caméra suit le personnage le long du rayon, avec parallaxe', async ({ 
   const vp = page.viewportSize();
   expect(box.x).toBeGreaterThan(0);
   expect(box.x + box.width).toBeLessThan(vp.width);
-  // Les rayons lointains ont glissé moins que le sol : décalage positif par rapport au fond.
+  // Les rayons lointains ont glissé moins que le sol : décalage positif par rapport au fond (parallaxe 0,82 → 0,18 × cam.x).
   const far = await page.locator('.layer-lointain').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
-  expect(far).toBeGreaterThan(cam.x * 0.3);
+  expect(far).toBeGreaterThan(cam.x * 0.1);
   await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-camera.png` });
 });
 
@@ -457,8 +457,8 @@ test('Panier : petites cartes ; toucher une carte la retourne en grand (descript
 
 test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
-  // Toucher l'étagère au-dessus du lait : le personnage va au pied de l'étagère.
-  const p = await page.evaluate(() => window.paperCart.worldToClient(560, 500));
+  // Toucher l'étagère au-dessus du lait (x = 920) : le personnage va au pied de l'étagère.
+  const p = await page.evaluate(() => window.paperCart.worldToClient(920, 500));
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 6000 }).toBe(false);
   await expect(page.locator('.scan-button')).toHaveClass(/visible/);
@@ -783,7 +783,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
 
 test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
-  const p = await page.evaluate(() => window.paperCart.worldToClient(1585, 250)); // pile de paniers, dans le hall
+  const p = await page.evaluate(() => window.paperCart.worldToClient(1655, 380)); // pile de paniers (y ≈ 800 dans le hall)
   await page.touchscreen.tap(p.x, p.y);
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
@@ -816,10 +816,10 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await state(page)).cards, { timeout: 5000 }).toEqual(['Banane']);
   await expect.poll(async () => (await state(page)).active).toBe(false);
-  // … puis le lait, à gauche : le panier est plein, l'écran propose de reposer une carte.
-  await page.keyboard.down('ArrowLeft');
+  // … puis le lait, à droite (x = 920) : le panier est plein, l'écran propose de reposer une carte.
+  await page.keyboard.down('ArrowRight');
   await expect.poll(async () => (await state(page)).reach, { timeout: 6000 }).toBe(1);
-  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.up('ArrowRight');
   await page.keyboard.press('Enter');
   // D'abord la question « Échanger une carte ? » : Oui.
   await expect(page.locator('.confirm')).toBeVisible();
@@ -837,7 +837,7 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   // Échange : la banane reposée apparaît à la place du lait (et non à sa place d'origine).
   const banane = (await page.evaluate(() => window.paperCart.products()))[0];
   expect(banane.scanned).toBe(false);
-  expect(banane.x).toBe(560);
+  expect(banane.x).toBe(920);
   await expect(page.locator('.product').nth(0)).toBeVisible();
   // « Non » à la question : rien ne change.
   await page.keyboard.press('Enter'); // la banane est à portée, à la place du lait
