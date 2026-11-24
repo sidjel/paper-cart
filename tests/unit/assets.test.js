@@ -65,7 +65,9 @@ describe('chargement des images', () => {
     const imgs = await loadImages([{ id: 'bg', url: 'art/fond.webp', w: 100, h: 50, scale: 0.9 }]);
     expect(assetStats.images).toBe(before.images + 1);
     expect(live.size).toBe(0); // aucun blob créé : utilisé tel quel
-    expect(imgs.get('bg').url).toBeNull();
+    // L'URL source reste renseignée pour les instances partagées (nuages, oiseaux, portiques) sans être révoquée.
+    expect(imgs.get('bg').url).toBe('art/fond.webp');
+    expect(imgs.get('bg').revoke).toBe(false);
     releaseImages(imgs);
     expect({ images: assetStats.images, pixels: assetStats.pixels }).toEqual(before);
   });

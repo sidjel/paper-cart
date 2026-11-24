@@ -86,7 +86,9 @@ export async function loadImages(entries) {
       if (canUseDirect(e.url, src, pw, ph)) {
         const finalW = src.naturalWidth;
         const finalH = src.naturalHeight;
-        out.set(e.id, { el: src, url: null, w: e.w, h: e.h, pw: finalW, ph: finalH });
+        // Toujours garder une `url` valide (utilisée par les nuages, oiseaux, portiques et produits partagés) ;
+        // `revoke: false` empêche releaseImages de révoquer une URL statique.
+        out.set(e.id, { el: src, url: e.url, revoke: false, w: e.w, h: e.h, pw: finalW, ph: finalH });
         assetStats.images += 1;
         assetStats.pixels += finalW * finalH;
         assetStats.perImage.push([e.url.split('/').pop(), Math.round(performance.now() - t1)]);
@@ -105,7 +107,7 @@ export async function loadImages(entries) {
         pendingDecodes.push(
           loadImage(url).then(
             (el) => {
-              out.set(e.id, { el, url, w: e.w, h: e.h, pw, ph });
+              out.set(e.id, { el, url, revoke: true, w: e.w, h: e.h, pw, ph });
               assetStats.images += 1;
               assetStats.pixels += pw * ph;
               assetStats.perImage.push([e.url.split('/').pop(), Math.round(performance.now() - t1)]);
@@ -137,7 +139,7 @@ export async function loadImages(entries) {
 export function releaseImages(images) {
   for (const im of images.values()) {
     im.el.removeAttribute('src');
-    if (im.url) URL.revokeObjectURL(im.url);
+    if (im.revoke && im.url) URL.revokeObjectURL(im.url);
     assetStats.images -= 1;
     assetStats.pixels -= im.pw * im.ph;
   }

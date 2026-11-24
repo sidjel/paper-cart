@@ -3,9 +3,13 @@
 > Lire seulement pour le prototype D (dessins et style). Balises : ✅ VALIDÉ · 🧪 À TESTER · ❓ À DÉFINIR · [TEMP] provisoire.
 > Règles techniques des images : `IMAGES.md` (à rédiger avant D). Méthode de dessin de l'auteur : `PROTOTYPES.md`.
 
-## Style crayon de couleur 🧪 À TESTER
-- Personnages, produits **et décors** dessinés à la main au crayon de couleur.
-- Trait visible, grain du papier.
+## Style crayon de couleur et origami 🧪 À TESTER
+- Deux pistes visuelles en test : **crayon de couleur** à la main (trait visible, grain du papier) et **papier découpé / origami** (décors Krita HD, nuages, oiseaux, héros 8 directions `test8dir`).
+- **Cycles d'animation du héros (origami)** ✅ : **16 images uniques (0 doublon)** par cycle de marche ; toute boucle générée est vérifiée contre les doublons avant intégration.
+
+## Transitions entre lieux ✅ principe · 🧪 visuel [TEMP]
+- **Principe validé** ✅ : transition en **volet / feuille de papier directionnelle** dans le sens de la marche (repli en fondu doux si *Réduire les animations* est activé).
+- **Visuel à affiner** 🧪 [TEMP] : la feuille CSS crème actuelle est provisoire (à remplacer par une vraie texture papier HD / liseré blanc découpé et/ou effet de feuille qui se retourne / se plie en origami). Dans la zone 2 (*La Réalité*), la feuille pourra se salir et s'assombrir.
 
 ## Direction visuelle ✅ VALIDÉ (texte de `VISION.md`, recopié mot pour mot, séance 51)
 Inspirée de Paper Mario et de Baten Kaitos.

@@ -5,6 +5,8 @@
 
 ## Exploration ✅ VALIDÉ
 - Marche 2.5D (A1, A2), scan en rayon et Panier (A3), Narrateur (A4).
+- ✅ **Marche continue entre zones** : maintenir la direction (clavier, manette, stick tactile) pendant un changement de lieu permet au héros de continuer à avancer sans arrêt brutal à l'arrivée ; la transition utilise un **volet papier directionnel** (repli en fondu doux avec *Réduire les animations*).
+- ✅ **Découverte d'objet clé** (Scanette, panier, jeton, chariot, rouleau) : fiche au centre de l'écran (animation petit → grand, indice d'évolution, mise en page compacte 2 colonnes en paysage smartphone) ; à « Continuer », l'objet vole en courbe jusqu'à son emplacement dans le HUD en bas à droite.
 - ✅ (séance 64) Le joueur sait **toujours** pourquoi il ne peut pas faire quelque chose (message, réaction courte du héros ou du narrateur).
 - ✅ **Test du gris** : avant de valider un lieu ou un dessin, une capture en noir et blanc ; le héros, les produits à scanner et les sorties restent lisibles.
 - ✅ **Faire jouer quelqu'un d'autre**, sans explication, à chaque fin de prototype ; noter ce qui bloque.
