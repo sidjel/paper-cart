@@ -137,12 +137,24 @@
         "frames": ["art/heros-test/heros-n-idle.webp"]
       },
       "walk": {
-        "stride": 74,
+        "stride": 18.5,
         "frames": [
-          { "src": "art/heros-test/heros-n-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-n-walk-1.webp",
           "art/heros-test/heros-n-walk-2.webp",
-          { "src": "art/heros-test/heros-n-walk-3.webp", "sound": "pas", "effect": "poussiere" },
-          "art/heros-test/heros-n-walk-4.webp"
+          "art/heros-test/heros-n-walk-3.webp",
+          "art/heros-test/heros-n-walk-4.webp",
+          "art/heros-test/heros-n-walk-5.webp",
+          "art/heros-test/heros-n-walk-6.webp",
+          "art/heros-test/heros-n-walk-7.webp",
+          { "src": "art/heros-test/heros-n-walk-8.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-n-walk-9.webp",
+          "art/heros-test/heros-n-walk-10.webp",
+          "art/heros-test/heros-n-walk-11.webp",
+          "art/heros-test/heros-n-walk-12.webp",
+          "art/heros-test/heros-n-walk-13.webp",
+          "art/heros-test/heros-n-walk-14.webp",
+          "art/heros-test/heros-n-walk-15.webp",
+          { "src": "art/heros-test/heros-n-walk-16.webp", "sound": "pas", "effect": "poussiere" }
         ]
       }
     }

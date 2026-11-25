@@ -29,9 +29,10 @@ describe('animations décrites dans les données', () => {
     expect(frameIndex(a, 0, 85)).toBe(2);
     expect(frameIndex(a, 0, 85, 2)).toBe(0); // vitesse ×2 : 170 px → image 4 → boucle
   });
-  it('le héros origami 8 directions a ses images de marche et de clignement', () => {
-    expect(hero.views.S.walk.frames.length).toBe(16);
-    expect(hero.views.N.walk.frames.length).toBe(4);
+  it('le héros origami 8 directions a ses images de marche (16 par vue) et de clignement', () => {
+    for (const v of ['S', 'SE', 'E', 'NE', 'N']) {
+      expect(hero.views[v].walk.frames.length).toBe(16);
+    }
     expect(JSON.stringify(hero.views.S.idle)).toContain('blink');
   });
 });
@@ -110,8 +111,11 @@ describe('zone de marche jusqu’en bas de l’écran', () => {
 
 describe('poussière et profil par défaut', () => {
   it('les images où un pied se pose font un bruit de pas et de la poussière', () => {
-    const a = compileAnimation(hero.views.N.walk);
-    expect(a.effects).toEqual(['poussiere', null, 'poussiere', null]);
+    for (const v of ['S', 'SE', 'E', 'NE', 'N']) {
+      const a = compileAnimation(hero.views[v].walk);
+      expect(a.effects.filter((e) => e === 'poussiere').length).toBe(2);
+      expect(a.sounds.filter((s) => s === 'pas').length).toBe(2);
+    }
   });
 });
 
