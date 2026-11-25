@@ -137,6 +137,18 @@ describe('passages au doigt (séance 67)', () => {
     const aOut = rayon.exits.items.find((e) => e.id === 'vers-rayon2-a');
     expect(exitTarget(rayon.exits.items, 2170, 600)).toEqual([(aOut.zone[0] + aOut.zone[2]) / 2, (aOut.zone[1] + aOut.zone[3]) / 2]); // l'arche centrale, au fond
     expect(exitTarget(rayon.exits.items, 1000, 600)).toBe(null); // l'étagère : comme avant
+    // Hall d'accueil : cliquer dans l'allée entre les deux piliers (à droite des paniers rouges) NE redirige PAS vers la sortie droite.
+    expect(exitTarget(accueil.exits.items, 1750, 320)).toBe(null);
+    expect(exitTarget(accueil.exits.items, 1850, 500)).toBe(null);
+    expect(exitTarget(accueil.exits.items, 2130, 300)).not.toBe(null); // seul le vrai bord droit redirige vers la sortie
+  });
+
+  it('hall d’accueil : le héros peut aller au fond entre les deux piliers et derrière la plante + les paniers rouges', () => {
+    const m = compileMask(accueil.walkMask);
+    expect(isWalkable(m, 1730, 360)).toBe(true); // au fond entre les deux piliers marron clair
+    expect(isWalkable(m, 1560, 252)).toBe(true); // derrière la plante à gauche des paniers rouges
+    expect(isWalkable(m, 1650, 260)).toBe(true); // derrière les paniers rouges
+    expect(isWalkable(m, 1650, 215)).toBe(false); // pied des paniers rouges : obstacle
   });
 });
 

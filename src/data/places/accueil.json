@@ -117,16 +117,32 @@
   ],
   "spawn": [1180, 100],
   "walkMask": {
-    "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le socle du comptoir Accueil, le meuble Scanettes et le pot gris (y≈906) ; z=224 à droite vers les rayons (y≈895) ; z=-72 en bas derrière les pots origami (y≈1076).",
+    "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1525–1970) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle z 198–238) ; z=-72 en bas derrière les pots origami.",
     "area": [
       [652, -72],
       [2320, -72],
       [2320, 224],
-      [1660, 224],
-      [1600, 206],
+      [1970, 224],
+      [1960, 250],
+      [1910, 300],
+      [1765, 375],
+      [1695, 375],
+      [1595, 295],
+      [1525, 255],
+      [1525, 206],
       [758, 206]
     ],
-    "obstacles": []
+    "obstacles": [
+      {
+        "name": "Plante et paniers rouges",
+        "points": [
+          [1515, 198],
+          [1695, 198],
+          [1695, 238],
+          [1515, 238]
+        ]
+      }
+    ]
   },
   "props": [
     {
@@ -162,7 +178,7 @@
         "id": "vers-rayon",
         "edge": "right",
         "zone": [2060, -72, 2320, 224],
-        "reach": [1650, 240, 2160, 1200],
+        "reach": [2100, -72, 2320, 1200],
         "to": "rayon-essai",
         "arriveEdge": "left",
         "arrive": [90, 60],
