@@ -5,7 +5,7 @@
   "projection": {
     "floorFrontY": 1032,
     "depthToScreen": 0.61,
-    "scalePerDepth": 0.0008
+    "scalePerDepth": 0.00135
   },
   "images": {
     "accueil-dehors": {
@@ -59,6 +59,18 @@
     "portique-origami": {
       "src": "art/accueil/portique-origami.webp",
       "size": [185, 255]
+    },
+    "plante-paniers-origami": {
+      "src": "art/accueil/plante-paniers-origami.webp",
+      "size": [128, 186]
+    },
+    "paniers-rouges-origami": {
+      "src": "art/accueil/paniers-rouges-origami.webp",
+      "size": [98, 199]
+    },
+    "brume-couloir-origami": {
+      "src": "art/accueil/brume-couloir-origami.webp",
+      "size": [460, 360]
     },
     "oiseau-marche-1": {
       "src": "art/rayon-essai/oiseau-marche-1.webp",
@@ -169,6 +181,30 @@
       "anchor": [63, 238],
       "depthRef": -48,
       "scale": 1.50
+    },
+    {
+      "id": "plante-paniers",
+      "image": "plante-paniers-origami",
+      "at": [1555, 218],
+      "anchor": [70, 184],
+      "depthRef": 218,
+      "comment": "Plante en pot gris à gauche des paniers rouges : le héros passe devant à z < 218 et derrière à z > 218."
+    },
+    {
+      "id": "paniers-rouges",
+      "image": "paniers-rouges-origami",
+      "at": [1656, 218],
+      "anchor": [49, 197],
+      "depthRef": 218,
+      "comment": "Tour de paniers rouges origami détourée : le héros passe devant à z < 218 et derrière à z > 218."
+    },
+    {
+      "id": "brume-couloir",
+      "image": "brume-couloir-origami",
+      "at": [1745, 260],
+      "anchor": [230, 358],
+      "depthRef": 260,
+      "comment": "Voile lumineux statique entre les deux piliers : quand le héros s'enfonce dans l'allée (z > 260), ses couleurs se fondent dans la brume ensoleillée du fond sans aucun filtre CSS."
     }
   ],
   "exits": {
