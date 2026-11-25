@@ -102,8 +102,8 @@ describe('sons et effets de pas (données)', () => {
 describe('zone de marche jusqu’en bas de l’écran', () => {
   it('on peut descendre derrière le rayon du premier plan', () => {
     const m = compileMask(place.walkMask);
-    expect(isWalkable(m, 960, -190)).toBe(true);
-    expect(isWalkable(m, 960, -200)).toBe(false);
+    expect(isWalkable(m, 960, -550)).toBe(true);
+    expect(isWalkable(m, 960, -570)).toBe(false);
     expect(isWalkable(m, 960, 260)).toBe(true); // jusqu'au pied de l'étagère du fond
   });
 });
@@ -134,11 +134,13 @@ describe('profondeur et corps vivant', () => {
     expect(scaleAt(proj, 375)).toBeLessThan(0.45); // au fond de l'allée : à hauteur des rayons du fond
     expect(scaleAt(proj, -72)).toBeLessThanOrEqual(accueil.projection.maxScale);
   });
-  it('rayon 1 : le mur biais à gauche (sous le panneau Accueil) n’est pas praticable', () => {
+  it('rayon 1 : le mur biais à gauche (sous le panneau Accueil) n’est pas praticable, et le sol descend derrière le Plan 1', () => {
     const m = compileMask(place.walkMask);
     expect(isWalkable(m, 50, 255)).toBe(false); // plinthe bleue du mur gauche
     expect(isWalkable(m, 50, 210)).toBe(true); // carrelage devant le mur gauche
     expect(isWalkable(m, 550, 260)).toBe(true); // pied des étagères
+    expect(isWalkable(m, 1500, -540)).toBe(true); // tout devant contre la gondole Plan 1 (seule la tête dépasse)
+    expect(scaleAt(createProjection(place.projection, { depthScale: 1 }), -560)).toBeLessThanOrEqual(1.45);
   });
   it('rebondit au milieu d’un pas, touche le sol au début', () => {
     bodyMotion(out, P, true, 0, 80, 0, -1);
