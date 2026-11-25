@@ -764,7 +764,10 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   await page.locator('.item-reveal-ok').click();
   await expect(page.locator('.item-reveal')).toBeHidden();
   await expect(page.locator('.scanette-button')).toBeVisible();
-  // Le panier est un peu plus loin à droite.
+  // Le panier est un peu plus loin à droite, devant le pot de fleurs (z < 195).
+  await page.keyboard.down('ArrowDown');
+  await page.waitForFunction(() => window.paperCart.hero().z < 190, null, { timeout: 4000 });
+  await page.keyboard.up('ArrowDown');
   await page.keyboard.down('ArrowRight');
   await page.waitForFunction(() => window.paperCart.scanState().pickup === 1, null, { timeout: 6000 });
   await page.keyboard.up('ArrowRight');

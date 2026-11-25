@@ -103,8 +103,8 @@ describe('sons et effets de pas (données)', () => {
 describe('zone de marche jusqu’en bas de l’écran', () => {
   it('on peut descendre derrière le rayon du premier plan', () => {
     const m = compileMask(place.walkMask);
-    expect(isWalkable(m, 960, -550)).toBe(true);
-    expect(isWalkable(m, 960, -570)).toBe(false);
+    expect(isWalkable(m, 960, -195)).toBe(true);
+    expect(isWalkable(m, 960, -210)).toBe(false);
     expect(isWalkable(m, 960, 260)).toBe(true); // jusqu'au pied de l'étagère du fond
   });
 });
@@ -143,8 +143,8 @@ describe('profondeur et corps vivant', () => {
     expect(isWalkable(m, 50, 255)).toBe(false); // plinthe bleue du mur gauche
     expect(isWalkable(m, 50, 210)).toBe(true); // carrelage devant le mur gauche
     expect(isWalkable(m, 550, 260)).toBe(true); // pied des étagères
-    expect(isWalkable(m, 1500, -540)).toBe(true); // tout devant contre la gondole Plan 1 (seule la tête dépasse)
-    expect(scaleAt(createProjection(place.projection, { depthScale: 1 }), -560)).toBeLessThanOrEqual(1.45);
+    expect(isWalkable(m, 1500, -195)).toBe(true); // jusqu'au bord bas de l'écran (y≈1079)
+    expect(scaleAt(createProjection(place.projection, { depthScale: 1 }), -200)).toBeLessThanOrEqual(1.25);
   });
   it('rebondit au milieu d’un pas, touche le sol au début', () => {
     bodyMotion(out, P, true, 0, 80, 0, -1);

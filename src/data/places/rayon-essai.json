@@ -7,7 +7,7 @@
     "floorFrontY": 933,
     "depthToScreen": 0.73,
     "scalePerDepth": 0.0012,
-    "maxScale": 1.45
+    "maxScale": 1.25
   },
   "images": {
     "rayon-fond": {
@@ -174,10 +174,10 @@
   },
   "spawn": [300, 60],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -560 = tout devant contre la gondole d'en face Plan 1 où seuls la tête et les cheveux dépassent au-dessus de y=905). Mur biais gauche suivi au pixel près.",
+    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -200 = bord bas de l'écran y≈1079, pieds toujours posés sur le carrelage derrière le premier plan semi-transparent). Mur biais gauche suivi au pixel près.",
     "area": [
-      [-160, -560],
-      [3510, -560],
+      [-160, -200],
+      [3510, -200],
       [3510, 264],
       [2290, 264],
       [2290, 330],
@@ -404,8 +404,8 @@
       {
         "id": "vers-accueil",
         "edge": "left",
-        "zone": [-160, -560, 80, 220],
-        "reach": [-160, -560, 50, 1080],
+        "zone": [-160, -200, 80, 220],
+        "reach": [-160, -200, 50, 1080],
         "to": "accueil",
         "arriveEdge": "right",
         "arrive": [2055, 60],
