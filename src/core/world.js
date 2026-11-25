@@ -37,9 +37,13 @@ export function buildProducts(place, catalog, stageY) {
 // au sol (place.pickups : at = [x, z] ; stageY(z) : hauteur sur la scène). Un objet caché par une pile de
 // cartons (place.pile.hides) n'est pas disponible tant qu'elle n'est pas tombée (scanned : indisponible).
 export function buildPickups(place, backZ, stageY) {
-  const desk = (place.accueil?.items ?? []).map((it) => ({
-    id: it.id, x: it.at[0], z: backZ, loose: true, scanned: false, standAt: [[it.at[0], backZ - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
-  }));
+  const deskZ = place.accueil?.z ?? backZ;
+  const desk = (place.accueil?.items ?? []).map((it) => {
+    const iz = it.z ?? deskZ;
+    return {
+      id: it.id, x: it.at[0], z: iz, loose: true, scanned: false, standAt: [[it.at[0], iz - 20]], y: it.at[1] + it.h, w: it.w, h: it.h,
+    };
+  });
   const floor = (place.pickups?.items ?? []).map((it) => ({
     id: it.id, x: it.at[0], z: it.at[1], loose: true, scanned: place.pile?.hides === it.id, standAt: it.standAt, y: stageY(it.at[1]), w: it.w, h: it.h,
   }));

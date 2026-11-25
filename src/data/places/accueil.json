@@ -271,6 +271,7 @@
     "b": [1850, 80]
   },
   "accueil": {
+    "z": 206,
     "remindAfterX": 1850,
     "comment": "Présentoir Scanettes à droite du comptoir i Accueil, paniers juste à sa droite.",
     "items": [
