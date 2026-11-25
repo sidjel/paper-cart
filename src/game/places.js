@@ -11,7 +11,7 @@
 
 import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
-import { clearTarget } from '../core/movement.js';
+import { clearTarget, setTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
 import { exitAt, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
@@ -294,7 +294,7 @@ export function createPlaces(ui, container, game) {
     game.sm.go('transition');
   }
 
-  function putHero(x, z, facing) {
+  function putHero(x, z, facing, walkTo = null) {
     const walker = game.walker();
     walker.x = walker.prevX = x;
     walker.z = walker.prevZ = z;
@@ -302,11 +302,14 @@ export function createPlaces(ui, container, game) {
     walker.facing = facing ?? walker.facing;
     walker.away = false;
     clearTarget(walker);
+    if (walkTo) setTarget(walker, walkTo[0], walkTo[1]);
   }
 
   async function change(exit) {
     const t0 = performance.now();
     const keepOld = isCrossDissolve(transition?.style) && view;
+    const start = exit.arriveFrom ?? exit.arrive;
+    const walkTo = exit.arriveFrom ? exit.arrive : null;
     if (keepOld) {
       // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
       // du lieu suivant (aucune disparition à vide avant la bascule).
@@ -322,7 +325,7 @@ export function createPlaces(ui, container, game) {
         view = null;
         images = null;
         mountPrepared(built);
-        putHero(exit.arrive[0], exit.arrive[1], exit.facing);
+        putHero(start[0], start[1], exit.facing, walkTo);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
@@ -335,7 +338,7 @@ export function createPlaces(ui, container, game) {
       unload();
       try {
         await load(exit.to);
-        putHero(exit.arrive[0], exit.arrive[1], exit.facing);
+        putHero(start[0], start[1], exit.facing, walkTo);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);

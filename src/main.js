@@ -59,6 +59,15 @@ import catalog from './data/products.json';
 const PLACES = { [rayonEssai.id]: rayonEssai, [accueilPlace.id]: accueilPlace, [rayon2.id]: rayon2, [salleTest.id]: salleTest };
 let place = PLACES[startPlaceId(Object.keys(PLACES), accueilPlace.id)]; // la partie commence dans le hall d'accueil
 const VERSION = __VERSION__;
+const COMMIT = __COMMIT__;
+// Si l'URL porte un ancien ?v=... (ex. ancien lien), l'aligner sur le commit réellement chargé.
+if (typeof history !== 'undefined' && typeof location !== 'undefined') {
+  const params = new URLSearchParams(location.search);
+  if (params.has('v') && params.get('v') !== COMMIT) {
+    params.set('v', COMMIT);
+    history.replaceState(null, '', `${location.pathname}?${params.toString()}${location.hash}`);
+  }
+}
 const BASE = import.meta.env.BASE_URL;
 const touch = matchMedia('(pointer: coarse)').matches;
 

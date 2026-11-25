@@ -175,14 +175,14 @@
   "walkMask": {
     "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -195 = tout en bas de l'écran derrière le rayon du premier plan). Option 1A : une seule grande arche centrale (x 2050–2290, z 264–330) vers le rayon 2 + bout du rayon en cul-de-sac récompense.",
     "area": [
-      [90, -195],
+      [-160, -195],
       [3510, -195],
       [3510, 264],
       [2290, 264],
       [2290, 330],
       [2050, 330],
       [2050, 264],
-      [90, 264]
+      [-160, 264]
     ],
     "obstacles": [
       {
@@ -396,8 +396,10 @@
     "items": [
       {
         "id": "vers-accueil",
-        "zone": [90, -195, 128, 264],
+        "zone": [-160, -195, -120, 264],
+        "reach": [-160, -195, 120, 1080],
         "to": "accueil",
+        "arriveFrom": [2260, 60],
         "arrive": [1940, 60],
         "facing": -1
       },

@@ -32,8 +32,13 @@ describe('lieux : sorties et fondu', () => {
         const dest = PLACES[e.to];
         expect(dest, `${pl.id} → ${e.to}`).toBeDefined();
         const [x, z] = e.arrive;
-        expect(isWalkable(compileMask(dest.walkMask), x, z), e.id).toBe(true);
+        const destMask = compileMask(dest.walkMask);
+        expect(isWalkable(destMask, x, z), e.id).toBe(true);
         expect(exitAt(dest.exits.items, x, z), e.id).toBeNull();
+        if (e.arriveFrom) {
+          expect(isWalkable(destMask, e.arriveFrom[0], e.arriveFrom[1]), `${e.id} arriveFrom`).toBe(true);
+          expect(exitAt(dest.exits.items, e.arriveFrom[0], e.arriveFrom[1]), `${e.id} arriveFrom`).toBeNull();
+        }
         // la zone de sortie touche bien le sol du lieu
         expect(isWalkable(here, (e.zone[0] + e.zone[2]) / 2, (e.zone[1] + e.zone[3]) / 2), e.id).toBe(true);
       }
@@ -41,9 +46,13 @@ describe('lieux : sorties et fondu', () => {
       for (const im of Object.values(pl.images)) expect(existsSync(`public/${im.src}`), im.src).toBe(true);
     }
   });
-  it('on peut aller du rayon à l’accueil et en revenir', () => {
-    expect(exitAt(rayon.exits.items, 100, 60).to).toBe('accueil');
-    expect(exitAt(accueil.exits.items, 2090, 0).to).toBe('rayon-essai');
+  it('on peut aller du rayon à l’accueil et en revenir après avoir complètement traversé le bord', () => {
+    // Le héros ne disparaît pas avant le bord : à x = 2120 (accueil) ou x = 100 (rayon), il est encore à l'écran.
+    expect(exitAt(accueil.exits.items, 2120, 0)).toBeNull();
+    expect(exitAt(rayon.exits.items, 100, 60)).toBeNull();
+    // Une fois complètement passé hors-champ, la sortie se déclenche.
+    expect(exitAt(accueil.exits.items, 2300, 0).to).toBe('rayon-essai');
+    expect(exitAt(rayon.exits.items, -140, 60).to).toBe('accueil');
     expect(exitAt(rayon.exits.items, 1500, 60)).toBeNull();
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {

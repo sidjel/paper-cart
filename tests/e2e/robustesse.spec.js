@@ -47,6 +47,7 @@ test('le rayon ne se charge pas : retour au hall, là où le héros est sorti ; 
 });
 
 test('même le hall ne se recharge pas : écran « Réessayer », qui ramène au jeu', async ({ page }) => {
+  await page.evaluate(() => window.paperCart.set('places.style', 'flip')); // mode qui décharge l'ancien lieu avant de charger le suivant
   await page.route('**/rayon-fond.*', (r) => r.abort());
   await page.route('**/accueil-fond.*', (r) => r.abort());
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
