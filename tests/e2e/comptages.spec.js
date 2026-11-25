@@ -212,7 +212,7 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
   };
   const containers = new Set([...(await ids('.guard')), ...(await ids('.actor')), ...(await ids('.prop'))]);
   const poses = new Set([...(await ids('.guard-pose')), ...(await ids('.actor-frame'))]);
-  expect(containers.size).toBe(5); // l'agent, le héros et les 3 portiques origami
+  expect(containers.size).toBe(8); // l'agent, le héros, les 3 portiques, la plante, les paniers rouges et la brume du couloir
   expect(poses.size).toBeGreaterThan(10); // 2 poses de l'agent, les images du héros
   let sig = null;
   let changes = 0;
