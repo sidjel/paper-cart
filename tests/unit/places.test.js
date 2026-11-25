@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -35,12 +35,9 @@ describe('lieux : sorties et fondu', () => {
         const destMask = compileMask(dest.walkMask);
         expect(isWalkable(destMask, x, z), e.id).toBe(true);
         expect(exitAt(dest.exits.items, x, z), e.id).toBeNull();
-        if (e.arriveFrom) {
-          expect(isWalkable(destMask, e.arriveFrom[0], e.arriveFrom[1]), `${e.id} arriveFrom`).toBe(true);
-          expect(e.arriveFrom[0], `${e.id} arriveFrom ≠ arrive`).not.toBe(x);
-        }
-        if (e.exitOutX !== undefined) {
-          expect(isWalkable(here, e.exitOutX, (e.zone[1] + e.zone[3]) / 2), `${e.id} exitOutX`).toBe(true);
+        if (e.edge) {
+          const b = edgeBounds(e.edge, pl.size[0], 1);
+          expect(isWalkable(here, b.outX, (e.zone[1] + e.zone[3]) / 2), `${e.id} outX`).toBe(true);
         }
         // la zone de sortie touche bien le sol du lieu
         expect(isWalkable(here, (e.zone[0] + e.zone[2]) / 2, (e.zone[1] + e.zone[3]) / 2), e.id).toBe(true);
@@ -49,24 +46,34 @@ describe('lieux : sorties et fondu', () => {
       for (const im of Object.values(pl.images)) expect(existsSync(`public/${im.src}`), im.src).toBe(true);
     }
   });
-  it('sorties de bord : déclenchent au contact du bord, avancent seules à 3/4 hors-champ, arrivée collée au bord sans re-déclencher', () => {
+  it('sorties de bord : ne déclenchent qu’au 1er pixel qui touche le bord (selon la profondeur z), puis 3/4 hors-champ et arrivée collée au bord', () => {
     const outRight = accueil.exits.items.find((e) => e.id === 'vers-rayon');
     const outLeft = rayon.exits.items.find((e) => e.id === 'vers-accueil');
-    // Toucher le bord déclenche la sortie, mais rester juste à côté (point d'arrivée) ne déclenche pas.
-    expect(exitAt(accueil.exits.items, 2090, 0)?.to).toBe('rayon-essai');
-    expect(exitAt(accueil.exits.items, outLeft.arrive[0], outLeft.arrive[1])).toBeNull();
-    expect(exitAt(rayon.exits.items, 60, 60)?.to).toBe('accueil');
-    expect(exitAt(rayon.exits.items, outRight.arrive[0], outRight.arrive[1])).toBeNull();
-    // La cible de sortie automatique (exitOutX) est bien au-delà du bord (3/4 hors-champ).
-    expect(outRight.exitOutX).toBeGreaterThan(accueil.size[0]);
-    expect(outLeft.exitOutX).toBeLessThan(0);
+    // À z profond (échelle 0,7), le héros est plus petit : x = 50 ne touche PAS encore le bord gauche (trigger ≈ 40,6).
+    expect(edgeTouched(outLeft, 50, rayon.size[0], 0.7)).toBe(false);
+    expect(edgeTouched(outLeft, 40, rayon.size[0], 0.7)).toBe(true);
+    // À z = 60 (échelle ~0,93), le 1er pixel touche vers x ≈ 54 ; à x = 75 il ne déclenche PAS encore.
+    expect(edgeTouched(outLeft, 75, rayon.size[0], 0.93)).toBe(false);
+    expect(edgeTouched(outLeft, 52, rayon.size[0], 0.93)).toBe(true);
+    // Côté droit (accueil 2160 px, échelle 0,95) : ne déclenche pas à 2085, déclenche dès que le 1er pixel touche (~2105).
+    expect(edgeTouched(outRight, 2085, accueil.size[0], 0.95)).toBe(false);
+    expect(edgeTouched(outRight, 2106, accueil.size[0], 0.95)).toBe(true);
+    // Les bornes calculées : outX laisse ~1/4 visible (3/4 hors-champ) et inX est collé au bord sans re-déclencher.
+    const leftB = edgeBounds('left', rayon.size[0], 0.93);
+    expect(leftB.outX).toBeLessThan(0);
+    expect(leftB.inX).toBeGreaterThan(leftB.triggerX);
+    expect(edgeTouched(outLeft, leftB.inX, rayon.size[0], 0.93)).toBe(false);
+    const rightB = edgeBounds('right', accueil.size[0], 0.95);
+    expect(rightB.outX).toBeGreaterThan(accueil.size[0]);
+    expect(rightB.inX).toBeLessThan(rightB.triggerX);
+    expect(edgeTouched(outRight, rightB.inX, accueil.size[0], 0.95)).toBe(false);
     // Logique pure de marche automatique au bord : avance seule vers la cible puis se termine.
-    const ew = createEdgeWalk('out', -45, 70, outLeft);
-    expect(stepEdgeWalk(ew, 70, 0.016)).toEqual({ done: false, moveX: -1, moveZ: 0 });
-    expect(stepEdgeWalk(ew, -45, 0.016)).toEqual({ done: true, moveX: 0, moveZ: 0 });
+    const ew = createEdgeWalk('out', leftB.outX, leftB.triggerX, outLeft);
+    expect(stepEdgeWalk(ew, leftB.triggerX, 0.016)).toEqual({ done: false, moveX: -1, moveZ: 0 });
+    expect(stepEdgeWalk(ew, leftB.outX, 0.016)).toEqual({ done: true, moveX: 0, moveZ: 0 });
     // Garde-fou délai : ne peut jamais bloquer.
-    const stuck = createEdgeWalk('out', 2205, 2080, outRight);
-    expect(stepEdgeWalk(stuck, 2080, 1.5).done).toBe(true);
+    const stuck = createEdgeWalk('out', rightB.outX, rightB.triggerX, outRight);
+    expect(stepEdgeWalk(stuck, rightB.triggerX, 1.5).done).toBe(true);
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {
     const tr = createTransition({ to: 'accueil' }, 'right', 'wipe');

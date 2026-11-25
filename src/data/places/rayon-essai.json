@@ -396,12 +396,12 @@
     "items": [
       {
         "id": "vers-accueil",
+        "edge": "left",
         "zone": [-80, -195, 80, 264],
-        "exitOutX": -45,
-        "reach": [-80, -195, 80, 1080],
+        "reach": [-80, -195, 50, 1080],
         "to": "accueil",
-        "arriveFrom": [2205, 60],
-        "arrive": [2050, 60],
+        "arriveEdge": "right",
+        "arrive": [2055, 60],
         "facing": -1
       },
       {

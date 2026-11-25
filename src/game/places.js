@@ -14,14 +14,15 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
-import { createProjection, worldToStageY } from '../scene/projection.js';
+import { createProjection, scaleAt, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
 import { quality } from '../scene/quality.js';
 
 export function createPlaces(ui, container, game) {
   let place = null;
+  let proj = null; // projection du lieu actif (pour l'échelle du héros selon z)
   let view = null; // vue du lieu affiché (scene/placeView.js)
   let images = null;
   const backstage = document.createElement('div'); // où attendent le héros, la poussière et le repère hors d'un lieu
@@ -93,6 +94,7 @@ export function createPlaces(ui, container, game) {
 
   function mountPrepared(built) {
     place = built.place;
+    proj = built.proj;
     images = built.images;
     view = built.view;
     // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
@@ -307,20 +309,23 @@ export function createPlaces(ui, container, game) {
     clearTarget(walker);
   }
 
-  function startEntryWalk(exit) {
-    if (!exit.arriveFrom) {
+  function arriveHero(exit) {
+    if (exit.arriveEdge && proj) {
+      const z = exit.arrive[1];
+      const b = edgeBounds(exit.arriveEdge, place.size[0], scaleAt(proj, z));
+      putHero(b.outX, z, exit.facing);
+      // Ignorer la sortie du bord d'arrivée tant que le héros n'en est pas ressorti.
+      ignoredExit = exitAt(place.exits?.items ?? [], b.outX, z);
+      edgeWalk = createEdgeWalk('in', b.inX, b.outX, null);
+    } else {
+      putHero(exit.arrive[0], exit.arrive[1], exit.facing);
       edgeWalk = null;
-      return;
     }
-    // Ignorer la sortie du bord d'arrivée tant que le héros n'en est pas ressorti.
-    ignoredExit = exitAt(place.exits?.items ?? [], exit.arriveFrom[0], exit.arriveFrom[1]);
-    edgeWalk = createEdgeWalk('in', exit.arrive[0], exit.arriveFrom[0], null);
   }
 
   async function change(exit) {
     const t0 = performance.now();
     const keepOld = isCrossDissolve(transition?.style) && view;
-    const start = exit.arriveFrom ?? exit.arrive;
     if (keepOld) {
       // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
       // du lieu suivant (aucune disparition à vide avant la bascule).
@@ -336,8 +341,7 @@ export function createPlaces(ui, container, game) {
         view = null;
         images = null;
         mountPrepared(built);
-        putHero(start[0], start[1], exit.facing);
-        startEntryWalk(exit);
+        arriveHero(exit);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
@@ -350,8 +354,7 @@ export function createPlaces(ui, container, game) {
       unload();
       try {
         await load(exit.to);
-        putHero(start[0], start[1], exit.facing);
-        startEntryWalk(exit);
+        arriveHero(exit);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
@@ -448,12 +451,19 @@ export function createPlaces(ui, container, game) {
       if (transition || edgeWalk || !game.canLeave()) return;
       const walker = game.walker();
       const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
-      if (exit === ignoredExit) return; // revenu par là après un échec ou entrée au bord : il doit d'abord en ressortir
+      const scale = proj ? scaleAt(proj, walker.z) : 1;
+      const touched = exit && edgeTouched(exit, walker.x, place.size[0], scale);
+      if (exit === ignoredExit && touched) return; // revenu après échec ou entrée au bord : il doit d'abord en ressortir
+      if (!touched) {
+        ignoredExit = null;
+        return;
+      }
       ignoredExit = null;
-      if (!exit || !game.places[exit.to]) return;
-      if (exit.exitOutX !== undefined) {
+      if (!game.places[exit.to]) return;
+      if (exit.edge) {
+        const { outX } = edgeBounds(exit.edge, place.size[0], scale);
         clearTarget(walker);
-        edgeWalk = createEdgeWalk('out', exit.exitOutX, walker.x, exit);
+        edgeWalk = createEdgeWalk('out', outX, walker.x, exit);
         edgeWalk.from = { id: place.id, x: walker.x, z: walker.z, facing: walker.facing };
       } else {
         leaveBy(exit);

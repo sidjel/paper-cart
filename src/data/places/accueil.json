@@ -160,12 +160,12 @@
     "items": [
       {
         "id": "vers-rayon",
-        "zone": [2080, -72, 2240, 224],
-        "exitOutX": 2205,
+        "edge": "right",
+        "zone": [2060, -72, 2240, 224],
         "reach": [1650, 240, 2160, 1200],
         "to": "rayon-essai",
-        "arriveFrom": [-45, 60],
-        "arrive": [110, 60],
+        "arriveEdge": "left",
+        "arrive": [90, 60],
         "facing": 1
       }
     ]

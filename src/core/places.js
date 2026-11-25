@@ -22,9 +22,33 @@ export function exitTarget(exits, x, z) {
   return null;
 }
 
+// Traversée d'un bord d'écran (gauche / droite), calée au pixel près sur la taille réelle du héros
+// à sa profondeur z (scaleAt(proj, z)) :
+// - triggerX : premier pixel du héros qui touche le bord (le joueur garde le contrôle jusqu'ici) ;
+// - outX     : le héros est aux 3/4 hors-champ (1/4 visible) → la transition se lance ;
+// - inX      : point d'arrivée collé au bord, sans toucher triggerX.
+const HERO_BODY_HALF_W = 58; // demi-largeur du corps visible du héros à échelle 1 (mesurée sur heros-e-*.webp)
+const EDGE_OUT_RATIO = 0.6; // décalage hors-champ depuis le bord pour laisser ~1/4 visible (3/4 sortis)
+const EDGE_IN_MARGIN = 26; // marge de sécurité à l'arrivée (collé au bord, ne re-déclenche pas)
+
+export function edgeBounds(side, placeWidth, depthScale = 1, halfW = HERO_BODY_HALF_W) {
+  const h = halfW * depthScale;
+  if (side === 'left') {
+    return { triggerX: h, outX: -EDGE_OUT_RATIO * h, inX: h + EDGE_IN_MARGIN };
+  }
+  return { triggerX: placeWidth - h, outX: placeWidth + EDGE_OUT_RATIO * h, inX: placeWidth - h - EDGE_IN_MARGIN };
+}
+
+// Vérifie si une sortie de bord est effectivement touchée par le premier pixel du héros.
+export function edgeTouched(exit, x, placeWidth, depthScale = 1, halfW = HERO_BODY_HALF_W) {
+  if (!exit?.edge) return true;
+  const { triggerX } = edgeBounds(exit.edge, placeWidth, depthScale, halfW);
+  return exit.edge === 'left' ? x <= triggerX : x >= triggerX;
+}
+
 // Marche automatique de traversée d'un bord d'écran :
-// - 'out' : dès que le héros touche le bord, il avance seul jusqu'à ~3/4 hors-champ avant la transition ;
-// - 'in'  : à l'arrivée dans le nouveau lieu, il entre depuis ~3/4 hors-champ jusqu'au bord sans toucher la sortie.
+// - 'out' : dès que le 1er pixel touche le bord, le héros avance seul jusqu'aux 3/4 hors-champ avant la transition ;
+// - 'in'  : à l'arrivée dans le nouveau lieu, il entre depuis les 3/4 hors-champ jusqu'au bord sans toucher la sortie.
 const EDGE_WALK_MAX_S = 1.2; // garde-fou : ne peut jamais bloquer même ralenti (chariot)
 export function createEdgeWalk(kind, targetX, startX, exit = null) {
   return { kind, targetX, dir: targetX >= startX ? 1 : -1, exit, t: 0 };
