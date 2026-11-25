@@ -111,12 +111,24 @@
         "frames": ["art/heros-test/heros-ne-idle.webp"]
       },
       "walk": {
-        "stride": 74,
+        "stride": 18.5,
         "frames": [
-          { "src": "art/heros-test/heros-ne-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-ne-walk-1.webp",
           "art/heros-test/heros-ne-walk-2.webp",
           { "src": "art/heros-test/heros-ne-walk-3.webp", "sound": "pas", "effect": "poussiere" },
-          "art/heros-test/heros-ne-walk-4.webp"
+          "art/heros-test/heros-ne-walk-4.webp",
+          "art/heros-test/heros-ne-walk-5.webp",
+          "art/heros-test/heros-ne-walk-6.webp",
+          "art/heros-test/heros-ne-walk-7.webp",
+          "art/heros-test/heros-ne-walk-8.webp",
+          "art/heros-test/heros-ne-walk-9.webp",
+          "art/heros-test/heros-ne-walk-10.webp",
+          { "src": "art/heros-test/heros-ne-walk-11.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-ne-walk-12.webp",
+          "art/heros-test/heros-ne-walk-13.webp",
+          "art/heros-test/heros-ne-walk-14.webp",
+          "art/heros-test/heros-ne-walk-15.webp",
+          "art/heros-test/heros-ne-walk-16.webp"
         ]
       }
     },
