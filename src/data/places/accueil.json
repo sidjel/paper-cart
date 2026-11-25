@@ -120,8 +120,8 @@
     "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le socle du comptoir Accueil, le meuble Scanettes et le pot gris (y≈906) ; z=224 à droite vers les rayons (y≈895) ; z=-72 en bas derrière les pots origami (y≈1076).",
     "area": [
       [652, -72],
-      [2240, -72],
-      [2240, 224],
+      [2320, -72],
+      [2320, 224],
       [1660, 224],
       [1600, 206],
       [758, 206]
@@ -161,7 +161,7 @@
       {
         "id": "vers-rayon",
         "edge": "right",
-        "zone": [2060, -72, 2240, 224],
+        "zone": [2060, -72, 2320, 224],
         "reach": [1650, 240, 2160, 1200],
         "to": "rayon-essai",
         "arriveEdge": "left",

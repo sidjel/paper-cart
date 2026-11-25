@@ -58,13 +58,13 @@ describe('lieux : sorties et fondu', () => {
     // Côté droit (accueil 2160 px, échelle 0,95) : ne déclenche pas à 2085, déclenche dès que le 1er pixel touche (~2105).
     expect(edgeTouched(outRight, 2085, accueil.size[0], 0.95)).toBe(false);
     expect(edgeTouched(outRight, 2106, accueil.size[0], 0.95)).toBe(true);
-    // Les bornes calculées : outX laisse ~1/4 visible (3/4 hors-champ) et inX est collé au bord sans re-déclencher.
+    // Les bornes calculées : outX sort 100 % hors-champ (plus aucun pixel visible) et inX est collé au bord sans re-déclencher.
     const leftB = edgeBounds('left', rayon.size[0], 0.93);
-    expect(leftB.outX).toBeLessThan(0);
+    expect(leftB.outX).toBeLessThan(-95);
     expect(leftB.inX).toBeGreaterThan(leftB.triggerX);
     expect(edgeTouched(outLeft, leftB.inX, rayon.size[0], 0.93)).toBe(false);
     const rightB = edgeBounds('right', accueil.size[0], 0.95);
-    expect(rightB.outX).toBeGreaterThan(accueil.size[0]);
+    expect(rightB.outX).toBeGreaterThan(accueil.size[0] + 95);
     expect(rightB.inX).toBeLessThan(rightB.triggerX);
     expect(edgeTouched(outRight, rightB.inX, accueil.size[0], 0.95)).toBe(false);
     // Logique pure de marche automatique au bord : avance seule vers la cible puis se termine.

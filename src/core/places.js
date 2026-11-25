@@ -25,10 +25,10 @@ export function exitTarget(exits, x, z) {
 // Traversée d'un bord d'écran (gauche / droite), calée au pixel près sur la taille réelle du héros
 // à sa profondeur z (scaleAt(proj, z)) :
 // - triggerX : premier pixel du héros qui touche le bord (le joueur garde le contrôle jusqu'ici) ;
-// - outX     : le héros est aux 3/4 hors-champ (1/4 visible) → la transition se lance ;
+// - outX     : le héros est 100 % hors-champ (plus aucun pixel visible, même en grande foulée) → la transition se lance ;
 // - inX      : point d'arrivée collé au bord, sans toucher triggerX.
 const HERO_BODY_HALF_W = 58; // demi-largeur du corps visible du héros à échelle 1 (mesurée sur heros-e-*.webp)
-const EDGE_OUT_RATIO = 0.6; // décalage hors-champ depuis le bord pour laisser ~1/4 visible (3/4 sortis)
+const EDGE_OUT_RATIO = 1.9; // décalage hors-champ (~110 px × échelle > 105 px max de foulée) : 0 pixel visible
 const EDGE_IN_MARGIN = 26; // marge de sécurité à l'arrivée (collé au bord, ne re-déclenche pas)
 
 export function edgeBounds(side, placeWidth, depthScale = 1, halfW = HERO_BODY_HALF_W) {
