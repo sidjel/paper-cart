@@ -4,14 +4,22 @@
     "scanette": {
       "name": "[TEMP] Scanette",
       "text": "[TEMP] Le scanner en libre-service du Maxi-Gouffre. Elle extrait l'essence des produits des rayons pour les transformer en cartes.",
-      "usage": "[TEMP] Approche-toi d'un produit en rayon et appuie sur Entrée (ou double-clic sur le produit) pour le scanner.",
+      "usage": {
+        "keys": "[TEMP] Approche-toi d'un produit en rayon et appuie sur Entrée ou Espace (ou double-clic sur le produit) pour le scanner.",
+        "touch": "[TEMP] Approche-toi d'un produit en rayon et touche « Scanner » (ou touche deux fois le produit) pour le scanner.",
+        "pad": "[TEMP] Approche-toi d'un produit en rayon et appuie sur A pour le scanner."
+      },
       "hint": "[TEMP] Sous la gâchette, un second cran semble verrouillé… peut-être qu'un jour elle saura scanner bien plus que de simples codes-barres.",
       "image": "art/accueil/objet-scanette-origami.webp"
     },
     "panier": {
       "name": "[TEMP] Panier à main",
       "text": "[TEMP] Un panier rouge léger pour ranger tes cartes de produits pendant tes courses. Sa capacité reste limitée : il faudra choisir avec soin.",
-      "usage": "[TEMP] Appuie sur I (ou clique sur le panier en bas à gauche) pour consulter tes cartes et tes objets.",
+      "usage": {
+        "keys": "[TEMP] Appuie sur I (ou clique sur le panier en bas à gauche) pour consulter tes cartes et tes objets.",
+        "touch": "[TEMP] Touche le panier en bas à gauche pour consulter tes cartes et tes objets.",
+        "pad": "[TEMP] Appuie sur Y pour ouvrir ton panier et consulter tes cartes et tes objets."
+      },
       "hint": "[TEMP] Six emplacements, c'est vite plein… peut-être qu'au comptoir d'accueil quelqu'un propose quelque chose de bien plus grand.",
       "image": "art/accueil/objet-panier-origami.webp"
     },
@@ -25,7 +33,11 @@
     "chariot": {
       "name": "[TEMP] Chariot",
       "text": "[TEMP] Bien plus grand que le panier ! Il augmente ta capacité de cartes et roule avec toi dans les rayons.",
-      "usage": "[TEMP] Appuie sur R (ou double-clic sur le chariot) pour le garer ou le reprendre. Ouvre-le avec I.",
+      "usage": {
+        "keys": "[TEMP] Appuie sur R (ou double-clic sur le chariot) pour le garer ou le reprendre. Ouvre-le avec I.",
+        "touch": "[TEMP] Touche deux fois le chariot (ou le bouton « Lâcher / Pousser ») pour le garer ou le reprendre. Touche son icône en bas à gauche pour l'ouvrir.",
+        "pad": "[TEMP] Appuie sur X pour garer ou reprendre le chariot, et sur Y pour l'ouvrir."
+      },
       "hint": "[TEMP] Ses roues grincent déjà, mais sa grille d'acier a l'air taillée pour encaisser bien plus que de simples courses…",
       "image": "art/placeholder/chariot-vide.svg"
     },

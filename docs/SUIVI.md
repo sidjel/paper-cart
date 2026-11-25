@@ -6,6 +6,20 @@ Les points ✅ sont dans `docs/SUIVI-archive.md` (rien n'est perdu ; déplacés 
 
 ## Ouvert
 
+### Séance 80 (audit Claude Opus 5.5 + correctifs Antigravity)
+| Demande ou point ouvert | Séance | État | Notes |
+|---|---|---|---|
+| **RAPPEL — Essai PixiJS v8 (avant Prototype B)** | 80 | 🔧 | **Juste avant le Prototype B (combat)** : essai court **PixiJS v8** (plutôt que Phaser 4) sur branche à part (Rayon 1 + héros), mesuré sur l'Oppo Reno 2 avec le même banc d'essai. Décision sur chiffres. *(Réponse auteur 7a.)* |
+| Élargir le décor du hall d'accueil (`2160 → ≥ 2500 px`, zéro bande noire sur 20:9 / 21:9) | 80 | 🔧 | Passe graphique dédiée juste après les correctifs code (3 plans Krita + recalage `accueil.json`, puis retrait de l'exception `accueil` dans `tests/unit/data.test.js`). *(Réponse auteur 2a / 7a.)* |
+| Valider le style de transition sur téléphone puis supprimer les 5 styles non retenus | 80 | 👀 | `mist` corrigé (héros visible pendant le chargement) + `dissolve`, `flip`, `double`, `strips`, `wipe` (sans ombres floues) à comparer sur Oppo Reno 2. *(Réponse auteur 1b.)* |
+| Clignotement à froid du héros au 1er lancement | 80 | 👀 | `decoding = 'sync'` après `decode()` (`assets.js`) + décodage copies `clouds.js`/`birds.js`. À re-vérifier à froid sur PC et Oppo Reno 2. *(Réponse auteur 1a.)* |
+| Remplacer `Segoe Print Bold` (panneaux Rayon 1) avant vente commerciale | 80 | 🔧 | Licence Microsoft : remplacer par une police libre **SIL OFL** (*Patrick Hand*, *Kalam*, *Shantell Sans*) ou lettrage manuel. Noté dans `CREDITS.md`. |
+| Indices énigmatiques des fiches d'objets (`objects.json`) | 80 | ❓ | Promesses `[TEMP]` non encore décidées par l'auteur : « second cran » de la Scanette, « machines oubliées » à jetons, chariot qui « encaisse ». Gardées en texte d'attente ; l'auteur tranchera plus tard. *(Réponse auteur 6a.)* |
+| Musique d'ambiance : remplacer la boucle de 12 s par une piste plus longue | 80 | 🔧 | `supermarche.mp3` (12 s) devient répétitive à la longue ; prévoir une ou plusieurs pistes CC0 plus longues (et streaming `<audio>` si > 1–2 min). |
+| Rayon 2 en décor origami HD + « test du gris » sur les produits à scanner | 80 | 🔧 | Le Rayon 2 derrière l'arche origami est encore en SVG gris provisoire ; prévoir la passe décor Rayon 2 et le test du gris (noir & blanc) pour détacher les produits scannables des étagères peintes. |
+| Personnalité et design définitifs du héros (+ 16 images uniques sur les 5 vues) | 79 | 🔧 | En attente du choix de l'auteur avant de lancer la génération des 5 vues définitives (attention mémoire : 89 images ≈ 116 Mo en DOM → argument supplémentaire pour le POC PixiJS avant B). |
+| Banc d'essai fluidité sur le vrai téléphone (Oppo Reno 2) | 80 | 🔧 | À relancer après cette passe (notamment pour mesurer `mist` vs volet, les 15 calques nuages/oiseaux et l'absence de clignotement). |
+
 ### Personnage
 | Demande | Séance | État | Notes |
 |---|---|---|---|

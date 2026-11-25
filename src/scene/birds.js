@@ -22,7 +22,11 @@ export function createBirds(layer, cfg, images, reduceMotion = false) {
       const id = cfg.frames[idx];
       const im = images.get(id);
       const el = claimed.has(id) ? new Image() : im.el;
-      if (el !== im.el) el.src = im.url;
+      if (el !== im.el) {
+        el.decoding = 'sync';
+        el.src = im.url;
+        el.decode?.().catch(() => {});
+      }
       claimed.add(id);
       el.className = 'bird-pose';
       el.width = w;

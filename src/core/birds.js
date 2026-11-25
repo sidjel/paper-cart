@@ -19,12 +19,15 @@ const RETURN_BURSTS = [
   [0.15, 1.04, 1.12],
 ];
 
-function walkState(bird, t, [wMin, wMax], reduceMotion) {
+// Cache par définition d'oiseau marcheur : évite de reconstruire les 10 segments à chaque image (60 Hz).
+const walkPlanCache = new WeakMap();
+
+function getWalkPlan(bird, wMin, wMax) {
+  const cached = walkPlanCache.get(bird);
+  if (cached && cached.wMin === wMin && cached.wMax === wMax) return cached;
   const dist = Math.max(1, wMax - wMin);
   const baseSpeed = Math.max(1, bird.speed ?? 34);
   const pauseMul = Math.max(0, bird.pause ?? 1);
-
-  // Construit les segments d'un cycle complet aller + retour (10 petits à-coups + 10 pauses variées).
   let totalDur = 0;
   const segs = [];
   let cursor = wMin;
@@ -45,7 +48,13 @@ function walkState(bird, t, [wMin, wMax], reduceMotion) {
     totalDur += moveDur + pauseDur;
     cursor = next;
   }
+  const plan = { wMin, wMax, totalDur, segs };
+  walkPlanCache.set(bird, plan);
+  return plan;
+}
 
+function walkState(bird, t, [wMin, wMax], reduceMotion) {
+  const { totalDur, segs } = getWalkPlan(bird, wMin, wMax);
   const phaseOffset = (bird.phase ?? 0) * totalDur;
   const u = reduceMotion ? phaseOffset % totalDur : (((t + phaseOffset) % totalDur) + totalDur) % totalDur;
 

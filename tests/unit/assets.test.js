@@ -68,6 +68,8 @@ describe('chargement des images', () => {
     // L'URL source reste renseignée pour les instances partagées (nuages, oiseaux, portiques) sans être révoquée.
     expect(imgs.get('bg').url).toBe('art/fond.webp');
     expect(imgs.get('bg').revoke).toBe(false);
+    // Une fois décodée, l'image repasse en décodage synchrone (anti-clignotement à froid des poses cachées).
+    expect(imgs.get('bg').el.decoding).toBe('sync');
     releaseImages(imgs);
     expect({ images: assetStats.images, pixels: assetStats.pixels }).toEqual(before);
   });

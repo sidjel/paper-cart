@@ -62,7 +62,7 @@ Structure ✅ VALIDÉ · fin mot de l'histoire ❓ À DÉFINIR.
 - ❓ À DÉFINIR : c'est en passant le portique que le héros est **scanné par le magasin et aplati** (enregistré comme un article) ; le « bip » du portique serait le **dernier son** dont il se souvient avant son trou de mémoire.
 
 ## L'intro du jeu 🧪 À TESTER (séance 43, textes [TEMP] dans `src/data/intro.json`)
-- Aucun personnage en 3D : le héros apparaît directement en papier. Écran noir, texte blanc ligne par ligne, des sons : pluie, parking, portes qui coulissent, « ding ». Toucher : ligne suivante ; « Passer » ; puis fondu sur le jeu.
+- Aucun personnage en 3D : le héros apparaît directement en papier. Écran noir, texte blanc ligne par ligne, des sons : **pluie réaliste CC0** (`public/audio/pluie-intro.mp3`), portes qui coulissent, « ding ». Toucher : ligne suivante ; « Passer » ; puis fondu sur le hall **ensoleillé** (anomalie Backrooms : dehors dans l'intro il pleuvait des cordes de nuit, mais derrière les vitres du Maxi-Gouffre il fait grand soleil, et le héros s'en étonne).
 - Puis le narrateur : « Bienvenue au Maxi-Gouffre. Nous avons pris la liberté d'optimiser votre format. » (piste : le « bip » du portique de sécurité juste avant, voir « L'accueil, un lieu à part »)
 - 🧪 **Arrivée** (séance 43) : annonce, puis 4 pensées du héros (le trou de mémoire, « pourquoi je me sens si plat ? », l'objectif : la Caisse Finale puis rentrer, « il me manque quelque chose… on me regarde. D'en haut. »).
 - **Première rencontre** ✅ VALIDÉ (séances 44 à 47) : après la **première carte**, jamais manquée ni interrompue, relisible (historique). Mise en scène 🧪 : il s'avance au milieu de l'écran en deux temps (« Hum ?… » à mi-chemin) ; bords violets ondulés, interface effacée (flou réel en option, coûteux).

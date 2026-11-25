@@ -6,7 +6,7 @@
 
 Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le magasin s'appelle provisoirement **Maxi-Gouffre**. On cherche à en sortir en **atteignant la caisse finale**, d'où le sous-titre *The Final Checkout* (« check out » veut aussi dire « partir » et « mourir » en argot anglais).
 
-- Chaque lieu est un **grand décor dessiné à la main** (par l'auteur, puis amélioré par IA ; en attendant, formes provisoires), vu à la troisième personne.
+- Chaque lieu est un **grand décor en diorama origami / papier découpé** (généré par IA puis détouré, retouché et monté à la main dans Krita ; en attendant, formes provisoires pour les éléments restants), vu à la troisième personne. *(Méthode assumée par l'auteur, séance 80 : déclaration de contenu pré-généré par IA prévue sur Steam.)*
 - On y fait marcher un **personnage en papier façon Paper Mario**.
 - Le personnage tient une **Scanette** (le scanner en libre-service des supermarchés, prise à l'accueil ; *vocabulaire de l'auteur, séance 36*) : il vise un produit dans le rayon et en extrait l'**essence**, qui devient une **carte**.
 - On combat avec ces cartes en **tour par tour sans chrono**, le personnage et l'ennemi face à face dans le décor, les cartes en bas de l'écran.
@@ -20,11 +20,11 @@ Un RPG à la **Baten Kaitos** dans un supermarché sans fin. Dans le jeu, le mag
 Étrange (Backrooms, magasin infini) et rigolo (humour noir, absurde).
 
 - Aucune marque réelle.
-- Pas d'esthétique « jeu généré par IA » : pas de néons génériques sur fond noir, pas de coffres, pas de capacités « bateau ».
+- Pas d'esthétique « jeu généré par IA » générique : pas de néons génériques sur fond noir, pas de coffres, pas de capacités « bateau » — chaque visuel généré est retravaillé, harmonisé et monté à la main (Krita) dans la direction artistique papier / origami du jeu.
 
 ## Direction visuelle
 
-Inspirée de Paper Mario et de Baten Kaitos : personnages et produits plats en papier découpé, dans des décors en diorama à plusieurs calques, dessinés à la main. Le détail (pivot de la feuille, ombre, texture, couleurs des zones) est dans `docs/DIRECTION_ARTISTIQUE.md`.
+Inspirée de Paper Mario et de Baten Kaitos : personnages et produits plats en papier découpé, dans des décors en diorama à plusieurs calques, générés par IA et retouchés/assemblés à la main. Le détail (pivot de la feuille, ombre, texture, couleurs des zones) est dans `docs/DIRECTION_ARTISTIQUE.md`.
 
 ## Piliers
 

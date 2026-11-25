@@ -120,3 +120,101 @@ test('clavier : une touche gardée pendant une perte de focus ne refait pas marc
   expect((await hero(page)).x).toBeCloseTo(stopped.x, 0);
   await page.keyboard.up('ArrowRight');
 });
+
+test('clavier : Échap en plein écran quitte le plein écran sans ouvrir la pause (non-régression séance 79)', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.evaluate(() => {
+    window.__exitedFs = 0;
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => document.documentElement });
+    document.exitFullscreen = () => {
+      window.__exitedFs++;
+      return Promise.resolve();
+    };
+  });
+  await page.keyboard.press('Escape');
+  await frames(page, 4);
+  expect(await page.evaluate(() => window.__exitedFs)).toBe(1);
+  expect(await page.evaluate(() => window.paperCart.state())).toBe('play');
+});
+
+test('clavier : Espace pendant l’écriture d’une bulle termine la phrase avant de passer (non-régression séance 79)', async ({ page }, info) => {
+  test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
+  await page.goto('./?lieu=accueil');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  // Aller devant l'hôtesse avec une vitesse de texte lente pour attraper la bulle en cours d'écriture.
+  await page.evaluate(() => {
+    window.paperCart.set('narrator.enabled', true);
+    window.paperCart.set('narrator.speed', 12);
+    window.paperCart.markSaid('arrivee');
+  });
+  await page.keyboard.down('ArrowUp');
+  await page.waitForFunction(() => window.paperCart.hero().z > 190);
+  await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.hero().x < 1160);
+  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.press('Space'); // lance le premier slogan de l'hôtesse
+  await page.waitForFunction(() => window.paperCart.narrator().visible && window.paperCart.narrator().shown > 0 && window.paperCart.narrator().shown < window.paperCart.narrator().text.length);
+  const firstText = await page.evaluate(() => window.paperCart.narrator().text);
+  await page.keyboard.press('Space'); // 1er appui : termine la phrase en cours sans la fermer
+  await frames(page, 3);
+  const after = await page.evaluate(() => window.paperCart.narrator());
+  expect(after.visible).toBe(true);
+  expect(after.text).toBe(firstText);
+  expect(after.shown).toBe(firstText.length);
+});
+
+test('fiche « Nouvel objet » au doigt : double toucher à portée ne la referme pas, aide tactile, monde figé', async ({ page }, info) => {
+  test.skip(info.project.name !== 'telephone', 'téléphone simulé');
+  await page.goto('./?lieu=accueil');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  // Avancer devant les Scanettes jusqu'à être déjà à portée.
+  const pt = await page.evaluate(() => window.paperCart.worldToClient(1370, 206));
+  await page.touchscreen.tap(pt.x, pt.y);
+  await expect.poll(() => page.evaluate(() => window.paperCart.scanState().pickup), { timeout: 8000 }).toBe(0);
+  // Double toucher directement sur le présentoir alors que le héros est déjà à portée : la fiche doit rester ouverte !
+  const stand = await page.evaluate(() => window.paperCart.worldToClient(1370, 560));
+  await page.touchscreen.tap(stand.x, stand.y);
+  await page.waitForTimeout(60);
+  await page.touchscreen.tap(stand.x, stand.y);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  await page.waitForTimeout(300);
+  await expect(page.locator('.item-reveal')).toBeVisible();
+  // Mode d'emploi adapté au doigt (ne mentionne pas « Entrée » ni « double-clic »).
+  const usage = await page.locator('.item-reveal-usage').textContent();
+  expect(usage).not.toMatch(/Entrée|double-clic/i);
+  // Le temps du narrateur est figé tant que la fiche est ouverte.
+  const t1 = await page.evaluate(() => window.paperCart.narrator().t);
+  await page.waitForTimeout(350);
+  const t2 = await page.evaluate(() => window.paperCart.narrator().t);
+  expect(t2).toBe(t1);
+  await page.locator('.item-reveal-ok').tap();
+  await expect(page.locator('.item-reveal')).toBeHidden();
+});
+
+test('transition « mist » : le héros reste visible dans l’ancien décor pendant le chargement du nouveau lieu', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC seulement');
+  await page.goto('./?lieu=accueil');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  await page.evaluate(() => window.paperCart.set('places.style', 'mist'));
+  // Ralentir volontairement le chargement du rayon d'essai pour observer le héros pendant 'load'.
+  let releaseRoute;
+  const hold = new Promise((r) => (releaseRoute = r));
+  await page.route('**/rayon-fond.webp', async (route) => {
+    await hold;
+    await route.continue();
+  });
+  await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
+  await page.waitForTimeout(180);
+  // Pendant le chargement, le héros est toujours monté dans le décor affiché (pas dans backstage).
+  const heroInStage = await page.evaluate(() => Boolean(document.querySelector('#game .stage .actor')));
+  expect(heroInStage).toBe(true);
+  releaseRoute();
+  await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play', null, { timeout: 15000 });
+});

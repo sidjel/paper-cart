@@ -31,7 +31,12 @@ function loadImage(url) {
   const img = new Image();
   img.decoding = 'async';
   img.src = url;
-  return img.decode().then(() => img);
+  return img.decode().then(() => {
+    // Une fois décodée au chargement, repasser en décodage synchrone : évite un trou d'une image
+    // (clignotement à froid) si une pose cachée (hidden) est redécodée à sa première apparition.
+    img.decoding = 'sync';
+    return img;
+  });
 }
 
 function canvasToBlob(canvas) {

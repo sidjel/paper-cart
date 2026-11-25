@@ -111,7 +111,12 @@ export function createStage(container, place, images, getValue) {
   }
 
   const refH = place.viewHeight ?? H;
+  let rectLeft = 0;
+  let rectTop = 0;
   function layout(zoom) {
+    const r = container.getBoundingClientRect();
+    rectLeft = r.left;
+    rectTop = r.top;
     vw = container.clientWidth;
     vh = container.clientHeight;
     baseScale = (vh / refH) * zoom;
@@ -128,18 +133,16 @@ export function createStage(container, place, images, getValue) {
     apply();
   }
 
-  // Écran (pixels CSS de la fenêtre) → scène. Écrit dans `out` pour ne rien créer.
+  // Écran (pixels CSS de la fenêtre) → scène. Utilise la position retenue au layout (zéro relecture DOM en jeu).
   function clientToStage(cx, cy, out) {
-    const r = container.getBoundingClientRect();
-    out.x = (cx - r.left - view.offX) / view.scale + view.camX;
-    out.y = (cy - r.top - view.offY) / view.scale + view.camY;
+    out.x = (cx - rectLeft - view.offX) / view.scale + view.camX;
+    out.y = (cy - rectTop - view.offY) / view.scale + view.camY;
     return out;
   }
 
   function stageToClient(sx, sy, out) {
-    const r = container.getBoundingClientRect();
-    out.x = r.left + view.offX + (sx - view.camX) * view.scale;
-    out.y = r.top + view.offY + (sy - view.camY) * view.scale;
+    out.x = rectLeft + view.offX + (sx - view.camX) * view.scale;
+    out.y = rectTop + view.offY + (sy - view.camY) * view.scale;
     return out;
   }
 

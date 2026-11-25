@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createAudio } from '../../src/audio/audio.js';
-import song from '../../src/data/music/supermarche.json';
 
 // Faux contexte audio : on garde les sources créées pour simuler leur fin (onended).
 let sources;
@@ -83,7 +82,7 @@ const settings = { latency: 'balanced', muted: false, master: 1, music: 1, pause
 
 describe('son : aucun nœud ne s’accumule (séance 65)', () => {
   it('chaque son libère ses nœuds à sa fin : le compteur des effets retombe à zéro', () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     for (const name of ['pas', 'bip', 'aspire', 'carte', 'retourne', 'froissement', 'aparte', 'portes', 'ding', 'annonce', 'blip']) a.play(name);
     expect(a.counters().sfx).toBeGreaterThan(0);
@@ -93,7 +92,7 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
   });
 
   it('le nettoyage est idempotent : une fin signalée deux fois ne compte qu’une fois', () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     a.play('pas');
     const once = sources.slice();
@@ -102,17 +101,18 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().sfx).toBe(0);
   });
 
-  it('les notes de musique libèrent aussi leurs nœuds', () => {
-    const a = createAudio(settings, song);
+  it('update sans fichier audio décodé reste silencieux sans erreur ni fuite', () => {
+    const a = createAudio(settings);
     a.unlock();
     a.update();
-    expect(a.counters().music).toBeGreaterThan(0);
-    end();
     expect(a.counters().music).toBe(0);
+    a.setIntroRain(true);
+    a.setIntroRain(false);
+    expect(a.counters().sfx).toBe(0);
   });
 
   it('interrompu (appel, autre application) : le son reprend au prochain geste, et c’est compté', () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     expect(a.counters().resumed).toBe(0);
     for (const st of ['interrupted', 'suspended']) {
@@ -126,21 +126,8 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
     expect(a.counters().state).toBe('suspended');
   });
 
-  it('un instrument coupé dans ⚙ ne joue plus (séance 66 : chercher un bruit dans la musique)', () => {
-    const all = createAudio(settings, song);
-    all.unlock();
-    all.update();
-    const withAll = all.counters().music;
-    end();
-    const noBass = createAudio({ ...settings, musicBass: false, musicPiano: false, musicMelody: false }, song);
-    noBass.unlock();
-    noBass.update();
-    expect(withAll).toBeGreaterThan(0);
-    expect(noBass.counters().music).toBe(0);
-  });
-
   it('sons courts préparés une fois : un pas, un bip, un froissement = une seule source, aucun filtre ni oscillateur', async () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     await prepared(a);
     end();
@@ -153,7 +140,7 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
   });
 
   it('famille pleine : son son le plus ancien s’arrête, sans jamais couper une autre famille (séance 66)', () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     a.play('annonce'); // haut-parleur
     const voice = sources.slice();
@@ -165,7 +152,7 @@ describe('son : aucun nœud ne s’accumule (séance 65)', () => {
   });
 
   it('les cris de corbeaux libèrent tous leurs nœuds audio à leur fin', () => {
-    const a = createAudio(settings, song);
+    const a = createAudio(settings);
     a.unlock();
     a.play('corbeau');
     a.play('corbeau');

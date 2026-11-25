@@ -47,9 +47,10 @@ export function createPlaces(ui, container, game) {
     if (!shouldPrefetch(config.display.profile, !!navigator.connection?.saveData)) return;
     const urls = neighborImageUrls(place, game.places, game.base).filter((u) => !prefetched.has(u));
     if (!urls.length) return;
+    const delayMs = Math.max(0, (config.places.prefetchDelay ?? 2.5) * 1000);
     prefetchTimer = setTimeout(async () => {
       prefetchTimer = 0;
-      if (!view || transition || !game.sm.is('play')) return;
+      if (!view || transition || !game.sm.is('play') || game.isScanning?.()) return;
       const ctrl = new AbortController();
       prefetchCtrl = ctrl;
       for (const url of urls) {
@@ -65,30 +66,43 @@ export function createPlaces(ui, container, game) {
         }
       }
       if (prefetchCtrl === ctrl) prefetchCtrl = null;
-    }, 2500);
+    }, delayMs);
   }
 
-  async function load(id) {
-    place = game.places[id];
-    const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
+  async function preparePlace(id) {
+    const nextPlace = game.places[id];
+    const rasterScale = computeRasterScale(nextPlace.viewHeight ?? nextPlace.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
     assetStats.rasterScale = rasterScale;
     // Décodées avant l'affichage. L'historique des temps d'image repart de zéro à chaque lieu (il ne grossit plus).
     assetStats.perImage.length = 0;
-    images = await loadImages(Object.entries(place.images).map(([key, im]) => ({ id: key, url: game.base + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })));
-    const proj = createProjection(place.projection, config.scene);
-    const mask = compileMask(place.walkMask);
+    const nextImages = await loadImages(
+      Object.entries(nextPlace.images).map(([key, im]) => ({ id: key, url: game.base + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
+    );
+    const proj = createProjection(nextPlace.projection, config.scene);
+    const mask = compileMask(nextPlace.walkMask);
     // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
-    const back = Math.max(...place.walkMask.area.map((pt) => pt[1]));
-    const here = enterPlace(game.world, place.id, () => ({
-      products: buildProducts(place, game.catalog, (z) => worldToStageY(proj, z)),
-      pickups: buildPickups(place, back, (z) => worldToStageY(proj, z)),
-      pile: place.pile ? createPile() : null, // pile de cartons (A8) : debout ou tombée
+    const back = Math.max(...nextPlace.walkMask.area.map((pt) => pt[1]));
+    const here = enterPlace(game.world, nextPlace.id, () => ({
+      products: buildProducts(nextPlace, game.catalog, (z) => worldToStageY(proj, z)),
+      pickups: buildPickups(nextPlace, back, (z) => worldToStageY(proj, z)),
+      pile: nextPlace.pile ? createPile() : null, // pile de cartons (A8) : debout ou tombée
     }));
-    view = createPlaceView(container, place, images, game.commonImages(), here, proj, config, game.getValue);
+    const nextView = createPlaceView(container, nextPlace, nextImages, game.commonImages(), here, proj, config, game.getValue);
+    return { place: nextPlace, images: nextImages, proj, mask, here, view: nextView };
+  }
+
+  function mountPrepared(built) {
+    place = built.place;
+    images = built.images;
+    view = built.view;
     // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
     for (const a of game.actors()) a.mount(view.stage.layers.acteurs);
-    game.onLoaded({ place, proj, mask, here, view });
+    game.onLoaded({ place, proj: built.proj, mask: built.mask, here: built.here, view });
     schedulePrefetch();
+  }
+
+  async function load(id) {
+    mountPrepared(await preparePlace(id));
   }
 
   function unload() {
@@ -294,27 +308,42 @@ export function createPlaces(ui, container, game) {
     const t0 = performance.now();
     const keepOld = isCrossDissolve(transition?.style) && view;
     if (keepOld) {
+      // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
+      // du lieu suivant (aucune disparition à vide avant la bascule).
       cancelPrefetch();
-      game.onLeaving();
-      for (const a of game.actors()) a.mount(backstage);
-      view.stage.el.classList.add('stage-dissolve');
-      view.stage.el.style.opacity = '1';
-      dissolving = { view, images };
-      view = null;
-      images = null;
+      const oldView = view;
+      const oldImages = images;
+      oldView.stage.el.classList.add('stage-dissolve');
+      oldView.stage.el.style.opacity = '1';
+      try {
+        const built = await preparePlace(exit.to);
+        game.onLeaving();
+        dissolving = { view: oldView, images: oldImages };
+        view = null;
+        images = null;
+        mountPrepared(built);
+        putHero(exit.arrive[0], exit.arrive[1], exit.facing);
+        game.onArrived();
+      } catch (err) {
+        game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
+        oldView.stage.el.classList.remove('stage-dissolve');
+        oldView.stage.el.style.opacity = '';
+        ignoredExit = exit;
+        game.onLoadFailed();
+      }
     } else {
       unload();
-    }
-    try {
-      await load(exit.to);
-      putHero(exit.arrive[0], exit.arrive[1], exit.facing);
-      game.onArrived();
-    } catch (err) {
-      game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
-      discardDissolving();
-      unload(); // ce qui a pu être construit avant l'échec
-      if (await backToStart(exit)) game.onLoadFailed();
-      else errorEl.hidden = false;
+      try {
+        await load(exit.to);
+        putHero(exit.arrive[0], exit.arrive[1], exit.facing);
+        game.onArrived();
+      } catch (err) {
+        game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
+        discardDissolving();
+        unload(); // ce qui a pu être construit avant l'échec
+        if (await backToStart(exit)) game.onLoadFailed();
+        else errorEl.hidden = false;
+      }
     }
     if (view) game.render();
     lastMs = Math.round(performance.now() - t0);

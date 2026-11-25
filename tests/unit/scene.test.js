@@ -4,7 +4,7 @@ import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
 import place from '../../src/data/places/rayon-essai.json';
-import hero from '../../src/data/characters/heros.json';
+import hero from '../../src/data/characters/heros-test.json';
 
 describe('animations décrites dans les données', () => {
   it('une seule image reste affichée', () => {
@@ -28,10 +28,10 @@ describe('animations décrites dans les données', () => {
     expect(frameIndex(a, 0, 85)).toBe(2);
     expect(frameIndex(a, 0, 85, 2)).toBe(0); // vitesse ×2 : 170 px → image 4 → boucle
   });
-  it('le héros a ses images de marche et de clignement', () => {
-    expect(hero.views.face.walk.frames.length).toBe(4);
-    expect(hero.views.dos.walk.frames.length).toBe(4);
-    expect(JSON.stringify(hero.views.face.idle)).toContain('cligne');
+  it('le héros origami 8 directions a ses images de marche et de clignement', () => {
+    expect(hero.views.S.walk.frames.length).toBe(16);
+    expect(hero.views.N.walk.frames.length).toBe(4);
+    expect(JSON.stringify(hero.views.S.idle)).toContain('blink');
   });
 });
 
@@ -89,19 +89,12 @@ describe('distance parcourue', () => {
   });
 });
 
-import { compileSong } from '../../src/audio/music.js';
-import song from '../../src/data/music/supermarche.json';
-
-describe('musique et sons (données)', () => {
-  it('la partition se transforme en événements triés, dans la boucle', () => {
-    const s = compileSong(song);
-    expect(s.loopBeats).toBe(32);
-    for (let i = 1; i < s.events.length; i++) expect(s.events[i].beat).toBeGreaterThanOrEqual(s.events[i - 1].beat);
-    expect(s.events.every((e) => e.beat < s.loopBeats)).toBe(true);
-  });
-  it('les pas sonnent quand un pied se pose (images 1 et 3 de la marche)', () => {
-    const a = compileAnimation(hero.views.face.walk);
-    expect(a.sounds).toEqual(['pas', null, 'pas', null]);
+describe('sons et effets de pas (données)', () => {
+  it('les pas sonnent quand un pied se pose (images 1 et 9 de la marche de face)', () => {
+    const a = compileAnimation(hero.views.S.walk);
+    expect(a.sounds.filter(Boolean)).toEqual(['pas', 'pas']);
+    expect(a.sounds[0]).toBe('pas');
+    expect(a.sounds[8]).toBe('pas');
   });
 });
 
@@ -116,7 +109,7 @@ describe('zone de marche jusqu’en bas de l’écran', () => {
 
 describe('poussière et profil par défaut', () => {
   it('les images où un pied se pose font un bruit de pas et de la poussière', () => {
-    const a = compileAnimation(hero.views.dos.walk);
+    const a = compileAnimation(hero.views.N.walk);
     expect(a.effects).toEqual(['poussiere', null, 'poussiere', null]);
   });
 });

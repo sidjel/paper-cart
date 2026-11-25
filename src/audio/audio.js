@@ -1,16 +1,16 @@
-// Le son du jeu : volumes, bruits de pas, musique. Tout est synthétisé (aucun fichier).
+// Le son du jeu : volumes, échantillons audio CC0 (musique, pluie d'intro, corbeaux, bip) et bruitages provisoires.
 // Le son lit l'état du jeu : musique plus douce en pause, tout suspendu quand l'onglet est caché.
 // Les navigateurs n'autorisent le son qu'après un premier geste (touche, clic, toucher) : unlock().
 
-import { createMusic } from './music.js';
 import { createSamples } from './samples.js';
 
 const HERO_BLIP = 0.05; // force du petit bip d'écriture du héros (séance 66 : adouci, 0,09 avant)
 
-export function createAudio(settings, song, base = '') {
+export function createAudio(settings, base = '') {
   let ctx = null;
-  let master, musicBus, sfxBus, birdsBus, scanBus, voiceBus, heroBus, noise, music;
+  let master, musicBus, sfxBus, birdsBus, scanBus, voiceBus, heroBus, introBus, noise;
   const samples = createSamples(base);
+  let introRainOn = false;
   let paused = false;
   let frozen = false; // aparté : le temps du magasin est figé, sa musique se tait
   let hidden = false;
@@ -41,22 +41,10 @@ export function createAudio(settings, song, base = '') {
   // s'arrête. Une famille ne coupe jamais une autre : les pas ou les froissements ne couvrent jamais le
   // haut-parleur, l'interface ou (plus tard) le combat.
   const FAMILY = {
-    pas: 'pas',
-    blip: 'texte',
-    blipHeros: 'texte',
-    froissement: 'papier',
-    retourne: 'papier',
-    bip: 'scanner',
-    aspire: 'scanner',
-    carte: 'scanner',
-    prise: 'scanner',
-    grince: 'chariot',
-    chute: 'chariot',
-    annonce: 'voix',
-    ding: 'voix',
-    aparte: 'aparte',
-    corbeau: 'ambiance',
-    portes: 'ambiance',
+    pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier',
+    bip: 'scanner', aspire: 'scanner', carte: 'scanner', prise: 'scanner',
+    grince: 'chariot', chute: 'chariot', annonce: 'voix', ding: 'voix',
+    aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance',
   };
   const playing = {}; // famille → sons en cours [{ sources, left }], du plus ancien au plus récent
   let collecting = null; // sources créées par le son en train de démarrer
@@ -116,6 +104,8 @@ export function createAudio(settings, song, base = '') {
     voiceBus.connect(master);
     heroBus = ctx.createGain(); // apartés du héros (froissement, petits bips)
     heroBus.connect(master);
+    introBus = ctx.createGain(); // pluie réaliste de l'intro (continue même musique figée)
+    introBus.connect(master);
     // Une seconde de bruit blanc, créée une fois, réutilisée par les pas et les souffles.
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const data = noise.getChannelData(0);
@@ -124,8 +114,8 @@ export function createAudio(settings, song, base = '') {
       x = (x * 1103515245 + 12345) & 0x7fffffff;
       data[i] = (x / 0x3fffffff) - 1;
     }
-    music = createMusic(song, settings);
     samples.load(ctx);
+    if (introRainOn) samples.setIntroRain(ctx, introBus, track, true);
     prepare().catch(() => {});
     // Chaque changement d'état du son est noté (une interruption par un appel, une autre application…).
     ctx.onstatechange = () => stats.states.push(`${new Date().toLocaleTimeString('fr-FR')} ${ctx.state}${hidden ? ' (onglet caché)' : ''}`);
@@ -139,9 +129,10 @@ export function createAudio(settings, song, base = '') {
     musicBus.gain.setTargetAtTime(settings.music * (paused ? settings.pauseMusic : 1) * (frozen ? 0 : 1), t, frozen ? 0.08 : 0.4);
     sfxBus.gain.setTargetAtTime(settings.steps, t, 0.03);
     birdsBus.gain.setTargetAtTime((settings.birdsVolume ?? 0.4) * (paused || frozen ? 0 : 1), t, 0.08);
-    scanBus.gain.setTargetAtTime(settings.scanVolume, t, 0.03);
+    scanBus.gain.setTargetAtTime(settings.scanVolume * 0.65, t, 0.03);
     voiceBus.gain.setTargetAtTime(settings.voiceVolume, t, 0.03);
     heroBus.gain.setTargetAtTime(settings.heroVolume, t, 0.03);
+    introBus.gain.setTargetAtTime(1, t, 0.05);
   }
 
   // Petite note : forme d'onde, fréquence de départ et d'arrivée, début, durée, volume.
@@ -548,7 +539,7 @@ export function createAudio(settings, song, base = '') {
         byName: { ...stats.byName },
         recent: stats.recent.slice(),
         clock: ctx ? Math.round(ctx.currentTime) : 0, // horloge du son (s)
-        song: samples.position() || (music ? music.position() : ''),
+        song: samples.position(),
         prepared: !!prepared, // sons courts préparés une fois au démarrage
         cut: stats.cut, // sons arrêtés parce que leur famille était pleine
         resumed: stats.resumed, // reprises au geste du joueur après une suspension ou une interruption
@@ -588,10 +579,15 @@ export function createAudio(settings, song, base = '') {
       for (const src of entry.sources) src.playing = entry;
       if (entry.left > 0) list.push(entry);
     },
+    // Pluie réaliste de l'intro (public/audio/pluie-intro.mp3, CC0 #595717).
+    setIntroRain(on) {
+      introRainOn = Boolean(on);
+      if (ctx && introBus) samples.setIntroRain(ctx, introBus, track, introRainOn);
+    },
     update() {
       if (!running()) return;
       const trackMusic = (src, nodes) => track(src, nodes, 'music');
-      stats.notes += samples.hasMusic() ? samples.updateMusic(ctx, musicBus, trackMusic) : music.update(ctx, musicBus, trackMusic);
+      stats.notes += samples.updateMusic(ctx, musicBus, trackMusic);
     },
   };
 }

@@ -1,16 +1,17 @@
 // L'hôtesse d'accueil (A8) : logique pure, sans écran ni hasard.
 // Derrière son comptoir, elle suit le héros du regard ; quand on lui parle :
-//  1. Elle dit quelques slogans (slogansBeforeOffer, sans jamais boucler) ;
-//  2. Si le héros a un rouleau de papier toilette (monnaie d'échange) et pas de jeton : elle propose
-//     de l'échanger contre un jeton (Oui / Non) ;
-//  3. Sinon, dès qu'elle a fini ses slogans (ou si le héros a déjà un jeton) : elle propose le chariot
-//     (« Vous voulez un chariot ? » : Oui / Non).
+//  1. Si le héros a un rouleau de papier toilette (et pas de jeton) : elle propose de l'échanger contre un jeton ;
+//  2. Si le héros a un jeton : elle propose aussitôt le chariot (« Vous voulez un chariot ? » : Oui / Non) ;
+//  3. Sans jeton : elle récite ses slogans naturellement dans l'ordre, glisse une seule fois sa proposition de
+//     chariot après slogansBeforeOffer slogans, puis continue le reste de ses 10 slogans sans jamais boucler
+//     artificiellement sur la question, avant une réplique d'attente polie.
 
 const GAZE_DEADZONE = 18; // évite de basculer sans cesse quand le héros est pile en face (px)
 
 export function createHotesse() {
   return {
     sloganIndex: 0, // prochain slogan à réciter (ne boucle pas)
+    offeredWithoutToken: false, // proposition de chariot déjà posée une fois sans jeton
     exchanged: false, // chariot déjà remis
   };
 }
@@ -73,18 +74,31 @@ export function talkToHotesse(state, lines, gear) {
     };
   }
   const limit = Math.min(lines.slogans.length, lines.slogansBeforeOffer ?? lines.slogans.length);
-  if (canGetChariot(gear) || state.sloganIndex >= limit) {
-    const canGrant = canGetChariot(gear);
+  if (canGetChariot(gear)) {
     return {
       kind: 'chariot_offer',
       text: offer.question,
       choices: [
-        { text: offer.yes, reply: canGrant ? '' : offer.noToken, grantChariot: canGrant, grantReply: offer.grant },
+        { text: offer.yes, reply: '', grantChariot: true, grantReply: offer.grant },
         { text: offer.no, reply: offer.refuse, grantChariot: false },
       ],
     };
   }
-  const text = lines.slogans[state.sloganIndex];
-  state.sloganIndex++;
-  return { kind: 'slogan', text };
+  if (!state.offeredWithoutToken && state.sloganIndex >= limit) {
+    state.offeredWithoutToken = true;
+    return {
+      kind: 'chariot_offer',
+      text: offer.question,
+      choices: [
+        { text: offer.yes, reply: offer.noToken, grantChariot: false, grantReply: offer.grant },
+        { text: offer.no, reply: offer.refuse, grantChariot: false },
+      ],
+    };
+  }
+  if (state.sloganIndex < lines.slogans.length) {
+    const text = lines.slogans[state.sloganIndex];
+    state.sloganIndex++;
+    return { kind: 'slogan', text };
+  }
+  return { kind: 'slogan', text: offer.idle ?? lines.slogans[lines.slogans.length - 1] };
 }

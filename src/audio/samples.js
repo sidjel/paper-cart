@@ -1,16 +1,27 @@
-// Échantillons audio CC0 (Freesound) décodés une fois dans le contexte audio unique du jeu.
-// En cas d'absence de réseau ou dans les tests sans decodeAudioData, le jeu retombe silencieusement
-// sur la synthèse (audio.js / music.js) sans erreur.
+// Échantillons audio CC0 (Freesound) décodés une fois dans le contexte audio unique du jeu :
+// musique d'ambiance supermarché, pluie réaliste de l'intro, cris de corbeaux dehors, bip de la Scanette.
+// En cas d'absence de réseau ou dans les tests sans decodeAudioData, les lectures restent silencieuses sans erreur.
 
 const CROW_FILES = ['audio/corbeau-1.mp3', 'audio/corbeau-2.mp3', 'audio/corbeau-3.mp3', 'audio/corbeau-4.mp3'];
 const BIP_FILE = 'audio/scan-bip.mp3';
 const MUSIC_FILE = 'audio/supermarche.mp3';
+const INTRO_RAIN_FILE = 'audio/pluie-intro.mp3';
 
-// Effet sonore joué une fois : une source + un gain, libérés dans onended via track().
+// Variations légères et déterministes des cris de corbeaux (évite la répétition mécanique sans Math.random).
+const CROW_RATES = [0.96, 1.03, 0.94, 1.05, 0.99];
+const CROW_GAINS = [0.85, 0.96, 0.82, 0.92, 0.89];
+
+// Effet sonore joué une fois : une source branchée sur son bus (plus un gain si volume != 1), libérée dans onended.
 function playOnce(ctx, bus, track, buffer, gain = 1, rate = 1) {
   const src = ctx.createBufferSource();
   src.buffer = buffer;
   if (src.playbackRate) src.playbackRate.value = rate;
+  if (gain === 1) {
+    src.connect(bus);
+    src.start();
+    track(src, [src]);
+    return;
+  }
   const g = ctx.createGain();
   g.gain.value = gain;
   src.connect(g).connect(bus);
@@ -22,11 +33,18 @@ export function createSamples(base = '') {
   const crows = [];
   let bipBuf = null;
   let musicBuf = null;
+  let rainBuf = null;
   let loaded = false;
-  let lastCrow = -1;
+  let crowIdx = 0;
   let musicSrc = null;
   let musicBeatT = -1;
   let musicStartT = 0;
+  let rainSrc = null;
+  let rainGain = null;
+  let rainWanted = false;
+  let rainBusRef = null;
+  let rainTrackRef = null;
+  let rainCtxRef = null;
 
   async function fetchBuffer(ctx, relPath) {
     try {
@@ -39,10 +57,43 @@ export function createSamples(base = '') {
     }
   }
 
+  function startRainNow() {
+    if (!rainWanted || !rainBuf || !rainCtxRef || !rainBusRef || rainSrc) return;
+    const ctx = rainCtxRef;
+    const now = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = rainBuf;
+    src.loop = true;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.55, now + 0.45);
+    src.connect(g).connect(rainBusRef);
+    src.start(now);
+    rainSrc = src;
+    rainGain = g;
+    rainTrackRef?.(src, [src, g], 'sfx');
+  }
+
+  function stopRainNow() {
+    if (!rainSrc || !rainCtxRef) return;
+    const src = rainSrc;
+    const g = rainGain;
+    rainSrc = null;
+    rainGain = null;
+    const now = rainCtxRef.currentTime;
+    try {
+      g?.gain?.setTargetAtTime(0.0001, now, 0.14);
+      src.stop(now + 0.5);
+    } catch {
+      // déjà arrêté
+    }
+  }
+
   return {
     load(ctx) {
       if (loaded || !ctx || typeof fetch !== 'function' || typeof ctx.decodeAudioData !== 'function') return;
       loaded = true;
+      rainCtxRef = ctx;
       for (const f of CROW_FILES) {
         fetchBuffer(ctx, f).then((b) => {
           if (b) crows.push(b);
@@ -54,24 +105,39 @@ export function createSamples(base = '') {
       fetchBuffer(ctx, MUSIC_FILE).then((b) => {
         if (b) musicBuf = b;
       });
+      fetchBuffer(ctx, INTRO_RAIN_FILE).then((b) => {
+        if (b) {
+          rainBuf = b;
+          if (rainWanted) startRainNow();
+        }
+      });
     },
 
-    // Alterne entre les vrais cris de corbeaux (#741366 découpé + #813115) sans répéter deux fois le même.
+    // Alterne entre les vrais cris de corbeaux (#741366 découpé + #813115) dans un ordre déterministe.
     playCrow(ctx, bus, track) {
       if (!crows.length) return false;
-      let idx = Math.floor(Math.random() * crows.length);
-      if (crows.length > 1 && idx === lastCrow) idx = (idx + 1) % crows.length;
-      lastCrow = idx;
-      const rate = 0.93 + Math.random() * 0.12;
-      const gain = 0.78 + Math.random() * 0.22;
+      const idx = crowIdx % crows.length;
+      const rate = CROW_RATES[crowIdx % CROW_RATES.length];
+      const gain = CROW_GAINS[crowIdx % CROW_GAINS.length];
+      crowIdx++;
       playOnce(ctx, bus, track, crows[idx], gain, rate);
       return true;
     },
 
+    // Bip de Scanette (#202530) : une seule source branchée directement sur le bus scanner.
     playBip(ctx, bus, track) {
       if (!bipBuf) return false;
-      playOnce(ctx, bus, track, bipBuf, 0.6, 1);
+      playOnce(ctx, bus, track, bipBuf, 1, 1);
       return true;
+    },
+
+    setIntroRain(ctx, bus, track, on) {
+      rainCtxRef = ctx;
+      rainBusRef = bus;
+      rainTrackRef = track;
+      rainWanted = Boolean(on);
+      if (rainWanted) startRainNow();
+      else stopRainNow();
     },
 
     hasMusic: () => musicBuf !== null,
@@ -104,7 +170,7 @@ export function createSamples(base = '') {
     },
 
     position() {
-      if (!musicBuf || !musicSrc) return '';
+      if (!musicBuf || !musicSrc) return 'en attente';
       const dur = musicBuf.duration || 12;
       const loop = Math.floor((musicBeatT - musicStartT) / dur) + 1;
       return `bossa supermarché (boucle ${loop}, ${dur.toFixed(0)} s)`;

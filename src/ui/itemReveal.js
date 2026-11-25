@@ -5,7 +5,7 @@
 const TEMP = /^\[TEMP\]\s*/;
 const clean = (s) => (s ?? '').replace(TEMP, '').replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
 
-export function createItemReveal(root, { objects, base = '' }) {
+export function createItemReveal(root, { objects, base = '', device = 'keys' }) {
   const backdrop = document.createElement('div');
   backdrop.className = 'overlay item-reveal';
   backdrop.hidden = true;
@@ -45,12 +45,49 @@ export function createItemReveal(root, { objects, base = '' }) {
   fly.hidden = true;
   root.appendChild(fly);
 
+  // Préchargement discret des illustrations d'objets clés dès le démarrage (zéro flash à la fanfare).
+  const preloaded = [];
+  if (typeof Image === 'function') {
+    for (const def of Object.values(objects ?? {})) {
+      if (!def?.image) continue;
+      const im = new Image();
+      im.decoding = 'async';
+      im.src = base + def.image;
+      im.decode?.().then(() => { im.decoding = 'sync'; }).catch(() => {});
+      preloaded.push(im);
+    }
+  }
+
   let onClosed = null;
   let flyTarget = null;
   let onLanded = null;
   let lastReduce = false;
   let lastSrc = '';
   let flyRaf = 0;
+  let shownId = '';
+  let currentDevice = device;
+  // Protection anti-faux-clic (règle src/ui/CLAUDE.md) : le double toucher qui ouvre la fiche ne peut
+  // pas la refermer aussitôt au relâchement du doigt.
+  let openedAt = -Infinity;
+  let armed = false;
+
+  backdrop.addEventListener('pointerdown', () => {
+    armed = true;
+  }, true);
+
+  function usageFor(def, dev) {
+    const raw = def?.usage;
+    if (!raw) return '';
+    if (typeof raw === 'string') return clean(raw);
+    return clean(raw[dev] ?? raw.keys ?? '');
+  }
+
+  function applyUsage() {
+    if (!shownId) return;
+    const u = usageFor(objects[shownId], currentDevice);
+    usageRow.hidden = !u;
+    usageText.textContent = u;
+  }
 
   function stopFly() {
     if (flyRaf) {
@@ -116,10 +153,11 @@ export function createItemReveal(root, { objects, base = '' }) {
 
   okBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (!armed && e.detail !== 0 && performance.now() - openedAt < 350) return;
     close();
   });
   backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) close();
+    if (e.target === backdrop && armed && performance.now() - openedAt >= 350) close();
   });
 
   return {
@@ -128,14 +166,15 @@ export function createItemReveal(root, { objects, base = '' }) {
       const def = objects[id];
       if (!def) return;
       stopFly();
+      shownId = id;
+      openedAt = performance.now();
+      armed = false;
       kicker.textContent = isNew ? 'Nouvel objet obtenu !' : 'Objet équipé';
       lastSrc = base + def.image;
       img.src = lastSrc;
       name.textContent = clean(def.name);
       desc.textContent = clean(def.text);
-      const u = clean(def.usage);
-      usageRow.hidden = !u;
-      usageText.textContent = u;
+      applyUsage();
       const h = clean(def.hint);
       hint.hidden = !h;
       hint.textContent = h ? `✦ ${h}` : '';
@@ -150,6 +189,11 @@ export function createItemReveal(root, { objects, base = '' }) {
         card.classList.add('pop');
       }
       okBtn.focus({ preventScroll: true });
+    },
+    setDevice(kind) {
+      if (!kind || kind === currentDevice) return;
+      currentDevice = kind;
+      if (!backdrop.hidden) applyUsage();
     },
     close,
     get open() {

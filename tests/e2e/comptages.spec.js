@@ -94,12 +94,13 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
       return {
         stageElements: stage.querySelectorAll('*').length,
         layers: stage.querySelectorAll('.layer').length,
+        ambientLayers: stage.querySelectorAll('.cloud, .bird').length,
         visibleImages,
         overdraw: area / (vw * vh),
       };
     });
 
-  const max = { stageElements: 0, layers: 0, visibleImages: 0, overdraw: 0 };
+  const max = { stageElements: 0, layers: 0, ambientLayers: 0, visibleImages: 0, overdraw: 0 };
   while (!(await page.evaluate(() => window.paperCart.benchReport()))) {
     const s = await sample();
     for (const k of Object.keys(max)) max[k] = Math.max(max[k], s[k]);

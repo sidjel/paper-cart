@@ -1,12 +1,11 @@
-// Personnage en papier : affichage seulement (la position vient de core/movement.js).
-// - deux vues dessinées (face, dos), tournées vers la droite ; la gauche en miroir (scaleX) ;
+// Personnage en papier (8 directions origami) : affichage seulement (la position vient de core/movement.js).
+// - 5 vues dessinées (S, SE, E, NE, N) ; les 3 vues gauche (SW, W, NW) en miroir (scaleX) ;
 // - retournement de la feuille quand il change de sens : elle s'amincit jusqu'à sa tranche,
 //   l'autre orientation la remplace, puis elle se rouvre (scaleX, jamais rotateY) ;
 // - animations décrites dans les données (voir animation.js) ; illustrations entières ;
 // - corps vivant : rebond en marchant, respiration à l'arrêt, petit écrasement en s'arrêtant ;
 // - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève ;
-// - objets tenus en main (Scanette, panier) dessinés à part, derrière le dessin (la main passe devant),
-//   qui suivent le bras image par image (données : held, hands) et se retournent avec la feuille.
+// - objets tenus en main (Scanette pendant le scan) dessinés à part, suivant le bras image par image.
 
 import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
@@ -126,23 +125,14 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
   }
 
-  // Mode 8 directions (ex. heros-test.json) ou classique 2 vues (face / dos).
-  const is8Dir = data.mode === '8dir';
-
-  // Une animation absente des données retombe sur l'image à l'arrêt.
-  const faceIdle = anims['face.idle'] ?? anims['S.idle'];
-  const dosIdle = anims['dos.idle'] ?? anims['N.idle'] ?? faceIdle;
-  const faceWalk = anims['face.walk'] ?? anims['S.walk'] ?? faceIdle;
-  const dosWalk = anims['dos.walk'] ?? anims['N.walk'] ?? dosIdle;
-  const faceScan = anims['face.scan'] ?? faceIdle;
-  const dosScan = anims['dos.scan'] ?? dosIdle;
-  // Apartés : tête de face, une image par émotion (face.aparte_<émotion>).
+  // Une animation absente des données retombe sur l'image de face à l'arrêt.
+  const faceIdle = anims['S.idle'];
+  // Apartés : expressions de face si définies (S.aparte_<émotion>), sinon S.idle.
   const asides = {};
-  for (const [key, a] of Object.entries(anims)) if (key.startsWith('face.aparte_')) asides[key.slice(12)] = a;
+  for (const [key, a] of Object.entries(anims)) if (key.startsWith('S.aparte_')) asides[key.slice(9)] = a;
 
   // État de l'affichage (distinct de la logique : la feuille met un instant à se retourner).
   let shownFacing = 1;
-  let shownAway = false;
   let shownDir = 'S';
   let flipStart = -1;
   let swapped = false;
@@ -164,45 +154,17 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let stopTime = -1;
   let idleStart = 0;
   const motion = { lift: 0, sx: 1, sy: 1 };
-  // Distance parcourue pendant un pas (un demi-cycle de marche : fonctionne en 4, 6 ou 8 images).
-  const firstWalk = data.views.face?.walk ?? data.views.S?.walk;
+  // Distance parcourue pendant un pas (un demi-cycle de marche : fonctionne en 4, 6 ou 16 images).
+  const firstWalk = data.views.S?.walk;
   const walkStride = (firstWalk?.stride ?? 40) * Math.max(2, (firstWalk?.frames?.length ?? 4) / 2);
 
-  function flipScale(time, facing, away, targetDir) {
-    if (is8Dir) {
-      const needed = targetDir !== shownDir;
-      if (flipStart < 0 && needed) {
-        const dur = display.reduceMotion ? 0 : settings.flipDuration;
-        if (dur <= 0 || !needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
-          shownDir = targetDir;
-          shownFacing = directionToView(shownDir).flip;
-          shownAway = shownDir === 'N' || shownDir === 'NE' || shownDir === 'NW';
-          return 1;
-        }
-        flipStart = time;
-        swapped = false;
-      }
-      if (flipStart < 0) return 1;
-      const p = (time - flipStart) / Math.max(settings.flipDuration, 1e-3);
-      if (p >= 0.5 && !swapped) {
-        shownDir = targetDir;
-        shownFacing = directionToView(shownDir).flip;
-        shownAway = shownDir === 'N' || shownDir === 'NE' || shownDir === 'NW';
-        swapped = true;
-      }
-      if (p >= 1) {
-        flipStart = -1;
-        return 1;
-      }
-      return flipWidth(p, settings.edgeThickness);
-    }
-    const needed = facing !== shownFacing || away !== shownAway;
+  function flipScale(time, targetDir) {
+    const needed = targetDir !== shownDir;
     if (flipStart < 0 && needed) {
       const dur = display.reduceMotion ? 0 : settings.flipDuration;
-      const sideChange = facing !== shownFacing;
-      if (dur <= 0 || (!sideChange && !settings.flipOnFrontBack)) {
-        shownFacing = facing;
-        shownAway = away;
+      if (dur <= 0 || !needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
+        shownDir = targetDir;
+        shownFacing = directionToView(shownDir).flip;
         return 1;
       }
       flipStart = time;
@@ -211,9 +173,8 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     if (flipStart < 0) return 1;
     const p = (time - flipStart) / Math.max(settings.flipDuration, 1e-3);
     if (p >= 0.5 && !swapped) {
-      // À mi-chemin, la feuille est vue par la tranche : on change d'orientation.
-      shownFacing = facing;
-      shownAway = away;
+      shownDir = targetDir;
+      shownFacing = directionToView(shownDir).flip;
       swapped = true;
     }
     if (p >= 1) {
@@ -224,7 +185,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   }
 
   function pickAnim8(moving, scanning, aside) {
-    if (aside) return asides[aside] ?? anims['S.idle'] ?? faceIdle;
+    if (aside) return asides[aside] ?? faceIdle;
     const { view } = directionToView(shownDir);
     if (scanning) return anims[`${view}.scan`] ?? anims[`${view}.idle`] ?? faceIdle;
     return moving ? (anims[`${view}.walk`] ?? anims[`${view}.idle`] ?? faceIdle) : (anims[`${view}.idle`] ?? faceIdle);
@@ -233,18 +194,12 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   // Appelé à chaque image affichée. (sx, sy) : position des pieds sur la scène ; time : temps de jeu (s).
   // scanning : Scanette levée (animation « scan » des données, si elle existe) ;
   // aside : émotion d'un aparté en cours ('' sinon) : il regarde le joueur, tête de face.
-  function render(sx, sy, scale, facing, away, moving, time, distance, scanning = false, aside = '', dir = 'S') {
+  function render(sx, sy, scale, _facing, _away, moving, time, distance, scanning = false, aside = '', dir = 'S') {
     const targetDir = aside ? 'S' : dir;
-    const width = flipScale(time, facing, away, targetDir);
+    const width = flipScale(time, targetDir);
     stats.flipping = flipStart >= 0;
 
-    const anim = is8Dir
-      ? pickAnim8(moving, scanning, aside)
-      : aside && !shownAway && asides[aside]
-        ? asides[aside]
-        : scanning
-          ? (shownAway ? dosScan : faceScan)
-          : shownAway ? (moving ? dosWalk : dosIdle) : moving ? faceWalk : faceIdle;
+    const anim = pickAnim8(moving, scanning, aside);
     if (anim !== current) {
       current = anim;
       animStartTime = time;

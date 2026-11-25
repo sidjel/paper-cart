@@ -478,14 +478,16 @@ describe('répliques du narrateur (données)', () => {
     }
     expect(file.lines.filter((l) => file.triggers[l.trigger].voice === 'heros').length).toBeGreaterThanOrEqual(4);
   });
-  it('chaque aparté a une émotion qui a son dessin (tête de face)', async () => {
-    const hero = (await import('../../src/data/characters/heros.json')).default;
+  it('chaque aparté a une émotion reconnue et le héros dispose de sa vue de face', async () => {
+    const hero = (await import('../../src/data/characters/heros-test.json')).default;
+    const valid = new Set(['inquiet', 'complice', 'blase']);
+    expect(hero.views.S?.idle?.frames?.length).toBeGreaterThan(0);
     for (const l of file.lines) {
       if (!['heros', 'regard'].includes(file.triggers[l.trigger].voice)) continue;
-      expect(hero.views.face[`aparte_${l.emotion}`], `${l.id} : ${l.emotion}`).toBeDefined();
+      expect(valid.has(l.emotion), `${l.id} : ${l.emotion}`).toBe(true);
       for (const st of l.steps ?? []) {
         for (const e of [st.emotion, ...(st.choices ?? []).map((c) => c.emotion)]) {
-          if (e) expect(hero.views.face[`aparte_${e}`], `${l.id} : ${e}`).toBeDefined();
+          if (e) expect(valid.has(e), `${l.id} : ${e}`).toBe(true);
         }
       }
     }

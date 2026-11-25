@@ -54,18 +54,21 @@ describe('hotesse (core/hotesse.js)', () => {
     expect(hotesseAction(DEF, { x: 1106, z: 206 }, { chariot: true })).toBe('parler');
   });
 
-  it('s arrête après 3 slogans et propose le chariot sans jamais boucler', () => {
+  it('propose le chariot une fois après 3 slogans sans jeton, puis récite naturellement tous les slogans restants', () => {
     const state = createHotesse();
     const gear = {};
-    expect(talkToHotesse(state, LINES, gear)).toEqual({ kind: 'slogan', text: 'Slogan 1' });
-    expect(talkToHotesse(state, LINES, gear)).toEqual({ kind: 'slogan', text: 'Slogan 2' });
-    expect(talkToHotesse(state, LINES, gear)).toEqual({ kind: 'slogan', text: 'Slogan 3' });
-    const offer = talkToHotesse(state, LINES, gear);
+    const linesWithIdle = { ...LINES, chariotOffer: { ...LINES.chariotOffer, idle: 'Je reste à votre disposition.' } };
+    expect(talkToHotesse(state, linesWithIdle, gear)).toEqual({ kind: 'slogan', text: 'Slogan 1' });
+    expect(talkToHotesse(state, linesWithIdle, gear)).toEqual({ kind: 'slogan', text: 'Slogan 2' });
+    expect(talkToHotesse(state, linesWithIdle, gear)).toEqual({ kind: 'slogan', text: 'Slogan 3' });
+    const offer = talkToHotesse(state, linesWithIdle, gear);
     expect(offer.kind).toBe('chariot_offer');
     expect(offer.text).toBe('Vous voulez un chariot ?');
     expect(offer.choices[0]).toMatchObject({ text: 'Oui', reply: 'Dommage, il faut un jeton !', grantChariot: false });
     expect(offer.choices[1]).toMatchObject({ text: 'Non', reply: 'Très bien… vos bras me remercieront plus tard.', grantChariot: false });
-    expect(talkToHotesse(state, LINES, gear).kind).toBe('chariot_offer');
+    // Après cette proposition unique, elle continue les slogans restants sans boucler mécaniquement sur le chariot.
+    expect(talkToHotesse(state, linesWithIdle, gear)).toEqual({ kind: 'slogan', text: 'Slogan 4' });
+    expect(talkToHotesse(state, linesWithIdle, gear)).toEqual({ kind: 'slogan', text: 'Je reste à votre disposition.' });
   });
 
   it('enchaîne rouleau de PQ → jeton → chariot', () => {

@@ -27,6 +27,7 @@
     "noToken": "[TEMP] Dommage, il faut un jeton !",
     "refuse": "[TEMP] Très bien… vos bras me remercieront plus tard. Ou pas.",
     "grant": "[TEMP] Et voilà votre bolide ! Attention aux accidents dans les virages !",
+    "idle": "[TEMP] Je reste à votre entière disposition. Enfin… derrière ce comptoir.",
     "after": "[TEMP] Attention aux accidents ! Les assurances du Maxi-Gouffre ne couvrent pas les carambolages."
   }
 }

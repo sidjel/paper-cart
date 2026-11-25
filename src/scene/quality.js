@@ -6,5 +6,5 @@ import { effectiveDisplay } from '../core/profiles.js';
 
 export function quality() {
   const d = config.display;
-  return effectiveDisplay(d.profiles, d.profile, { maxPixelRatio: d.maxPixelRatio, hallRain: d.hallRain, dust: config.character.dust });
+  return effectiveDisplay(d.profiles, d.profile, { maxPixelRatio: d.maxPixelRatio, dust: config.character.dust });
 }

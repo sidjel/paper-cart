@@ -7,7 +7,7 @@ import { createStateMachine } from './core/state.js';
 import { createStepper } from './core/stepper.js';
 import { clampToBounds } from './core/walkmask.js';
 import { createWalker, setPath, stepWalker, clearTarget, faceProduct } from './core/movement.js';
-import { directionFromVector, directionToView } from './core/direction.js';
+import { setTreadmillDirection, stepTreadmill, treadmillWalkConfig } from './core/treadmill.js';
 import { nearestProduct, inReach, pickTapped, approachPoint, approachStep, createScan, startScan, stepScan, scanProgress } from './core/scan.js';
 import { createBasket, addToBasket, removeFromBasket } from './core/cards.js';
 import objectsFile from './data/objects.json';
@@ -48,13 +48,11 @@ import { createSettingsPanel, loadSavedSettings } from './ui/settings.js';
 import { createMeasureTools } from './debug/measure.js';
 import { createDepartTools, startPlaceId, departButtons } from './debug/departs.js';
 import { createAudio } from './audio/audio.js';
-import song from './data/music/supermarche.json';
 import rayonEssai from './data/places/rayon-essai.json';
 import accueilPlace from './data/places/accueil.json';
 import rayon2 from './data/places/rayon-2.json';
 import salleTest from './data/places/salle-test.json';
-import heroClassicData from './data/characters/heros.json';
-import heroTestData from './data/characters/heros-test.json';
+import heroData from './data/characters/heros-test.json';
 import catalog from './data/products.json';
 
 // Les lieux du jeu (données). Le lieu affiché change avec loadPlace / unloadPlace (plus bas).
@@ -65,7 +63,6 @@ const BASE = import.meta.env.BASE_URL;
 const touch = matchMedia('(pointer: coarse)').matches;
 
 loadSavedSettings();
-const heroData = config.character.heroStyle === 'classique' ? heroClassicData : heroTestData;
 
 const gameEl = document.getElementById('game');
 const uiEl = document.getElementById('ui');
@@ -95,7 +92,7 @@ const tmpStage = { x: 0, y: 0 };
 const tmpWorld = { x: 0, z: 0 };
 let renderLine = '';
 
-const audio = createAudio(config.audio, song, BASE);
+const audio = createAudio(config.audio, BASE);
 const hud = createHud(uiEl, { version: VERSION, onAction: handleAction, device: touch ? 'touch' : 'keys', muted: config.audio.muted, dev: config.debug.devMode });
 // Historique des dialogues (Pause → Dialogues), pour relire une réplique passée trop vite.
 const journal = createJournal(hud.pauseCard, config.narrator.logMax, { onFirstButton: () => hud.focusResume() });
@@ -126,16 +123,9 @@ const basketUi = createBasketUi(uiEl, {
 basketUi.setReduceMotion(() => config.display.reduceMotion);
 const flyingCard = createFlyingCard(uiEl);
 const confirm = createConfirm(uiEl);
-const itemReveal = createItemReveal(uiEl, { objects: objectsFile.objects, base: BASE });
-const DIR_VEC = { S: [0, -1], SE: [Math.SQRT1_2, -Math.SQRT1_2], E: [1, 0], NE: [Math.SQRT1_2, Math.SQRT1_2], N: [0, 1], NW: [-Math.SQRT1_2, Math.SQRT1_2], W: [-1, 0], SW: [-Math.SQRT1_2, -Math.SQRT1_2] };
+const itemReveal = createItemReveal(uiEl, { objects: objectsFile.objects, base: BASE, device: touch ? 'touch' : 'keys' });
 const treadmill = createTreadmillUi(uiEl, {
-  onDirection(dir) {
-    if (!walker) return;
-    walker.dir = dir;
-    walker.facing = directionToView(dir).flip;
-    walker.away = dir === 'N' || dir === 'NE' || dir === 'NW';
-    clearTarget(walker);
-  },
+  onDirection: (dir) => setTreadmillDirection(walker, dir),
   onPerspective(on) {
     if (!proj || !place) return;
     proj.perDepth = on ? (place.treadmillPerspective ?? 0.00022) : 0;
@@ -214,6 +204,7 @@ function startIntro() {
   introRun = createIntro(introLines);
   introUi.show();
   audio.setFrozen(true); // pas de musique de magasin pendant l'intro
+  audio.setIntroRain(true); // pluie réaliste dehors pendant l'intro (CC0 #595717)
   sm.go('intro');
 }
 // À chaque image, pendant l'intro puis pendant le fondu final (le jeu est déjà lancé derrière).
@@ -233,6 +224,7 @@ function updateIntro(dt) {
   const line = introRun.phase === 'line' ? introLines[introRun.i] : null;
   introUi.set(line, introRun.phase === 'line' ? introRun.i : -1, lineOpacity(introRun, config.intro), blackOpacity(introRun, config.intro));
   if (introRun.phase === 'end' && sm.is('intro')) {
+    audio.setIntroRain(false);
     audio.setFrozen(false);
     sm.go('play'); // l'écran noir des lieux prend le relais, plein (places.reveal) : le retrait de l'intro ne se voit pas
     introRun.handoff = 2;
@@ -1041,14 +1033,14 @@ function frame(now) {
     return;
   }
   if (!places.ready) return;
-  const playing = sm.is('play');
+  const playing = sm.is('play') && !itemReveal.open;
   if (playing) {
     if (dragPending) onTarget(dragX, dragY);
     const n = stepper.advance(dt / 1000);
     for (let i = 0; i < n; i++) {
       input.read(intent);
-      if (scan.active || heroAside() || itemReveal.open || voices.waitingAnswer()) {
-        // Pendant un scan, un aparté, une fiche d'objet ou un choix Oui/Non, le personnage ne bouge pas,
+      if (scan.active || heroAside() || voices.waitingAnswer()) {
+        // Pendant un scan, un aparté ou un choix Oui/Non, le personnage ne bouge pas,
         // sauf la marche d'une conversation (il s'avance tout seul).
         intent.moveX = 0;
         intent.moveZ = 0;
@@ -1060,27 +1052,9 @@ function frame(now) {
         intent.moveZ = 0;
       }
       if (treadmill.active) {
-        clearTarget(walker);
-        walker.prevX = walker.x;
-        walker.prevZ = walker.z;
-        if (intent.moveX !== 0 || intent.moveZ !== 0) {
-          const dir = directionFromVector(intent.moveX, intent.moveZ);
-          if (dir) {
-            walker.dir = dir;
-            walker.facing = directionToView(dir).flip;
-            walker.away = dir === 'N' || dir === 'NE' || dir === 'NW';
-          }
-        }
-        walker.moving = !treadmill.paused;
-        if (walker.moving) {
-          // Même vitesse réelle que stepWalker selon la direction (depthFactor sur l'axe avant/arrière).
-          const [ux, uz] = DIR_VEC[walker.dir] ?? DIR_VEC.S;
-          const dirSpeed = Math.hypot(ux, uz * config.walk.depthFactor) * config.walk.maxSpeed;
-          walker.distance += dirSpeed * (treadmill.slow ? 0.4 : 1) * stepper.step;
-        }
+        stepTreadmill(walker, intent, config.walk, treadmill, stepper.step);
       } else {
-        const walkCfg = treadmill.slow ? { ...config.walk, maxSpeed: config.walk.maxSpeed * 0.4 } : config.walk;
-        stepWalker(walker, intent, mask, chariot.walk(walkCfg), stepper.step);
+        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step);
       }
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
@@ -1099,6 +1073,9 @@ function frame(now) {
     if (birds && voices.asideP === 0 && stepCrowCalls(crowCalls, sec)) audio.play('corbeau');
     render();
     voices.updateStars();
+  } else if (sm.is('play') && itemReveal.open) {
+    // Sous la fiche « Nouvel objet », le monde, les voix et les corbeaux restent figés.
+    stepper.reset();
   } else if (sm.is('intro')) {
     updateIntro(Math.min(dt / 1000, 0.1));
   } else if (sm.is('panier')) {
@@ -1123,6 +1100,7 @@ const places = createPlaces(uiEl, gameEl, {
   walker: () => walker,
   // On ne quitte un lieu que héros libre : ni scan, ni aparté, ni approche en cours.
   canLeave: () => !scan.active && !heroAside() && pendingScan < 0,
+  isScanning: () => scan.active,
   // Un lieu vient d'être construit : le jeu s'y branche.
   onLoaded({ place: pl, proj: pr, mask: mk, here, view }) {
     place = pl;
@@ -1196,7 +1174,21 @@ async function start() {
   sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
   chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince'), onBumps: () => say('chariot_cogne'), onForgot: () => say('chariot_oublie') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
-  input = createInput({ surface: gameEl, ui: uiEl, settings: config.input, onAction: handleAction, onTarget, onDoubleTap, onDrag, device: touch ? 'touch' : 'keys', onDevice: (kind) => hud.setDevice(kind), canSkip: () => voices.canSkip() });
+  input = createInput({
+    surface: gameEl,
+    ui: uiEl,
+    settings: config.input,
+    onAction: handleAction,
+    onTarget,
+    onDoubleTap,
+    onDrag,
+    device: touch ? 'touch' : 'keys',
+    onDevice(kind) {
+      hud.setDevice(kind);
+      itemReveal.setDevice(kind);
+    },
+    canSkip: () => voices.canSkip(),
+  });
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
@@ -1217,7 +1209,6 @@ async function start() {
     if ((key.startsWith('character.') || key === 'scene.depthScale' || key.startsWith('camera.')) && stage) render();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
-    if (key === 'display.hallRain') stage?.el.classList.toggle('no-rain', !quality().rain);
     if (key.startsWith('player.')) voices.applyPlayerName();
     if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();

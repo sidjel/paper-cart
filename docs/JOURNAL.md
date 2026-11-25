@@ -18,6 +18,34 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 80 — 25/11/2026 — Suite audit Claude Opus 5.5 : correctifs `mist`, fiche objet, pluie réaliste CC0, retrait musique synthétique et code mort, garde-fous
+
+**Contexte & commits intermédiaires depuis la séance 79 (`8bdfe05` → `c06fb72`)** :
+- Chargement rapide `.webp` en parallèle (`8bdfe05`), marche continue entre lieux (`676851b`), volet papier directionnel (`d7896f9`), fix des `.webp` partagés (`529a3a0`), 4 styles origami HD (`0931959`) et transitions douces `dissolve` / `mist` (`c06fb72`), suivis d'un audit complet de Claude Opus 5.5 vérifié dans le code.
+
+**Décisions de l'auteur** :
+- `1a` : corriger le clignotement à froid (`decoding = 'sync'` après décodage + décodage copies partagées).
+- `1b` : garder `mist` en corrigeant la disparition du héros pendant le chargement ; conserver les 6 styles testables dans `⚙` jusqu'à validation sur téléphone.
+- `2a` / `7a` : ajouter une règle de dimensions (`≥ 2 400 px` mini / `2 560 px` recommandé + test automatique garde-fou), puis élargir visuellement le hall dans une passe dédiée juste après.
+- `2b` : contraste Backrooms (pluie réaliste CC0 `#595717` dans l'intro → grand soleil inexplicable derrière les vitres du hall remarqué par le héros ; retrait total du code mort de pluie du hall).
+- `3b` : supprimer totalement la musique générée par le navigateur (`music.js`, `supermarche.json`, 3 réglages `basse / piano / mélodie`).
+- `4a` : supprimer l'ancien héros provisoire 2 vues (`heros.json`, 16 SVG) et les 11 SVG inutilisés.
+- `5a` : hôtesse récite naturellement ses 10 slogans sans boucle artificielle (proposition chariot une seule fois après le 3ᵉ sans jeton, aucun indice sur le PQ).
+- `6a` : petits correctifs fluidité sans risque + préchargement voisins autorisé même en marche/dialogue avec délai réglable (`places.prefetchDelay`).
+- `7a` (moteur) : rester en DOM/CSS pour finir A8, rappel inscrit dans `SUIVI.md` pour un POC **PixiJS v8** sur branche à part juste avant le Prototype B.
+- `8a` / `9b` / `10a` : scripts de conversion versionnés dans `tools/`, `VISION.md` mis à jour (IA + retouche manuelle Krita, déclaration Steam prévue), publication sur `main` après 100 % tests verts.
+
+**Fait** :
+- **Transition `mist`** (`src/game/places.js`) : préparation du lieu suivant (`preparePlace`) avant de déplacer les acteurs hors de l'ancien décor (le héros ne disparaît plus pendant le chargement) ; retrait des `box-shadow` flous sur les transitions papier (`src/style.css`).
+- **Fiche « Nouvel objet »** (`src/ui/itemReveal.js`, `src/data/objects.json`, `src/main.js`) : protection anti-faux-clic au double toucher, mode d'emploi adapté au dernier appareil (`keys / touch / pad`), préchargement des 5 images d'objets au démarrage, monde/voix/corbeaux figés sous la fiche.
+- **Anti-clignotement à froid** (`src/scene/assets.js`, `src/scene/clouds.js`, `src/scene/birds.js`) : passage en `decoding = 'sync'` après `decode()` et décodage proactif des copies partagées.
+- **Pluie d'intro CC0 & retrait code mort** : ajout de `public/audio/pluie-intro.mp3` (`#595717`, *Soft Rain Loop*, CC0), pensée Backrooms dans `src/data/narrator.json`, suppression de tout le code/CSS/réglage de pluie du hall, suppression de l'ancienne musique synthétisée (`music.js` + `supermarche.json` + 3 réglages musique), suppression de l'ancien héros 2 vues (`heros.json` + 27 SVG/WebP inutilisés).
+- **Hôtesse naturelle** (`src/core/hotesse.js`, `src/data/characters/hotesse.json`) : les 10 slogans sont tous entendus naturellement sans boucle répétitive sur la question du chariot.
+- **Fluidité & architecture** : `getBoundingClientRect()` mémorisé au `layout()` (`src/scene/stage.js`), cache de segments dans `src/core/birds.js`, `places.prefetchDelay` dans `src/config.js`, logique du studio extraite dans `src/core/treadmill.js`, suivi des calques `.cloud`/`.bird` dans `tests/e2e/comptages.spec.js`.
+- **Tests, outils & docs** : 4 nouveaux tests E2E de non-régression (`Échap` plein écran, `Espace` machine à écrire, fiche objet double-tap/tactile/monde figé, héros visible pendant `mist`), garde-fou dimensions dans `tests/unit/data.test.js`, `tests/unit/treadmill.test.js`, `tools/video_to_sprites.ps1`, et mise à jour de `VISION.md`, `CREDITS.md`, `ARCHITECTURE.md`, `SUIVI.md`, `PROTOTYPES.md`, `GAME_DESIGN.md`, `HISTOIRE.md`, `DIRECTION_ARTISTIQUE.md`.
+
+---
+
 ## Séance 79 (branche `test/krita-mcp`) — 23–24/11/2026 — Héros origami 8 directions, marche vidéo 16 images, hôtesse & troc PQ→jeton→chariot, découverte Zelda et salle de test libre
 
 **Demandes & décisions de l'auteur** :

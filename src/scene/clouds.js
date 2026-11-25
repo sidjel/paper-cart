@@ -8,7 +8,11 @@ export function createClouds(layer, cfg, images, reduceMotion = false) {
   const items = cfg.items.map((def) => {
     const im = images.get(def.image);
     const el = claimed.has(def.image) ? new Image() : im.el;
-    if (el !== im.el) el.src = im.url;
+    if (el !== im.el) {
+      el.decoding = 'sync';
+      el.src = im.url;
+      el.decode?.().catch(() => {});
+    }
     claimed.add(def.image);
     el.className = 'cloud';
     el.width = im.w;

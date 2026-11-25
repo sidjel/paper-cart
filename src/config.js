@@ -18,7 +18,6 @@ export const config = {
     arrivalRadius: 4, // distance à laquelle on considère être arrivé au point touché (px)
   },
   character: {
-    heroStyle: 'test8dir', // apparence du héros : 'test8dir' (origami 8 directions) ou 'classique' (provisoire 2 vues)
     flipDuration: 0.18, // durée du retournement de la feuille (s) ; 0 = instantané
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
@@ -56,6 +55,7 @@ export const config = {
     fade: 0.34, // changement de lieu : durée de la transition (fondu enchaîné ou effet papier, s) ; 0 = direct
     style: 'mist', // effet : 'mist' (fondu enchaîné + brume), 'dissolve' (fondu enchaîné), 'flip', 'double', 'strips', 'wipe'
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît
+    prefetchDelay: 2.5, // délai avant pré-téléchargement réseau silencieux des lieux voisins (s)
   },
   intro: {
     enabled: true, // texte d'introduction après « Commencer »
@@ -151,15 +151,14 @@ export const config = {
     foregroundOpacity: 1, // opacité par défaut du rayon du premier plan (opaque + transparence dynamique quand le héros passe derrière)
     hallForegroundOpacity: 1, // opacité du premier plan du hall (plantes en pots Krita)
     behindPlantsOpacity: 0.45, // opacité des plantes quand le héros passe derrière
-    hallRain: true, // pluie animée du hall (et reflet du tapis) ; l'éteindre aide à chercher la cause d'un clignotement
     maxPixelRatio: 2, // plafond de densité de pixels des images (coût mémoire et carte graphique)
     // Profil de qualité (ARCHITECTURE §14) : 'leger', 'normal' ou 'fin'. [TEMP] « Fin » par défaut (comme
     // avant les profils) en attendant le choix automatique au premier lancement (étape suivante).
     profile: 'fin',
     profiles: {
-      leger: { density: 1, rain: false, dust: false, farParallax: false },
-      normal: { density: 1.5, rain: true, dust: true, farParallax: true },
-      fin: { density: 2, rain: true, dust: true, farParallax: true },
+      leger: { density: 1, dust: false, farParallax: false },
+      normal: { density: 1.5, dust: true, farParallax: true },
+      fin: { density: 2, dust: true, farParallax: true },
     },
     // Objets du décor (chariot, présentoirs) sur leur propre calque, en permanence. Sans cela, le
     // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
@@ -192,11 +191,7 @@ export const config = {
     maxAmbiance: 2, // pluie, portes
     rustle: false, // froissement de papier : début des pensées du héros et réponses du joueur (séance 66 : désactivé, choix de l'auteur)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
-    // Instruments de la musique (séance 66 : interrupteurs pour trouver un bruit ; le shaker, fautif, est retiré).
     preparedSounds: true, // essai : sons courts préparés une fois (oui) ou fabriqués à chaque fois comme avant (non)
-    musicBass: true, // basse
-    musicPiano: true, // piano électrique (accords)
-    musicMelody: true, // mélodie (vibraphone)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
     latency: 'balanced',
@@ -240,10 +235,6 @@ export const TUNABLES = [
   { group: 'Marche', key: 'walk.deceleration', label: 'Freinage', min: 300, max: 20000, step: 100, unit: 'px/s²' },
   { group: 'Marche', key: 'walk.depthFactor', label: 'Vitesse vers le fond', min: 0.3, max: 1.5, step: 0.05, unit: '×' },
   { group: 'Marche', key: 'walk.arrivalRadius', label: "Précision d'arrivée", min: 1, max: 40, step: 1, unit: 'px' },
-  {
-    group: 'Personnage', key: 'character.heroStyle', label: 'Apparence du héros (test)', type: 'choice', reload: true,
-    options: [['test8dir', 'Héros test origami (8 directions)'], ['classique', 'Héros provisoire (2 vues)']],
-  },
   { group: 'Personnage', key: 'character.flipDuration', label: 'Durée du retournement', min: 0, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Personnage', key: 'character.edgeThickness', label: 'Épaisseur de la tranche', min: 0, max: 0.25, step: 0.01 },
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
@@ -280,9 +271,6 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.heroBlips', label: 'Bips d’écriture du héros', type: 'bool' },
   { group: 'Son', key: 'audio.rustle', label: 'Froissement de papier', type: 'bool' },
   { group: 'Son', key: 'audio.preparedSounds', label: 'Essai : sons courts préparés', type: 'bool' },
-  { group: 'Son', key: 'audio.musicBass', label: 'Musique : basse', type: 'bool' },
-  { group: 'Son', key: 'audio.musicPiano', label: 'Musique : piano', type: 'bool' },
-  { group: 'Son', key: 'audio.musicMelody', label: 'Musique : mélodie', type: 'bool' },
   { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.birdsVolume', label: 'Corbeaux / oiseaux dehors', min: 0, max: 1, step: 0.05 },
   {
@@ -291,7 +279,6 @@ export const TUNABLES = [
   },
   { group: 'Son', key: 'audio.pauseMusic', label: 'Musique en pause', min: 0, max: 1, step: 0.05, unit: '×' },
   { group: 'Affichage', key: 'display.foregroundOpacity', label: 'Opacité du rayon de devant', min: 0, max: 1, step: 0.05 },
-  { group: 'Affichage', key: 'display.hallRain', label: 'Pluie animée du hall (ancien décor)', type: 'bool' },
   { group: 'Affichage', key: 'display.hallForegroundOpacity', label: 'Opacité du premier plan du hall', min: 0, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.behindPlantsOpacity', label: 'Opacité du premier plan devant le héros', min: 0.15, max: 1, step: 0.05 },
   { group: 'Scanner', key: 'carry.panier', label: 'Capacité du panier (cartes)', min: 1, max: 30, step: 1 },
@@ -373,6 +360,7 @@ export const TUNABLES = [
   { group: 'Narrateur', key: 'narrator.heroBlipEvery', label: 'Héros : petit bip toutes les N lettres (0 = aucun)', min: 0, max: 16, step: 1 },
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
+  { group: 'Caméra', key: 'places.prefetchDelay', label: 'Préchargement des lieux voisins après', min: 0, max: 10, step: 0.5, unit: 's' },
   { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du volet papier (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
   {
     group: 'Caméra', key: 'places.style', label: 'Changement de lieu : style de transition (test)', type: 'choice',
