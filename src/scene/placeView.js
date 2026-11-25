@@ -10,6 +10,7 @@ import { createProps } from './props.js';
 import { createProducts } from './products.js';
 import { createSpeakerWaves } from './speakers.js';
 import { createDebugMask } from './debugMask.js';
+import { createDebugPerspective } from './debugPerspective.js';
 import { propLevels } from './depth.js';
 import { createPoses } from './poses.js';
 import { createBirds } from './birds.js';
@@ -54,6 +55,8 @@ export function createPlaceView(container, place, images, common, here, proj, co
   const birds = place.birds ? createBirds(stage.layers[place.birds.layer], place.birds, images, config.display.reduceMotion) : null;
   const debugMask = createDebugMask(stage.el, place, proj, props);
   debugMask.setVisible(config.debug.showWalkMask);
+  const debugPerspective = createDebugPerspective(stage.el, place, proj);
+  debugPerspective.setVisible(config.debug.showPerspective);
   return {
     stage,
     props,
@@ -63,6 +66,7 @@ export function createPlaceView(container, place, images, common, here, proj, co
     clouds,
     birds,
     debugMask,
+    debugPerspective,
     guard, // images de l'agent de sécurité, au repos et geste d'arrêt (game/guard.js les place), ou null
     hotesse, // image unique de l'hôtesse derrière le comptoir (game/hotesse.js l'oriente), ou null
     // En partant : tout ce qui a été construit pour ce lieu quitte la page.

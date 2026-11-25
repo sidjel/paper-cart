@@ -6,6 +6,7 @@
     "floorFrontY": 1032,
     "depthToScreen": 0.61,
     "horizonY": 718,
+    "vanishX": 1730,
     "refZ": 206,
     "baseScale": 0.90,
     "maxScale": 1.38
@@ -221,8 +222,10 @@
       "image": "brume-couloir-origami",
       "at": [1745, 260],
       "anchor": [230, 358],
-      "depthRef": 260,
-      "comment": "Voile lumineux statique entre les deux piliers : quand le héros s'enfonce dans l'allée (z > 260), ses couleurs se fondent dans la brume ensoleillée du fond sans aucun filtre CSS."
+      "depthRef": 232,
+      "fadeZ": [232, 375],
+      "maxOpacity": 0.82,
+      "comment": "Voile lumineux statique entre les deux piliers : son opacité augmente en fondu continu (0 → 0.82) quand le héros s'enfonce dans l'allée (z 232 → 375), sans coupure brusque ni filtre CSS."
     }
   ],
   "exits": {

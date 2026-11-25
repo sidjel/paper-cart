@@ -15,6 +15,7 @@ const ACTIONS = {
   F2: 'settings',
   F3: 'diagnostic',
   F4: 'debugMask',
+  F6: 'debugPerspective',
   Enter: 'action',
   NumpadEnter: 'action',
   Space: 'action',

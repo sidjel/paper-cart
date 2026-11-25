@@ -87,7 +87,7 @@ window.addEventListener('error', (e) => logError(e.message || String(e.error)));
 window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.reason?.message ?? e.reason}`));
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
-let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust, chariot;
+let stage, proj, mask, walker, sprite, marker, debugMask, debugPerspective, input, props, depthRefs, dust, chariot;
 let fgLayers = [];
 // Dernière position affichée du personnage (pour placer la poussière d'un pas).
 const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
@@ -704,6 +704,9 @@ function handleAction(action) {
     case 'debugMask':
       if (config.debug.devMode) setValue('debug.showWalkMask', !config.debug.showWalkMask);
       break;
+    case 'debugPerspective':
+      if (config.debug.devMode) setValue('debug.showPerspective', !config.debug.showPerspective);
+      break;
     case 'fullscreen':
       toggleFullscreen();
       break;
@@ -1026,6 +1029,19 @@ function render() {
       );
     }
   }
+  if (props) {
+    for (const p of props) {
+      if (!p.fadeZ) continue;
+      const [z0, z1] = p.fadeZ;
+      const raw = Math.max(0, Math.min(1, (z - z0) / Math.max(1, z1 - z0)));
+      const smooth = raw * raw * (3 - 2 * raw);
+      const op = Math.round(smooth * p.maxOpacity * 200) / 200;
+      if (op !== p.lastOpacity) {
+        p.lastOpacity = op;
+        p.el.style.opacity = String(op);
+      }
+    }
+  }
   if (!walker.hasTarget) marker.hide();
 }
 
@@ -1126,7 +1142,7 @@ const places = createPlaces(uiEl, gameEl, {
     treadmill.setVisible(!!place.treadmill);
     chariot.attach(proj);
     pile.attach(place, view, here, mask);
-    ({ stage, props, depthRefs, products, speakerWaves, debugMask, clouds, birds } = view);
+    ({ stage, props, depthRefs, products, speakerWaves, debugMask, debugPerspective, clouds, birds } = view);
     fgLayers = place.layers
       .filter((l) => l.occluders?.length)
       .map((l) => ({
@@ -1207,6 +1223,7 @@ async function start() {
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
     if (key === 'debug.showWalkMask') debugMask?.setVisible(value);
+    if (key === 'debug.showPerspective') debugPerspective?.setVisible(value);
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity' || key === 'display.hallForegroundOpacity') {
       stage?.applyOpacity();
@@ -1220,6 +1237,7 @@ async function start() {
     }
     if (key === 'display.crt' || key === 'display.crtStrength') applyCrt();
     if (key.startsWith('access.') || key === 'display.narratorAlpha' || key === 'display.menuAlpha') applyAccess();
+    if (key === 'scene.depthScale') debugPerspective?.refresh();
     if ((key.startsWith('character.') || key === 'scene.depthScale' || key.startsWith('camera.')) && stage) render();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);

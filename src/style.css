@@ -54,7 +54,7 @@ html, body {
 }
 .layer-parallax { will-change: transform; }
 
-.layer, .layer-image, .debug-mask {
+.layer, .layer-image, .debug-mask, .debug-perspective {
   position: absolute;
   left: 0;
   top: 0;
@@ -110,6 +110,13 @@ html, body {
 .target-marker.visible { opacity: 0.85; transition: none; }
 
 .debug-mask { pointer-events: none; z-index: 1; }
+.debug-perspective { pointer-events: none; z-index: 2; }
+.persp-ray { stroke: rgb(6 182 212 / 0.45); stroke-width: 2; }
+.persp-z { stroke: rgb(245 158 11 / 0.65); stroke-width: 2; stroke-dasharray: 10 8; }
+.persp-horizon { stroke: rgb(225 29 72 / 0.9); stroke-width: 3; stroke-dasharray: 14 8; }
+.persp-vp { fill: none; stroke: rgb(250 204 21); stroke-width: 3; }
+.persp-label { fill: rgb(254 243 199); stroke: rgb(15 23 42 / 0.85); stroke-width: 4; paint-order: stroke; font: 700 18px system-ui, sans-serif; }
+.persp-horizon-label { fill: rgb(255 228 230); stroke: rgb(136 19 55 / 0.9); stroke-width: 4; paint-order: stroke; font: 700 20px system-ui, sans-serif; }
 .mask-depth { stroke: rgb(40 90 200); stroke-width: 4; stroke-dasharray: 12 8; }
 .mask-area { fill: rgb(80 200 90 / 0.25); stroke: rgb(30 140 50); stroke-width: 3; }
 .mask-obstacle { fill: rgb(220 60 50 / 0.35); stroke: rgb(170 30 20); stroke-width: 3; }

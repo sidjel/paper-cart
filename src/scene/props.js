@@ -27,7 +27,17 @@ export function createProps(place, images, parent, proj) {
     if (def.scale) el.style.transformOrigin = `${def.anchor[0]}px ${def.anchor[1]}px`;
     el.style.transform = `translate(${sx}px, ${sy}px)${def.scale ? ` scale(${def.scale})` : ''}`;
     el.style.zIndex = levels[i];
+    if (def.fadeZ) el.style.opacity = '0';
     parent.appendChild(el);
-    return { id: def.id, el, depthRef: def.depthRef, left: sx, width: img.w };
+    return {
+      id: def.id,
+      el,
+      depthRef: def.depthRef,
+      left: sx,
+      width: img.w,
+      fadeZ: def.fadeZ ?? null,
+      maxOpacity: def.maxOpacity ?? 1,
+      lastOpacity: def.fadeZ ? 0 : 1,
+    };
   });
 }

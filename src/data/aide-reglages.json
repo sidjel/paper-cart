@@ -148,6 +148,7 @@
     "quick.block": "Test rapide : durée de chaque bloc de mesure.",
     "quick.settle": "Test rapide : début de chaque bloc ignoré (le temps que tout se stabilise).",
     "quick.rounds": "Test rapide : nombre de tours.",
-    "debug.showWalkMask": "Montre la zone où le héros peut marcher (en couleur), et les obstacles. Touche F4."
+    "debug.showWalkMask": "Montre la zone où le héros peut marcher (en couleur), et les obstacles. Touche F4.",
+    "debug.showPerspective": "Affiche la ligne d'horizon, le point de fuite, les rayons de perspective et les lignes de profondeur (z et taille du héros). Touche F6."
   }
 }

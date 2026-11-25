@@ -7,6 +7,19 @@
 - Deux pistes visuelles en test : **crayon de couleur** à la main (trait visible, grain du papier) et **papier découpé / origami** (décors Krita HD, nuages, oiseaux, héros 8 directions `test8dir`).
 - **Cycles d'animation du héros (origami)** ✅ : **16 images uniques (0 doublon)** par cycle de marche ; toute boucle générée est vérifiée contre les doublons avant intégration.
 
+## Pipeline sprites personnages origami ✅ VALIDÉ (8 directions 16 images + poses fixes)
+Méthode éprouvée et réutilisable pour tout futur personnage / PNJ origami :
+1. **Marches 8 directions (5 vues générées `S`, `SE`, `E`, `NE`, `N` + 3 miroirs `SW`, `W`, `NW`)** :
+   - **Source vidéo** : format vertical `9:16` (`720×1280`, 24 ips, 6 s), fond blanc uni `#FFFFFF`, marche sur place (tapis invisible), caméra 100 % fixe (zéro zoom/pan), en joignant 1–2 frames de référence + la vue HD de l'angle ciblé.
+   - **Extraction & boucle** : extraction FFmpeg native via `tools/video_to_sprites.ps1`, puis recherche automatique du meilleur cycle complet (32 à 34 frames natives, `LoopMad` minimal, `HalfMad` élevé) échantillonné en **16 images uniques** (`0 doublon`).
+   - **Détourage** : *flood-fill* depuis les 4 bords sur fond blanc / ombre grise claire + nettoyage d'1 px de frange.
+   - **Recalibrage HSL par bande (clé anti-dérive MP4)** : mesure automatique des bandes couleur de la référence (`heros-s-walk-1.webp` : orange `H ≈ 20.4°`, bleu `H ≈ 206.9°`, peau `H ≈ 30.5°`) et recalage par bande pour supprimer le voile gris/blanchâtre des vidéos MP4 (écart `< 0.5°`).
+   - **Format & netteté** : export 2× Retina (`480×680`, hauteur corps `625 px`, ligne de pieds `y = 660`), **masque de netteté 3×3 (`0.75`)** appliqué sur l'intérieur opaque *après* redimensionnement (restaure la netteté des plis origami), puis **liseré papier blanc (`5.5 px`)** et export WebP qualité `0.96`.
+   - **Synchronisation** : `stride: 18.5` (identique aux 4 images `stride: 74`), son de pas + poussière placés sur les **2 poses exactes de contact au sol** (espacées de 8 frames).
+2. **Poses fixes debout (`idle` + `idle-blink`)** :
+   - Générées **séparément** des vidéos de marche (jamais extraites d'une marche, sinon le buste penche et un talon reste décollé) : personnage 100 % droit, **deux semelles bien à plat au sol**, mêmes mains dans les poches, même recalibrage HSL + format `480×680` + liseré blanc `5.5 px`.
+   - **Clignement des yeux (`S`, `SE`, `E`)** : peint uniquement sur les paupières de l'image `idle` finale (zéro décalage du reste du corps).
+
 ## Transitions entre lieux 🧪 en validation sur téléphone
 - **Styles en essai (`⚙ → Caméra`)** : fondu enchaîné avec légère brume (`mist`, par défaut en test, héros maintenu visible pendant le chargement), fondu enchaîné pur (`dissolve`), et 4 effets papier origami HD (`flip`, `double`, `strips`, `wipe` avec `public/art/ui/transition-origami.webp`, bordures nettes sans ombres floues ; repli fondu doux si *Réduire les animations* est activé). Les 5 styles non retenus seront retirés après validation sur téléphone.
 

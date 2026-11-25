@@ -223,6 +223,7 @@ export const config = {
   },
   debug: {
     showWalkMask: false, // affiche la zone de marche (vert) et les obstacles (rouge)
+    showPerspective: false, // affiche la grille de perspective (lignes de fuite, horizon, profondeur z)
     devMode: true, // outils de développement visibles hors des réglages (écran titre : « Départ ») ; à couper pour la version vendue
   },
 };
@@ -406,6 +407,7 @@ export const TUNABLES = [
   { group: 'Diagnostic', key: 'quick.settle', label: 'Test rapide : début de bloc ignoré', min: 0, max: 5, step: 0.5, unit: 's' },
   { group: 'Diagnostic', key: 'quick.rounds', label: 'Test rapide : nombre de tours', min: 1, max: 10, step: 1 },
   { group: 'Debug', key: 'debug.showWalkMask', label: 'Afficher la zone de marche (F4)', type: 'bool' },
+  { group: 'Debug', key: 'debug.showPerspective', label: 'Afficher la grille de perspective (F6)', type: 'bool' },
 ];
 
 // Profils de marche à essayer (bouton dans le panneau) : ils règlent vitesse, accélération, freinage.
