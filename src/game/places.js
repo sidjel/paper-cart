@@ -11,10 +11,10 @@
 
 import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
-import { clearTarget, setTarget } from '../core/movement.js';
+import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -107,6 +107,7 @@ export function createPlaces(ui, container, game) {
 
   function unload() {
     cancelPrefetch();
+    edgeWalk = null;
     if (!view) return;
     game.onLeaving();
     for (const a of game.actors()) a.mount(backstage);
@@ -172,6 +173,7 @@ export function createPlaces(ui, container, game) {
   fadeEl.appendChild(waitEl);
   ui.appendChild(fadeEl);
   let transition = null;
+  let edgeWalk = null; // traversée automatique d'un bord d'écran ('out' jusqu'à 3/4 hors-champ, ou 'in' jusqu'au bord)
   let dissolving = null; // { view, images } : ancien lieu en cours de fondu enchaîné, libéré dès la fin
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
   let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
@@ -282,10 +284,11 @@ export function createPlaces(ui, container, game) {
     }
   }
 
-  function leaveBy(exit) {
+  function leaveBy(exit, fromOverride = null) {
     cancelPrefetch();
+    edgeWalk = null;
     const w = game.walker();
-    leftFrom = { id: place.id, x: w.x, z: w.z, facing: w.facing };
+    leftFrom = fromOverride ?? { id: place.id, x: w.x, z: w.z, facing: w.facing };
     transition = createTransition(exit, transitionDirection(exit, place), config.places.style);
     fadeEl.classList.add('paper-fx');
     paintFade(transition);
@@ -294,7 +297,7 @@ export function createPlaces(ui, container, game) {
     game.sm.go('transition');
   }
 
-  function putHero(x, z, facing, walkTo = null) {
+  function putHero(x, z, facing) {
     const walker = game.walker();
     walker.x = walker.prevX = x;
     walker.z = walker.prevZ = z;
@@ -302,14 +305,22 @@ export function createPlaces(ui, container, game) {
     walker.facing = facing ?? walker.facing;
     walker.away = false;
     clearTarget(walker);
-    if (walkTo) setTarget(walker, walkTo[0], walkTo[1]);
+  }
+
+  function startEntryWalk(exit) {
+    if (!exit.arriveFrom) {
+      edgeWalk = null;
+      return;
+    }
+    // Ignorer la sortie du bord d'arrivée tant que le héros n'en est pas ressorti.
+    ignoredExit = exitAt(place.exits?.items ?? [], exit.arriveFrom[0], exit.arriveFrom[1]);
+    edgeWalk = createEdgeWalk('in', exit.arrive[0], exit.arriveFrom[0], null);
   }
 
   async function change(exit) {
     const t0 = performance.now();
     const keepOld = isCrossDissolve(transition?.style) && view;
     const start = exit.arriveFrom ?? exit.arrive;
-    const walkTo = exit.arriveFrom ? exit.arrive : null;
     if (keepOld) {
       // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
       // du lieu suivant (aucune disparition à vide avant la bascule).
@@ -325,7 +336,8 @@ export function createPlaces(ui, container, game) {
         view = null;
         images = null;
         mountPrepared(built);
-        putHero(start[0], start[1], exit.facing, walkTo);
+        putHero(start[0], start[1], exit.facing);
+        startEntryWalk(exit);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
@@ -338,7 +350,8 @@ export function createPlaces(ui, container, game) {
       unload();
       try {
         await load(exit.to);
-        putHero(start[0], start[1], exit.facing, walkTo);
+        putHero(start[0], start[1], exit.facing);
+        startEntryWalk(exit);
         game.onArrived();
       } catch (err) {
         game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
@@ -401,19 +414,50 @@ export function createPlaces(ui, container, game) {
     get busy() {
       return transition !== null;
     },
+    // Traversée automatique d'un bord d'écran (sortie engagée ou entrée au bord).
+    get autoWalking() {
+      return edgeWalk !== null;
+    },
     // Un lieu est affiché.
     get ready() {
       return view !== null;
     },
     lastTransitionMs: () => lastMs,
+    // Pas de logique : si le héros traverse un bord automatiquement, remplace l'intention du joueur.
+    stepEdge(intent, dt) {
+      if (!edgeWalk) return;
+      const walker = game.walker();
+      const res = stepEdgeWalk(edgeWalk, walker.x, dt);
+      if (!res) return;
+      if (res.done) {
+        const finished = edgeWalk;
+        edgeWalk = null;
+        if (finished.kind === 'out') {
+          intent.moveX = 0;
+          intent.moveZ = 0;
+          leaveBy(finished.exit, finished.from);
+        }
+        return;
+      }
+      clearTarget(walker);
+      intent.moveX = res.moveX;
+      intent.moveZ = res.moveZ;
+    },
     // À chaque image de jeu : le héros entre-t-il dans une sortie ?
     watchExits() {
-      if (transition || !game.canLeave()) return;
+      if (transition || edgeWalk || !game.canLeave()) return;
       const walker = game.walker();
       const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
-      if (exit === ignoredExit) return; // revenu par là après un échec : il doit d'abord en ressortir
+      if (exit === ignoredExit) return; // revenu par là après un échec ou entrée au bord : il doit d'abord en ressortir
       ignoredExit = null;
-      if (exit && game.places[exit.to]) leaveBy(exit);
+      if (!exit || !game.places[exit.to]) return;
+      if (exit.exitOutX !== undefined) {
+        clearTarget(walker);
+        edgeWalk = createEdgeWalk('out', exit.exitOutX, walker.x, exit);
+        edgeWalk.from = { id: place.id, x: walker.x, z: walker.z, facing: walker.facing };
+      } else {
+        leaveBy(exit);
+      }
     },
     // À chaque image pendant le changement de lieu : seul le volet papier avance.
     update(dt) {

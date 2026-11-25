@@ -22,6 +22,24 @@ export function exitTarget(exits, x, z) {
   return null;
 }
 
+// Marche automatique de traversée d'un bord d'écran :
+// - 'out' : dès que le héros touche le bord, il avance seul jusqu'à ~3/4 hors-champ avant la transition ;
+// - 'in'  : à l'arrivée dans le nouveau lieu, il entre depuis ~3/4 hors-champ jusqu'au bord sans toucher la sortie.
+const EDGE_WALK_MAX_S = 1.2; // garde-fou : ne peut jamais bloquer même ralenti (chariot)
+export function createEdgeWalk(kind, targetX, startX, exit = null) {
+  return { kind, targetX, dir: targetX >= startX ? 1 : -1, exit, t: 0 };
+}
+
+export function stepEdgeWalk(edge, x, dt) {
+  if (!edge) return null;
+  edge.t += dt;
+  const dx = edge.targetX - x;
+  if (edge.t >= EDGE_WALK_MAX_S || (edge.dir > 0 && dx <= 2) || (edge.dir < 0 && dx >= -2)) {
+    return { done: true, moveX: 0, moveZ: 0 };
+  }
+  return { done: false, moveX: edge.dir, moveZ: 0 };
+}
+
 // Transition : 'out' (couvre l'écran) → 'load' (on change de lieu) → 'in' (s'ouvre / fond) → 'done'.
 // En fondu enchaîné ('dissolve' / 'mist'), 'out' passe tout de suite en 'load' : l'ancien lieu reste affiché
 // pendant le chargement du nouveau, puis s'estompe directement dessus pendant 'in'.

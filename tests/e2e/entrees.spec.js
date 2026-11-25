@@ -218,3 +218,24 @@ test('transition « mist » : le héros reste visible dans l’ancien décor pen
   releaseRoute();
   await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play', null, { timeout: 15000 });
 });
+
+test('traversée de bord : au contact du bord gauche, le héros avance seul à 3/4 hors-champ, change de lieu et arrive collé au bord droit sans re-déclencher', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc', 'PC seulement');
+  await page.goto('./?lieu=rayon-essai');
+  await page.waitForFunction(() => window.paperCart?.state() === 'title');
+  await page.evaluate(() => window.paperCart.startGame());
+  await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  // Marcher à gauche jusqu'à toucher le bord (x <= 80), puis lâcher la touche aussitôt.
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForFunction(() => window.paperCart.hero().x <= 80, null, { timeout: 5000 });
+  await page.keyboard.up('ArrowLeft');
+  // Même touche lâchée, il traverse automatiquement jusqu'à 3/4 hors-champ, change de lieu vers l'accueil,
+  // et avance automatiquement jusqu'à son point d'arrivée collé au bord droit (~2050), sans re-déclencher la sortie.
+  await page.waitForFunction(() => window.paperCart.place() === 'accueil' && window.paperCart.state() === 'play', null, { timeout: 15000 });
+  await page.waitForFunction(() => {
+    const h = window.paperCart.hero();
+    return h.x <= 2060 && h.x >= 2000 && !h.moving;
+  }, null, { timeout: 5000 });
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => window.paperCart.place())).toBe('accueil');
+});

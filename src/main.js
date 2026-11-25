@@ -838,7 +838,7 @@ function onTarget(cx, cy) {
   if (!sm.is('play')) return;
   voices.acted();
   if (scan.active || itemReveal.open || voices.waitingAnswer()) return; // pendant un scan, une fiche ou un choix, le héros ne se déplace pas
-  if (guard.holding()) return; // l'agent de sécurité parle (ou le héros fait demi-tour) : il ne bouge pas
+  if (guard.holding() || places.autoWalking) return; // l'agent parle ou le héros traverse un bord : il ne change pas de cible
   if (heroAside()) {
     voices.skip(); // toucher : la réplique passe
     return;
@@ -1060,6 +1060,8 @@ function frame(now) {
         intent.moveX = 0;
         intent.moveZ = 0;
       }
+      places.stepEdge(intent, stepper.step);
+      if (places.busy) break;
       if (treadmill.active) {
         stepTreadmill(walker, intent, config.walk, treadmill, stepper.step);
       } else {

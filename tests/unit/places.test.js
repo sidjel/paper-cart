@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -37,7 +37,10 @@ describe('lieux : sorties et fondu', () => {
         expect(exitAt(dest.exits.items, x, z), e.id).toBeNull();
         if (e.arriveFrom) {
           expect(isWalkable(destMask, e.arriveFrom[0], e.arriveFrom[1]), `${e.id} arriveFrom`).toBe(true);
-          expect(exitAt(dest.exits.items, e.arriveFrom[0], e.arriveFrom[1]), `${e.id} arriveFrom`).toBeNull();
+          expect(e.arriveFrom[0], `${e.id} arriveFrom ≠ arrive`).not.toBe(x);
+        }
+        if (e.exitOutX !== undefined) {
+          expect(isWalkable(here, e.exitOutX, (e.zone[1] + e.zone[3]) / 2), `${e.id} exitOutX`).toBe(true);
         }
         // la zone de sortie touche bien le sol du lieu
         expect(isWalkable(here, (e.zone[0] + e.zone[2]) / 2, (e.zone[1] + e.zone[3]) / 2), e.id).toBe(true);
@@ -46,14 +49,24 @@ describe('lieux : sorties et fondu', () => {
       for (const im of Object.values(pl.images)) expect(existsSync(`public/${im.src}`), im.src).toBe(true);
     }
   });
-  it('on peut aller du rayon à l’accueil et en revenir après avoir complètement traversé le bord', () => {
-    // Le héros ne disparaît pas avant le bord : à x = 2120 (accueil) ou x = 100 (rayon), il est encore à l'écran.
-    expect(exitAt(accueil.exits.items, 2120, 0)).toBeNull();
-    expect(exitAt(rayon.exits.items, 100, 60)).toBeNull();
-    // Une fois complètement passé hors-champ, la sortie se déclenche.
-    expect(exitAt(accueil.exits.items, 2300, 0).to).toBe('rayon-essai');
-    expect(exitAt(rayon.exits.items, -140, 60).to).toBe('accueil');
-    expect(exitAt(rayon.exits.items, 1500, 60)).toBeNull();
+  it('sorties de bord : déclenchent au contact du bord, avancent seules à 3/4 hors-champ, arrivée collée au bord sans re-déclencher', () => {
+    const outRight = accueil.exits.items.find((e) => e.id === 'vers-rayon');
+    const outLeft = rayon.exits.items.find((e) => e.id === 'vers-accueil');
+    // Toucher le bord déclenche la sortie, mais rester juste à côté (point d'arrivée) ne déclenche pas.
+    expect(exitAt(accueil.exits.items, 2090, 0)?.to).toBe('rayon-essai');
+    expect(exitAt(accueil.exits.items, outLeft.arrive[0], outLeft.arrive[1])).toBeNull();
+    expect(exitAt(rayon.exits.items, 60, 60)?.to).toBe('accueil');
+    expect(exitAt(rayon.exits.items, outRight.arrive[0], outRight.arrive[1])).toBeNull();
+    // La cible de sortie automatique (exitOutX) est bien au-delà du bord (3/4 hors-champ).
+    expect(outRight.exitOutX).toBeGreaterThan(accueil.size[0]);
+    expect(outLeft.exitOutX).toBeLessThan(0);
+    // Logique pure de marche automatique au bord : avance seule vers la cible puis se termine.
+    const ew = createEdgeWalk('out', -45, 70, outLeft);
+    expect(stepEdgeWalk(ew, 70, 0.016)).toEqual({ done: false, moveX: -1, moveZ: 0 });
+    expect(stepEdgeWalk(ew, -45, 0.016)).toEqual({ done: true, moveX: 0, moveZ: 0 });
+    // Garde-fou délai : ne peut jamais bloquer.
+    const stuck = createEdgeWalk('out', 2205, 2080, outRight);
+    expect(stepEdgeWalk(stuck, 2080, 1.5).done).toBe(true);
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {
     const tr = createTransition({ to: 'accueil' }, 'right', 'wipe');
