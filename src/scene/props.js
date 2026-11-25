@@ -2,7 +2,7 @@
 // Chacun est une illustration entière, posée au sol à sa position dans le monde (at),
 // avec son point d'ancrage dans l'image (anchor) et son point de référence de profondeur (depthRef).
 
-import { worldToStageX, worldToStageY } from './projection.js';
+import { scaleAt, worldToStageX, worldToStageY } from './projection.js';
 import { propLevels } from './depth.js';
 
 export function createProps(place, images, parent, proj) {
@@ -23,9 +23,13 @@ export function createProps(place, images, parent, proj) {
     el.dataset.prop = def.id;
     const sx = worldToStageX(proj, def.at[0]) - def.anchor[0];
     const sy = worldToStageY(proj, def.at[1]) - def.anchor[1];
-    // scale (facultatif) : plus petit au fond, plus grand devant, autour du point d'ancrage.
-    if (def.scale) el.style.transformOrigin = `${def.anchor[0]}px ${def.anchor[1]}px`;
-    el.style.transform = `translate(${sx}px, ${sy}px)${def.scale ? ` scale(${def.scale})` : ''}`;
+    // perspectiveScale : suit exactement la même loi de perspective (scaleAt) que le héros.
+    // scale : échelle fixe facultative autour du point d'ancrage.
+    const s = def.perspectiveScale
+      ? def.perspectiveScale * scaleAt(proj, def.at[1])
+      : (def.scale ?? 0);
+    if (s) el.style.transformOrigin = `${def.anchor[0]}px ${def.anchor[1]}px`;
+    el.style.transform = `translate(${sx}px, ${sy}px)${s ? ` scale(${s.toFixed(4)})` : ''}`;
     el.style.zIndex = levels[i];
     if (def.fadeZ) el.style.opacity = '0';
     parent.appendChild(el);

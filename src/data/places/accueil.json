@@ -183,8 +183,8 @@
       "at": [697, 212],
       "anchor": [63, 238],
       "depthRef": 212,
-      "scale": 1.20,
-      "comment": "Portique antivol du fond (~1m70, légèrement sous la taille du héros de 1m80)"
+      "perspectiveScale": 1.245,
+      "comment": "Portiques antivol alignés sur la même perspective sol plat (scaleAt, horizonY=718) que le héros (~90 % de sa taille à chaque profondeur : fond ×1.10, milieu ×1.57, avant ×2.04)"
     },
     {
       "id": "portique-milieu",
@@ -192,7 +192,7 @@
       "at": [647, 82],
       "anchor": [63, 238],
       "depthRef": 82,
-      "scale": 1.34
+      "perspectiveScale": 1.245
     },
     {
       "id": "portique-avant",
@@ -200,7 +200,7 @@
       "at": [598, -48],
       "anchor": [63, 238],
       "depthRef": -48,
-      "scale": 1.50
+      "perspectiveScale": 1.245
     },
     {
       "id": "plante-paniers",
