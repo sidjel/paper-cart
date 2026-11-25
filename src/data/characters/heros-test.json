@@ -52,12 +52,24 @@
         ]
       },
       "walk": {
-        "stride": 74,
+        "stride": 18.5,
         "frames": [
-          { "src": "art/heros-test/heros-se-walk-1.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-se-walk-1.webp",
           "art/heros-test/heros-se-walk-2.webp",
           { "src": "art/heros-test/heros-se-walk-3.webp", "sound": "pas", "effect": "poussiere" },
-          "art/heros-test/heros-se-walk-4.webp"
+          "art/heros-test/heros-se-walk-4.webp",
+          "art/heros-test/heros-se-walk-5.webp",
+          "art/heros-test/heros-se-walk-6.webp",
+          "art/heros-test/heros-se-walk-7.webp",
+          "art/heros-test/heros-se-walk-8.webp",
+          "art/heros-test/heros-se-walk-9.webp",
+          "art/heros-test/heros-se-walk-10.webp",
+          { "src": "art/heros-test/heros-se-walk-11.webp", "sound": "pas", "effect": "poussiere" },
+          "art/heros-test/heros-se-walk-12.webp",
+          "art/heros-test/heros-se-walk-13.webp",
+          "art/heros-test/heros-se-walk-14.webp",
+          "art/heros-test/heros-se-walk-15.webp",
+          "art/heros-test/heros-se-walk-16.webp"
         ]
       }
     },
