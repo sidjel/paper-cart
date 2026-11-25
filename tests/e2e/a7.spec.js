@@ -94,7 +94,10 @@ test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son pr
 test('A7 : longer le fond du rayon 7 (ou le bord avant du rayon 2) devant les ouvertures ne fait pas changer de rayon', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'clavier : PC');
   test.setTimeout(40_000);
-  // Rayon 7 : contre le fond, puis tout le long vers la droite, devant les deux ouvertures.
+  // Rayon 7 : dépasser le mur biais gauche et le présentoir (x > 950), monter contre le fond, puis longer vers la droite.
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => window.paperCart.hero().x > 950);
+  await page.keyboard.up('ArrowRight');
   await page.keyboard.down('ArrowUp');
   await page.waitForFunction(() => window.paperCart.hero().z > 250);
   await page.keyboard.up('ArrowUp');

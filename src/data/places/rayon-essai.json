@@ -3,11 +3,13 @@
   "name": "[TEMP] Rayon 1 — Essentiels & Surprises (origami V2)",
   "size": [3600, 1080],
   "projection": {
-    "comment": "Monde → scène. y = floorFrontY - z × depthToScreen. Taille = 1 - z × scalePerDepth (1 à z = 0, plus petit au fond, plafonné à 1.45 devant le rayon Plan 1). Calé sur le rayon origami V1.",
+    "comment": "Perspective exacte à point de fuite réel (horizonY=324, sol plat) : scale = (y - 324) / (933 - 324). Sans plafond prématuré (maxScale=2.0), le héros grandit en continu en s'approchant du Plan 1 (z=-680, scale=1.82) sans jamais donner d'effet de creux.",
     "floorFrontY": 933,
     "depthToScreen": 0.73,
-    "scalePerDepth": 0.0012,
-    "maxScale": 1.25
+    "horizonY": 324,
+    "refZ": 0,
+    "baseScale": 1,
+    "maxScale": 2.0
   },
   "images": {
     "rayon-fond": {
@@ -107,7 +109,7 @@
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
       "occluders": [
-        [0, 905, 4300, 1600]
+        [0, 905, 4300, 1750]
       ],
       "contains": "plan 1 origami HD (haut de la gondole d'en face) : opaque par défaut, devient semi-transparent quand le héros passe derrière",
       "hiddenBy": "rien"
@@ -174,10 +176,10 @@
   },
   "spawn": [300, 60],
   "walkMask": {
-    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -200 = bord bas de l'écran y≈1079, pieds toujours posés sur le carrelage derrière le premier plan semi-transparent). Mur biais gauche suivi au pixel près.",
+    "comment": "x : le long du rayon ; z : profondeur (264 = au pied des étagères du fond y≈740, -680 = tout devant contre la gondole Plan 1 en perspective exacte sol plat horizonY=324, où seule la tête dépasse au-dessus de y=905 sans effet de creux). Mur biais gauche suivi au pixel près.",
     "area": [
-      [-160, -200],
-      [3510, -200],
+      [-160, -680],
+      [3510, -680],
       [3510, 264],
       [2290, 264],
       [2290, 330],
@@ -404,8 +406,8 @@
       {
         "id": "vers-accueil",
         "edge": "left",
-        "zone": [-160, -200, 80, 220],
-        "reach": [-160, -200, 50, 1080],
+        "zone": [-160, -680, 80, 220],
+        "reach": [-160, -680, 50, 1080],
         "to": "accueil",
         "arriveEdge": "right",
         "arrive": [2055, 60],

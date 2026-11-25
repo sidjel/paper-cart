@@ -1183,7 +1183,7 @@ const places = createPlaces(uiEl, gameEl, {
 
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
-  const frontScale = Math.max(1, scaleAt(createProjection(place.projection, config.scene), nearestZ));
+  const frontScale = Math.min(1.25, Math.max(1, scaleAt(createProjection(place.projection, config.scene), nearestZ)));
   const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio);
   // Images communes à tous les lieux.
   loadedImages = await loadImages([
