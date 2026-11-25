@@ -263,8 +263,8 @@ test('toucher hors du sol : il va jusqu’au bord de la zone de marche', async (
     else await page.mouse.click(x, y);
     await expect.poll(async () => (await hero(page)).hasTarget, { timeout: 6000 }).toBe(false);
   };
-  // Sur l'étagère du fond, bien au-dessus du sol.
-  const shelf = await page.evaluate(() => window.paperCart.worldToClient(400, 500));
+  // Sur l'étagère du fond, bien au-dessus du sol (au-delà du mur biais gauche x >= 550).
+  const shelf = await page.evaluate(() => window.paperCart.worldToClient(600, 500));
   await tapAt(shelf.x, shelf.y);
   expect((await hero(page)).z).toBeGreaterThan(258);
   // Tout en bas de l'écran, sur le rayon de devant.

@@ -97,13 +97,13 @@ function face(w, dx, dz) {
 }
 
 // Rapproche la vitesse de la vitesse voulue, avec accélération ou freinage limités.
-function steer(w, wantX, wantZ, p, dt) {
+function steer(w, wantX, wantZ, p, dt, s = 1) {
   const dx = wantX - w.vx;
   const dz = wantZ - w.vz;
   const len = Math.hypot(dx, dz);
   // On freine (lâcher, arrivée) avec le freinage, on accélère avec l'accélération.
   const braking = wantX * wantX + wantZ * wantZ < w.vx * w.vx + w.vz * w.vz;
-  const maxDelta = (braking ? p.deceleration : p.acceleration) * dt;
+  const maxDelta = (braking ? p.deceleration : p.acceleration) * s * dt;
   if (len <= maxDelta) {
     w.vx = wantX;
     w.vz = wantZ;
@@ -141,10 +141,15 @@ function moveWithCollisions(w, mask, dt) {
 
 // Un pas de logique. `input` : { moveX, moveZ } entre -1 et 1 (moveZ > 0 = vers le fond).
 // `p` : réglages de marche (config.walk).
-export function stepWalker(w, input, mask, p, dt) {
+// `speedScale` : échelle de perspective (scaleAt), pour garder la même vitesse perçue et la même
+// cadence de pas au fond comme devant (1 par défaut).
+export function stepWalker(w, input, mask, p, dt, speedScale = 1) {
   w.prevX = w.x;
   w.prevZ = w.z;
 
+  const s = Math.max(0.2, speedScale);
+  const maxSpeed = p.maxSpeed * s;
+  const decel = p.deceleration * s;
   const ix = input.moveX;
   const iz = input.moveZ;
   let wantX = 0;
@@ -155,8 +160,8 @@ export function stepWalker(w, input, mask, p, dt) {
     w.hasTarget = false;
     const len = Math.hypot(ix, iz);
     const k = len > 1 ? 1 / len : 1;
-    wantX = ix * k * p.maxSpeed;
-    wantZ = iz * k * p.maxSpeed * p.depthFactor;
+    wantX = ix * k * maxSpeed;
+    wantZ = iz * k * maxSpeed * p.depthFactor;
     face(w, ix * k, iz * k);
   } else if (w.hasTarget) {
     // Point intermédiaire atteint : on enchaîne sur le suivant sans s'arrêter.
@@ -175,11 +180,11 @@ export function stepWalker(w, input, mask, p, dt) {
       w.vx = 0;
       w.vz = 0;
       w.moving = w.x !== w.prevX || w.z !== w.prevZ;
-      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
+      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ) / s;
       return;
     } else {
       // Ralentit en approchant de l'arrivée pour s'arrêter pile, sans dépasser.
-      const speed = lastWaypoint(w) ? Math.min(p.maxSpeed, Math.sqrt(2 * p.deceleration * dist)) : p.maxSpeed;
+      const speed = lastWaypoint(w) ? Math.min(maxSpeed, Math.sqrt(2 * decel * dist)) : maxSpeed;
       const ux = dx / dist;
       const uz = ez / dist;
       wantX = ux * speed;
@@ -188,7 +193,7 @@ export function stepWalker(w, input, mask, p, dt) {
     }
   }
 
-  steer(w, wantX, wantZ, p, dt);
+  steer(w, wantX, wantZ, p, dt, s);
 
   if (w.hasTarget && lastWaypoint(w)) {
     // Ne pas dépasser l'arrivée dans ce pas.
@@ -201,7 +206,7 @@ export function stepWalker(w, input, mask, p, dt) {
       w.vz = 0;
       w.hasTarget = false;
       w.moving = true;
-      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
+      w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ) / s;
       return;
     }
   }
@@ -221,5 +226,5 @@ export function stepWalker(w, input, mask, p, dt) {
   }
 
   w.moving = w.x !== w.prevX || w.z !== w.prevZ;
-  if (w.moving) w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ);
+  if (w.moving) w.distance += Math.hypot(w.x - w.prevX, w.z - w.prevZ) / s;
 }

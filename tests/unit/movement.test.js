@@ -113,4 +113,15 @@ describe('déplacement vers un point', () => {
     stepWalker(w, { moveX: 0, moveZ: 1 }, mask, P, DT);
     expect(w.hasTarget).toBe(false);
   });
+
+  it('adapte la vitesse à l’échelle de perspective tout en gardant la même cadence de pas', () => {
+    const front = createWalker(100, 50);
+    const far = createWalker(100, 50);
+    for (let i = 0; i < 40; i++) {
+      stepWalker(front, { moveX: 1, moveZ: 0 }, mask, P, DT, 1);
+      stepWalker(far, { moveX: 1, moveZ: 0 }, mask, P, DT, 0.45);
+    }
+    expect(far.vx).toBeCloseTo(front.vx * 0.45, 3);
+    expect(far.distance).toBeCloseTo(front.distance, 1);
+  });
 });

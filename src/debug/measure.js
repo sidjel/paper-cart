@@ -70,7 +70,11 @@ export function createMeasureTools(ui, game) {
     const stage = game.stage();
     config.display.reduceMotion = variant === 'T1' ? true : quickSavedReduce;
     stage.applyOpacity(); // rayon de devant comme dans le jeu…
-    if (variant === 'T2') stage.setLayerOpacity('premier-plan', 0); // … ou invisible (T2)
+    if (variant === 'T2') {
+      for (const id of Object.keys(stage.layers)) {
+        if (id.startsWith('premier-plan')) stage.setLayerOpacity(id, 0); // … ou invisible (T2)
+      }
+    }
   }
 
   async function startQuick(params, suite = 'T012') {
@@ -134,7 +138,9 @@ export function createMeasureTools(ui, game) {
     const b = config.bench;
     const layers = game.stage().layers;
     // (un lieu peut ne pas avoir ces calques)
-    if (layers['premier-plan']) layers['premier-plan'].style.display = on && b.noForeground ? 'none' : '';
+    for (const [id, layerEl] of Object.entries(layers)) {
+      if (id.startsWith('premier-plan')) layerEl.style.display = on && b.noForeground ? 'none' : '';
+    }
     if (layers.lointain) layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
     game.sprite().shadowEl.style.display = on && b.noShadow ? 'none' : '';
     if (on) {

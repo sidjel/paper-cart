@@ -106,7 +106,10 @@
       "position": [0, 905],
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
-      "contains": "plan 1 origami HD (haut de la gondole d'en face, opaque : quand le héros s'avance tout devant, seule sa tête / ses cheveux dépassent au-dessus des produits)",
+      "occluders": [
+        [0, 905, 4300, 1600]
+      ],
+      "contains": "plan 1 origami HD (haut de la gondole d'en face) : opaque par défaut, devient semi-transparent quand le héros passe derrière",
       "hiddenBy": "rien"
     }
   ],

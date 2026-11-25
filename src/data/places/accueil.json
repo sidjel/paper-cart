@@ -19,9 +19,13 @@
       "src": "art/accueil/accueil-fond.webp",
       "size": [2160, 1080]
     },
-    "accueil-avant": {
-      "src": "art/accueil/accueil-avant.webp",
-      "size": [2520, 340]
+    "accueil-avant-gauche": {
+      "src": "art/accueil/accueil-avant-gauche.webp",
+      "size": [420, 340]
+    },
+    "accueil-avant-droite": {
+      "src": "art/accueil/accueil-avant-droite.webp",
+      "size": [470, 340]
     },
     "agent-securite": {
       "src": "art/placeholder/agent-securite.svg",
@@ -117,16 +121,27 @@
       "hiddenBy": "le premier plan (pots de fleurs origami), en bas à gauche et à droite"
     },
     {
-      "id": "premier-plan",
-      "image": "accueil-avant",
+      "id": "premier-plan-gauche",
+      "image": "accueil-avant-gauche",
       "position": [0, 740],
       "parallax": 1.35,
       "opacity": "display.hallForegroundOpacity",
       "occluders": [
-        [0, 860, 415, 1080],
-        [1830, 860, 2520, 1080]
+        [0, 860, 415, 1080]
       ],
-      "contains": "plan 1 (pots de fleurs origami en premier plan détourés sans contour) : passe devant le personnage et défile plus vite que le sol",
+      "contains": "plan 1 gauche (pots de fleurs origami en bas à gauche) : semi-transparent indépendamment du massif de droite",
+      "hiddenBy": "rien"
+    },
+    {
+      "id": "premier-plan",
+      "image": "accueil-avant-droite",
+      "position": [1824, 740],
+      "parallax": 1.35,
+      "opacity": "display.hallForegroundOpacity",
+      "occluders": [
+        [1830, 860, 2290, 1080]
+      ],
+      "contains": "plan 1 droite (pots de fleurs origami en bas à droite) : semi-transparent uniquement quand le héros passe derrière ce massif",
       "hiddenBy": "rien"
     }
   ],

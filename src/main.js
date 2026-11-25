@@ -88,9 +88,7 @@ window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.re
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
 let stage, proj, mask, walker, sprite, marker, debugMask, input, props, depthRefs, dust, chariot;
-let fgOccluders = null;
-let fgOpacityKey = 'display.hallForegroundOpacity';
-let behindAmount = 0;
+let fgLayers = [];
 // Dernière position affichée du personnage (pour placer la poussière d'un pas).
 const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
 const DUST_IMAGE = 'art/placeholder/poussiere.svg';
@@ -1018,13 +1016,15 @@ function render() {
   stage.setCamera(camera.x, camera.y);
   clouds?.update(storeTime, config.display.reduceMotion);
   birds?.update(storeTime, config.display.reduceMotion, stage.parallaxOffset(birds.layer));
-  if (fgOccluders && !sm.is('bench')) {
-    const target = behindFactor(shown.x, shown.y, shown.scale, fgOccluders, stage.parallaxOffset('premier-plan'));
-    behindAmount = stepFade(behindAmount, target, 10, camDt, config.display.reduceMotion);
-    stage.setLayerOpacity(
-      'premier-plan',
-      foregroundOpacity(getValue(fgOpacityKey), config.display.behindPlantsOpacity, behindAmount),
-    );
+  if (fgLayers.length && !sm.is('bench')) {
+    for (const fg of fgLayers) {
+      const target = behindFactor(shown.x, shown.y, shown.scale, fg.occluders, stage.parallaxOffset(fg.id));
+      fg.amount = stepFade(fg.amount, target, 10, camDt, config.display.reduceMotion);
+      stage.setLayerOpacity(
+        fg.id,
+        foregroundOpacity(getValue(fg.opacityKey), config.display.behindPlantsOpacity, fg.amount),
+      );
+    }
   }
   if (!walker.hasTarget) marker.hide();
 }
@@ -1065,7 +1065,7 @@ function frame(now) {
       if (treadmill.active) {
         stepTreadmill(walker, intent, config.walk, treadmill, stepper.step);
       } else {
-        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step);
+        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step, scaleAt(proj, walker.z));
       }
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
@@ -1127,10 +1127,14 @@ const places = createPlaces(uiEl, gameEl, {
     chariot.attach(proj);
     pile.attach(place, view, here, mask);
     ({ stage, props, depthRefs, products, speakerWaves, debugMask, clouds, birds } = view);
-    const fgLayer = place.layers.find((l) => l.id === 'premier-plan');
-    fgOccluders = fgLayer?.occluders ?? null;
-    fgOpacityKey = fgLayer?.opacity ?? 'display.hallForegroundOpacity';
-    behindAmount = 0;
+    fgLayers = place.layers
+      .filter((l) => l.occluders?.length)
+      .map((l) => ({
+        id: l.id,
+        occluders: l.occluders,
+        opacityKey: l.opacity ?? 'display.hallForegroundOpacity',
+        amount: 0,
+      }));
     highlighted = -2; // le bouton d'action est recalculé
     pickupReach = -2;
     hotesseAction = '';
@@ -1142,8 +1146,7 @@ const places = createPlaces(uiEl, gameEl, {
   },
   onLeaving() {
     marker.hide();
-    fgOccluders = null;
-    behindAmount = 0;
+    fgLayers = [];
     clouds = null;
     birds = null;
     stage = null;

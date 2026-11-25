@@ -65,6 +65,9 @@
       "position": [0, 930],
       "parallax": 1,
       "opacity": "display.foregroundOpacity",
+      "occluders": [
+        [0, 930, 4300, 1400]
+      ],
       "contains": "l'arrière du rayon 7, en transparence, avec ses deux ouvertures (les passages) et leurs panneaux ; sans parallaxe, pour que les ouvertures restent en face des passages",
       "hiddenBy": "rien"
     }
