@@ -1531,7 +1531,19 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; overflow: hidden; will-change: opacity; }
 .place-fade.paper-fx { background: transparent; }
 .place-fade[hidden] { display: none; }
-.place-sheet[hidden], .place-flaps[hidden], .place-strips[hidden] { display: none; }
+.place-sheet[hidden], .place-flaps[hidden], .place-strips[hidden], .place-mist[hidden] { display: none; }
+
+/* Fondu enchaîné (cross-dissolve) : l'ancien décor reste par-dessus le nouveau et s'estompe doucement. */
+.stage.stage-dissolve { z-index: 2; pointer-events: none; will-change: opacity; }
+/* Très légère brume lumineuse crème pendant le croisement (adoucit le changement de perspective). */
+.place-mist {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  background: radial-gradient(ellipse at 50% 48%, rgb(255 252 244 / 0.92) 0%, rgb(248 242 228 / 0.85) 55%, rgb(238 230 212 / 0.72) 100%);
+}
 
 /* 3A (retournement) & 2A (volet glissant) : illustration origami HD avec liseré blanc découpé et tranche papier. */
 .place-sheet {

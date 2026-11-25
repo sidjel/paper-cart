@@ -22,20 +22,30 @@ export function exitTarget(exits, x, z) {
   return null;
 }
 
-// Transition : 'out' (la feuille couvre l'écran) → 'load' (on change de lieu) → 'in' (elle s'ouvre) → 'done'.
-// p : { fade } (durée d'entrée et de sortie, s). dir : 'right' | 'left' | 'up' | 'down'.
-export function createTransition(exit, dir = 'right', style = 'flip') {
+// Transition : 'out' (couvre l'écran) → 'load' (on change de lieu) → 'in' (s'ouvre / fond) → 'done'.
+// En fondu enchaîné ('dissolve' / 'mist'), 'out' passe tout de suite en 'load' : l'ancien lieu reste affiché
+// pendant le chargement du nouveau, puis s'estompe directement dessus pendant 'in'.
+export function isCrossDissolve(style) {
+  return style === 'dissolve' || style === 'mist';
+}
+
+export function createTransition(exit, dir = 'right', style = 'wipe') {
   return { exit, dir, style, phase: 'out', t: 0 };
 }
 
-// Avance le fondu. Renvoie 'load' une seule fois, quand l'écran est noir (c'est le moment de changer de lieu).
-// Si p.fade <= 0, le fondu est supprimé : passage direct sur 'load' puis sur 'done'.
+// Avance la transition. Renvoie 'load' une seule fois, au moment de charger le nouveau lieu.
+// Si p.fade <= 0 (ou en fondu enchaîné), passage direct sur 'load'.
 export function stepTransition(tr, dt, p) {
   if (tr.phase === 'load') {
-    tr.t += dt; // temps passé dans le noir à charger (pour le signe d'attente)
+    tr.t += dt; // temps passé à charger (pour le signe d'attente)
     return '';
   }
   if (tr.phase === 'done') return '';
+  if (tr.phase === 'out' && isCrossDissolve(tr.style)) {
+    tr.t = 0;
+    tr.phase = 'load';
+    return 'load';
+  }
   tr.t += dt;
   if (p.fade > 0 && tr.t < p.fade) return '';
   tr.t = 0;
@@ -252,6 +262,25 @@ export function transitionStrips(tr, p, dir = tr.dir || 'right', count = 6) {
     items.push({ t, s, white, opacity });
   }
   return { axis, items };
+}
+
+// Fondu enchaîné ('dissolve') et fondu enchaîné + très légère brume lumineuse ('mist').
+// L'ancien décor s'estompe en courbe douce (smoothstep) directement par-dessus le nouveau.
+export function transitionDissolve(tr, p) {
+  const withMist = tr.style === 'mist';
+  if (tr.phase === 'out' || tr.phase === 'load') {
+    return { oldOpacity: 1, mistOpacity: withMist ? 0.12 : 0 };
+  }
+  if (tr.phase === 'in') {
+    if (p.fade <= 0) return { oldOpacity: 0, mistOpacity: 0 };
+    const u = clamp01(tr.t / p.fade);
+    const e = u * u * (3 - 2 * u); // courbe douce sans à-coup
+    return {
+      oldOpacity: 1 - e,
+      mistOpacity: withMist ? Math.sin(u * Math.PI) * 0.34 : 0,
+    };
+  }
+  return { oldOpacity: 0, mistOpacity: 0 };
 }
 
 // Pré-téléchargement silencieux des lieux voisins (docs/ARCHITECTURE.md §11) : logique pure.

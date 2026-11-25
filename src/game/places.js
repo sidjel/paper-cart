@@ -14,7 +14,7 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -143,6 +143,11 @@ export function createPlaces(ui, container, game) {
   }
   fadeEl.appendChild(stripsEl);
 
+  const mistEl = document.createElement('div');
+  mistEl.className = 'place-mist';
+  mistEl.hidden = true;
+  fadeEl.appendChild(mistEl);
+
   // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais d'écran muet.
   const waitEl = document.createElement('div');
   waitEl.className = 'place-wait';
@@ -153,11 +158,20 @@ export function createPlaces(ui, container, game) {
   fadeEl.appendChild(waitEl);
   ui.appendChild(fadeEl);
   let transition = null;
+  let dissolving = null; // { view, images } : ancien lieu en cours de fondu enchaîné, libéré dès la fin
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
   let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
   let revealFade = 0.25;
 
+  function discardDissolving() {
+    if (!dissolving) return;
+    dissolving.view.destroy();
+    releaseImages(dissolving.images);
+    dissolving = null;
+  }
+
   function resetFx() {
+    discardDissolving();
     fadeEl.classList.remove('paper-fx');
     fadeEl.style.transform = '';
     sheetEl.hidden = true;
@@ -166,6 +180,8 @@ export function createPlaces(ui, container, game) {
     sheetEl.classList.remove('edge');
     flapsEl.hidden = true;
     stripsEl.hidden = true;
+    mistEl.hidden = true;
+    mistEl.style.opacity = '0';
   }
 
   // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
@@ -189,6 +205,17 @@ export function createPlaces(ui, container, game) {
   function paintFade(tr) {
     fadeEl.style.opacity = '1';
     fadeEl.style.transform = '';
+    if (isCrossDissolve(tr.style)) {
+      sheetEl.hidden = true;
+      flapsEl.hidden = true;
+      stripsEl.hidden = true;
+      const { oldOpacity, mistOpacity } = transitionDissolve(tr, config.places);
+      if (dissolving) dissolving.view.stage.el.style.opacity = String(oldOpacity);
+      mistEl.hidden = mistOpacity <= 0;
+      if (!mistEl.hidden) mistEl.style.opacity = String(mistOpacity);
+      return;
+    }
+    mistEl.hidden = true;
     if (config.display.reduceMotion || config.places.fade <= 0) {
       sheetEl.hidden = false;
       flapsEl.hidden = true;
@@ -265,13 +292,26 @@ export function createPlaces(ui, container, game) {
 
   async function change(exit) {
     const t0 = performance.now();
-    unload();
+    const keepOld = isCrossDissolve(transition?.style) && view;
+    if (keepOld) {
+      cancelPrefetch();
+      game.onLeaving();
+      for (const a of game.actors()) a.mount(backstage);
+      view.stage.el.classList.add('stage-dissolve');
+      view.stage.el.style.opacity = '1';
+      dissolving = { view, images };
+      view = null;
+      images = null;
+    } else {
+      unload();
+    }
     try {
       await load(exit.to);
       putHero(exit.arrive[0], exit.arrive[1], exit.facing);
       game.onArrived();
     } catch (err) {
       game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
+      discardDissolving();
       unload(); // ce qui a pu être construit avant l'échec
       if (await backToStart(exit)) game.onLoadFailed();
       else errorEl.hidden = false;

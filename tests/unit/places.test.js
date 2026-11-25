@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, createTransition, stepTransition, placeReady, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -47,7 +47,7 @@ describe('lieux : sorties et fondu', () => {
     expect(exitAt(rayon.exits.items, 1500, 60)).toBeNull();
   });
   it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {
-    const tr = createTransition({ to: 'accueil' });
+    const tr = createTransition({ to: 'accueil' }, 'right', 'wipe');
     expect(transitionBlack(tr, P)).toBe(0);
     let loads = 0;
     for (let k = 0; k < 30; k++) if (stepTransition(tr, 1 / 60, P) === 'load') loads++;
@@ -85,7 +85,7 @@ describe('lieux : sorties et fondu', () => {
 
   it('jamais d’écran noir muet : le signe d’attente apparaît si le chargement dure plus de waitAfter', () => {
     const p = { fade: 0.25, waitAfter: 0.3 };
-    const tr = createTransition({ to: 'x' });
+    const tr = createTransition({ to: 'x' }, 'right', 'wipe');
     stepTransition(tr, 0.3, p); // fondu : noir
     expect(tr.phase).toBe('load');
     expect(showWait(tr, p)).toBe(false);
@@ -201,5 +201,31 @@ describe('volet papier directionnel (2A)', () => {
     placeReady(tr);
     stepTransition(tr, 0.25, p); // retournées et disparues
     expect(transitionStrips(tr, p, 'right', 6).items.every((it) => it.opacity === 0)).toBe(true);
+  });
+
+  it('cross-dissolve et brume lumineuse : charge tout de suite puis fond doucement l’ancien lieu', () => {
+    const p = { fade: 0.34 };
+    expect(isCrossDissolve('dissolve')).toBe(true);
+    expect(isCrossDissolve('mist')).toBe(true);
+    expect(isCrossDissolve('flip')).toBe(false);
+
+    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'mist');
+    expect(stepTransition(tr, 1 / 60, p)).toBe('load'); // passe tout de suite au chargement
+    expect(tr.phase).toBe('load');
+    expect(transitionDissolve(tr, p).oldOpacity).toBe(1);
+    placeReady(tr);
+    stepTransition(tr, 0.17, p); // mi-parcours : ancien lieu à 50 %, brume douce à son pic (~0.34)
+    const mid = transitionDissolve(tr, p);
+    expect(mid.oldOpacity).toBeCloseTo(0.5);
+    expect(mid.mistOpacity).toBeCloseTo(0.34);
+    stepTransition(tr, 0.2, p);
+    expect(tr.phase).toBe('done');
+    expect(transitionDissolve(tr, p)).toEqual({ oldOpacity: 0, mistOpacity: 0 });
+
+    const pure = createTransition({ to: 'accueil' }, 'left', 'dissolve');
+    stepTransition(pure, 1 / 60, p);
+    placeReady(pure);
+    stepTransition(pure, 0.17, p);
+    expect(transitionDissolve(pure, p)).toEqual({ oldOpacity: 0.5, mistOpacity: 0 });
   });
 });

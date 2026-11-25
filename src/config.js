@@ -53,9 +53,9 @@ export const config = {
     speed: 260, // agent de sécurité du hall : vitesse de marche, quand il va de son poste à sa place au début (px/s)
   },
   places: {
-    fade: 0.24, // changement de lieu : durée d'entrée et de sortie de la transition papier (s) ; 0 = direct
-    style: 'flip', // effet de transition : 'flip' (3A), 'double' (3B), 'strips' (lignes→cartes bleues), 'wipe' (2A)
-    waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît sur la feuille
+    fade: 0.34, // changement de lieu : durée de la transition (fondu enchaîné ou effet papier, s) ; 0 = direct
+    style: 'mist', // effet : 'mist' (fondu enchaîné + brume), 'dissolve' (fondu enchaîné), 'flip', 'double', 'strips', 'wipe'
+    waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît
   },
   intro: {
     enabled: true, // texte d'introduction après « Commencer »
@@ -377,6 +377,8 @@ export const TUNABLES = [
   {
     group: 'Caméra', key: 'places.style', label: 'Changement de lieu : style de transition (test)', type: 'choice',
     options: [
+      ['mist', 'Cross-dissolve + brume lumineuse'],
+      ['dissolve', 'Cross-dissolve (fondu enchaîné pur)'],
       ['flip', '3A · Feuille origami qui se retourne'],
       ['double', '3B · Double-volet origami'],
       ['strips', 'Lignes blanches → cartes liseré bleu'],
