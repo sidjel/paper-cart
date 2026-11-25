@@ -3,13 +3,14 @@
   "name": "[TEMP] Accueil — hall origami V2",
   "size": [2160, 1080],
   "projection": {
+    "comment": "Perspective exacte à point de fuite réel (horizonY=718, sol plat) : sans plafond prématuré (maxScale=2.0), le héros grandit en continu jusqu'en bas de l'écran (z=-72, scale=1.71) sans effet de creux.",
     "floorFrontY": 1032,
     "depthToScreen": 0.61,
     "horizonY": 718,
     "vanishX": 1730,
     "refZ": 206,
     "baseScale": 0.90,
-    "maxScale": 1.38
+    "maxScale": 2.0
   },
   "images": {
     "accueil-dehors": {
@@ -148,7 +149,7 @@
   ],
   "spawn": [1180, 100],
   "walkMask": {
-    "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1525–1970) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle z 198–238) ; z=-72 en bas derrière les pots origami.",
+    "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1525–1970) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle x 1500–1710, z 208–228) ; z=-72 en bas derrière les pots origami.",
     "area": [
       [652, -72],
       [2360, -72],
@@ -167,10 +168,10 @@
       {
         "name": "Plante et paniers rouges",
         "points": [
-          [1515, 198],
-          [1695, 198],
-          [1695, 238],
-          [1515, 238]
+          [1500, 208],
+          [1710, 208],
+          [1710, 228],
+          [1500, 228]
         ]
       }
     ]
