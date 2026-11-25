@@ -5,7 +5,10 @@
   "projection": {
     "floorFrontY": 1032,
     "depthToScreen": 0.61,
-    "scalePerDepth": 0.00135
+    "horizonY": 718,
+    "refZ": 206,
+    "baseScale": 0.90,
+    "maxScale": 1.38
   },
   "images": {
     "accueil-dehors": {
@@ -132,8 +135,8 @@
     "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1525–1970) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle z 198–238) ; z=-72 en bas derrière les pots origami.",
     "area": [
       [652, -72],
-      [2320, -72],
-      [2320, 224],
+      [2360, -72],
+      [2360, 224],
       [1970, 224],
       [1960, 250],
       [1910, 300],
@@ -213,8 +216,8 @@
       {
         "id": "vers-rayon",
         "edge": "right",
-        "zone": [2060, -72, 2320, 224],
-        "reach": [2100, -72, 2320, 1200],
+        "zone": [2060, -72, 2360, 224],
+        "reach": [2100, -72, 2360, 1200],
         "to": "rayon-essai",
         "arriveEdge": "left",
         "arrive": [90, 60],

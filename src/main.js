@@ -32,7 +32,7 @@ import { createHotesseWiring } from './game/hotesse.js';
 import { exitTarget } from './core/places.js';
 import { quality } from './scene/quality.js';
 import { createVoices } from './game/voices.js';
-import { worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
+import { createProjection, worldToStageX, worldToStageY, stageToWorldX, stageToWorldZ, scaleAt } from './scene/projection.js';
 import { characterImageEntries, createCharacterSprite } from './scene/character.js';
 import { behindFactor, stepFade, foregroundOpacity } from './core/occlusion.js';
 import { createCrowCalls, resetCrowCalls, stepCrowCalls } from './core/birds.js';
@@ -1164,7 +1164,7 @@ const places = createPlaces(uiEl, gameEl, {
 
 async function start() {
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
-  const frontScale = Math.max(1, 1 - (nearestZ - (place.projection.refZ ?? 0)) * (place.projection.scalePerDepth ?? 0) * config.scene.depthScale);
+  const frontScale = Math.max(1, scaleAt(createProjection(place.projection, config.scene), nearestZ));
   const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio);
   // Images communes à tous les lieux.
   loadedImages = await loadImages([

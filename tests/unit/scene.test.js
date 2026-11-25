@@ -4,6 +4,7 @@ import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
 import place from '../../src/data/places/rayon-essai.json';
+import accueil from '../../src/data/places/accueil.json';
 import hero from '../../src/data/characters/heros-test.json';
 
 describe('animations décrites dans les données', () => {
@@ -126,6 +127,18 @@ describe('profondeur et corps vivant', () => {
     expect(scaleAt(proj, 250)).toBeLessThan(0.8);
     expect(scaleAt(proj, -150)).toBeGreaterThan(1.1);
     expect(scaleAt(createProjection(place.projection, { depthScale: 0 }), 250)).toBe(1);
+  });
+  it('perspective à point de fuite réel (accueil) : taille juste au comptoir, réduit au fond de l’allée, plafonné devant', () => {
+    const proj = createProjection(accueil.projection, { depthScale: 1 });
+    expect(scaleAt(proj, 206)).toBeCloseTo(0.90, 2); // devant le comptoir : tête à hauteur du haut de l'écran PC
+    expect(scaleAt(proj, 375)).toBeLessThan(0.45); // au fond de l'allée : à hauteur des rayons du fond
+    expect(scaleAt(proj, -72)).toBeLessThanOrEqual(accueil.projection.maxScale);
+  });
+  it('rayon 1 : le mur biais à gauche (sous le panneau Accueil) n’est pas praticable', () => {
+    const m = compileMask(place.walkMask);
+    expect(isWalkable(m, 50, 255)).toBe(false); // plinthe bleue du mur gauche
+    expect(isWalkable(m, 50, 210)).toBe(true); // carrelage devant le mur gauche
+    expect(isWalkable(m, 550, 260)).toBe(true); // pied des étagères
   });
   it('rebondit au milieu d’un pas, touche le sol au début', () => {
     bodyMotion(out, P, true, 0, 80, 0, -1);
