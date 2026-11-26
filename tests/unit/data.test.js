@@ -19,9 +19,7 @@ const ALL_PLACES = [accueil, place, rayon2, salleTest];
 // Règle dimensions (docs/ARCHITECTURE.md §4) : chaque lieu fait au moins 2400 px de large (20:9 sans bande
 // noire), 1080 px de haut visible, et aucune image ne dépasse 4096 px sur un côté (sauf exceptions datées).
 const MIN_PLACE_WIDTH = 2400;
-const WIDTH_EXCEPTIONS = {
-  accueil: 'hall origami V2 (2160 px) — élargissement prévu à ≥ 2500 px (étape 2a / 7a)',
-};
+const WIDTH_EXCEPTIONS = {};
 const MAX_IMAGE_SIDE_EXCEPTIONS = {
   'rayon-avant': 'bande premier plan parallaxe 1,25 (4300×175, redimensionnée au chargement par assets.js)',
   'rayon2-avant': 'bande premier plan rayon 2 provisoire (4300×150, redimensionnée au chargement)',

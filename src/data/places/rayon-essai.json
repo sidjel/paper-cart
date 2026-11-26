@@ -410,7 +410,7 @@
         "reach": [-160, -680, 50, 1080],
         "to": "accueil",
         "arriveEdge": "right",
-        "arrive": [2055, 60],
+        "arrive": [2495, 60],
         "facing": -1
       },
       {

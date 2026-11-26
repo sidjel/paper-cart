@@ -53,7 +53,7 @@
 - Caméra : toute la hauteur toujours visible, un écran plus allongé montre plus de largeur (séance 6, validé séance 7). *Remplace le choix « remplir / tout montrer » du plan initial.*
 - **Dimensions, proportions et résolution des lieux ✅ (séance 80, contrôlées par `tests/unit/data.test.js`)** :
   - hauteur de scène visible fixe : **`1 080 px`** (`size[1]` ou `viewHeight`) ;
-  - largeur minimale obligatoire d'un lieu : **`2 400 px`** (écrans 20:9 comme l'Oppo Reno 2 sans bandes noires), **recommandée ≥ `2 560 px`** (couvre aussi 21:9 + laisse une marge de caméra) ; exception datée en cours sur `accueil` (`2 160 px`, élargissement prévu en étape 2a) ;
+  - largeur minimale obligatoire d'un lieu : **`2 400 px`** (écrans 20:9 comme l'Oppo Reno 2 sans bandes noires), **recommandée ≥ `2 560 px`** (couvre aussi 21:9 + laisse une marge de caméra) ; tous les lieux respectent désormais cette règle (`accueil` élargi à `2 600 px` en séance 81) ;
   - plans parallaxe (`dehors`/`lointain`, `premier-plan`) dimensionnés pour couvrir toute la course caméra sans bord vide ;
   - plafond matériel GPU : **≤ `4 096 px`** sur un côté pour une image unique ; sprites de personnage à cadre et point d'appui aux pieds identiques sur toutes les poses.
 - Images : bitmaps `.webp` utilisés directement lorsqu'ils sont proches de la résolution utile (`assets.js`), SVG et images trop grandes préparés **une fois au chargement**, décodés avant affichage puis repassés en `decoding = 'sync'` (anti-clignotement à froid). Animations décrites dans les données (1 image comme 16).

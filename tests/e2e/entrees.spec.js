@@ -153,7 +153,7 @@ test('clavier : Espace pendant l’écriture d’une bulle termine la phrase ava
   await page.waitForFunction(() => window.paperCart.hero().z > 190);
   await page.keyboard.up('ArrowUp');
   await page.keyboard.down('ArrowLeft');
-  await page.waitForFunction(() => window.paperCart.hero().x < 1160);
+  await page.waitForFunction(() => window.paperCart.hero().x < 1380);
   await page.keyboard.up('ArrowLeft');
   await page.keyboard.press('Space'); // lance le premier slogan de l'hôtesse
   await page.waitForFunction(() => window.paperCart.narrator().visible && window.paperCart.narrator().shown > 0 && window.paperCart.narrator().shown < window.paperCart.narrator().text.length);
@@ -172,12 +172,12 @@ test('fiche « Nouvel objet » au doigt : double toucher à portée ne la referm
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
-  // Avancer devant les Scanettes jusqu'à être déjà à portée.
-  const pt = await page.evaluate(() => window.paperCart.worldToClient(1370, 206));
+  // Avancer devant les Scanettes jusqu'à être déjà à portée (hall 2600 px : x = 1590).
+  const pt = await page.evaluate(() => window.paperCart.worldToClient(1590, 206));
   await page.touchscreen.tap(pt.x, pt.y);
   await expect.poll(() => page.evaluate(() => window.paperCart.scanState().pickup), { timeout: 8000 }).toBe(0);
   // Double toucher directement sur le présentoir alors que le héros est déjà à portée : la fiche doit rester ouverte !
-  const stand = await page.evaluate(() => window.paperCart.worldToClient(1370, 560));
+  const stand = await page.evaluate(() => window.paperCart.worldToClient(1590, 560));
   await page.touchscreen.tap(stand.x, stand.y);
   await page.waitForTimeout(60);
   await page.touchscreen.tap(stand.x, stand.y);
@@ -228,12 +228,12 @@ test('traversée de bord : au contact du bord gauche, le héros avance seul à 3
   await page.keyboard.down('ArrowLeft');
   await page.waitForFunction(() => window.paperCart.hero().x <= 52, null, { timeout: 5000 });
   await page.keyboard.up('ArrowLeft');
-  // Même touche lâchée, il traverse automatiquement jusqu'à 3/4 hors-champ, change de lieu vers l'accueil,
-  // et avance automatiquement jusqu'à son point d'arrivée collé au bord droit (~2079), sans re-déclencher la sortie.
+  // Même touche lâchée, il traverse automatiquement jusqu'à 100 % hors-champ, change de lieu vers l'accueil,
+  // et avance automatiquement jusqu'à son point d'arrivée collé au bord droit (~2519 dans le hall 2600 px), sans re-déclencher la sortie.
   await page.waitForFunction(() => window.paperCart.place() === 'accueil' && window.paperCart.state() === 'play', null, { timeout: 15000 });
   await page.waitForFunction(() => {
     const h = window.paperCart.hero();
-    return h.x <= 2090 && h.x >= 2040 && !h.moving;
+    return h.x <= 2530 && h.x >= 2480 && !h.moving;
   }, null, { timeout: 5000 });
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => window.paperCart.place())).toBe('accueil');

@@ -31,10 +31,10 @@ test.afterEach(async () => {
 
 const hero = (page) => page.evaluate(() => window.paperCart.hero());
 
-// Dans le hall : dépasser les portiques par l'avant (ils sont un obstacle).
+// Dans le hall (2600 px) : dépasser les portiques par l'avant (ils sont un obstacle).
 async function pastGates(page) {
   await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => window.paperCart.hero().x > 1100);
+  await page.waitForFunction(() => window.paperCart.hero().x > 1320);
   await page.keyboard.up('ArrowRight');
 }
 
@@ -796,7 +796,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
 
 test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
-  const p = await page.evaluate(() => window.paperCart.worldToClient(1655, 380)); // pile de paniers (y ≈ 800 dans le hall)
+  const p = await page.evaluate(() => window.paperCart.worldToClient(1875, 380)); // pile de paniers (y ≈ 800 dans le hall 2600 px)
   await page.touchscreen.tap(p.x, p.y);
   await page.touchscreen.tap(p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);

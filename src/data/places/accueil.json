@@ -1,13 +1,13 @@
 {
   "id": "accueil",
-  "name": "[TEMP] Accueil — hall origami V2",
-  "size": [2160, 1080],
+  "name": "[TEMP] Accueil — hall origami V3 (2600 px)",
+  "size": [2600, 1080],
   "projection": {
-    "comment": "Perspective exacte à point de fuite réel (horizonY=718, sol plat) : sans plafond prématuré (maxScale=2.0), le héros grandit en continu jusqu'en bas de l'écran (z=-72, scale=1.71) sans effet de creux.",
+    "comment": "Perspective exacte à point de fuite réel (horizonY=718, sol plat, élargi 2600 px = +220 G / +220 D) : sans plafond prématuré (maxScale=2.0), le héros grandit en continu jusqu'en bas de l'écran (z=-72, scale=1.71) sans effet de creux.",
     "floorFrontY": 1032,
     "depthToScreen": 0.61,
     "horizonY": 718,
-    "vanishX": 1730,
+    "vanishX": 1950,
     "refZ": 206,
     "baseScale": 0.90,
     "maxScale": 2.0
@@ -15,11 +15,11 @@
   "images": {
     "accueil-dehors": {
       "src": "art/accueil/accueil-dehors.webp",
-      "size": [2400, 1080]
+      "size": [2800, 1080]
     },
     "accueil-fond": {
       "src": "art/accueil/accueil-fond.webp",
-      "size": [2160, 1080]
+      "size": [2600, 1080]
     },
     "accueil-avant-gauche": {
       "src": "art/accueil/accueil-avant-gauche.webp",
@@ -106,15 +106,15 @@
     {
       "id": "dehors",
       "image": "accueil-dehors",
-      "position": [-120, 0],
+      "position": [-100, 0],
       "parallax": 0.35,
-      "contains": "plan 3 (extérieur origami HD séparé) : ciel bleu dégagé, nuages origami dérivants, oiseaux origami en vol et 2 oiseaux qui marchent par à-coups derrière les verrières du plafond, village avec clocher, lac et arbres derrière la baie vitrée",
+      "contains": "plan 3 (extérieur origami HD étendu 2800×1080) : ciel bleu dégagé, nuages origami dérivants, oiseaux origami en vol et 2 oiseaux qui marchent par à-coups derrière les verrières du plafond, village avec clocher, lac et arbres derrière la baie vitrée",
       "hiddenBy": "le plan 2 (accueil-fond), sauf par les vitres de la baie et de la verrière"
     },
     {
       "id": "fond",
       "image": "accueil-fond",
-      "contains": "plan 2 (accueil origami Krita) : portes vitrées coulissantes et verrières détourées sans nuages figés, comptoir i Accueil, meuble Scanettes garni de 16 Scanettes origami centrées, pile de paniers rouges, ouverture vers les rayons à droite, sol carrelé reconstruit",
+      "contains": "plan 2 (accueil origami HD élargi 2600×1080) : portes vitrées coulissantes et verrières détourées sans nuages figés, comptoir i Accueil, meuble Scanettes garni de 16 Scanettes origami centrées, pile de paniers rouges, ouverture élargie vers les rayons à droite, sol carrelé reconstruit",
       "hiddenBy": "en partie par les portiques horizontaux, l'agent, le personnage et les pots de fleurs du premier plan"
     },
     {
@@ -137,41 +137,41 @@
     {
       "id": "premier-plan",
       "image": "accueil-avant-droite",
-      "position": [1824, 740],
+      "position": [2264, 740],
       "parallax": 1.35,
       "opacity": "display.hallForegroundOpacity",
       "occluders": [
-        [1830, 860, 2290, 1080]
+        [2270, 860, 2730, 1080]
       ],
       "contains": "plan 1 droite (pots de fleurs origami en bas à droite) : semi-transparent uniquement quand le héros passe derrière ce massif",
       "hiddenBy": "rien"
     }
   ],
-  "spawn": [1180, 100],
+  "spawn": [1400, 100],
   "walkMask": {
-    "comment": "Repère du hall origami V2 (2160×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1525–1970) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle x 1500–1710, z 208–228) ; z=-72 en bas derrière les pots origami.",
+    "comment": "Repère du hall origami V3 (2600×1080, floorFrontY=1032, depthToScreen=0.61) : z=206 devant le comptoir et les Scanettes ; allée ouverte entre les deux piliers marron clair (x 1745–2190) jusqu'au fond (z=375, y≈803) et derrière la plante + paniers rouges (obstacle x 1720–1930, z 208–228) ; z=-72 en bas derrière les pots origami.",
     "area": [
-      [652, -72],
-      [2360, -72],
-      [2360, 224],
-      [1970, 224],
-      [1960, 250],
-      [1910, 300],
-      [1765, 375],
-      [1695, 375],
-      [1595, 295],
-      [1525, 255],
-      [1525, 206],
-      [758, 206]
+      [872, -72],
+      [2800, -72],
+      [2800, 224],
+      [2190, 224],
+      [2180, 250],
+      [2130, 300],
+      [1985, 375],
+      [1915, 375],
+      [1815, 295],
+      [1745, 255],
+      [1745, 206],
+      [978, 206]
     ],
     "obstacles": [
       {
         "name": "Plante et paniers rouges",
         "points": [
-          [1500, 208],
-          [1710, 208],
-          [1710, 228],
-          [1500, 228]
+          [1720, 208],
+          [1930, 208],
+          [1930, 228],
+          [1720, 228]
         ]
       }
     ]
@@ -180,7 +180,7 @@
     {
       "id": "portique-fond",
       "image": "portique-origami",
-      "at": [697, 212],
+      "at": [917, 212],
       "anchor": [63, 238],
       "depthRef": 212,
       "perspectiveScale": 1.245,
@@ -189,7 +189,7 @@
     {
       "id": "portique-milieu",
       "image": "portique-origami",
-      "at": [647, 82],
+      "at": [867, 82],
       "anchor": [63, 238],
       "depthRef": 82,
       "perspectiveScale": 1.245
@@ -197,7 +197,7 @@
     {
       "id": "portique-avant",
       "image": "portique-origami",
-      "at": [598, -48],
+      "at": [818, -48],
       "anchor": [63, 238],
       "depthRef": -48,
       "perspectiveScale": 1.245
@@ -205,7 +205,7 @@
     {
       "id": "plante-paniers",
       "image": "plante-paniers-origami",
-      "at": [1555, 218],
+      "at": [1775, 218],
       "anchor": [70, 184],
       "depthRef": 218,
       "comment": "Plante en pot gris à gauche des paniers rouges : le héros passe devant à z < 218 et derrière à z > 218."
@@ -213,7 +213,7 @@
     {
       "id": "paniers-rouges",
       "image": "paniers-rouges-origami",
-      "at": [1656, 218],
+      "at": [1876, 218],
       "anchor": [49, 197],
       "depthRef": 218,
       "comment": "Tour de paniers rouges origami détourée : le héros passe devant à z < 218 et derrière à z > 218."
@@ -221,7 +221,7 @@
     {
       "id": "brume-couloir",
       "image": "brume-couloir-origami",
-      "at": [1745, 260],
+      "at": [1965, 260],
       "anchor": [230, 358],
       "depthRef": 232,
       "fadeZ": [232, 375],
@@ -235,8 +235,8 @@
       {
         "id": "vers-rayon",
         "edge": "right",
-        "zone": [2060, -72, 2360, 224],
-        "reach": [2100, -72, 2360, 1200],
+        "zone": [2500, -72, 2800, 224],
+        "reach": [2540, -72, 2800, 1200],
         "to": "rayon-essai",
         "arriveEdge": "left",
         "arrive": [90, 60],
@@ -245,22 +245,22 @@
     ]
   },
   "bench": {
-    "start": [1180, 100],
+    "start": [1400, 100],
     "route": [
       {
-        "to": [1370, 200]
+        "to": [1590, 200]
       },
       {
         "wait": 1
       },
       {
-        "to": [1960, 80]
+        "to": [2180, 80]
       },
       {
-        "to": [950, -65]
+        "to": [1170, -65]
       },
       {
-        "to": [1180, 100]
+        "to": [1400, 100]
       },
       {
         "wait": 1
@@ -268,23 +268,23 @@
     ]
   },
   "diagnostic": {
-    "a": [1050, 80],
-    "b": [1850, 80]
+    "a": [1270, 80],
+    "b": [2070, 80]
   },
   "accueil": {
     "z": 206,
-    "remindAfterX": 1850,
+    "remindAfterX": 2070,
     "comment": "Présentoir Scanettes à droite du comptoir i Accueil, paniers juste à sa droite.",
     "items": [
       {
         "id": "scanette",
-        "at": [1370, 560],
+        "at": [1590, 560],
         "w": 220,
         "h": 310
       },
       {
         "id": "panier",
-        "at": [1655, 700],
+        "at": [1875, 700],
         "w": 150,
         "h": 200
       }
@@ -292,7 +292,7 @@
   },
   "clouds": {
     "layer": "dehors",
-    "span": [-360, 2680],
+    "span": [-360, 3120],
     "items": [
       { "image": "nuage-1", "y": 64, "scale": 0.88, "speed": 11, "dir": 1, "phase": 0.05, "opacity": 0.96 },
       { "image": "nuage-3", "y": 86, "scale": 0.82, "speed": 9, "dir": 1, "phase": 0.24, "opacity": 0.94 },
@@ -318,7 +318,7 @@
     ],
     "cycle": [0, 1, 2, 3, 5, 4, 2, 1],
     "size": [128, 96],
-    "span": [-120, 2320],
+    "span": [-120, 2760],
     "flock": [
       { "y": 255, "scale": 0.44, "speed": 62, "dir": 1, "bob": 9, "flap": 6.5, "phase": 0.14 },
       { "y": 185, "scale": 0.34, "speed": 50, "dir": 1, "bob": 7, "flap": 7.4, "phase": 0.08 },
@@ -329,14 +329,14 @@
         "mode": "walk",
         "size": [128, 128],
         "cycle": [6, 7],
-        "walkSpan": [975, 1285],
+        "walkSpan": [1195, 1505],
         "walkPoints": [
-          [975, 94],
-          [1046, 89],
-          [1056, 83],
-          [1097, 73],
-          [1168, 84],
-          [1285, 89]
+          [1195, 94],
+          [1266, 89],
+          [1276, 83],
+          [1317, 73],
+          [1388, 84],
+          [1505, 89]
         ],
         "y": 84,
         "scale": 0.68,
@@ -350,7 +350,7 @@
         "mode": "walk",
         "size": [128, 128],
         "cycle": [6, 7],
-        "walkSpan": [1725, 1915],
+        "walkSpan": [1945, 2135],
         "y": 118,
         "scale": 0.68,
         "speed": 32,
@@ -364,8 +364,8 @@
   "speakers": {
     "comment": "Haut-parleurs du plafond (repères x, y près des luminaires origami au plafond).",
     "items": [
-      [1650, 145],
-      [1690, 345]
+      [1870, 145],
+      [1910, 345]
     ]
   },
   "guard": {
@@ -374,11 +374,11 @@
     "stopImage": "agent-securite-stop",
     "anchor": [120, 328],
     "scale": 1.24,
-    "post": [250, 160],
-    "stand": [460, 160],
+    "post": [470, 160],
+    "stand": [680, 160],
     "startDelay": 1.2,
     "barrier": {
-      "x0": 616,
+      "x0": 836,
       "slope": 0.38
     },
     "warn": 200,
@@ -390,11 +390,11 @@
   "hotesse": {
     "comment": "Hôtesse d'accueil (A8) derrière le comptoir, à droite de l'écran d'ordinateur. Suit le héros du regard ; slogans en boucle, échange du rouleau de papier toilette contre le chariot.",
     "image": "hotesse",
-    "at": [1106, 718],
+    "at": [1326, 718],
     "anchor": [100, 182],
     "scale": 0.80,
     "depthRef": 230,
-    "talkX": 1106,
+    "talkX": 1326,
     "talkZ": 206,
     "range": 145
   }

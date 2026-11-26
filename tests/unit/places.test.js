@@ -55,9 +55,9 @@ describe('lieux : sorties et fondu', () => {
     // À z = 60 (échelle ~0,93), le 1er pixel touche vers x ≈ 54 ; à x = 75 il ne déclenche PAS encore.
     expect(edgeTouched(outLeft, 75, rayon.size[0], 0.93)).toBe(false);
     expect(edgeTouched(outLeft, 52, rayon.size[0], 0.93)).toBe(true);
-    // Côté droit (accueil 2160 px, échelle 0,95) : ne déclenche pas à 2085, déclenche dès que le 1er pixel touche (~2105).
-    expect(edgeTouched(outRight, 2085, accueil.size[0], 0.95)).toBe(false);
-    expect(edgeTouched(outRight, 2106, accueil.size[0], 0.95)).toBe(true);
+    // Côté droit (accueil 2600 px, échelle 0,95) : ne déclenche pas à 2525, déclenche dès que le 1er pixel touche (~2545).
+    expect(edgeTouched(outRight, 2525, accueil.size[0], 0.95)).toBe(false);
+    expect(edgeTouched(outRight, 2546, accueil.size[0], 0.95)).toBe(true);
     // Les bornes calculées : outX sort 100 % hors-champ (plus aucun pixel visible) et inX est collé au bord sans re-déclencher.
     const leftB = edgeBounds('left', rayon.size[0], 0.93);
     expect(leftB.outX).toBeLessThan(-95);
@@ -136,18 +136,18 @@ describe('passages au doigt (séance 67)', () => {
     const aOut = rayon.exits.items.find((e) => e.id === 'vers-rayon2-a');
     expect(exitTarget(rayon.exits.items, 2170, 600)).toEqual([(aOut.zone[0] + aOut.zone[2]) / 2, (aOut.zone[1] + aOut.zone[3]) / 2]); // l'arche centrale, au fond
     expect(exitTarget(rayon.exits.items, 1000, 600)).toBe(null); // l'étagère : comme avant
-    // Hall d'accueil : cliquer dans l'allée entre les deux piliers (à droite des paniers rouges) NE redirige PAS vers la sortie droite.
-    expect(exitTarget(accueil.exits.items, 1750, 320)).toBe(null);
-    expect(exitTarget(accueil.exits.items, 1850, 500)).toBe(null);
-    expect(exitTarget(accueil.exits.items, 2130, 300)).not.toBe(null); // seul le vrai bord droit redirige vers la sortie
+    // Hall d'accueil (2600 px) : cliquer dans l'allée entre les deux piliers NE redirige PAS vers la sortie droite.
+    expect(exitTarget(accueil.exits.items, 1970, 320)).toBe(null);
+    expect(exitTarget(accueil.exits.items, 2070, 500)).toBe(null);
+    expect(exitTarget(accueil.exits.items, 2570, 300)).not.toBe(null); // seul le vrai bord droit redirige vers la sortie
   });
 
   it('hall d’accueil : le héros peut aller au fond entre les deux piliers et derrière la plante + les paniers rouges', () => {
     const m = compileMask(accueil.walkMask);
-    expect(isWalkable(m, 1730, 360)).toBe(true); // au fond entre les deux piliers marron clair
-    expect(isWalkable(m, 1560, 252)).toBe(true); // derrière la plante à gauche des paniers rouges
-    expect(isWalkable(m, 1650, 260)).toBe(true); // derrière les paniers rouges
-    expect(isWalkable(m, 1650, 215)).toBe(false); // pied des paniers rouges : obstacle
+    expect(isWalkable(m, 1950, 360)).toBe(true); // au fond entre les deux piliers marron clair
+    expect(isWalkable(m, 1780, 252)).toBe(true); // derrière la plante à gauche des paniers rouges
+    expect(isWalkable(m, 1870, 260)).toBe(true); // derrière les paniers rouges
+    expect(isWalkable(m, 1870, 215)).toBe(false); // pied des paniers rouges : obstacle
   });
 });
 
