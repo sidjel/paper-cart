@@ -1,22 +1,73 @@
-// Profils de réglages nommés par onglet du panneau développeur (F2).
-// Logique pure + persistance localStorage : créer, renommer, mettre à jour, supprimer, comparer.
+// Profils de réglages nommés (complets tous onglets ET par onglet) pour le panneau développeur (F2).
+// Logique pure + persistance robuste dans localStorage avec copie de secours (.bak) et export/import JSON.
 
 const PROFILES_KEY = 'paper-cart.profils-onglets.v1';
+const PROFILES_BAK_KEY = 'paper-cart.profils-onglets.v1.bak';
+const SEEDED_KEY = 'paper-cart.profils-seeded.v1';
+export const GLOBAL_GROUP = '__global__';
+
+// Deux profils prêts à l'emploi créés automatiquement au premier démarrage (modifiables/supprimables).
+export const STARTER_CHARACTER_PROFILES = [
+  {
+    id: 'starter-papier-net',
+    name: 'Papier net & cohérent',
+    values: {
+      'character.flipDuration': 0.16,
+      'character.edgeThickness': 0.08,
+      'character.flipOnFrontBack': true,
+      'character.flipAllDirs': false,
+      'character.turnFlipDuration': 0.12,
+      'character.paperTwist': 1.0,
+      'character.flipShadow': 0.55,
+      'character.paperSheen': false,
+      'character.smoothTurns': true,
+    },
+  },
+  {
+    id: 'starter-paper-mario',
+    name: 'Paper Mario complet',
+    values: {
+      'character.flipDuration': 0.18,
+      'character.edgeThickness': 0.1,
+      'character.flipOnFrontBack': true,
+      'character.flipAllDirs': true,
+      'character.turnFlipDuration': 0.13,
+      'character.paperTwist': 1.25,
+      'character.flipShadow': 0.65,
+      'character.paperSheen': true,
+      'character.smoothTurns': true,
+    },
+  },
+];
+
+function parseObject(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
 
 function readStore(storage) {
   if (!storage) return {};
-  try {
-    const raw = JSON.parse(storage.getItem(PROFILES_KEY) || '{}');
-    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
-  } catch {
-    return {};
+  const primary = parseObject(storage.getItem(PROFILES_KEY));
+  if (primary) return primary;
+  const backup = parseObject(storage.getItem(PROFILES_BAK_KEY));
+  if (backup) {
+    writeStore(storage, backup);
+    return backup;
   }
+  return {};
 }
 
 function writeStore(storage, data) {
   if (!storage) return;
   try {
-    storage.setItem(PROFILES_KEY, JSON.stringify(data));
+    const json = JSON.stringify(data);
+    storage.setItem(PROFILES_KEY, json);
+    storage.setItem(PROFILES_BAK_KEY, json);
   } catch {
     /* navigation privée ou quota : pas de sauvegarde */
   }
@@ -26,17 +77,60 @@ export function cleanProfileName(name) {
   return String(name || '').trim().replace(/\s+/g, ' ').slice(0, 32);
 }
 
+function validProfiles(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.filter((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && p.values && typeof p.values === 'object');
+}
+
 export function createProfileStore(storage = typeof localStorage !== 'undefined' ? localStorage : null) {
   const data = readStore(storage);
 
   function list(group) {
-    const arr = Array.isArray(data[group]) ? data[group] : [];
-    return arr.filter((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && p.values && typeof p.values === 'object');
+    return validProfiles(data[group]);
   }
 
   function saveGroup(group, arr) {
     data[group] = arr;
     writeStore(storage, data);
+  }
+
+  // Injecte une seule fois les 2 profils de départ (Personnage + Profils complets) sans jamais écraser
+  // ni recréer un profil supprimé volontairement par l'utilisateur.
+  function ensureStarters(allDefaults) {
+    if (storage) {
+      try {
+        if (storage.getItem(SEEDED_KEY) === '1') return;
+      } catch {
+        /* ignore */
+      }
+    }
+    const charArr = [...list('Personnage')];
+    for (const st of STARTER_CHARACTER_PROFILES) {
+      if (!charArr.some((p) => p.id === st.id || p.name === st.name)) {
+        charArr.push({ id: st.id, name: st.name, values: { ...st.values } });
+      }
+    }
+    data.Personnage = charArr;
+
+    if (allDefaults && typeof allDefaults === 'object') {
+      const globArr = [...list(GLOBAL_GROUP)];
+      for (const st of STARTER_CHARACTER_PROFILES) {
+        const gid = `global-${st.id}`;
+        if (!globArr.some((p) => p.id === gid || p.name === st.name)) {
+          globArr.push({ id: gid, name: st.name, values: { ...allDefaults, ...st.values } });
+        }
+      }
+      data[GLOBAL_GROUP] = globArr;
+    }
+
+    writeStore(storage, data);
+    if (storage) {
+      try {
+        storage.setItem(SEEDED_KEY, '1');
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   function create(group, rawName, values) {
@@ -76,206 +170,42 @@ export function createProfileStore(storage = typeof localStorage !== 'undefined'
 
   function matches(profile, getValue) {
     if (!profile) return false;
-    return Object.entries(profile.values).every(([k, v]) => getValue(k) === v);
+    const entries = Object.entries(profile.values);
+    if (entries.length === 0) return false;
+    return entries.every(([k, v]) => getValue(k) === v);
   }
 
-  return { list, create, update, remove, matches };
-}
-
-// Barre de profils nommés en haut à droite d'un onglet (créer, appliquer, mettre à jour, renommer, supprimer).
-export function createTabProfilesBar(store, groupName, keys, { getValue, setValue }) {
-  const wrap = document.createElement('div');
-  wrap.className = 'settings-tab-profiles';
-
-  const row = document.createElement('div');
-  row.className = 'settings-profiles-row';
-
-  const select = document.createElement('select');
-  select.className = 'settings-profiles-select';
-  select.setAttribute('aria-label', `Profils enregistrés pour ${groupName}`);
-
-  const newBtn = document.createElement('button');
-  newBtn.type = 'button';
-  newBtn.className = 'settings-profile-btn';
-  newBtn.textContent = '+ Créer';
-  newBtn.title = 'Enregistrer les réglages actuels de cet onglet dans un nouveau profil';
-
-  const updateBtn = document.createElement('button');
-  updateBtn.type = 'button';
-  updateBtn.className = 'settings-profile-btn';
-  updateBtn.textContent = 'Enregistrer';
-  updateBtn.title = 'Mettre à jour le profil sélectionné avec les réglages actuels';
-
-  const renameBtn = document.createElement('button');
-  renameBtn.type = 'button';
-  renameBtn.className = 'settings-profile-btn';
-  renameBtn.textContent = 'Renommer';
-
-  const delBtn = document.createElement('button');
-  delBtn.type = 'button';
-  delBtn.className = 'settings-profile-btn danger';
-  delBtn.textContent = 'Supprimer';
-
-  const status = document.createElement('span');
-  status.className = 'settings-profile-status';
-
-  row.append(select, newBtn, updateBtn, renameBtn, delBtn);
-
-  const editor = document.createElement('form');
-  editor.className = 'settings-profile-editor';
-  editor.hidden = true;
-  const nameInput = document.createElement('input');
-  nameInput.type = 'text';
-  nameInput.maxLength = 32;
-  nameInput.placeholder = 'Nom du profil…';
-  nameInput.setAttribute('aria-label', 'Nom du profil');
-  const okBtn = document.createElement('button');
-  okBtn.type = 'submit';
-  okBtn.className = 'settings-profile-btn primary';
-  okBtn.textContent = 'Valider';
-  const cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.className = 'settings-profile-btn';
-  cancelBtn.textContent = 'Annuler';
-  editor.append(nameInput, okBtn, cancelBtn);
-
-  wrap.append(row, editor, status);
-
-  let selectedId = '';
-  let editMode = null;
-  let pendingDelete = false;
-  let statusTimer = null;
-
-  function snapshotValues() {
-    const vals = {};
-    for (const k of keys) vals[k] = getValue(k);
-    return vals;
+  function exportJson() {
+    const out = {};
+    for (const [g, arr] of Object.entries(data)) {
+      const clean = validProfiles(arr);
+      if (clean.length > 0) out[g] = clean;
+    }
+    return JSON.stringify(out, null, 2);
   }
 
-  function flash(msg) {
-    status.textContent = msg;
-    clearTimeout(statusTimer);
-    statusTimer = setTimeout(() => {
-      status.textContent = '';
-    }, 2200);
+  function importJson(raw) {
+    const parsed = parseObject(raw);
+    if (!parsed) return 0;
+    let count = 0;
+    for (const [g, arr] of Object.entries(parsed)) {
+      const incoming = validProfiles(arr);
+      if (incoming.length === 0) continue;
+      const cur = [...list(g)];
+      for (const p of incoming) {
+        const name = cleanProfileName(p.name);
+        if (!name) continue;
+        const clean = { id: p.id, name, values: { ...p.values } };
+        const idx = cur.findIndex((x) => x.id === clean.id);
+        if (idx >= 0) cur[idx] = clean;
+        else cur.push(clean);
+        count++;
+      }
+      data[g] = cur;
+    }
+    if (count > 0) writeStore(storage, data);
+    return count;
   }
 
-  function closeEditor() {
-    editMode = null;
-    editor.hidden = true;
-    nameInput.value = '';
-  }
-
-  function refresh() {
-    const list = store.list(groupName);
-    if (selectedId && !list.some((p) => p.id === selectedId)) selectedId = '';
-    select.replaceChildren();
-    select.add(new Option(list.length ? `Profils (${list.length})…` : 'Aucun profil', ''));
-    for (const p of list) {
-      const exact = store.matches(p, getValue);
-      const label = p.id === selectedId && !exact ? `${p.name} (modifié)` : p.name;
-      select.add(new Option(label, p.id));
-    }
-    select.value = selectedId;
-    const hasSel = Boolean(selectedId);
-    updateBtn.hidden = !hasSel;
-    renameBtn.hidden = !hasSel;
-    delBtn.hidden = !hasSel;
-    if (!hasSel) {
-      pendingDelete = false;
-      delBtn.textContent = 'Supprimer';
-    }
-  }
-
-  select.addEventListener('change', () => {
-    selectedId = select.value;
-    pendingDelete = false;
-    delBtn.textContent = 'Supprimer';
-    closeEditor();
-    if (!selectedId) {
-      refresh();
-      return;
-    }
-    const prof = store.list(groupName).find((p) => p.id === selectedId);
-    if (prof) {
-      for (const [k, v] of Object.entries(prof.values)) setValue(k, v);
-      flash(`Profil « ${prof.name} » chargé`);
-    }
-    refresh();
-  });
-
-  newBtn.addEventListener('click', () => {
-    pendingDelete = false;
-    delBtn.textContent = 'Supprimer';
-    editMode = 'create';
-    editor.hidden = false;
-    nameInput.value = '';
-    nameInput.placeholder = 'Nom du nouveau profil…';
-    nameInput.focus();
-  });
-
-  updateBtn.addEventListener('click', () => {
-    if (!selectedId) return;
-    const updated = store.update(groupName, selectedId, { values: snapshotValues() });
-    if (updated) {
-      flash(`Profil « ${updated.name} » mis à jour ✓`);
-      refresh();
-    }
-  });
-
-  renameBtn.addEventListener('click', () => {
-    if (!selectedId) return;
-    const prof = store.list(groupName).find((p) => p.id === selectedId);
-    if (!prof) return;
-    pendingDelete = false;
-    delBtn.textContent = 'Supprimer';
-    editMode = 'rename';
-    editor.hidden = false;
-    nameInput.value = prof.name;
-    nameInput.placeholder = 'Nouveau nom…';
-    nameInput.focus();
-    nameInput.select();
-  });
-
-  delBtn.addEventListener('click', () => {
-    if (!selectedId) return;
-    if (!pendingDelete) {
-      pendingDelete = true;
-      delBtn.textContent = 'Confirmer ?';
-      return;
-    }
-    const prof = store.list(groupName).find((p) => p.id === selectedId);
-    if (store.remove(groupName, selectedId)) {
-      selectedId = '';
-      pendingDelete = false;
-      delBtn.textContent = 'Supprimer';
-      closeEditor();
-      flash(prof ? `Profil « ${prof.name} » supprimé` : 'Profil supprimé');
-      refresh();
-    }
-  });
-
-  cancelBtn.addEventListener('click', () => closeEditor());
-
-  editor.addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const raw = nameInput.value;
-    if (editMode === 'create') {
-      const created = store.create(groupName, raw, snapshotValues());
-      if (!created) return;
-      selectedId = created.id;
-      closeEditor();
-      flash(`Profil « ${created.name} » créé ✓`);
-      refresh();
-    } else if (editMode === 'rename' && selectedId) {
-      const renamed = store.update(groupName, selectedId, { name: raw });
-      if (!renamed) return;
-      closeEditor();
-      flash(`Renommé en « ${renamed.name} » ✓`);
-      refresh();
-    }
-  });
-
-  refresh();
-  return { el: wrap, refresh };
+  return { list, ensureStarters, create, update, remove, matches, exportJson, importJson };
 }

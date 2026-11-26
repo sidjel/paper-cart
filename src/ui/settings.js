@@ -4,7 +4,8 @@
 
 import helpFile from '../data/aide-reglages.json';
 import { WALK_PRESETS, TUNABLES, getValue, getDefault, setValue, overrides, applyOverrides, resetAll, onConfigChange } from '../config.js';
-import { createProfileStore, createTabProfilesBar } from './settingsProfiles.js';
+import { GLOBAL_GROUP, createProfileStore } from './settingsProfiles.js';
+import { createGlobalProfilesView, createTabProfilesBar } from './settingsProfilesUi.js';
 
 const STORAGE_KEY = 'paper-cart.reglages.v1';
 
@@ -76,7 +77,7 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
   } catch {
     /* pas de mémoire : premier onglet */
   }
-  if (!TUNABLES.some((t) => t.group === currentTab) && !extras[currentTab]) currentTab = TUNABLES[0].group;
+  if (currentTab !== 'Profils' && !TUNABLES.some((t) => t.group === currentTab) && !extras[currentTab]) currentTab = TUNABLES[0].group;
 
   const layout = document.createElement('div');
   layout.className = 'settings-layout';
@@ -158,7 +159,11 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
 
   const presetButtons = [];
   const profileStore = createProfileStore();
+  const allKeys = TUNABLES.map((t) => t.key);
+  const allDefaults = Object.fromEntries(allKeys.map((k) => [k, getDefault(k)]));
+  profileStore.ensureStarters(allDefaults);
   const profileUpdaters = [];
+  let globalProfilesTab = null;
 
   // Le profil dont toutes les valeurs correspondent aux réglages actuels est mis en évidence.
   function updatePresets() {
@@ -168,6 +173,42 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
       b.setAttribute('aria-pressed', active);
     }
     for (const refresh of profileUpdaters) refresh();
+    if (globalProfilesTab) {
+      globalProfilesTab.dataset.count = String(profileStore.list(GLOBAL_GROUP).length);
+    }
+  }
+
+  // Onglet bleu « Profils » tout en haut : profils complets (tous les onglets) + sauvegarde JSON.
+  {
+    const sec = document.createElement('section');
+    sec.className = 'settings-section';
+    sec.dataset.group = 'Profils';
+    sec.hidden = currentTab !== 'Profils';
+    const heading = document.createElement('h3');
+    heading.className = 'settings-section-title';
+    heading.textContent = 'Profils';
+    heading.hidden = true;
+    sec.appendChild(heading);
+
+    const view = createGlobalProfilesView(profileStore, allKeys, {
+      getValue,
+      setValue,
+      onProfilesChange: () => updatePresets(),
+    });
+    profileUpdaters.push(view.refresh);
+    sec.appendChild(view.el);
+
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'settings-tab is-profiles';
+    tab.textContent = 'Profils';
+    tab.setAttribute('role', 'tab');
+    tab.addEventListener('click', () => showTab('Profils'));
+    globalProfilesTab = tab;
+    tabBar.appendChild(tab);
+    tabs.push(['Profils', tab, sec]);
+    sectionsHolder.appendChild(sec);
+    sections.set('Profils', sec);
   }
 
   function updateCounters() {

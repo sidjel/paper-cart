@@ -1384,6 +1384,74 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .settings .settings-tab { font-family: "Courier New", ui-monospace, monospace; background: rgb(255 255 255 / calc(0.55 * var(--menu-alpha, 0.94))); border: 1px dashed #23262d; }
 .settings .settings-tab:hover { background: rgb(35 38 45 / 0.08); }
 .settings .settings-tab.active { background: #23262d; color: #fbfaf4; border-style: solid; }
+.settings .settings-tab.is-profiles {
+  background: #e6f0fb;
+  color: #164b8a;
+  border: 1.5px solid #2b6cb0;
+  font-weight: 700;
+}
+.settings .settings-tab.is-profiles:hover { background: #d4e6f9; }
+.settings .settings-tab.is-profiles.active {
+  background: #1d5fa7;
+  color: #fbfaf4;
+  border-color: #144478;
+}
+.global-profiles { display: flex; flex-direction: column; gap: 12px; }
+.global-profiles-intro { margin: 0; font-size: calc(13px * var(--ts, 1)); line-height: 1.45; color: #364152; }
+.global-profiles-create { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.global-profiles-create input {
+  flex: 1 1 220px;
+  min-height: 36px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #2b6cb0;
+  background: #fff;
+  color: #23262d;
+  font: 600 calc(13px * var(--ts, 1))/1.2 "Courier New", ui-monospace, monospace;
+}
+.global-profiles-list { display: flex; flex-direction: column; gap: 8px; }
+.global-profiles-empty { margin: 8px 0; font-size: calc(13px * var(--ts, 1)); opacity: 0.7; }
+.global-profile-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgb(35 38 45 / 0.22);
+  background: rgb(255 255 255 / 0.72);
+}
+.global-profile-card.is-active {
+  border-color: #1d5fa7;
+  background: #edf5ff;
+}
+.global-profile-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.global-profile-name { font-weight: 700; font-size: calc(14px * var(--ts, 1)); color: #1a2433; }
+.global-profile-badge {
+  font: 700 calc(11px * var(--ts, 1))/1.2 "Courier New", ui-monospace, monospace;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgb(29 95 167 / 0.14);
+  color: #164b8a;
+}
+.global-profile-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.global-profiles-backup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgb(35 38 45 / 0.22);
+}
+.global-profiles-import { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.global-profiles-import[hidden] { display: none; }
+.global-profiles-import textarea {
+  flex: 1 1 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgb(35 38 45 / 0.35);
+  font: 12px/1.35 "Courier New", ui-monospace, monospace;
+}
 .settings .setting { border-bottom: none; }
 .settings .setting-value { font-family: "Courier New", ui-monospace, monospace; }
 .settings input[type="range"], .settings input[type="checkbox"] { accent-color: #c0503f; }

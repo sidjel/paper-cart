@@ -9,7 +9,7 @@
 
 import { bodyMotion, compileAnimation, flipEffects, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
-import { createPaperFlipRenderer, turnDirectionSign } from './paperFlip.js';
+import { createPaperFlipRenderer, turnAngleDeg, turnDirectionSign } from './paperFlip.js';
 import { directionToView, needsPaperFlip } from '../core/direction.js';
 
 export function characterImageEntries(data, rasterScale) {
@@ -143,6 +143,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let flipFromImg = null;
   let flipFromFlip = 1;
   let flipSign = 1;
+  let flipAngle = 180;
   let flipP = -1;
   let swapped = false;
   let current = null; // animation en cours
@@ -194,6 +195,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       flipFromFlip = shownFacing;
       flipFromImg = current && shownIndex >= 0 ? current.els[shownIndex] : null;
       flipSign = turnDirectionSign(flipFromDir, targetDir);
+      flipAngle = turnAngleDeg(flipFromDir, targetDir) || 180;
       flipDur = dur;
       flipStart = time;
       swapped = false;
@@ -281,7 +283,10 @@ export function createCharacterSprite(data, images, parent, settings, display, o
         toImg,
         toFlip,
         turnSign: flipSign,
+        angleDeg: flipAngle,
         edgeThickness: settings.edgeThickness,
+        twist: settings.paperTwist ?? 1,
+        shadow: settings.flipShadow ?? 0.55,
         sheen: settings.paperSheen !== false,
       });
     } else {

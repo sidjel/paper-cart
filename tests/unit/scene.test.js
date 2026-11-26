@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { compileAnimation, frameIndex, flipEffects, flipWidth } from '../../src/scene/animation.js';
-import { flipElasticScale, flipProgress, turnDirectionSign } from '../../src/scene/paperFlip.js';
+import { flipElasticScale, flipProgress, minWidthForAngle, turnAngleDeg, turnDirectionSign } from '../../src/scene/paperFlip.js';
 import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
@@ -69,6 +69,14 @@ describe('retournement de la feuille', () => {
     expect(flipElasticScale(1)).toBeCloseTo(0);
     expect(turnDirectionSign('E', 'SE')).toBe(-1);
     expect(turnDirectionSign('E', 'NE')).toBe(1);
+    expect(turnAngleDeg('E', 'SE')).toBe(45);
+    expect(turnAngleDeg('E', 'S')).toBe(90);
+    expect(turnAngleDeg('N', 'SW')).toBe(135);
+    expect(turnAngleDeg('E', 'W')).toBe(180);
+    // Largeur minimale adaptée à l'angle réel : 45° > 90° > 135° > 180°
+    expect(minWidthForAngle(45, 0.08)).toBeGreaterThan(minWidthForAngle(90, 0.08));
+    expect(minWidthForAngle(90, 0.08)).toBeGreaterThan(minWidthForAngle(135, 0.08));
+    expect(minWidthForAngle(135, 0.08)).toBeGreaterThan(minWidthForAngle(180, 0.08));
   });
 });
 

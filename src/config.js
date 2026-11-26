@@ -22,7 +22,9 @@ export const config = {
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
     flipAllDirs: true, // retournement de la feuille aussi sur les virages 45°/90° (ex. profil → face, droite → diagonale)
-    turnFlipDuration: 0.12, // durée (s) du retournement de la feuille sur un virage 45°/90°
+    turnFlipDuration: 0.13, // durée (s) du retournement de la feuille sur un virage 45°/90°
+    paperTwist: 1.0, // ampleur de la torsion diagonale et courbure en S de la feuille cartonnée (0 = plat, 1 = normal, 2 = prononcé)
+    flipShadow: 0.55, // intensité de l'ombre portée dynamique derrière la feuille pendant le retournement (0 = aucune)
     paperSheen: true, // reflet lumineux discret sur la feuille pendant le retournement (style Paper Mario)
     smoothTurns: true, // active l'hystérésis (±7°) et la conservation/synchro de phase de marche (même jambe devant)
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
@@ -245,6 +247,8 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
   { group: 'Personnage', key: 'character.flipAllDirs', label: 'Retournement papier sur tous les virages', type: 'bool' },
   { group: 'Personnage', key: 'character.turnFlipDuration', label: 'Durée du retournement (45°/90°)', min: 0, max: 0.4, step: 0.01, unit: 's' },
+  { group: 'Personnage', key: 'character.paperTwist', label: 'Torsion papier 2.5D', min: 0, max: 2, step: 0.05, unit: '×' },
+  { group: 'Personnage', key: 'character.flipShadow', label: 'Ombre portée au retournement', min: 0, max: 1, step: 0.05 },
   { group: 'Personnage', key: 'character.paperSheen', label: 'Reflet papier au retournement', type: 'bool' },
   { group: 'Personnage', key: 'character.smoothTurns', label: 'Hystérésis et phase de marche (8 dir.)', type: 'bool' },
   { group: 'Personnage', key: 'character.bounceHeight', label: 'Rebond en marchant', min: 0, max: 30, step: 1, unit: 'px' },
