@@ -41,7 +41,7 @@ export function createAudio(settings, base = '') {
   // s'arrête. Une famille ne coupe jamais une autre : les pas ou les froissements ne couvrent jamais le
   // haut-parleur, l'interface ou (plus tard) le combat.
   const FAMILY = {
-    pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier', pivotPapier: 'papier',
+    pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier',
     bip: 'scanner', aspire: 'scanner', carte: 'scanner', prise: 'scanner',
     grince: 'chariot', chute: 'chariot', annonce: 'voix', ding: 'voix',
     aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance',
@@ -506,8 +506,7 @@ export function createAudio(settings, base = '') {
     return [src, lp, g];
   }
 
-  const pivotPapier = () => { if (settings.flipSound !== false) samples.playPaperFlip(ctx, sfxBus, track); };
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, pivotPapier, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.
@@ -589,7 +588,7 @@ export function createAudio(settings, base = '') {
     update() {
       if (!running()) return;
       const trackMusic = (src, nodes) => track(src, nodes, 'music');
-      stats.notes += samples.updateMusic(ctx, musicBus, trackMusic);
+      stats.notes += samples.updateMusic(ctx, musicBus, trackMusic, settings.musicTrack);
     },
   };
 }

@@ -15,7 +15,17 @@ Les points ✅ sont dans `docs/SUIVI-archive.md` (rien n'est perdu ; déplacés 
 | Clignotement à froid du héros au 1er lancement | 80 | 👀 | `decoding = 'sync'` après `decode()` (`assets.js`) + décodage copies `clouds.js`/`birds.js`. À re-vérifier à froid sur PC et Oppo Reno 2. *(Réponse auteur 1a.)* |
 | Remplacer `Segoe Print Bold` (panneaux Rayon 1) avant vente commerciale | 80 | 🔧 | Licence Microsoft : remplacer par une police libre **SIL OFL** (*Patrick Hand*, *Kalam*, *Shantell Sans*) ou lettrage manuel. Noté dans `CREDITS.md`. |
 | Indices énigmatiques des fiches d'objets (`objects.json`) | 80 | ❓ | Promesses `[TEMP]` non encore décidées par l'auteur : « second cran » de la Scanette, « machines oubliées » à jetons, chariot qui « encaisse ». Gardées en texte d'attente ; l'auteur tranchera plus tard. *(Réponse auteur 6a.)* |
-| Musique d'ambiance : remplacer la boucle de 12 s par une piste plus longue | 80 | 🔧 | `supermarche.mp3` (12 s) devient répétitive à la longue ; prévoir une ou plusieurs pistes CC0 plus longues (et streaming `<audio>` si > 1–2 min). |
+| Musique d'ambiance : remplacer la boucle de 12 s par une piste plus longue | 80 | 🧪 | `Airport Lounge` (`#651533`, 30 s, CC0) intégrée à l'essai (`F2 → Son → Musique du magasin`) ; 2 pistes plus longues (2 min et 3 min) gardées en réserve ci-dessous. |
+| Priorité plateforme : jeu **PC d'abord**, mobile/Android en bonus | 81 | ✅ | Précision de l'auteur : privilégier la qualité visuelle sur PC ; les effets avancés peuvent être coupés sur le profil `Légère` pour mobile. |
+
+### Réserve audio CC0 (sons gardés de côté dans `_assets_stock/audio_en_reserve/`)
+| Son | Fichier en réserve | Durée | Auteur & source Freesound | Licence | Usage envisagé |
+|---|---|---|---|---|---|
+| *Happy Commercial Music* (`#674939`) | `musique_2_happy_commercial_674939.mp3` | 2 min 01 s | `Seth_Makes_Sounds` — https://freesound.org/people/Seth_Makes_Sounds/sounds/674939/ | CC0 1.0 | Musique de rayon / zone 1 (guitare acoustique joyeuse) |
+| *Cute Happy Background Music* (`#666720`) | `musique_3_cute_happy_666720.mp3` | 3 min 04 s | `Seth_Makes_Sounds` — https://freesound.org/people/Seth_Makes_Sounds/sounds/666720/ | CC0 1.0 | Musique longue de rayon / exploration (esprit Nintendo / Paper Mario) |
+| *Umblättern (kurz)* (`#369960`) | `papier_1_retournement_court_369960.ogg` | 0,18 s | `MiSchy` — https://freesound.org/people/MiSchy/sounds/369960/ | CC0 1.0 | Retournement de carte / menu (non retenu sur le pivot du héros) |
+| *Paper_Flip_04* (`#615334`) | `papier_2_flip_jeu_615334.ogg` | 0,66 s | `Rookster` — https://freesound.org/people/Rookster/sounds/615334/ | CC0 1.0 | Effet UI / ouverture de livre ou panier |
+| *Paper Crumple 2* (`#334199`) | `papier_3_froissement_334199.ogg` | 0,44 s | `WasabiWielder` — https://freesound.org/people/WasabiWielder/sounds/334199/ | CC0 1.0 | Effet papier froissé / coup reçu / carton |
 | Rayon 2 en décor origami HD + « test du gris » sur les produits à scanner | 80 | 🔧 | Le Rayon 2 derrière l'arche origami est encore en SVG gris provisoire ; prévoir la passe décor Rayon 2 et le test du gris (noir & blanc) pour détacher les produits scannables des étagères peintes. |
 | Personnalité et design définitifs du héros (+ 16 images uniques sur les 5 vues) | 79 | 🔧 | En attente du choix de l'auteur avant de lancer la génération des 5 vues définitives (attention mémoire : 89 images ≈ 116 Mo en DOM → argument supplémentaire pour le POC PixiJS avant B). |
 | Banc d'essai fluidité sur le vrai téléphone (Oppo Reno 2) | 80 | 🔧 | À relancer après cette passe (notamment pour mesurer `mist` vs volet, les 15 calques nuages/oiseaux et l'absence de clignotement). |

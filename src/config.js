@@ -182,8 +182,8 @@ export const config = {
     master: 0.8, // volume général
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
-    stepSound: 'carrelage', // son de pas en essai : 'carrelage' (1+2), 'pas1', 'pas2', 'pas3' (caoutchouc), 'mix' (1+2+3), 'synthese'
-    flipSound: true, // son court de papier (#369960) quand le personnage se retourne
+    stepSound: 'mix', // son de pas retenu : 'mix' (les 3 pas alternés), ou 'carrelage', 'pas1', 'pas2', 'pas3', 'synthese'
+    musicTrack: 'airport-lounge', // musique du magasin : 'airport-lounge' (30 s, essai) ou 'supermarche' (bossa 12 s)
     birdsVolume: 0.4, // volume des corbeaux / oiseaux dehors
     scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
@@ -290,15 +290,21 @@ export const TUNABLES = [
   {
     group: 'Son', key: 'audio.stepSound', label: 'Son des pas (essai)', type: 'choice',
     options: [
+      ['mix', 'Les 3 pas alternés'],
       ['carrelage', 'Carrelage G/D (pas 1 + 2)'],
       ['pas1', 'Pas 1 seul (carrelage G)'],
       ['pas2', 'Pas 2 seul (carrelage D)'],
       ['pas3', 'Pas 3 (semelle caoutchouc)'],
-      ['mix', 'Les 3 pas alternés'],
       ['synthese', 'Synthèse (ancien)'],
     ],
   },
-  { group: 'Son', key: 'audio.flipSound', label: 'Son papier au retournement', type: 'bool' },
+  {
+    group: 'Son', key: 'audio.musicTrack', label: 'Musique du magasin', type: 'choice',
+    options: [
+      ['airport-lounge', 'Airport Lounge (30 s, essai)'],
+      ['supermarche', 'Bossa supermarché (12 s, ancienne)'],
+    ],
+  },
   { group: 'Son', key: 'audio.birdsVolume', label: 'Corbeaux / oiseaux dehors', min: 0, max: 1, step: 0.05 },
   {
     group: 'Son', key: 'audio.latency', label: 'Réserve de son (anti-grésillement)', type: 'choice', reload: true,

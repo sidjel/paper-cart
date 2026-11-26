@@ -199,7 +199,6 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       flipDur = dur;
       flipStart = time;
       swapped = false;
-      onFrameEvent('pivotPapier', null);
     }
     if (flipStart < 0) {
       flipP = -1;
