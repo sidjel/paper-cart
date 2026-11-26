@@ -3,6 +3,10 @@
 // Les 5 vues dessinées sont S, SE, E, NE, N ; les 3 vues de gauche (SW, W, NW) sont obtenues en miroir.
 
 const SECTORS = ['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'];
+const SECTOR_INDEX = Object.fromEntries(SECTORS.map((d, i) => [d, i]));
+const SECTOR_STEP = Math.PI / 4; // 45° entre deux directions voisines
+const HALF_SECTOR = Math.PI / 8; // 22.5° : demi-largeur d'un secteur
+const HYSTERESIS = (7 * Math.PI) / 180; // ±7° autour des frontières pour éviter les oscillations
 const DIR_DEADZONE = 0.2;
 
 const VIEW_MAP = {
@@ -17,11 +21,29 @@ const VIEW_MAP = {
 };
 
 // Renvoie la direction parmi 8 à partir d'un vecteur (dx, dz), ou `current` si trop faible.
+// Une hystérésis angulaire (±7°) évite les allers-retours rapides près d'une limite de secteur.
 export function directionFromVector(dx, dz, current = 'S') {
   if (Math.hypot(dx, dz) < DIR_DEADZONE) return current;
   const angle = Math.atan2(dz, dx); // 0 = E, +pi/2 = N, -pi/2 = S
-  const idx = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
+  const curIdx = SECTOR_INDEX[current];
+  if (curIdx !== undefined) {
+    const curAngle = curIdx * SECTOR_STEP;
+    const diff = Math.atan2(Math.sin(angle - curAngle), Math.cos(angle - curAngle));
+    if (Math.abs(diff) <= HALF_SECTOR + HYSTERESIS) return current;
+  }
+  const idx = ((Math.round(angle / SECTOR_STEP) % 8) + 8) % 8;
   return SECTORS[idx];
+}
+
+// Avance d'au plus un secteur (45°) depuis `currentDir` vers `targetDir` par le plus court chemin angulaire.
+export function stepDirectionToward(currentDir, targetDir) {
+  const a = SECTOR_INDEX[currentDir];
+  const b = SECTOR_INDEX[targetDir];
+  if (a === undefined || b === undefined || a === b) return targetDir;
+  let diff = (b - a + 8) % 8;
+  if (diff > 4) diff -= 8;
+  if (Math.abs(diff) <= 1) return targetDir;
+  return SECTORS[(a + (diff > 0 ? 1 : -1) + 8) % 8];
 }
 
 // Associe une des 8 directions à l'une des 5 vues dessinées et son miroir horizontal (1 ou -1).

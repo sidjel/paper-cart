@@ -117,6 +117,24 @@ describe('poussière et profil par défaut', () => {
       expect(a.sounds.filter((s) => s === 'pas').length).toBe(2);
     }
   });
+
+  it('cohérence et synchronisation de phase des cycles de marche sur les 5 vues (8 directions)', () => {
+    const views = ['S', 'SE', 'E', 'NE', 'N'].map((v) => ({ v, a: compileAnimation(hero.views[v].walk) }));
+    const refCount = views[0].a.count;
+    const refStride = views[0].a.stride;
+    for (const { a } of views) {
+      expect(a.count).toBe(refCount);
+      expect(a.stride).toBe(refStride);
+      const contacts = a.sounds.map((s, idx) => (s === 'pas' ? idx : -1)).filter((idx) => idx >= 0);
+      expect(contacts.length).toBe(2);
+      expect(contacts[1] - contacts[0]).toBe(refCount / 2);
+      // Avec syncPhase=true, la distance 0 et le demi-cycle tombent exactement sur un contact au sol pour toutes les vues.
+      const i0 = frameIndex(a, 0, 0, 1, true);
+      const iHalf = frameIndex(a, 0, (refCount / 2) * refStride, 1, true);
+      expect(a.sounds[i0]).toBe('pas');
+      expect(a.sounds[iHalf]).toBe('pas');
+    }
+  });
 });
 
 import { bodyMotion } from '../../src/scene/animation.js';

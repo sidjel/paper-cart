@@ -22,13 +22,20 @@ export function compileAnimation(def) {
   });
   const sounds = def.frames.map((f) => (typeof f === 'object' && f.sound) || null);
   const effects = def.frames.map((f) => (typeof f === 'object' && f.effect) || null);
-  return { count: n, stride: def.stride > 0 ? def.stride : 0, ends, total, sounds, effects };
+  // Décalage de phase du premier contact au sol : permet de synchroniser les cycles de marche entre directions.
+  const firstContact = sounds.findIndex((s, i) => Boolean(s || effects[i]));
+  const contactOffset = firstContact >= 0 ? firstContact : 0;
+  return { count: n, stride: def.stride > 0 ? def.stride : 0, ends, total, sounds, effects, contactOffset };
 }
 
 // Numéro de l'image à montrer. elapsedMs : temps écoulé dans l'animation ; distance : pixels parcourus.
-export function frameIndex(anim, elapsedMs, distance, speed = 1) {
+// syncPhase : aligne l'image 0 du cycle de marche sur le premier contact au sol (cohérence entre 8 directions).
+export function frameIndex(anim, elapsedMs, distance, speed = 1, syncPhase = false) {
   if (anim.count <= 1) return 0;
-  if (anim.stride > 0) return Math.floor((distance * speed) / anim.stride) % anim.count;
+  if (anim.stride > 0) {
+    const step = Math.floor((Math.max(0, distance) * speed) / anim.stride);
+    return (step + (syncPhase ? anim.contactOffset : 0)) % anim.count;
+  }
   if (anim.total <= 0) return 0;
   const t = (elapsedMs * speed) % anim.total;
   for (let i = 0; i < anim.count; i++) if (t < anim.ends[i]) return i;

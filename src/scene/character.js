@@ -9,7 +9,9 @@
 
 import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
-import { directionToView, needsPaperFlip } from '../core/direction.js';
+import { directionToView, needsPaperFlip, stepDirectionToward } from '../core/direction.js';
+
+const TURN_STEP_DURATION = 0.05; // durée (s) d'un secteur intermédiaire lors d'un virage de 90°+ hors retournement papier
 
 export function characterImageEntries(data, rasterScale) {
   const entries = [];
@@ -135,11 +137,13 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let shownFacing = 1;
   let shownDir = 'S';
   let flipStart = -1;
+  let turnStepTime = -1; // horodatage du dernier passage par un secteur intermédiaire (lissage angulaire)
   let swapped = false;
   let current = null; // animation en cours
   let animStartTime = 0;
   let animStartDist = 0;
   let shownIndex = -1;
+  let lastWalkStep = -1;
   let lastFlip = NaN;
   let lastX = NaN;
   let lastY = NaN;
@@ -162,13 +166,33 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     const needed = targetDir !== shownDir;
     if (flipStart < 0 && needed) {
       const dur = display.reduceMotion ? 0 : settings.flipDuration;
-      if (dur <= 0 || !needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
+      if (dur <= 0) {
         shownDir = targetDir;
         shownFacing = directionToView(shownDir).flip;
+        turnStepTime = -1;
         return 1;
       }
+      if (!needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
+        // Virage sans retournement gauche ↔ droite : on passe par les secteurs intermédiaires (lissage angulaire).
+        const next = stepDirectionToward(shownDir, targetDir);
+        if (next === targetDir) {
+          if (turnStepTime < 0 || time - turnStepTime >= TURN_STEP_DURATION) {
+            shownDir = targetDir;
+            shownFacing = directionToView(shownDir).flip;
+            turnStepTime = -1;
+          }
+        } else if (turnStepTime < 0 || time - turnStepTime >= TURN_STEP_DURATION) {
+          shownDir = next;
+          shownFacing = directionToView(shownDir).flip;
+          turnStepTime = time;
+        }
+        return 1;
+      }
+      turnStepTime = -1;
       flipStart = time;
       swapped = false;
+    } else if (!needed) {
+      turnStepTime = -1;
     }
     if (flipStart < 0) return 1;
     const p = (time - flipStart) / Math.max(settings.flipDuration, 1e-3);
@@ -201,13 +225,28 @@ export function createCharacterSprite(data, images, parent, settings, display, o
 
     const anim = pickAnim8(moving, scanning, aside);
     if (anim !== current) {
+      // Changement de direction en marchant : on conserve la phase du cycle (animStartDist)
+      // au lieu de repartir à l'image 0, et on évite de re-déclencher le pas déjà joué.
+      const keepWalkPhase = Boolean(current?.stride > 0 && anim.stride > 0);
       current = anim;
-      animStartTime = time;
-      animStartDist = distance;
-      shownIndex = -1;
+      if (!keepWalkPhase) {
+        animStartTime = time;
+        animStartDist = distance;
+        shownIndex = -1;
+        lastWalkStep = -1;
+      }
     }
-    const i = frameIndex(anim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed);
-    if (i !== shownIndex) {
+    const i = frameIndex(anim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed, anim.stride > 0);
+    if (anim.stride > 0) {
+      const step = Math.floor((Math.max(0, distance - animStartDist) * settings.walkAnimSpeed) / anim.stride);
+      if (step !== lastWalkStep) {
+        lastWalkStep = step;
+        shownIndex = i;
+        if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
+      } else {
+        shownIndex = i;
+      }
+    } else if (i !== shownIndex) {
       shownIndex = i;
       if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
