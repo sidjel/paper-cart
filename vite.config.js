@@ -56,7 +56,11 @@ export default defineConfig(({ command }) => {
     define: isServe ? {} : { __VERSION__: JSON.stringify(label), __COMMIT__: JSON.stringify(commit) },
     server: { host: true },
     preview: { host: true },
-    build: { target: 'es2022', assetsInlineLimit: 0 },
+    build: {
+      target: 'es2022',
+      assetsInlineLimit: 0,
+      rollupOptions: { input: { main: 'index.html', pixiPoc: 'pixi-poc.html' } },
+    },
     test: { include: ['tests/unit/**/*.test.js'], environment: 'node' },
   };
 });
