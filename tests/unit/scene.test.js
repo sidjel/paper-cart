@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compileAnimation, frameIndex, flipWidth } from '../../src/scene/animation.js';
+import { compileAnimation, frameIndex, flipEffects, flipWidth } from '../../src/scene/animation.js';
 import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
@@ -43,6 +43,20 @@ describe('retournement de la feuille', () => {
     expect(flipWidth(1, 0.06)).toBeCloseTo(1);
     expect(flipWidth(0.5, 0.06)).toBeCloseTo(0.06);
     expect(flipWidth(0.25, 0)).toBeLessThan(1);
+    expect(flipWidth(0.25, 0.25)).toBeGreaterThan(flipWidth(0.25, 0.06)); // épaisseur de tranche perceptible
+    expect(flipWidth(0.8, 0.06)).toBeGreaterThan(0.8); // réouverture vive avec léger snap cartonné
+  });
+  it('effets papier du retournement : soulèvement, tranche au milieu et reflet à la réouverture', () => {
+    const out = { lift: 0, edge: 0, sheen: 0 };
+    flipEffects(out, 0.5);
+    expect(out.lift).toBeCloseTo(3.5);
+    expect(out.edge).toBeCloseTo(1);
+    flipEffects(out, 0.67);
+    expect(out.sheen).toBeGreaterThan(0.4);
+    flipEffects(out, 1);
+    expect(out.lift).toBeCloseTo(0);
+    expect(out.edge).toBe(0);
+    expect(out.sheen).toBe(0);
   });
 });
 

@@ -42,10 +42,30 @@ export function frameIndex(anim, elapsedMs, distance, speed = 1, syncPhase = fal
   return anim.count - 1;
 }
 
-// Retournement de la feuille de papier (pivot) : renvoie la largeur apparente (0 à 1)
-// pour une progression p de 0 à 1. La feuille s'amincit, passe par sa tranche, se rouvre.
+// Retournement de la feuille de papier (pivot) : renvoie la largeur apparente
+// pour une progression p de 0 à 1.
+// - Courbe remappée edge + (1 - edge) * |cos(pπ)| pour que l'épaisseur de tranche soit perceptible ;
+// - Léger « snap » cartonné (+5,5 %) à la réouverture (p > 0.5) comme dans Paper Mario.
 export function flipWidth(p, edge) {
-  return Math.max(edge, Math.abs(Math.cos(p * Math.PI)));
+  const c = Math.max(0, Math.min(1, p));
+  const w = edge + (1 - edge) * Math.abs(Math.cos(c * Math.PI));
+  if (c > 0.5 && c < 1) {
+    const q = (c - 0.5) * 2;
+    return w + 0.055 * Math.sin(Math.PI * q) * q;
+  }
+  return w;
+}
+
+// Effets visuels du retournement papier (fonction pure, écrit dans `out`) :
+//  - lift  : léger soulèvement de la feuille pendant le pivot (px) ;
+//  - edge  : visibilité de la tranche papier claire autour de p = 0.5 (0..1) ;
+//  - sheen : bref reflet lumineux sur la feuille lorsqu'elle revient face à la lumière (0..1).
+export function flipEffects(out, p) {
+  const c = Math.max(0, Math.min(1, p));
+  out.lift = 3.5 * Math.sin(c * Math.PI);
+  out.edge = Math.max(0, 1 - Math.abs(c - 0.5) / 0.22);
+  out.sheen = c > 0.4 && c < 0.94 ? 0.52 * Math.sin(Math.PI * ((c - 0.4) / 0.54)) : 0;
+  return out;
 }
 
 // Mouvement du corps en papier, calculé à partir de l'état (fonction pure, écrit dans `out`) :
