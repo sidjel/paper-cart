@@ -54,21 +54,10 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   flip.style.height = `${h}px`;
   flip.style.transformOrigin = `${ax}px ${ay}px`;
   root.appendChild(flip);
-  // Tranche papier claire (dans root, hors scaleX) : visible au milieu du pivot, largeur liée à edgeThickness.
-  const paperEdge = document.createElement('div');
-  paperEdge.className = 'actor-edge';
-  paperEdge.style.left = `${ax}px`;
-  paperEdge.style.top = `${Math.round(h * 0.08)}px`;
-  paperEdge.style.height = `${Math.round(ay - h * 0.08)}px`;
-  root.appendChild(paperEdge);
   parent.appendChild(root);
 
   // Un élément <img> par image distincte ; une seule visible à la fois, sans calque propre (scene/poses.js).
   const poses = createPoses(images, flip, data.size, 'actor-frame');
-  // Reflet papier diagonal (dans flip, suit le retournement ; piloté par alpha CSS sans filter ni calque GPU).
-  const paperSheen = document.createElement('div');
-  paperSheen.className = 'actor-sheen';
-  flip.appendChild(paperSheen);
   const imageEl = (url) => poses.el(url);
   // Objets tenus : un élément par image distincte, derrière les images du héros, ou devant (front) quand
   // l'objet dessine lui-même la main qui le tient.
@@ -163,14 +152,12 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const stats = { frameChanges: 0, flipping: false }; // pour le diagnostic
   let lastBody = NaN;
   let lastLift = NaN;
-  let lastEdgeA = 0;
-  let lastEdgeW = -1;
-  let lastSheenA = 0;
+  let lastBright = 1;
   let wasMoving = false;
   let stopTime = -1;
   let idleStart = 0;
   const motion = { lift: 0, sx: 1, sy: 1 };
-  const fxFlip = { lift: 0, edge: 0, sheen: 0 };
+  const fxFlip = { lift: 0, brightness: 1 };
   // Distance parcourue pendant un pas (un demi-cycle de marche : fonctionne en 4, 6 ou 16 images).
   const firstWalk = data.views.S?.walk;
   const walkStride = (firstWalk?.stride ?? 40) * Math.max(2, (firstWalk?.frames?.length ?? 4) / 2);
@@ -198,8 +185,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     if (flipStart < 0) {
       fxFlip.lift = 0;
-      fxFlip.edge = 0;
-      fxFlip.sheen = 0;
+      fxFlip.brightness = 1;
       return 1;
     }
     const p = (time - flipStart) / Math.max(flipDur, 1e-3);
@@ -211,8 +197,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     if (p >= 1) {
       flipStart = -1;
       fxFlip.lift = 0;
-      fxFlip.edge = 0;
-      fxFlip.sheen = 0;
+      fxFlip.brightness = 1;
       return 1;
     }
     flipEffects(fxFlip, p);
@@ -290,22 +275,11 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       lastBody = motion.sy;
       lastLift = totalLift;
     }
-    // Tranche papier claire (épaisseur proportionnelle à settings.edgeThickness) et reflet lumineux au pivot.
-    const edgeW = settings.edgeThickness > 0 ? Math.max(2, Math.round(settings.edgeThickness * 44)) : 0;
-    const edgeA = edgeW > 0 && !display.reduceMotion ? Number(fxFlip.edge.toFixed(3)) : 0;
-    if (edgeW !== lastEdgeW) {
-      paperEdge.style.width = `${edgeW}px`;
-      paperEdge.style.marginLeft = `${-edgeW / 2}px`;
-      lastEdgeW = edgeW;
-    }
-    if (edgeA !== lastEdgeA) {
-      paperEdge.style.setProperty('--edge-a', edgeA);
-      lastEdgeA = edgeA;
-    }
-    const sheenA = settings.paperSheen !== false && !display.reduceMotion ? Number(fxFlip.sheen.toFixed(3)) : 0;
-    if (sheenA !== lastSheenA) {
-      paperSheen.style.setProperty('--sheen-a', sheenA);
-      lastSheenA = sheenA;
+    // Éclairage de surface papier strictement sur la silhouette (actif uniquement pendant le pivot, nul à l'arrêt/marche).
+    const bright = settings.paperSheen !== false && !display.reduceMotion ? Number(fxFlip.brightness.toFixed(3)) : 1;
+    if (bright !== lastBright) {
+      root.style.filter = bright === 1 ? '' : `brightness(${bright})`;
+      lastBright = bright;
     }
     const s = scale * data.scale;
     // footSink : les pieds légèrement enfoncés dans le sol (le contour blanc sous la semelle touche le sol).

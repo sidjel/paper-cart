@@ -57,14 +57,18 @@ export function flipWidth(p, edge) {
 }
 
 // Effets visuels du retournement papier (fonction pure, écrit dans `out`) :
-//  - lift  : léger soulèvement de la feuille pendant le pivot (px) ;
-//  - edge  : visibilité de la tranche papier claire autour de p = 0.5 (0..1) ;
-//  - sheen : bref reflet lumineux sur la feuille lorsqu'elle revient face à la lumière (0..1).
+//  - lift       : léger soulèvement de la feuille pendant le pivot (px) ;
+//  - brightness : ombrage de la feuille quand elle s'incline (1 → 0.80) puis bref éclat clair
+//                 à la réouverture face à la lumière (1.16 → 1), strictement sur la silhouette.
 export function flipEffects(out, p) {
   const c = Math.max(0, Math.min(1, p));
   out.lift = 3.5 * Math.sin(c * Math.PI);
-  out.edge = Math.max(0, 1 - Math.abs(c - 0.5) / 0.22);
-  out.sheen = c > 0.4 && c < 0.94 ? 0.52 * Math.sin(Math.PI * ((c - 0.4) / 0.54)) : 0;
+  if (c <= 0.5) {
+    out.brightness = 1 - 0.2 * Math.sin(c * Math.PI);
+  } else {
+    const q = (c - 0.5) * 2; // 0 → 1
+    out.brightness = 1 + 0.16 * Math.sin(Math.PI * q);
+  }
   return out;
 }
 

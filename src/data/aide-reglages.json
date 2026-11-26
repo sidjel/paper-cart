@@ -11,7 +11,7 @@
     "character.flipOnFrontBack": "La feuille se retourne aussi quand il passe de face à dos (vers le fond).",
     "character.flipAllDirs": "Joue le retournement de la feuille de papier sur tous les changements de direction (y compris profil → face et cardinale ↔ diagonale), directement sans passer par une vue intermédiaire.",
     "character.turnFlipDuration": "Durée du retournement de la feuille sur un virage de 45° ou 90° (quand « Retournement papier sur tous les virages » est coché). 0 : changement instantané.",
-    "character.paperSheen": "Ajoute un bref reflet lumineux diagonal sur la feuille de papier lorsqu'elle se rouvre face à la lumière pendant un retournement.",
+    "character.paperSheen": "Ombrage léger quand la feuille pivote puis bref éclat lumineux à la réouverture, strictement sur la silhouette du personnage (aucun débordement).",
     "character.smoothTurns": "Active l'hystérésis angulaire (±7° contre les oscillations près d'une limite) ainsi que la conservation et la synchronisation du cycle de marche (même jambe devant sur les 8 directions).",
     "character.bounceHeight": "Hauteur du petit saut à chaque pas. 0 : il glisse sans rebondir.",
     "character.walkSquash": "Écrasement du dessin quand un pied se pose. Plus haut : marche plus « élastique ».",

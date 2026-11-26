@@ -46,17 +46,16 @@ describe('retournement de la feuille', () => {
     expect(flipWidth(0.25, 0.25)).toBeGreaterThan(flipWidth(0.25, 0.06)); // épaisseur de tranche perceptible
     expect(flipWidth(0.8, 0.06)).toBeGreaterThan(0.8); // réouverture vive avec léger snap cartonné
   });
-  it('effets papier du retournement : soulèvement, tranche au milieu et reflet à la réouverture', () => {
-    const out = { lift: 0, edge: 0, sheen: 0 };
+  it('effets papier du retournement : soulèvement, ombrage en fermeture et éclat à la réouverture', () => {
+    const out = { lift: 0, brightness: 1 };
     flipEffects(out, 0.5);
     expect(out.lift).toBeCloseTo(3.5);
-    expect(out.edge).toBeCloseTo(1);
-    flipEffects(out, 0.67);
-    expect(out.sheen).toBeGreaterThan(0.4);
+    expect(out.brightness).toBeLessThan(1);
+    flipEffects(out, 0.75);
+    expect(out.brightness).toBeGreaterThan(1.1);
     flipEffects(out, 1);
     expect(out.lift).toBeCloseTo(0);
-    expect(out.edge).toBe(0);
-    expect(out.sheen).toBe(0);
+    expect(out.brightness).toBeCloseTo(1);
   });
 });
 
