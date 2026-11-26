@@ -86,6 +86,7 @@
       },
       "walk": {
         "stride": 18.5,
+        "phaseOffset": 8,
         "frames": [
           { "src": "art/heros-test/heros-e-walk-1.webp", "sound": "pas", "effect": "poussiere" },
           "art/heros-test/heros-e-walk-2.webp",
@@ -138,6 +139,7 @@
       },
       "walk": {
         "stride": 18.5,
+        "phaseOffset": 15,
         "frames": [
           "art/heros-test/heros-n-walk-1.webp",
           "art/heros-test/heros-n-walk-2.webp",

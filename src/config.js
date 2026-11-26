@@ -21,8 +21,8 @@ export const config = {
     flipDuration: 0.18, // durée du retournement de la feuille (s) ; 0 = instantané
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
-    smoothTurns: true, // comparaison A/B : active l'hystérésis (±7°), le passage par secteur intermédiaire et la conservation/synchro de phase de marche
-    turnStepDuration: 0.07, // durée (s) d'un secteur intermédiaire lors d'un virage de 90°+ hors retournement papier
+    smoothTurns: true, // comparaison A/B : active l'hystérésis (±7°), le mini-pivot papier 45° et la conservation/synchro de phase (même jambe devant)
+    turnStepDuration: 0.08, // durée (s) du mini-pivot papier 45° (cardinale ↔ diagonale)
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
     bounceHeight: 7, // hauteur du rebond à chaque pas (px)
     walkSquash: 0.05, // écrasement quand le pied se pose (part de la hauteur)

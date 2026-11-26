@@ -7,7 +7,7 @@
 // - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève ;
 // - objets tenus en main (Scanette pendant le scan) dessinés à part, suivant le bras image par image.
 
-import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc } from './animation.js';
+import { bodyMotion, compileAnimation, flipWidth, frameIndex, frameSrc, miniFlipWidth } from './animation.js';
 import { createPoses } from './poses.js';
 import { directionToView, needsPaperFlip, stepDirectionToward } from '../core/direction.js';
 
@@ -135,7 +135,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let shownFacing = 1;
   let shownDir = 'S';
   let flipStart = -1;
-  let turnStepTime = -1; // horodatage du dernier passage par un secteur intermédiaire (lissage angulaire)
+  let flipMode = 'full'; // 'full' (retournement 180° / gauche↔droite) ou 'mini' (mini-pivot papier 45°)
+  let flipDur = 0.18;
+  let flipTarget = 'S';
   let swapped = false;
   let current = null; // animation en cours
   let animStartTime = 0;
@@ -163,46 +165,41 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   function flipScale(time, targetDir) {
     const needed = targetDir !== shownDir;
     if (flipStart < 0 && needed) {
-      const dur = display.reduceMotion ? 0 : settings.flipDuration;
-      if (dur <= 0) {
+      if (display.reduceMotion) {
         shownDir = targetDir;
         shownFacing = directionToView(shownDir).flip;
-        turnStepTime = -1;
         return 1;
       }
-      if (!needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
-        const stepDur = settings.smoothTurns === false ? 0 : (settings.turnStepDuration ?? 0.07);
+      if (needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack)) {
+        if (settings.flipDuration <= 0) {
+          shownDir = targetDir;
+          shownFacing = directionToView(shownDir).flip;
+          return 1;
+        }
+        flipMode = 'full';
+        flipDur = settings.flipDuration;
+        flipTarget = targetDir;
+        flipStart = time;
+        swapped = false;
+      } else {
+        const stepDur = settings.smoothTurns === false ? 0 : (settings.turnStepDuration ?? 0.08);
         if (stepDur <= 0) {
           shownDir = targetDir;
           shownFacing = directionToView(shownDir).flip;
-          turnStepTime = -1;
           return 1;
         }
-        // Virage sans retournement gauche ↔ droite : on passe par les secteurs intermédiaires (lissage angulaire).
-        const next = stepDirectionToward(shownDir, targetDir);
-        if (next === targetDir) {
-          if (turnStepTime < 0 || time - turnStepTime >= stepDur) {
-            shownDir = targetDir;
-            shownFacing = directionToView(shownDir).flip;
-            turnStepTime = -1;
-          }
-        } else if (turnStepTime < 0 || time - turnStepTime >= stepDur) {
-          shownDir = next;
-          shownFacing = directionToView(shownDir).flip;
-          turnStepTime = time;
-        }
-        return 1;
+        // Mini-pivot papier 45° (cardinale ↔ diagonale, ou étape par étape sur 90°+ hors retournement).
+        flipMode = 'mini';
+        flipDur = stepDur;
+        flipTarget = stepDirectionToward(shownDir, targetDir);
+        flipStart = time;
+        swapped = false;
       }
-      turnStepTime = -1;
-      flipStart = time;
-      swapped = false;
-    } else if (!needed) {
-      turnStepTime = -1;
     }
     if (flipStart < 0) return 1;
-    const p = (time - flipStart) / Math.max(settings.flipDuration, 1e-3);
+    const p = (time - flipStart) / Math.max(flipDur, 1e-3);
     if (p >= 0.5 && !swapped) {
-      shownDir = targetDir;
+      shownDir = flipMode === 'full' ? targetDir : flipTarget;
       shownFacing = directionToView(shownDir).flip;
       swapped = true;
     }
@@ -210,7 +207,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       flipStart = -1;
       return 1;
     }
-    return flipWidth(p, settings.edgeThickness);
+    return flipMode === 'mini' ? miniFlipWidth(p, 0.72) : flipWidth(p, settings.edgeThickness);
   }
 
   function pickAnim8(moving, scanning, aside) {

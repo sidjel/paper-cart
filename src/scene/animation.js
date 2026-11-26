@@ -22,9 +22,9 @@ export function compileAnimation(def) {
   });
   const sounds = def.frames.map((f) => (typeof f === 'object' && f.sound) || null);
   const effects = def.frames.map((f) => (typeof f === 'object' && f.effect) || null);
-  // Décalage de phase du premier contact au sol : permet de synchroniser les cycles de marche entre directions.
+  // Décalage de phase du contact de référence (même jambe devant sur les 8 directions).
   const firstContact = sounds.findIndex((s, i) => Boolean(s || effects[i]));
-  const contactOffset = firstContact >= 0 ? firstContact : 0;
+  const contactOffset = Number.isInteger(def.phaseOffset) ? def.phaseOffset : (firstContact >= 0 ? firstContact : 0);
   return { count: n, stride: def.stride > 0 ? def.stride : 0, ends, total, sounds, effects, contactOffset };
 }
 
@@ -46,6 +46,12 @@ export function frameIndex(anim, elapsedMs, distance, speed = 1, syncPhase = fal
 // pour une progression p de 0 à 1. La feuille s'amincit, passe par sa tranche, se rouvre.
 export function flipWidth(p, edge) {
   return Math.max(edge, Math.abs(Math.cos(p * Math.PI)));
+}
+
+// Mini-pivot de la feuille pour un virage de 45° (cardinale ↔ diagonale) :
+// léger amincissement horizontal (1 → minWidth → 1) sans passer par la tranche complète.
+export function miniFlipWidth(p, minWidth = 0.72) {
+  return minWidth + (1 - minWidth) * Math.abs(Math.cos(p * Math.PI));
 }
 
 // Mouvement du corps en papier, calculé à partir de l'état (fonction pure, écrit dans `out`) :
