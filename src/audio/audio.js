@@ -41,7 +41,7 @@ export function createAudio(settings, base = '') {
   // s'arrête. Une famille ne coupe jamais une autre : les pas ou les froissements ne couvrent jamais le
   // haut-parleur, l'interface ou (plus tard) le combat.
   const FAMILY = {
-    pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier',
+    pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier', pivotPapier: 'papier',
     bip: 'scanner', aspire: 'scanner', carte: 'scanner', prise: 'scanner',
     grince: 'chariot', chute: 'chariot', annonce: 'voix', ding: 'voix',
     aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance',
@@ -486,6 +486,7 @@ export function createAudio(settings, base = '') {
   // Pieds gauche et droit légèrement différents, pour ne pas sonner comme une machine.
   function step() {
     foot = 1 - foot;
+    if (samples.playStep(ctx, sfxBus, track, settings.stepSound, foot)) return;
     const f = foot;
     playPrepared('pas', f, sfxBus, () => [stepGraph(ctx, sfxBus, ctx.currentTime, f)]);
   }
@@ -505,7 +506,8 @@ export function createAudio(settings, base = '') {
     return [src, lp, g];
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
+  const pivotPapier = () => { if (settings.flipSound !== false) samples.playPaperFlip(ctx, sfxBus, track); };
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, pivotPapier, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
 
   return {
     // Appelé au premier geste du joueur.

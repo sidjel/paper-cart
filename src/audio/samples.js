@@ -6,10 +6,16 @@ const CROW_FILES = ['audio/corbeau-1.mp3', 'audio/corbeau-2.mp3', 'audio/corbeau
 const BIP_FILE = 'audio/scan-bip.mp3';
 const MUSIC_FILE = 'audio/supermarche.mp3';
 const INTRO_RAIN_FILE = 'audio/pluie-intro.mp3';
+const STEP_TILE_L = 'audio/pas-carrelage-g.mp3';
+const STEP_TILE_R = 'audio/pas-carrelage-d.mp3';
+const STEP_RUBBER = 'audio/pas-caoutchouc.mp3';
+const PAPER_FLIP_FILE = 'audio/papier-retournement.mp3';
 
 // Variations légères et déterministes des cris de corbeaux (évite la répétition mécanique sans Math.random).
 const CROW_RATES = [0.96, 1.03, 0.94, 1.05, 0.99];
 const CROW_GAINS = [0.85, 0.96, 0.82, 0.92, 0.89];
+const STEP_RATES = [0.97, 1.03, 0.99, 1.02];
+const FLIP_RATES = [0.96, 1.04, 1.0, 0.98];
 
 // Effet sonore joué une fois : une source branchée sur son bus (plus un gain si volume != 1), libérée dans onended.
 function playOnce(ctx, bus, track, buffer, gain = 1, rate = 1) {
@@ -34,8 +40,14 @@ export function createSamples(base = '') {
   let bipBuf = null;
   let musicBuf = null;
   let rainBuf = null;
+  let stepTileL = null;
+  let stepTileR = null;
+  let stepRubber = null;
+  let paperFlipBuf = null;
   let loaded = false;
   let crowIdx = 0;
+  let stepIdx = 0;
+  let flipIdx = 0;
   let musicSrc = null;
   let musicBeatT = -1;
   let musicStartT = 0;
@@ -111,6 +123,39 @@ export function createSamples(base = '') {
           if (rainWanted) startRainNow();
         }
       });
+      fetchBuffer(ctx, STEP_TILE_L).then((b) => { if (b) stepTileL = b; });
+      fetchBuffer(ctx, STEP_TILE_R).then((b) => { if (b) stepTileR = b; });
+      fetchBuffer(ctx, STEP_RUBBER).then((b) => { if (b) stepRubber = b; });
+      fetchBuffer(ctx, PAPER_FLIP_FILE).then((b) => { if (b) paperFlipBuf = b; });
+    },
+
+    // Pas réels CC0 (carrelage G/D #390762/#390761 et semelle caoutchouc #32638) selon le choix dans F2 → Son.
+    playStep(ctx, bus, track, mode = 'carrelage', foot = 0) {
+      if (mode === 'synthese') return false;
+      let buf = null;
+      if (mode === 'pas1') buf = stepTileL;
+      else if (mode === 'pas2') buf = stepTileR;
+      else if (mode === 'pas3') buf = stepRubber;
+      else if (mode === 'mix') {
+        const list = [stepTileL, stepTileR, stepRubber].filter(Boolean);
+        if (list.length) buf = list[stepIdx % list.length];
+      } else {
+        buf = (foot ? stepTileR : stepTileL) || stepTileL || stepTileR;
+      }
+      if (!buf) return false;
+      const rate = STEP_RATES[stepIdx % STEP_RATES.length];
+      stepIdx++;
+      playOnce(ctx, bus, track, buf, mode === 'pas3' ? 0.62 : 0.45, rate);
+      return true;
+    },
+
+    // Retournement de feuille papier court CC0 (#369960, 0,18 s).
+    playPaperFlip(ctx, bus, track) {
+      if (!paperFlipBuf) return false;
+      const rate = FLIP_RATES[flipIdx % FLIP_RATES.length];
+      flipIdx++;
+      playOnce(ctx, bus, track, paperFlipBuf, 0.55, rate);
+      return true;
     },
 
     // Alterne entre les vrais cris de corbeaux (#741366 découpé + #813115) dans un ordre déterministe.
