@@ -4,6 +4,7 @@
 
 import helpFile from '../data/aide-reglages.json';
 import { WALK_PRESETS, TUNABLES, getValue, getDefault, setValue, overrides, applyOverrides, resetAll, onConfigChange } from '../config.js';
+import { createProfileStore, createTabProfilesBar } from './settingsProfiles.js';
 
 const STORAGE_KEY = 'paper-cart.reglages.v1';
 
@@ -156,6 +157,9 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
   }
 
   const presetButtons = [];
+  const profileStore = createProfileStore();
+  const profileUpdaters = [];
+
   // Le profil dont toutes les valeurs correspondent aux réglages actuels est mis en évidence.
   function updatePresets() {
     for (const [preset, b] of presetButtons) {
@@ -163,6 +167,7 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
       b.classList.toggle('active', active);
       b.setAttribute('aria-pressed', active);
     }
+    for (const refresh of profileUpdaters) refresh();
   }
 
   function updateCounters() {
@@ -196,6 +201,13 @@ export function createSettingsPanel(root, { onClose, extras = {} }) {
       heading.textContent = group;
       heading.hidden = true;
       section.appendChild(heading);
+
+      const groupKeys = TUNABLES.filter((x) => x.group === group).map((x) => x.key);
+      if (groupKeys.length > 0) {
+        const bar = createTabProfilesBar(profileStore, group, groupKeys, { getValue, setValue });
+        profileUpdaters.push(bar.refresh);
+        section.appendChild(bar.el);
+      }
 
       const tab = document.createElement('button');
       tab.type = 'button';

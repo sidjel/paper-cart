@@ -362,7 +362,54 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 .settings-section-title[hidden] { display: none; }
 .settings-section[hidden] { display: none; }
-.settings.is-filtering .presets, .settings.is-filtering .settings-extra { display: none; }
+.settings.is-filtering .presets, .settings.is-filtering .settings-extra, .settings.is-filtering .settings-tab-profiles { display: none; }
+.settings-tab-profiles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.settings-profiles-row, .settings-profile-editor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+.settings-profiles-select, .settings-profile-editor input {
+  min-height: 32px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgb(35 38 45 / 0.35);
+  background: #fff;
+  color: #23262d;
+  font: 600 calc(12.5px * var(--ts, 1))/1.2 "Courier New", ui-monospace, monospace;
+}
+.settings-profiles-select { max-width: 220px; }
+.settings-profile-editor input { width: 190px; }
+.settings-profile-btn {
+  min-height: 32px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid rgb(35 38 45 / 0.35);
+  background: rgb(255 255 255 / 0.78);
+  color: #23262d;
+  font: 700 calc(12px * var(--ts, 1))/1.2 "Courier New", ui-monospace, monospace;
+  cursor: pointer;
+}
+.settings-profile-btn:hover { background: rgb(35 38 45 / 0.08); }
+.settings-profile-btn.primary { background: #23262d; color: #fbfaf4; border-color: #23262d; }
+.settings-profile-btn.danger { color: #9c2b23; border-color: rgb(156 43 35 / 0.45); }
+.settings-profile-btn.danger:hover { background: rgb(156 43 35 / 0.1); }
+.settings-profile-btn[hidden] { display: none; }
+.settings-profile-editor[hidden] { display: none; }
+.settings-profile-status {
+  min-height: 16px;
+  font-size: calc(12px * var(--ts, 1));
+  font-weight: 700;
+  color: #2b6b3f;
+}
 .settings-empty { margin: 24px 0; text-align: center; font-size: calc(15px * var(--ts, 1)); opacity: 0.72; }
 .settings-empty[hidden] { display: none; }
 .setting-item {
