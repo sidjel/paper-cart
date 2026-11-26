@@ -7,8 +7,9 @@
 // - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève ;
 // - objets tenus en main (Scanette pendant le scan) dessinés à part, suivant le bras image par image.
 
-import { bodyMotion, compileAnimation, flipEffects, flipWidth, frameIndex, frameSrc } from './animation.js';
+import { bodyMotion, compileAnimation, flipEffects, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
+import { createPaperFlipRenderer, turnDirectionSign } from './paperFlip.js';
 import { directionToView, needsPaperFlip } from '../core/direction.js';
 
 export function characterImageEntries(data, rasterScale) {
@@ -58,6 +59,8 @@ export function createCharacterSprite(data, images, parent, settings, display, o
 
   // Un élément <img> par image distincte ; une seule visible à la fois, sans calque propre (scene/poses.js).
   const poses = createPoses(images, flip, data.size, 'actor-frame');
+  // Canvas 2.5D pré-alloué pour le retournement papier (caché hors retournement = 0 coût en marche/arrêt).
+  const paperFlip = createPaperFlipRenderer(flip, data.size);
   const imageEl = (url) => poses.el(url);
   // Objets tenus : un élément par image distincte, derrière les images du héros, ou devant (front) quand
   // l'objet dessine lui-même la main qui le tient.
@@ -136,6 +139,11 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let shownDir = 'S';
   let flipStart = -1;
   let flipDur = 0.18;
+  let flipFromDir = 'S';
+  let flipFromImg = null;
+  let flipFromFlip = 1;
+  let flipSign = 1;
+  let flipP = -1;
   let swapped = false;
   let current = null; // animation en cours
   let animStartTime = 0;
@@ -152,7 +160,6 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const stats = { frameChanges: 0, flipping: false }; // pour le diagnostic
   let lastBody = NaN;
   let lastLift = NaN;
-  let lastBright = 1;
   let wasMoving = false;
   let stopTime = -1;
   let idleStart = 0;
@@ -162,13 +169,15 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   const firstWalk = data.views.S?.walk;
   const walkStride = (firstWalk?.stride ?? 40) * Math.max(2, (firstWalk?.frames?.length ?? 4) / 2);
 
-  function flipScale(time, targetDir) {
+  function updateFlip(time, targetDir) {
     const needed = targetDir !== shownDir;
     if (flipStart < 0 && needed) {
       if (display.reduceMotion) {
         shownDir = targetDir;
         shownFacing = directionToView(shownDir).flip;
-        return 1;
+        flipP = -1;
+        fxFlip.lift = 0;
+        return;
       }
       const isMajorFlip = needsPaperFlip(shownDir, targetDir, settings.flipOnFrontBack);
       const dur = isMajorFlip
@@ -177,16 +186,22 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (dur <= 0) {
         shownDir = targetDir;
         shownFacing = directionToView(shownDir).flip;
-        return 1;
+        flipP = -1;
+        fxFlip.lift = 0;
+        return;
       }
+      flipFromDir = shownDir;
+      flipFromFlip = shownFacing;
+      flipFromImg = current && shownIndex >= 0 ? current.els[shownIndex] : null;
+      flipSign = turnDirectionSign(flipFromDir, targetDir);
       flipDur = dur;
       flipStart = time;
       swapped = false;
     }
     if (flipStart < 0) {
+      flipP = -1;
       fxFlip.lift = 0;
-      fxFlip.brightness = 1;
-      return 1;
+      return;
     }
     const p = (time - flipStart) / Math.max(flipDur, 1e-3);
     if (p >= 0.5 && !swapped) {
@@ -196,17 +211,17 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
     if (p >= 1) {
       flipStart = -1;
+      flipP = -1;
       fxFlip.lift = 0;
-      fxFlip.brightness = 1;
-      return 1;
+      return;
     }
+    flipP = p;
     flipEffects(fxFlip, p);
-    return flipWidth(p, settings.edgeThickness);
   }
 
-  function pickAnim8(moving, scanning, aside) {
+  function pickAnim8(moving, scanning, aside, dir = shownDir) {
     if (aside) return asides[aside] ?? faceIdle;
-    const { view } = directionToView(shownDir);
+    const { view } = directionToView(dir);
     if (scanning) return anims[`${view}.scan`] ?? anims[`${view}.idle`] ?? faceIdle;
     return moving ? (anims[`${view}.walk`] ?? anims[`${view}.idle`] ?? faceIdle) : (anims[`${view}.idle`] ?? faceIdle);
   }
@@ -216,11 +231,12 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   // aside : émotion d'un aparté en cours ('' sinon) : il regarde le joueur, tête de face.
   function render(sx, sy, scale, _facing, _away, moving, time, distance, scanning = false, aside = '', dir = 'S') {
     const targetDir = aside ? 'S' : dir;
-    const width = flipScale(time, targetDir);
-    stats.flipping = flipStart >= 0;
+    updateFlip(time, targetDir);
+    const isFlipping = flipP >= 0;
+    stats.flipping = isFlipping;
 
     const smooth = settings.smoothTurns !== false;
-    const anim = pickAnim8(moving, scanning, aside);
+    const anim = pickAnim8(moving, scanning, aside, shownDir);
     if (anim !== current) {
       // Changement de direction en marchant : on conserve la phase du cycle (animStartDist)
       // au lieu de repartir à l'image 0, et on évite de re-déclencher le pas déjà joué.
@@ -248,7 +264,30 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
     const frame = anim.els[i];
-    if (poses.show(frame)) stats.frameChanges++;
+    if (isFlipping) {
+      // Rendu 2.5D (courbure, torsion, chant blanc, ombrage directionnel et reflet masqué par l'alpha)
+      const fromAnim = pickAnim8(moving, scanning, aside, flipFromDir);
+      const toAnim = pickAnim8(moving, scanning, aside, targetDir);
+      const fromI = frameIndex(fromAnim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed, smooth && fromAnim.stride > 0);
+      const toI = frameIndex(toAnim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed, smooth && toAnim.stride > 0);
+      const fromImg = fromAnim.els[fromI] ?? flipFromImg ?? frame;
+      const toImg = toAnim.els[toI] ?? frame;
+      const toFlip = directionToView(targetDir).flip;
+      poses.hide();
+      paperFlip.draw({
+        p: flipP,
+        fromImg,
+        fromFlip: flipFromFlip,
+        toImg,
+        toFlip,
+        turnSign: flipSign,
+        edgeThickness: settings.edgeThickness,
+        sheen: settings.paperSheen !== false,
+      });
+    } else {
+      paperFlip.hide();
+      if (poses.show(frame)) stats.frameChanges++;
+    }
     placeHeld(anim.srcs[i], anim.viewName, anim.away, scanning);
 
     // Corps vivant (rebond, respiration, écrasement), sauf si l'on réduit les animations.
@@ -268,18 +307,13 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
 
     const totalLift = motion.lift + (display.reduceMotion ? 0 : fxFlip.lift);
-    const fx = shownFacing * width * motion.sx;
+    // Pendant le retournement 2.5D, le miroir et la largeur sont gérés par paperFlip.draw (pas de scaleX plat).
+    const fx = (isFlipping ? 1 : shownFacing) * motion.sx;
     if (fx !== lastFlip || motion.sy !== lastBody || totalLift !== lastLift) {
       flip.style.transform = `translateY(${-totalLift}px) scale(${fx}, ${motion.sy})`;
       lastFlip = fx;
       lastBody = motion.sy;
       lastLift = totalLift;
-    }
-    // Éclairage de surface papier strictement sur la silhouette (actif uniquement pendant le pivot, nul à l'arrêt/marche).
-    const bright = settings.paperSheen !== false && !display.reduceMotion ? Number(fxFlip.brightness.toFixed(3)) : 1;
-    if (bright !== lastBright) {
-      root.style.filter = bright === 1 ? '' : `brightness(${bright})`;
-      lastBright = bright;
     }
     const s = scale * data.scale;
     // footSink : les pieds légèrement enfoncés dans le sol (le contour blanc sous la semelle touche le sol).

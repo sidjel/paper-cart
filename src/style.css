@@ -88,6 +88,8 @@ html, body {
 }
 .actor-flip { position: relative; }
 .actor-frame { position: absolute; left: 0; top: 0; display: block; }
+.actor-flip-canvas { position: absolute; display: block; pointer-events: none; }
+.actor-flip-canvas[hidden] { display: none; }
 /* Objets tenus (Scanette, panier) : derrière le dessin du héros, sa main passe devant. */
 .actor-held { position: absolute; left: 0; top: 0; display: block; z-index: -1; transform-origin: 0 0; } /* pivot calculé dans le code (épaule) */
 .actor-held.front { z-index: 1; } /* l'objet dessine la main qui le tient (anse, poignée) */

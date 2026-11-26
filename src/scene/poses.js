@@ -34,5 +34,11 @@ export function createPoses(images, parent, [w, h], className) {
       shown = el;
       return true;
     },
+    // Cacher temporairement la pose active (ex. pendant le rendu canvas 2.5D du retournement).
+    hide() {
+      if (!shown) return;
+      shown.hidden = true;
+      shown = null;
+    },
   };
 }

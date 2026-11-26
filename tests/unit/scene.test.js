@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { compileAnimation, frameIndex, flipEffects, flipWidth } from '../../src/scene/animation.js';
+import { flipElasticScale, flipProgress, turnDirectionSign } from '../../src/scene/paperFlip.js';
 import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
@@ -56,6 +57,18 @@ describe('retournement de la feuille', () => {
     flipEffects(out, 1);
     expect(out.lift).toBeCloseTo(0);
     expect(out.brightness).toBeCloseTo(1);
+  });
+  it('courbe 2.5D du retournement (anticipation, accélération au milieu, rebond cartonné et sens)', () => {
+    expect(flipProgress(0)).toBeCloseTo(0);
+    expect(flipProgress(0.5)).toBeCloseTo(0.5);
+    expect(flipProgress(1)).toBeCloseTo(1);
+    expect(flipProgress(0.2)).toBeLessThan(0.2); // anticipation au démarrage
+    expect(flipElasticScale(0)).toBeCloseTo(0);
+    expect(flipElasticScale(0.08)).toBeGreaterThan(0); // légère anticipation
+    expect(flipElasticScale(0.8)).toBeGreaterThan(0.03); // rebond cartonné à la réouverture
+    expect(flipElasticScale(1)).toBeCloseTo(0);
+    expect(turnDirectionSign('E', 'SE')).toBe(-1);
+    expect(turnDirectionSign('E', 'NE')).toBe(1);
   });
 });
 
