@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { directionFromVector, directionToView, needsPaperFlip, stepDirectionToward } from '../../src/core/direction.js';
+import { directionFromVector, directionToView, needsPaperFlip } from '../../src/core/direction.js';
 import { createWalker, stepWalker, faceProduct, faceScreen } from '../../src/core/movement.js';
 import { compileMask } from '../../src/core/walkmask.js';
 
@@ -74,15 +74,5 @@ describe('orientation sur 8 directions (core/direction.js)', () => {
     expect(directionFromVector(Math.cos(rad(19)), Math.sin(rad(19)), 'NE')).toBe('NE');
     // Revenir franchement vers E (ex. 12°) re-bascule vers E.
     expect(directionFromVector(Math.cos(rad(12)), Math.sin(rad(12)), 'NE')).toBe('E');
-  });
-
-  it('avance par le plus court chemin angulaire sur les 8 directions (stepDirectionToward)', () => {
-    expect(stepDirectionToward('S', 'E')).toBe('SE');
-    expect(stepDirectionToward('SE', 'E')).toBe('E');
-    expect(stepDirectionToward('S', 'W')).toBe('SW');
-    expect(stepDirectionToward('N', 'E')).toBe('NE');
-    expect(stepDirectionToward('SE', 'NE')).toBe('E');
-    expect(stepDirectionToward('E', 'SE')).toBe('SE');
-    expect(stepDirectionToward('E', 'E')).toBe('E');
   });
 });

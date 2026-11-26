@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compileAnimation, frameIndex, flipWidth, miniFlipWidth } from '../../src/scene/animation.js';
+import { compileAnimation, frameIndex, flipWidth } from '../../src/scene/animation.js';
 import { propLevels, actorLevel } from '../../src/scene/depth.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { createWalker, stepWalker } from '../../src/core/movement.js';
@@ -43,11 +43,6 @@ describe('retournement de la feuille', () => {
     expect(flipWidth(1, 0.06)).toBeCloseTo(1);
     expect(flipWidth(0.5, 0.06)).toBeCloseTo(0.06);
     expect(flipWidth(0.25, 0)).toBeLessThan(1);
-  });
-  it('mini-pivot 45° : léger amincissement au milieu sans passer par la tranche', () => {
-    expect(miniFlipWidth(0, 0.72)).toBeCloseTo(1);
-    expect(miniFlipWidth(0.5, 0.72)).toBeCloseTo(0.72);
-    expect(miniFlipWidth(1, 0.72)).toBeCloseTo(1);
   });
 });
 

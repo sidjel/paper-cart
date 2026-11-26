@@ -48,12 +48,6 @@ export function flipWidth(p, edge) {
   return Math.max(edge, Math.abs(Math.cos(p * Math.PI)));
 }
 
-// Mini-pivot de la feuille pour un virage de 45° (cardinale ↔ diagonale) :
-// léger amincissement horizontal (1 → minWidth → 1) sans passer par la tranche complète.
-export function miniFlipWidth(p, minWidth = 0.72) {
-  return minWidth + (1 - minWidth) * Math.abs(Math.cos(p * Math.PI));
-}
-
 // Mouvement du corps en papier, calculé à partir de l'état (fonction pure, écrit dans `out`) :
 //  - en marchant : petit rebond à chaque pas, léger écrasement quand le pied se pose ;
 //  - à l'arrêt : respiration (la feuille s'étire et se tasse doucement) ;

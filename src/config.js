@@ -21,8 +21,9 @@ export const config = {
     flipDuration: 0.18, // durée du retournement de la feuille (s) ; 0 = instantané
     edgeThickness: 0.06, // épaisseur minimale de la feuille vue de profil (tranche), en part de sa largeur
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
-    smoothTurns: true, // comparaison A/B : active l'hystérésis (±7°), le mini-pivot papier 45° et la conservation/synchro de phase (même jambe devant)
-    turnStepDuration: 0.08, // durée (s) du mini-pivot papier 45° (cardinale ↔ diagonale)
+    flipAllDirs: true, // retournement de la feuille aussi sur les virages 45°/90° (ex. profil → face, droite → diagonale)
+    turnFlipDuration: 0.12, // durée (s) du retournement de la feuille sur un virage 45°/90°
+    smoothTurns: true, // active l'hystérésis (±7°) et la conservation/synchro de phase de marche (même jambe devant)
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
     bounceHeight: 7, // hauteur du rebond à chaque pas (px)
     walkSquash: 0.05, // écrasement quand le pied se pose (part de la hauteur)
@@ -241,8 +242,9 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.flipDuration', label: 'Durée du retournement', min: 0, max: 0.6, step: 0.01, unit: 's' },
   { group: 'Personnage', key: 'character.edgeThickness', label: 'Épaisseur de la tranche', min: 0, max: 0.25, step: 0.01 },
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
-  { group: 'Personnage', key: 'character.smoothTurns', label: 'Virages fluides 8 dir. (A/B)', type: 'bool' },
-  { group: 'Personnage', key: 'character.turnStepDuration', label: 'Durée d’étape de virage', min: 0, max: 0.25, step: 0.01, unit: 's' },
+  { group: 'Personnage', key: 'character.flipAllDirs', label: 'Retournement papier sur tous les virages', type: 'bool' },
+  { group: 'Personnage', key: 'character.turnFlipDuration', label: 'Durée du retournement (45°/90°)', min: 0, max: 0.4, step: 0.01, unit: 's' },
+  { group: 'Personnage', key: 'character.smoothTurns', label: 'Hystérésis et phase de marche (8 dir.)', type: 'bool' },
   { group: 'Personnage', key: 'character.bounceHeight', label: 'Rebond en marchant', min: 0, max: 30, step: 1, unit: 'px' },
   { group: 'Personnage', key: 'character.walkSquash', label: 'Écrasement à chaque pas', min: 0, max: 0.2, step: 0.01 },
   { group: 'Personnage', key: 'character.breathAmount', label: 'Respiration (ampleur)', min: 0, max: 0.06, step: 0.002 },

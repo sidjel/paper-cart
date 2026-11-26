@@ -35,17 +35,6 @@ export function directionFromVector(dx, dz, current = 'S', useHysteresis = true)
   return SECTORS[idx];
 }
 
-// Avance d'au plus un secteur (45°) depuis `currentDir` vers `targetDir` par le plus court chemin angulaire.
-export function stepDirectionToward(currentDir, targetDir) {
-  const a = SECTOR_INDEX[currentDir];
-  const b = SECTOR_INDEX[targetDir];
-  if (a === undefined || b === undefined || a === b) return targetDir;
-  let diff = (b - a + 8) % 8;
-  if (diff > 4) diff -= 8;
-  if (Math.abs(diff) <= 1) return targetDir;
-  return SECTORS[(a + (diff > 0 ? 1 : -1) + 8) % 8];
-}
-
 // Associe une des 8 directions à l'une des 5 vues dessinées et son miroir horizontal (1 ou -1).
 export function directionToView(dir) {
   return VIEW_MAP[dir] ?? VIEW_MAP.S;
