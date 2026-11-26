@@ -1084,8 +1084,8 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   const guard = () => page.evaluate(() => window.paperCart.guard());
   const said = async () => (await page.evaluate(() => window.paperCart.journal())).join(' ');
   expect((await hero(page)).x).toBeGreaterThan(1000); // la partie commence à droite des portiques
-  // Au début, l'agent va de son poste à sa place, au milieu, puis ne bouge plus.
-  await expect.poll(async () => Math.round((await guard()).x), { timeout: 5000 }).toBe(460);
+  // Au début, l'agent va de son poste à sa place, au milieu (hall 2600 px : x = 680), puis ne bouge plus.
+  await expect.poll(async () => Math.round((await guard()).x), { timeout: 5000 }).toBe(680);
   const z0 = (await guard()).z;
   // Vers la gauche : il lève le bras et parle (bulle au-dessus de lui) ; le héros sursaute et s'arrête.
   await page.keyboard.down('ArrowLeft');
@@ -1125,5 +1125,5 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   expect(minX).toBeGreaterThan(700);
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-stop.png` });
   const gd = await guard();
-  expect([Math.round(gd.x), gd.z]).toEqual([460, z0]); // l'agent n'a pas bougé
+  expect([Math.round(gd.x), gd.z]).toEqual([680, z0]); // l'agent n'a pas bougé
 });
