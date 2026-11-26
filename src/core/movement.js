@@ -87,13 +87,13 @@ export function faceScreen(w) {
   w.dir = 'S';
 }
 
-function face(w, dx, dz) {
+function face(w, dx, dz, useHysteresis = true) {
   if (dx > FACE_THRESHOLD) w.facing = 1;
   else if (dx < -FACE_THRESHOLD) w.facing = -1;
   // De dos seulement en allant vers le fond ; de côté ou vers l'avant, on voit son visage.
   if (dz > FACE_THRESHOLD) w.away = true;
   else if (dz < -FACE_THRESHOLD || dx > FACE_THRESHOLD || dx < -FACE_THRESHOLD) w.away = false;
-  w.dir = directionFromVector(dx, dz, w.dir);
+  w.dir = directionFromVector(dx, dz, w.dir, useHysteresis);
 }
 
 // Rapproche la vitesse de la vitesse voulue, avec accélération ou freinage limités.
@@ -143,7 +143,7 @@ function moveWithCollisions(w, mask, dt) {
 // `p` : réglages de marche (config.walk).
 // `speedScale` : échelle de perspective (scaleAt), pour garder la même vitesse perçue et la même
 // cadence de pas au fond comme devant (1 par défaut).
-export function stepWalker(w, input, mask, p, dt, speedScale = 1) {
+export function stepWalker(w, input, mask, p, dt, speedScale = 1, smoothTurns = true) {
   w.prevX = w.x;
   w.prevZ = w.z;
 
@@ -162,7 +162,7 @@ export function stepWalker(w, input, mask, p, dt, speedScale = 1) {
     const k = len > 1 ? 1 / len : 1;
     wantX = ix * k * maxSpeed;
     wantZ = iz * k * maxSpeed * p.depthFactor;
-    face(w, ix * k, iz * k);
+    face(w, ix * k, iz * k, smoothTurns);
   } else if (w.hasTarget) {
     // Point intermédiaire atteint : on enchaîne sur le suivant sans s'arrêter.
     while (!lastWaypoint(w) && Math.hypot(w.tx - w.x, w.tz - w.z) <= WAYPOINT_RADIUS) nextWaypoint(w);
@@ -189,7 +189,7 @@ export function stepWalker(w, input, mask, p, dt, speedScale = 1) {
       const uz = ez / dist;
       wantX = ux * speed;
       wantZ = uz * speed * p.depthFactor;
-      face(w, ux, uz);
+      face(w, ux, uz, smoothTurns);
     }
   }
 

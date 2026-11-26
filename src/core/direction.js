@@ -22,11 +22,11 @@ const VIEW_MAP = {
 
 // Renvoie la direction parmi 8 à partir d'un vecteur (dx, dz), ou `current` si trop faible.
 // Une hystérésis angulaire (±7°) évite les allers-retours rapides près d'une limite de secteur.
-export function directionFromVector(dx, dz, current = 'S') {
+export function directionFromVector(dx, dz, current = 'S', useHysteresis = true) {
   if (Math.hypot(dx, dz) < DIR_DEADZONE) return current;
   const angle = Math.atan2(dz, dx); // 0 = E, +pi/2 = N, -pi/2 = S
   const curIdx = SECTOR_INDEX[current];
-  if (curIdx !== undefined) {
+  if (useHysteresis && curIdx !== undefined) {
     const curAngle = curIdx * SECTOR_STEP;
     const diff = Math.atan2(Math.sin(angle - curAngle), Math.cos(angle - curAngle));
     if (Math.abs(diff) <= HALF_SECTOR + HYSTERESIS) return current;

@@ -9,6 +9,8 @@
     "character.flipDuration": "Durée du retournement de la feuille de papier quand il change de côté. 0 : retournement instantané.",
     "character.edgeThickness": "Épaisseur de la feuille vue de profil, au milieu du retournement. Plus grand : la tranche reste plus visible.",
     "character.flipOnFrontBack": "La feuille se retourne aussi quand il passe de face à dos (vers le fond).",
+    "character.smoothTurns": "Active ensemble les 3 améliorations de fluidité en 8 directions : hystérésis angulaire (±7°), passage par la vue intermédiaire sur les virages de 90°+ et conservation/synchronisation du cycle de marche. Décocher pour comparer avec l'ancien comportement.",
+    "character.turnStepDuration": "Temps passé sur la vue intermédiaire (ex. 3/4) pendant un virage de 90°+ hors retournement papier. Plus grand : la transition intermédiaire est plus visible ; 0 : changement instantané.",
     "character.bounceHeight": "Hauteur du petit saut à chaque pas. 0 : il glisse sans rebondir.",
     "character.walkSquash": "Écrasement du dessin quand un pied se pose. Plus haut : marche plus « élastique ».",
     "character.breathAmount": "Ampleur de la respiration à l'arrêt (le dessin gonfle un peu). 0 : immobile.",

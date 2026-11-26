@@ -1081,7 +1081,7 @@ function frame(now) {
       if (treadmill.active) {
         stepTreadmill(walker, intent, config.walk, treadmill, stepper.step);
       } else {
-        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step, scaleAt(proj, walker.z));
+        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step, scaleAt(proj, walker.z), config.character.smoothTurns);
       }
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
