@@ -20,7 +20,6 @@ export const STARTER_CHARACTER_PROFILES = [
       'character.paperTwist': 1.0,
       'character.flipShadow': 0.55,
       'character.paperSheen': false,
-      'character.smoothTurns': true,
     },
   },
   {
@@ -35,7 +34,6 @@ export const STARTER_CHARACTER_PROFILES = [
       'character.paperTwist': 1.25,
       'character.flipShadow': 0.65,
       'character.paperSheen': true,
-      'character.smoothTurns': true,
     },
   },
 ];
@@ -172,7 +170,19 @@ export function createProfileStore(storage = typeof localStorage !== 'undefined'
     if (!profile) return false;
     const entries = Object.entries(profile.values);
     if (entries.length === 0) return false;
-    return entries.every(([k, v]) => getValue(k) === v);
+    let checked = 0;
+    for (const [k, v] of entries) {
+      let cur;
+      try {
+        cur = getValue(k);
+      } catch {
+        continue;
+      }
+      if (cur === undefined) continue; // ignore les anciennes clés retirées du menu F2
+      checked++;
+      if (cur !== v) return false;
+    }
+    return checked > 0;
   }
 
   function exportJson() {

@@ -120,4 +120,20 @@ describe('profils de réglages nommés (complets + par onglet)', () => {
     expect(dst.remove(GLOBAL_GROUP, pA.id)).toBe(true);
     expect(dst.importJson('pas du json')).toBe(0);
   });
+
+  it('ignore proprement les anciennes clés retirées du menu F2 dans un profil déjà sauvegardé', () => {
+    resetAll();
+    const storage = memoryStorage();
+    const store = createProfileStore(storage);
+    const oldProfile = store.create('Personnage', 'Ancien profil', {
+      'character.flipDuration': getDefault('character.flipDuration'),
+      'character.smoothTurns': true,
+      'places.style': 'mist',
+      'audio.musicTrack': 'airport-lounge',
+    });
+    expect(store.matches(oldProfile, getValue)).toBe(true);
+    setValue('character.flipDuration', 0.35);
+    expect(store.matches(oldProfile, getValue)).toBe(false);
+    resetAll();
+  });
 });

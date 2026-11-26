@@ -1650,114 +1650,13 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 /* Panier : pas de zoom du navigateur sur un double toucher (cartes, grande carte). */
 .panier-grid .card { touch-action: manipulation; }
 .card-detail { touch-action: none; }
-/* Changement de lieu : transitions papier origami (3A retournement, 3B double-volet, lignes→cartes bleues, 2A volet)
-   ou fondu noir en relais d'intro / erreur (un seul calque .place-fade, enfants cachés hors transition). */
+/* Changement de lieu : fondu enchaîné pur (cross-dissolve) et relais noir d'intro / erreur. */
 .place-fade { position: absolute; inset: 0; z-index: 30; background: #000; opacity: 0; pointer-events: none; overflow: hidden; will-change: opacity; }
 .place-fade.paper-fx { background: transparent; }
 .place-fade[hidden] { display: none; }
-.place-sheet[hidden], .place-flaps[hidden], .place-strips[hidden], .place-mist[hidden] { display: none; }
 
 /* Fondu enchaîné (cross-dissolve) : l'ancien décor reste par-dessus le nouveau et s'estompe doucement. */
 .stage.stage-dissolve { z-index: 2; pointer-events: none; will-change: opacity; }
-/* Très légère brume lumineuse crème pendant le croisement (adoucit le changement de perspective). */
-.place-mist {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  will-change: opacity;
-  background: radial-gradient(ellipse at 50% 48%, rgb(255 252 244 / 0.92) 0%, rgb(248 242 228 / 0.85) 55%, rgb(238 230 212 / 0.72) 100%);
-}
-
-/* 3A (retournement) & 2A (volet glissant) : illustration origami HD avec liseré blanc net (sans ombre floue). */
-.place-sheet {
-  position: absolute;
-  inset: 0;
-  background-color: #6ab5ff;
-  background-image: var(--transition-img);
-  background-size: cover;
-  background-position: center;
-  border: 6px solid #fff;
-  outline: 2px solid rgb(30 91 184 / 0.35);
-  outline-offset: -8px;
-  will-change: transform, opacity;
-}
-.place-sheet.edge {
-  background-image: none;
-  background-color: #fff;
-  outline: 3px solid #dce9fb;
-  outline-offset: -3px;
-}
-
-/* 3B (double-volet origami) : deux moitiés de l'illustration qui se replient vers la pliure centrale. */
-.place-flaps { position: absolute; inset: 0; }
-.place-flap {
-  position: absolute;
-  background-color: #6ab5ff;
-  background-image: var(--transition-img);
-  will-change: transform;
-}
-.place-flaps.axis-x .place-flap { top: 0; bottom: 0; width: 50.6%; background-size: 200% 100%; }
-.place-flaps.axis-x .place-flap-a {
-  left: 0;
-  transform-origin: 0% 50%;
-  background-position: 0% 50%;
-  border-right: 4px solid #fff;
-}
-.place-flaps.axis-x .place-flap-b {
-  right: 0;
-  transform-origin: 100% 50%;
-  background-position: 100% 50%;
-  border-left: 4px solid #fff;
-}
-.place-flaps.axis-y .place-flap { left: 0; right: 0; height: 50.6%; background-size: 100% 200%; }
-.place-flaps.axis-y .place-flap-a {
-  top: 0;
-  transform-origin: 50% 0%;
-  background-position: 50% 0%;
-  border-bottom: 4px solid #fff;
-}
-.place-flaps.axis-y .place-flap-b {
-  bottom: 0;
-  transform-origin: 50% 100%;
-  background-position: 50% 100%;
-  border-top: 4px solid #fff;
-}
-
-/* Lignes blanches → élargissement → cartes à liseré bleu qui se retournent (6 bandes découpées). */
-.place-strips { position: absolute; inset: 0; }
-.place-strip {
-  position: absolute;
-  background-color: #6ab5ff;
-  background-image: var(--transition-img);
-  border: 3px solid #1e5bb8;
-  outline: 2px solid #fff;
-  outline-offset: -5px;
-  will-change: transform, opacity;
-}
-.place-strips.axis-x .place-strip {
-  left: 0;
-  right: 0;
-  height: calc(100% / 6 + 2px);
-  top: calc(var(--i) * 100% / 6);
-  background-size: 100% 600%;
-  background-position: 0 calc(var(--i) * 20%);
-}
-.place-strips.axis-y .place-strip {
-  top: 0;
-  bottom: 0;
-  width: calc(100% / 6 + 2px);
-  left: calc(var(--i) * 100% / 6);
-  background-size: 600% 100%;
-  background-position: calc(var(--i) * 20%) 0;
-}
-.place-strip.as-white {
-  background-image: none;
-  background-color: #fff;
-  border-color: #3a86ff;
-  outline: 2px solid #1e5bb8;
-  outline-offset: -5px;
-}
 .place-fade.paper-fx .place-wait span { background: #fff; border: 1.5px solid #1e5bb8; }
 
 /* Agent de sécurité du hall (A6) : placé par src/game/guard.js. */

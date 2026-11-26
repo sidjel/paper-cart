@@ -26,7 +26,6 @@ export const config = {
     paperTwist: 1.0, // ampleur de la torsion diagonale et courbure en S de la feuille cartonnée (0 = plat, 1 = normal, 2 = prononcé)
     flipShadow: 0.55, // intensité de l'ombre portée dynamique derrière la feuille pendant le retournement (0 = aucune)
     paperSheen: true, // reflet lumineux discret sur la feuille pendant le retournement (style Paper Mario)
-    smoothTurns: true, // active l'hystérésis (±7°) et la conservation/synchro de phase de marche (même jambe devant)
     walkAnimSpeed: 1, // vitesse des images de marche (× ; plus grand = pas plus rapides)
     bounceHeight: 7, // hauteur du rebond à chaque pas (px)
     walkSquash: 0.05, // écrasement quand le pied se pose (part de la hauteur)
@@ -58,8 +57,7 @@ export const config = {
     speed: 260, // agent de sécurité du hall : vitesse de marche, quand il va de son poste à sa place au début (px/s)
   },
   places: {
-    fade: 0.34, // changement de lieu : durée de la transition (fondu enchaîné ou effet papier, s) ; 0 = direct
-    style: 'mist', // effet : 'mist' (fondu enchaîné + brume), 'dissolve' (fondu enchaîné), 'flip', 'double', 'strips', 'wipe'
+    fade: 0.34, // changement de lieu : durée du fondu enchaîné pur (s) ; 0 = direct
     waitAfter: 0.3, // chargement plus long que ça (s) : un petit signe d'attente apparaît
     prefetchDelay: 2.5, // délai avant pré-téléchargement réseau silencieux des lieux voisins (s)
   },
@@ -166,10 +164,6 @@ export const config = {
       normal: { density: 1.5, dust: true, farParallax: true },
       fin: { density: 2, dust: true, farParallax: true },
     },
-    // Objets du décor (chariot, présentoirs) sur leur propre calque, en permanence. Sans cela, le
-    // navigateur leur crée un calque quand le personnage passe derrière et le retire ensuite :
-    // à chaque bascule l'objet est redessiné et peut disparaître un instant (clignotement).
-    propLayers: true,
     // Plein écran : 'auto' (téléphone : oui, en paysage, en touchant « Commencer » ; PC : non), 'oui', 'non'.
     fullscreenMode: 'auto',
     narratorAlpha: 0.78, // opacité du fond des annonces du haut-parleur (1 = opaque)
@@ -183,23 +177,13 @@ export const config = {
     music: 0.4, // volume de la musique
     steps: 0.35, // volume des pas
     stepSound: 'mix', // son de pas retenu : 'mix' (les 3 pas alternés), ou 'carrelage', 'pas1', 'pas2', 'pas3', 'synthese'
-    musicTrack: 'airport-lounge', // musique du magasin : 'airport-lounge' (30 s, essai) ou 'supermarche' (bossa 12 s)
     birdsVolume: 0.4, // volume des corbeaux / oiseaux dehors
     scanVolume: 0.6, // volume des sons du scanner (bip, aspiration, carte)
     voiceVolume: 0.5, // volume du narrateur (annonce, petits bips du texte)
     heroVolume: 0.5, // volume des sons du héros (bips, froissement, aparté) ; plus dans le panneau (séance 66, demande de l'auteur : remplacé par les deux interrupteurs ci-dessous)
     heroBlips: true, // petits bips d'écriture du héros (apartés, pensées)
-    // Nombre maximum de sons en même temps, par famille (le plus ancien s'arrête ; une famille ne coupe jamais une autre).
-    maxPas: 2,
-    maxTexte: 3, // bips du texte (haut-parleur, héros)
-    maxPapier: 2, // froissement, carte qui se retourne
-    maxScanner: 4, // bip, aspiration, carte, prise
-    maxVoix: 2, // annonce, ding
-    maxAparte: 1,
-    maxAmbiance: 2, // pluie, portes
     rustle: false, // froissement de papier : début des pensées du héros et réponses du joueur (séance 66 : désactivé, choix de l'auteur)
     pauseMusic: 0.35, // volume de la musique en pause (× volume de la musique)
-    preparedSounds: true, // essai : sons courts préparés une fois (oui) ou fabriqués à chaque fois comme avant (non)
     // Taille de la réserve de son du navigateur : plus grande = moins de risque de grésillement,
     // mais les pas sonnent un tout petit peu plus tard.
     latency: 'balanced',
@@ -252,7 +236,6 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.paperTwist', label: 'Torsion papier 2.5D', min: 0, max: 2, step: 0.05, unit: '×' },
   { group: 'Personnage', key: 'character.flipShadow', label: 'Ombre portée au retournement', min: 0, max: 1, step: 0.05 },
   { group: 'Personnage', key: 'character.paperSheen', label: 'Reflet papier au retournement', type: 'bool' },
-  { group: 'Personnage', key: 'character.smoothTurns', label: 'Hystérésis et phase de marche (8 dir.)', type: 'bool' },
   { group: 'Personnage', key: 'character.bounceHeight', label: 'Rebond en marchant', min: 0, max: 30, step: 1, unit: 'px' },
   { group: 'Personnage', key: 'character.walkSquash', label: 'Écrasement à chaque pas', min: 0, max: 0.2, step: 0.01 },
   { group: 'Personnage', key: 'character.breathAmount', label: 'Respiration (ampleur)', min: 0, max: 0.06, step: 0.002 },
@@ -278,17 +261,11 @@ export const TUNABLES = [
   { group: 'Son', key: 'audio.muted', label: 'Couper le son', type: 'bool' },
   { group: 'Son', key: 'audio.master', label: 'Volume général', min: 0, max: 1, step: 0.05 },
   { group: 'Son', key: 'audio.music', label: 'Musique', min: 0, max: 1, step: 0.05 },
-  { group: 'Son', key: 'audio.maxPas', label: 'Sons en même temps : pas', min: 1, max: 6, step: 1 },
-  { group: 'Son', key: 'audio.maxTexte', label: 'Sons en même temps : bips du texte', min: 1, max: 8, step: 1 },
-  { group: 'Son', key: 'audio.maxPapier', label: 'Sons en même temps : papier', min: 1, max: 6, step: 1 },
-  { group: 'Son', key: 'audio.maxScanner', label: 'Sons en même temps : scanner', min: 1, max: 8, step: 1 },
-  { group: 'Son', key: 'audio.maxVoix', label: 'Sons en même temps : haut-parleur', min: 1, max: 4, step: 1 },
   { group: 'Son', key: 'audio.heroBlips', label: 'Bips d’écriture du héros', type: 'bool' },
   { group: 'Son', key: 'audio.rustle', label: 'Froissement de papier', type: 'bool' },
-  { group: 'Son', key: 'audio.preparedSounds', label: 'Essai : sons courts préparés', type: 'bool' },
   { group: 'Son', key: 'audio.steps', label: 'Bruits de pas', min: 0, max: 1, step: 0.05 },
   {
-    group: 'Son', key: 'audio.stepSound', label: 'Son des pas (essai)', type: 'choice',
+    group: 'Son', key: 'audio.stepSound', label: 'Son des pas', type: 'choice',
     options: [
       ['mix', 'Les 3 pas alternés'],
       ['carrelage', 'Carrelage G/D (pas 1 + 2)'],
@@ -296,13 +273,6 @@ export const TUNABLES = [
       ['pas2', 'Pas 2 seul (carrelage D)'],
       ['pas3', 'Pas 3 (semelle caoutchouc)'],
       ['synthese', 'Synthèse (ancien)'],
-    ],
-  },
-  {
-    group: 'Son', key: 'audio.musicTrack', label: 'Musique du magasin', type: 'choice',
-    options: [
-      ['airport-lounge', 'Airport Lounge (30 s, essai)'],
-      ['supermarche', 'Bossa supermarché (12 s, ancienne)'],
     ],
   },
   { group: 'Son', key: 'audio.birdsVolume', label: 'Corbeaux / oiseaux dehors', min: 0, max: 1, step: 0.05 },
@@ -394,18 +364,7 @@ export const TUNABLES = [
   { group: 'Marche', key: 'guard.speed', label: 'Agent de sécurité : vitesse', min: 50, max: 1500, step: 10, unit: 'px/s' },
   { group: 'Caméra', key: 'places.waitAfter', label: 'Changement de lieu : signe d’attente après', min: 0, max: 2, step: 0.1, unit: 's' },
   { group: 'Caméra', key: 'places.prefetchDelay', label: 'Préchargement des lieux voisins après', min: 0, max: 10, step: 0.5, unit: 's' },
-  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du volet papier (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
-  {
-    group: 'Caméra', key: 'places.style', label: 'Changement de lieu : style de transition (test)', type: 'choice',
-    options: [
-      ['mist', 'Cross-dissolve + brume lumineuse'],
-      ['dissolve', 'Cross-dissolve (fondu enchaîné pur)'],
-      ['flip', '3A · Feuille origami qui se retourne'],
-      ['double', '3B · Double-volet origami'],
-      ['strips', 'Lignes blanches → cartes liseré bleu'],
-      ['wipe', '2A · Volet papier glissant'],
-    ],
-  },
+  { group: 'Caméra', key: 'places.fade', label: 'Changement de lieu : durée du fondu enchaîné (0 = direct)', min: 0, max: 1, step: 0.01, unit: 's' },
   { group: 'Caméra', key: 'camera.zoom', label: 'Zoom (netteté au rechargement)', min: 1, max: 1.8, step: 0.05, unit: '×' },
   { group: 'Caméra', key: 'camera.follow', label: 'Vitesse de suivi', min: 0.5, max: 20, step: 0.5 },
   { group: 'Caméra', key: 'camera.lookAhead', label: 'Regard devant le personnage', min: 0, max: 500, step: 10, unit: 'px' },
@@ -418,7 +377,6 @@ export const TUNABLES = [
   { group: 'Affichage', key: 'display.menuAlpha', label: 'Opacité des menus', min: 0.25, max: 1, step: 0.05 },
   { group: 'Affichage', key: 'display.crt', label: 'Filtre écran cathodique', type: 'bool' },
   { group: 'Affichage', key: 'display.crtStrength', label: 'Force du filtre cathodique', min: 0.1, max: 1, step: 0.05 },
-  { group: 'Affichage', key: 'display.propLayers', label: 'Objets sur calque fixe (anti-clignotement)', type: 'bool' },
   {
     group: 'Affichage', key: 'display.profile', label: 'Qualité (profil)', type: 'choice', reload: true,
     options: [['leger', 'Légère (téléphones modestes, PC anciens)'], ['normal', 'Normale'], ['fin', 'Fine (appareils rapides)']],
@@ -454,7 +412,7 @@ const listeners = [];
 
 export function getValue(key, from = config) {
   const [section, name] = key.split('.');
-  return from[section][name];
+  return from[section]?.[name];
 }
 
 export function getDefault(key) {

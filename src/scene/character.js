@@ -237,7 +237,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     const isFlipping = flipP >= 0;
     stats.flipping = isFlipping;
 
-    const smooth = settings.smoothTurns !== false;
+    const smooth = true;
     const anim = pickAnim8(moving, scanning, aside, shownDir);
     if (anim !== current) {
       // Changement de direction en marchant : on conserve la phase du cycle (animStartDist)

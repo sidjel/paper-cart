@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
+import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, transitionDissolve, showWait, exitTarget, shouldPrefetch, neighborIds, neighborImageUrls } from '../../src/core/places.js';
 import { compileMask, isWalkable } from '../../src/core/walkmask.js';
 import { TRANSITIONS } from '../../src/core/state.js';
 import rayon from '../../src/data/places/rayon-essai.json';
@@ -75,33 +75,32 @@ describe('lieux : sorties et fondu', () => {
     const stuck = createEdgeWalk('out', rightB.outX, rightB.triggerX, outRight);
     expect(stepEdgeWalk(stuck, rightB.triggerX, 1.5).done).toBe(true);
   });
-  it('fondu : noircit, attend le nouveau lieu dans le noir, puis s’efface', () => {
-    const tr = createTransition({ to: 'accueil' }, 'right', 'wipe');
-    expect(transitionBlack(tr, P)).toBe(0);
+  it('fondu enchaîné pur : charge tout de suite en gardant l’ancien décor, puis le fond doucement', () => {
+    const tr = createTransition({ to: 'accueil' });
+    expect(transitionDissolve(tr, P)).toBe(1);
     let loads = 0;
-    for (let k = 0; k < 30; k++) if (stepTransition(tr, 1 / 60, P) === 'load') loads++;
+    for (let k = 0; k < 5; k++) if (stepTransition(tr, 1 / 60, P) === 'load') loads++;
     expect(loads).toBe(1);
     expect(tr.phase).toBe('load');
-    expect(transitionBlack(tr, P)).toBe(1); // reste noir tant que le lieu n'est pas prêt
+    expect(transitionDissolve(tr, P)).toBe(1); // reste plein tant que le lieu n'est pas prêt
     placeReady(tr);
     stepTransition(tr, 0.125, P);
-    expect(transitionBlack(tr, P)).toBeCloseTo(0.5);
+    expect(transitionDissolve(tr, P)).toBeCloseTo(0.5);
     stepTransition(tr, 0.2, P);
     expect(tr.phase).toBe('done');
-    expect(transitionBlack(tr, P)).toBe(0);
+    expect(transitionDissolve(tr, P)).toBe(0);
   });
 
   it('fade à 0 : passage direct sans division par zéro ni blocage', () => {
     const zero = { fade: 0, waitAfter: 0.3 };
     const tr = createTransition({ to: 'rayon-essai' });
-    expect(transitionBlack(tr, zero)).toBe(1);
     expect(stepTransition(tr, 1 / 60, zero)).toBe('load');
     expect(tr.phase).toBe('load');
     placeReady(tr);
-    expect(transitionBlack(tr, zero)).toBe(0);
+    expect(transitionDissolve(tr, zero)).toBe(0);
     stepTransition(tr, 1 / 60, zero);
     expect(tr.phase).toBe('done');
-    expect(transitionBlack(tr, zero)).toBe(0);
+    expect(transitionDissolve(tr, zero)).toBe(0);
   });
   it('la machine à états a un état « transition », entre deux moments de jeu', () => {
     expect(TRANSITIONS.play).toContain('transition');
@@ -114,14 +113,14 @@ describe('lieux : sorties et fondu', () => {
 
   it('jamais d’écran noir muet : le signe d’attente apparaît si le chargement dure plus de waitAfter', () => {
     const p = { fade: 0.25, waitAfter: 0.3 };
-    const tr = createTransition({ to: 'x' }, 'right', 'wipe');
-    stepTransition(tr, 0.3, p); // fondu : noir
+    const tr = createTransition({ to: 'x' });
+    stepTransition(tr, 0.01, p); // passe tout de suite en 'load'
     expect(tr.phase).toBe('load');
     expect(showWait(tr, p)).toBe(false);
     stepTransition(tr, 0.2, p);
     expect(showWait(tr, p)).toBe(false);
     stepTransition(tr, 0.15, p);
-    expect(showWait(tr, p)).toBe(true); // 0,35 s dans le noir
+    expect(showWait(tr, p)).toBe(true); // 0,35 s de chargement
     placeReady(tr);
     expect(showWait(tr, p)).toBe(false);
   });
@@ -168,105 +167,5 @@ describe('pré-téléchargement silencieux des lieux voisins', () => {
     expect(new Set(urls).size).toBe(urls.length);
     // Ne répète pas les images déjà présentes dans l'accueil (ex. oiseau-1.webp).
     expect(urls.some((u) => u.endsWith('art/accueil/oiseau-1.webp'))).toBe(false);
-  });
-});
-
-describe('volet papier directionnel (2A)', () => {
-  it('déduit la direction selon le bord de sortie du lieu', () => {
-    expect(transitionDirection(accueil.exits.items[0], accueil)).toBe('right');
-    expect(transitionDirection(rayon.exits.items.find((e) => e.to === 'accueil'), rayon)).toBe('left');
-    expect(transitionDirection(rayon.exits.items.find((e) => e.to === 'rayon-2'), rayon)).toBe('up');
-    expect(transitionDirection(rayon2.exits.items.find((e) => e.to === 'rayon-essai'), rayon2)).toBe('down');
-  });
-
-  it('glisse de +104 % à 0 % puis à -104 % dans le sens opposé à la marche', () => {
-    const p = { fade: 0.18 };
-    const tr = createTransition({ to: 'rayon-essai' }, 'right');
-    expect(transitionWipe(tr, p)).toEqual({ x: 104, y: 0 });
-    stepTransition(tr, 0.09, p); // mi-parcours aller : 75 % couvert
-    expect(transitionWipe(tr, p).x).toBeCloseTo(26);
-    stepTransition(tr, 0.1, p); // passe en 'load'
-    expect(tr.phase).toBe('load');
-    expect(transitionWipe(tr, p)).toEqual({ x: 0, y: 0 });
-    placeReady(tr);
-    stepTransition(tr, 0.09, p); // mi-parcours sortie
-    expect(transitionWipe(tr, p).x).toBeCloseTo(-26);
-    stepTransition(tr, 0.1, p);
-    expect(tr.phase).toBe('done');
-    expect(transitionWipe(tr, p)).toEqual({ x: -104, y: 0 });
-  });
-
-  it('inverse correctement les axes pour left, up et down', () => {
-    const p = { fade: 0.18 };
-    expect(transitionWipe(createTransition({ to: 'accueil' }, 'left'), p)).toEqual({ x: -104, y: 0 });
-    expect(transitionWipe(createTransition({ to: 'rayon-2' }, 'up'), p)).toEqual({ x: 0, y: -104 });
-    expect(transitionWipe(createTransition({ to: 'rayon-essai' }, 'down'), p)).toEqual({ x: 0, y: 104 });
-  });
-
-  it('3A (flip) : pivote depuis la tranche blanche puis se replie en sortie', () => {
-    const p = { fade: 0.24 };
-    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'flip');
-    expect(transitionFlip(tr, p).edge).toBe(true);
-    expect(transitionFlip(tr, p).sx).toBeCloseTo(0.045);
-    stepTransition(tr, 0.25, p);
-    expect(tr.phase).toBe('load');
-    expect(transitionFlip(tr, p)).toEqual({ x: 0, y: 0, sx: 1, sy: 1, edge: false });
-    placeReady(tr);
-    stepTransition(tr, 0.25, p);
-    expect(tr.phase).toBe('done');
-    expect(transitionFlip(tr, p).edge).toBe(true);
-  });
-
-  it('3B (double) : ferme les deux rabats vers le centre puis les rouvre', () => {
-    const p = { fade: 0.24 };
-    const tr = createTransition({ to: 'rayon-2' }, 'up', 'double');
-    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 0, b: 0 });
-    stepTransition(tr, 0.25, p);
-    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 1, b: 1 });
-    placeReady(tr);
-    stepTransition(tr, 0.25, p);
-    expect(transitionFlaps(tr, p)).toEqual({ axis: 'y', a: 0, b: 0 });
-  });
-
-  it('strips : lignes blanches → élargissement en cartes → retournement', () => {
-    const p = { fade: 0.24 };
-    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'strips');
-    stepTransition(tr, 0.05, p); // début : lignes blanches fines
-    const early = transitionStrips(tr, p, 'right', 6);
-    expect(early.axis).toBe('x');
-    expect(early.items[0].white).toBe(true);
-    expect(early.items[0].s).toBeCloseTo(0.14);
-    stepTransition(tr, 0.25, p); // plein écran en cartes
-    const full = transitionStrips(tr, p, 'right', 6);
-    expect(full.items.every((it) => !it.white && it.s > 1)).toBe(true);
-    placeReady(tr);
-    stepTransition(tr, 0.25, p); // retournées et disparues
-    expect(transitionStrips(tr, p, 'right', 6).items.every((it) => it.opacity === 0)).toBe(true);
-  });
-
-  it('cross-dissolve et brume lumineuse : charge tout de suite puis fond doucement l’ancien lieu', () => {
-    const p = { fade: 0.34 };
-    expect(isCrossDissolve('dissolve')).toBe(true);
-    expect(isCrossDissolve('mist')).toBe(true);
-    expect(isCrossDissolve('flip')).toBe(false);
-
-    const tr = createTransition({ to: 'rayon-essai' }, 'right', 'mist');
-    expect(stepTransition(tr, 1 / 60, p)).toBe('load'); // passe tout de suite au chargement
-    expect(tr.phase).toBe('load');
-    expect(transitionDissolve(tr, p).oldOpacity).toBe(1);
-    placeReady(tr);
-    stepTransition(tr, 0.17, p); // mi-parcours : ancien lieu à 50 %, brume douce à son pic (~0.34)
-    const mid = transitionDissolve(tr, p);
-    expect(mid.oldOpacity).toBeCloseTo(0.5);
-    expect(mid.mistOpacity).toBeCloseTo(0.34);
-    stepTransition(tr, 0.2, p);
-    expect(tr.phase).toBe('done');
-    expect(transitionDissolve(tr, p)).toEqual({ oldOpacity: 0, mistOpacity: 0 });
-
-    const pure = createTransition({ to: 'accueil' }, 'left', 'dissolve');
-    stepTransition(pure, 1 / 60, p);
-    placeReady(pure);
-    stepTransition(pure, 0.17, p);
-    expect(transitionDissolve(pure, p)).toEqual({ oldOpacity: 0.5, mistOpacity: 0 });
   });
 });

@@ -1081,7 +1081,7 @@ function frame(now) {
       if (treadmill.active) {
         stepTreadmill(walker, intent, config.walk, treadmill, stepper.step);
       } else {
-        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step, scaleAt(proj, walker.z), config.character.smoothTurns);
+        stepWalker(walker, intent, mask, chariot.walk(treadmillWalkConfig(config.walk, treadmill.slow)), stepper.step, scaleAt(proj, walker.z));
       }
       chariot.step(mask, stepper.step); // le chariot poussé bute contre le décor, puis suit le héros
       pile.step(walker, intent, chariot.core(), stepper.step); // la pile de cartons, poussée à la main ou au chariot
@@ -1242,7 +1242,6 @@ async function start() {
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
     if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
     if (key.startsWith('player.')) voices.applyPlayerName();
-    if (key === 'display.propLayers') stage?.el.classList.toggle('props-layered', value);
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
     if (key === 'carry.panier' || key === 'carry.chariot') basketUi.setCapacity(capacity(gear, config.carry));
@@ -1289,7 +1288,7 @@ async function start() {
     markSaid: (trigger) => voices.markSaid(trigger),
     flips: () => flips,
     place: () => place.id,
-    useExit: (id) => places.useExit(id),
+    useExit: (id, unloadFirst = false) => places.useExit(id, unloadFirst),
     lastTransitionMs: () => places.lastTransitionMs(),
     paths: () => pathCount,
     reloadPlace: () => places.reload(),

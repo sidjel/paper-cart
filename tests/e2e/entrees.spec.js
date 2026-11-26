@@ -196,13 +196,12 @@ test('fiche « Nouvel objet » au doigt : double toucher à portée ne la referm
   await expect(page.locator('.item-reveal')).toBeHidden();
 });
 
-test('transition « mist » : le héros reste visible dans l’ancien décor pendant le chargement du nouveau lieu', async ({ page }, info) => {
+test('transition fondu enchaîné pur : le héros reste visible dans l’ancien décor pendant le chargement du nouveau lieu', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'PC seulement');
   await page.goto('./?lieu=accueil');
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
-  await page.evaluate(() => window.paperCart.set('places.style', 'mist'));
   // Ralentir volontairement le chargement du rayon d'essai pour observer le héros pendant 'load'.
   let releaseRoute;
   const hold = new Promise((r) => (releaseRoute = r));

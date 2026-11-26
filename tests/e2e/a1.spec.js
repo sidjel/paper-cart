@@ -171,18 +171,28 @@ test('passe derrière le présentoir puis revient devant', async ({ page }, info
 
 test('la feuille se retourne quand il change de côté', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
-  // Largeur apparente de la feuille (négative = tournée vers la gauche), lue dans le style.
+  // Largeur / orientation de la feuille (négative = tournée vers la gauche), lue dans le style.
   const width = () => page.locator('.actor-flip').evaluate((el) => Number(/scale\((-?[\d.e-]+),/.exec(el.style.transform)?.[1] ?? 1));
-  // Se tourner d'abord à droite (E), puis à gauche (W) pour déclencher un retournement gauche ↔ droite.
+  // Se tourner d'abord à droite (E), puis observer le canevas 2.5D avant le demi-tour à gauche (W)
+  // (observateur dans la page : insensible à la lenteur d'un runner CI sans carte graphique).
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(180);
+  await page.waitForTimeout(220);
   await page.keyboard.up('ArrowRight');
+  await page.evaluate(() => {
+    const c = document.querySelector('.actor-flip-canvas');
+    window.__flipSeen = Boolean(c && !c.hidden);
+    if (c) {
+      new MutationObserver(() => {
+        if (!c.hidden) window.__flipSeen = true;
+      }).observe(c, { attributes: true, attributeFilter: ['hidden'] });
+    }
+  });
   await page.keyboard.down('ArrowLeft');
-  // Pendant le retournement, la feuille est nettement plus étroite qu'en entier.
-  await expect.poll(async () => Math.abs(await width()), { timeout: 2000, intervals: [16] }).toBeLessThan(0.7);
+  await expect.poll(() => page.evaluate(() => window.__flipSeen), { timeout: 2500 }).toBe(true);
   await page.waitForTimeout(400);
   await page.keyboard.up('ArrowLeft');
   await page.waitForTimeout(300);
+  await expect(page.locator('.actor-flip-canvas')).toBeHidden();
   expect(await width()).toBeLessThan(-0.9);
 });
 

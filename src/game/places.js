@@ -14,7 +14,7 @@ import { compileMask } from '../core/walkmask.js';
 import { clearTarget } from '../core/movement.js';
 import { enterPlace, buildProducts, buildPickups } from '../core/world.js';
 import { createPile } from '../core/pile.js';
-import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, isCrossDissolve, transitionBlack, transitionDirection, transitionWipe, transitionFlip, transitionFlaps, transitionStrips, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
+import { exitAt, edgeBounds, edgeTouched, createEdgeWalk, stepEdgeWalk, createTransition, stepTransition, placeReady, transitionDissolve, showWait, shouldPrefetch, neighborImageUrls } from '../core/places.js';
 import { assetStats, computeRasterScale, loadImages, releaseImages } from '../scene/assets.js';
 import { createProjection, scaleAt, worldToStageY } from '../scene/projection.js';
 import { createPlaceView } from '../scene/placeView.js';
@@ -118,52 +118,11 @@ export function createPlaces(ui, container, game) {
     releaseImages(images);
   }
 
-  // ---------- Changement de lieu : transition papier origami gérée par la machine à états ----------
-  // Un seul calque .place-fade pour tout le jeu : noir en relais d'intro/erreur (enfants cachés = 0 calque
-  // en plus), et transition origami (3A retournement, 3B double-volet, lignes→cartes bleues, ou 2A volet) entre lieux.
+  // ---------- Changement de lieu : fondu enchaîné pur (cross-dissolve) ----------
+  // Un seul calque .place-fade pour le relais noir d'intro/erreur et le signe d'attente (.place-wait).
   const fadeEl = document.createElement('div');
   fadeEl.className = 'place-fade';
   fadeEl.hidden = true;
-  const artUrl = `${game.base}art/ui/transition-origami.webp`;
-  fadeEl.style.setProperty('--transition-img', `url("${artUrl}")`);
-  // Préchargement silencieux de l'illustration de transition pour éviter tout flash au premier passage.
-  if (typeof Image === 'function') {
-    const pre = new Image();
-    pre.src = artUrl;
-  }
-  const sheetEl = document.createElement('div');
-  sheetEl.className = 'place-sheet';
-  sheetEl.hidden = true;
-  fadeEl.appendChild(sheetEl);
-
-  const flapsEl = document.createElement('div');
-  flapsEl.className = 'place-flaps';
-  flapsEl.hidden = true;
-  const flapA = document.createElement('div');
-  flapA.className = 'place-flap place-flap-a';
-  const flapB = document.createElement('div');
-  flapB.className = 'place-flap place-flap-b';
-  flapsEl.append(flapA, flapB);
-  fadeEl.appendChild(flapsEl);
-
-  const STRIP_COUNT = 6;
-  const stripsEl = document.createElement('div');
-  stripsEl.className = 'place-strips';
-  stripsEl.hidden = true;
-  const stripEls = [];
-  for (let i = 0; i < STRIP_COUNT; i++) {
-    const s = document.createElement('div');
-    s.className = 'place-strip';
-    s.style.setProperty('--i', String(i));
-    stripsEl.appendChild(s);
-    stripEls.push(s);
-  }
-  fadeEl.appendChild(stripsEl);
-
-  const mistEl = document.createElement('div');
-  mistEl.className = 'place-mist';
-  mistEl.hidden = true;
-  fadeEl.appendChild(mistEl);
 
   // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais d'écran muet.
   const waitEl = document.createElement('div');
@@ -175,7 +134,7 @@ export function createPlaces(ui, container, game) {
   fadeEl.appendChild(waitEl);
   ui.appendChild(fadeEl);
   let transition = null;
-  let edgeWalk = null; // traversée automatique d'un bord d'écran ('out' jusqu'à 3/4 hors-champ, ou 'in' jusqu'au bord)
+  let edgeWalk = null; // traversée automatique d'un bord d'écran ('out' jusqu'à 100 % hors-champ, ou 'in' jusqu'au bord)
   let dissolving = null; // { view, images } : ancien lieu en cours de fondu enchaîné, libéré dès la fin
   let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
   let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
@@ -192,20 +151,11 @@ export function createPlaces(ui, container, game) {
     discardDissolving();
     fadeEl.classList.remove('paper-fx');
     fadeEl.style.transform = '';
-    sheetEl.hidden = true;
-    sheetEl.style.transform = '';
-    sheetEl.style.opacity = '';
-    sheetEl.classList.remove('edge');
-    flapsEl.hidden = true;
-    stripsEl.hidden = true;
-    mistEl.hidden = true;
-    mistEl.style.opacity = '0';
   }
 
-  // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on recharge le lieu de départ et le
-  // héros revient là où il est sorti (cette sortie est ignorée tant qu'il n'en est pas ressorti), le
-  // haut-parleur prévient. Si même ce rechargement échoue : un écran d'erreur avec « Réessayer ».
-  // Dans tous les cas, l'état « transition » se termine.
+  // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on garde ou recharge le lieu de départ
+  // (sortie ignorée tant que le héros n'en est pas ressorti), et le haut-parleur prévient.
+  // Si même le rechargement échoue sans lieu monté : écran d'erreur avec « Réessayer ».
   let leftFrom = null; // { id, x, z, facing } : où était le héros en partant
   let ignoredExit = null; // sortie d'où l'on vient de revenir après un échec
   const errorEl = document.createElement('div');
@@ -223,75 +173,18 @@ export function createPlaces(ui, container, game) {
   function paintFade(tr) {
     fadeEl.style.opacity = '1';
     fadeEl.style.transform = '';
-    if (isCrossDissolve(tr.style)) {
-      sheetEl.hidden = true;
-      flapsEl.hidden = true;
-      stripsEl.hidden = true;
-      const { oldOpacity, mistOpacity } = transitionDissolve(tr, config.places);
-      if (dissolving) dissolving.view.stage.el.style.opacity = String(oldOpacity);
-      mistEl.hidden = mistOpacity <= 0;
-      if (!mistEl.hidden) mistEl.style.opacity = String(mistOpacity);
-      return;
-    }
-    mistEl.hidden = true;
-    if (config.display.reduceMotion || config.places.fade <= 0) {
-      sheetEl.hidden = false;
-      flapsEl.hidden = true;
-      stripsEl.hidden = true;
-      sheetEl.classList.remove('edge');
-      sheetEl.style.transform = '';
-      sheetEl.style.opacity = String(transitionBlack(tr, config.places));
-      return;
-    }
-    if (tr.style === 'double') {
-      sheetEl.hidden = true;
-      stripsEl.hidden = true;
-      flapsEl.hidden = false;
-      const { axis, a, b } = transitionFlaps(tr, config.places, tr.dir);
-      flapsEl.classList.toggle('axis-x', axis === 'x');
-      flapsEl.classList.toggle('axis-y', axis === 'y');
-      flapA.style.transform = axis === 'x' ? `scaleX(${a})` : `scaleY(${a})`;
-      flapB.style.transform = axis === 'x' ? `scaleX(${b})` : `scaleY(${b})`;
-    } else if (tr.style === 'strips') {
-      sheetEl.hidden = true;
-      flapsEl.hidden = true;
-      stripsEl.hidden = false;
-      const { axis, items } = transitionStrips(tr, config.places, tr.dir, STRIP_COUNT);
-      stripsEl.classList.toggle('axis-x', axis === 'x');
-      stripsEl.classList.toggle('axis-y', axis === 'y');
-      for (let i = 0; i < STRIP_COUNT; i++) {
-        const it = items[i];
-        const el = stripEls[i];
-        el.style.transform = axis === 'x' ? `translate3d(${it.t}%, 0, 0) scaleY(${it.s})` : `translate3d(0, ${it.t}%, 0) scaleX(${it.s})`;
-        el.style.opacity = String(it.opacity);
-        el.classList.toggle('as-white', it.white);
-      }
-    } else if (tr.style === 'wipe') {
-      flapsEl.hidden = true;
-      stripsEl.hidden = true;
-      sheetEl.hidden = false;
-      sheetEl.classList.remove('edge');
-      const { x, y } = transitionWipe(tr, config.places, tr.dir);
-      sheetEl.style.opacity = '1';
-      sheetEl.style.transform = `translate3d(${x}%, ${y}%, 0)`;
-    } else {
-      // 'flip' (3A par défaut) : feuille origami avec liseré blanc qui se retourne en scaleX/scaleY.
-      flapsEl.hidden = true;
-      stripsEl.hidden = true;
-      sheetEl.hidden = false;
-      const { x, y, sx, sy, edge } = transitionFlip(tr, config.places, tr.dir);
-      sheetEl.style.opacity = '1';
-      sheetEl.style.transform = `translate3d(${x}%, ${y}%, 0) scale(${sx}, ${sy})`;
-      sheetEl.classList.toggle('edge', edge);
-    }
+    const fadeCfg = config.display.reduceMotion ? { fade: 0 } : config.places;
+    const oldOpacity = transitionDissolve(tr, fadeCfg);
+    if (dissolving) dissolving.view.stage.el.style.opacity = String(oldOpacity);
   }
 
-  function leaveBy(exit, fromOverride = null) {
+  function leaveBy(exit, fromOverride = null, unloadFirst = false) {
     cancelPrefetch();
     edgeWalk = null;
     const w = game.walker();
     leftFrom = fromOverride ?? { id: place.id, x: w.x, z: w.z, facing: w.facing };
-    transition = createTransition(exit, transitionDirection(exit, place), config.places.style);
+    transition = createTransition(exit);
+    transition.unloadFirst = unloadFirst;
     fadeEl.classList.add('paper-fx');
     paintFade(transition);
     fadeEl.hidden = false;
@@ -325,7 +218,7 @@ export function createPlaces(ui, container, game) {
 
   async function change(exit) {
     const t0 = performance.now();
-    const keepOld = isCrossDissolve(transition?.style) && view;
+    const keepOld = !transition?.unloadFirst && view;
     if (keepOld) {
       // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
       // du lieu suivant (aucune disparition à vide avant la bascule).
@@ -509,10 +402,10 @@ export function createPlaces(ui, container, game) {
       } else fadeEl.style.opacity = String(o);
     },
     // Tests : prendre une sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
-    useExit(id) {
+    useExit(id, unloadFirst = false) {
       const exit = (place.exits?.items ?? []).find((e) => !id || e.id === id);
       if (!exit || transition || !game.sm.is('play')) return false;
-      leaveBy(exit);
+      leaveBy(exit, null, unloadFirst);
       return true;
     },
     retry,

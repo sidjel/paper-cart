@@ -21,7 +21,7 @@ Méthode éprouvée et réutilisable pour tout futur personnage / PNJ origami :
    - **Clignement des yeux (`S`, `SE`, `E`)** : peint uniquement sur les paupières de l'image `idle` finale (zéro décalage du reste du corps).
 
 ## Transitions entre lieux 🧪 en validation sur téléphone
-- **Styles en essai (`⚙ → Caméra`)** : fondu enchaîné avec légère brume (`mist`, par défaut en test, héros maintenu visible pendant le chargement), fondu enchaîné pur (`dissolve`), et 4 effets papier origami HD (`flip`, `double`, `strips`, `wipe` avec `public/art/ui/transition-origami.webp`, bordures nettes sans ombres floues ; repli fondu doux si *Réduire les animations* est activé). Les 5 styles non retenus seront retirés après validation sur téléphone.
+- **Style validé (séance 81)** : **fondu enchaîné pur** (`cross-dissolve`, héros maintenu visible dans l'ancien décor pendant le chargement, puis fondu doux ; passage direct si *Réduire les animations* ou durée = 0). Les 5 autres styles d'essai ont été retirés (visuel `transition-origami.webp` archivé dans `_assets_stock/ui_en_reserve/`).
 
 ## Direction visuelle ✅ VALIDÉ (texte de `VISION.md`, recopié mot pour mot, séance 51)
 Inspirée de Paper Mario et de Baten Kaitos.

@@ -46,12 +46,13 @@ export function createAudio(settings, base = '') {
     grince: 'chariot', chute: 'chariot', annonce: 'voix', ding: 'voix',
     aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance',
   };
+  const FAMILY_LIMITS = { pas: 2, texte: 3, papier: 2, scanner: 4, voix: 2, aparte: 1, ambiance: 2 };
   const playing = {}; // famille → sons en cours [{ sources, left }], du plus ancien au plus récent
   let collecting = null; // sources créées par le son en train de démarrer
   function limit(family) {
     const list = (playing[family] ??= []);
     for (let i = list.length - 1; i >= 0; i--) if (list[i].left <= 0) list.splice(i, 1); // finis
-    const max = settings[`max${family[0].toUpperCase()}${family.slice(1)}`] ?? Infinity; // config.audio.maxPas…
+    const max = settings[`max${family[0].toUpperCase()}${family.slice(1)}`] ?? FAMILY_LIMITS[family] ?? Infinity;
     while (list.length >= max) {
       const oldest = list.shift();
       stats.cut++;
@@ -185,7 +186,7 @@ export function createAudio(settings, base = '') {
   }
   // Un son préparé (variante k), ou à défaut fabriqué en direct (graph : nœuds de chaque partie).
   function playPrepared(name, k, bus, live) {
-    if (prepared && settings.preparedSounds !== false) {
+    if (prepared) {
       const src = ctx.createBufferSource();
       src.buffer = prepared[name][k];
       src.connect(bus);
@@ -588,7 +589,7 @@ export function createAudio(settings, base = '') {
     update() {
       if (!running()) return;
       const trackMusic = (src, nodes) => track(src, nodes, 'music');
-      stats.notes += samples.updateMusic(ctx, musicBus, trackMusic, settings.musicTrack);
+      stats.notes += samples.updateMusic(ctx, musicBus, trackMusic);
     },
   };
 }

@@ -4,8 +4,7 @@
 
 const CROW_FILES = ['audio/corbeau-1.mp3', 'audio/corbeau-2.mp3', 'audio/corbeau-3.mp3', 'audio/corbeau-4.mp3'];
 const BIP_FILE = 'audio/scan-bip.mp3';
-const MUSIC_BOSSA_FILE = 'audio/supermarche.mp3';
-const MUSIC_LOUNGE_FILE = 'audio/musique-airport-lounge.mp3';
+const MUSIC_FILE = 'audio/musique-airport-lounge.mp3';
 const INTRO_RAIN_FILE = 'audio/pluie-intro.mp3';
 const STEP_TILE_L = 'audio/pas-carrelage-g.mp3';
 const STEP_TILE_R = 'audio/pas-carrelage-d.mp3';
@@ -37,8 +36,7 @@ function playOnce(ctx, bus, track, buffer, gain = 1, rate = 1) {
 export function createSamples(base = '') {
   const crows = [];
   let bipBuf = null;
-  let bossaBuf = null;
-  let loungeBuf = null;
+  let musicBuf = null;
   let rainBuf = null;
   let stepTileL = null;
   let stepTileR = null;
@@ -47,8 +45,6 @@ export function createSamples(base = '') {
   let crowIdx = 0;
   let stepIdx = 0;
   let musicSrc = null;
-  let musicGain = null;
-  let musicTrackId = '';
   let musicBeatT = -1;
   let musicStartT = 0;
   let rainSrc = null;
@@ -114,11 +110,8 @@ export function createSamples(base = '') {
       fetchBuffer(ctx, BIP_FILE).then((b) => {
         if (b) bipBuf = b;
       });
-      fetchBuffer(ctx, MUSIC_BOSSA_FILE).then((b) => {
-        if (b) bossaBuf = b;
-      });
-      fetchBuffer(ctx, MUSIC_LOUNGE_FILE).then((b) => {
-        if (b) loungeBuf = b;
+      fetchBuffer(ctx, MUSIC_FILE).then((b) => {
+        if (b) musicBuf = b;
       });
       fetchBuffer(ctx, INTRO_RAIN_FILE).then((b) => {
         if (b) {
@@ -178,28 +171,15 @@ export function createSamples(base = '') {
       else stopRainNow();
     },
 
-    hasMusic: () => loungeBuf !== null || bossaBuf !== null,
+    hasMusic: () => musicBuf !== null,
 
-    // Boucle musicale sans couture (AudioBufferSourceNode loop = true) sur le bus haut-parleur.
-    // Change de piste en direct si le réglage audio.musicTrack change dans F2 → Son.
-    updateMusic(ctx, bus, track, wantedTrack = 'airport-lounge') {
-      const targetId = wantedTrack === 'supermarche' ? 'supermarche' : 'airport-lounge';
-      const buf = targetId === 'supermarche' ? (bossaBuf || loungeBuf) : (loungeBuf || bossaBuf);
-      if (!buf) return 0;
+    // Boucle musicale sans couture (Airport Lounge, 30 s CC0) sur le bus haut-parleur.
+    updateMusic(ctx, bus, track) {
+      if (!musicBuf) return 0;
       const now = ctx.currentTime;
-      if (musicSrc && musicTrackId !== targetId) {
-        try {
-          musicGain?.gain?.setTargetAtTime(0.0001, now, 0.08);
-          musicSrc.stop(now + 0.25);
-        } catch {
-          /* déjà arrêté */
-        }
-        musicSrc = null;
-        musicGain = null;
-      }
       if (!musicSrc) {
         const src = ctx.createBufferSource();
-        src.buffer = buf;
+        src.buffer = musicBuf;
         src.loop = true;
         const g = ctx.createGain();
         g.gain.setValueAtTime(0.0001, now);
@@ -208,8 +188,6 @@ export function createSamples(base = '') {
         src.start(now);
         track(src, [src, g], 'music');
         musicSrc = src;
-        musicGain = g;
-        musicTrackId = targetId;
         musicStartT = now;
         musicBeatT = now;
         return 1;
@@ -222,12 +200,10 @@ export function createSamples(base = '') {
     },
 
     position() {
-      const buf = musicTrackId === 'supermarche' ? bossaBuf : loungeBuf;
-      if (!buf || !musicSrc) return 'en attente';
-      const dur = buf.duration || 30;
+      if (!musicBuf || !musicSrc) return 'en attente';
+      const dur = musicBuf.duration || 30;
       const loop = Math.floor((musicBeatT - musicStartT) / dur) + 1;
-      const label = musicTrackId === 'supermarche' ? 'bossa supermarché' : 'Airport Lounge';
-      return `${label} (boucle ${loop}, ${dur.toFixed(0)} s)`;
+      return `Airport Lounge (boucle ${loop}, ${dur.toFixed(0)} s)`;
     },
   };
 }
