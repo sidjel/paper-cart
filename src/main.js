@@ -1291,6 +1291,7 @@ async function start() {
   window.paperCart = {
     version: VERSION,
     state: () => sm.get(),
+    time: () => stepper.time,
     guard: () => guard.info(),
     hotesse: () => hotesse.info(),
     chariot: () => chariot.info(),

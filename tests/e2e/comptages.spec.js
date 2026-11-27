@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import limites from './comptages-limites.json' with { type: 'json' };
-import { watchConsole } from './helpers.js';
+import { watchConsole, waitGameTime } from './helpers.js';
 
 // Test des comptages (PixiJS v8) : on mesure des grandeurs indépendantes de la machine (le navigateur
 // headless de test n'a pas de carte graphique), pendant un tour du banc d'essai.
@@ -253,13 +253,14 @@ test('un scan ne crée que la petite carte du Panier', async ({ page }, info) =>
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   await page.evaluate(() => {
     window.paperCart.equip();
+    window.paperCart.markSaid('arrivee');
     window.paperCart.markSaid('rencontre');
   });
   await page.keyboard.down('ArrowUp');
   await page.waitForFunction(() => window.paperCart.hero().z > 200);
   await page.keyboard.up('ArrowUp');
   await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => window.paperCart.scanState().reach === 0, null, { timeout: 8000 });
+  await page.waitForFunction(() => window.paperCart.scanState().reach === 0, null, { timeout: 10000 });
   await page.keyboard.up('ArrowRight');
   await page.evaluate(() => {
     const c = window.__scan;
@@ -273,8 +274,9 @@ test('un scan ne crée que la petite carte du Panier', async ({ page }, info) =>
     c.on = true;
   });
   await page.keyboard.press('Enter');
-  await page.waitForFunction(() => window.paperCart.journal().length > 0, null, { timeout: 8000 }); // le haut-parleur commente
-  await page.waitForTimeout(2500);
+  await page.waitForFunction(() => window.paperCart.scanState().cards.length === 1 && !window.paperCart.scanState().active, null, { timeout: 15000 });
+  await page.waitForFunction(() => window.paperCart.journal().some((l) => /essence/.test(l)), null, { timeout: 10000 }); // le haut-parleur commente le scan
+  await waitGameTime(page, 1.0);
   const c = await page.evaluate(() => window.__scan);
   console.log('Pendant un scan :', JSON.stringify(c));
   expect(c.created).toBe(1); // la petite carte du Panier
@@ -282,7 +284,7 @@ test('un scan ne crée que la petite carte du Panier', async ({ page }, info) =>
 });
 
 // Rien n'apparaît à froid au début de la partie (séance 68). Une fois la scène dévoilée, plus aucun
-// calque DOM (#ui / #game) n'est créé ni retiré pendant 6 s, alors que le haut-parleur fait son annonce.
+// calque DOM (#ui / #game) n'est créé ni retiré pendant 5 s de temps de jeu, alors que le haut-parleur fait son annonce.
 test('début de partie : après l’apparition du hall, aucun calque créé ni retiré (annonce comprise)', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   test.setTimeout(40_000);
@@ -306,16 +308,18 @@ test('début de partie : après l’apparition du hall, aucun calque créé ni r
   });
   await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart.state() === 'play');
-  await page.waitForTimeout(700); // noir tenu puis effacé : la scène est dévoilée
+  await expect(page.locator('.place-fade')).toBeHidden({ timeout: 15000 }); // noir tenu puis effacé : la scène est vraiment dévoilée
   tracking = true;
-  await page.waitForFunction(() => window.paperCart.journal().length > 0, null, { timeout: 8000 }); // l'annonce d'arrivée
-  await page.waitForTimeout(5000);
+  await page.waitForFunction(() => window.paperCart.journal().length > 0, null, { timeout: 12000 }); // l'annonce d'arrivée
+  await waitGameTime(page, 5);
   const names = [];
   for (const [k, id] of changes) {
     try {
       const d = (await cdp.send('DOM.describeNode', { backendNodeId: id })).node;
       const a = d.attributes ?? [];
-      names.push(`${k}${d.localName}.${a[a.indexOf('class') + 1] ?? ''}`);
+      const ci = a.indexOf('class');
+      const cls = ci >= 0 ? (a[ci + 1] ?? '').split(' ')[0] : '';
+      names.push(`${k}${d.localName}${cls ? `.${cls}` : ''}`);
     } catch {
       names.push(`${k}?`);
     }
@@ -354,13 +358,16 @@ test('fin de l’intro : l’écran noir des lieux prend le relais ; rien d’au
   await page.keyboard.press('Escape'); // passer l'intro
   await page.waitForFunction(() => window.paperCart.state() === 'play', null, { timeout: 30000 });
   expect(await page.locator('.place-fade').isVisible()).toBe(true); // le relais : l'écran noir des lieux
-  await page.waitForTimeout(5000); // fondu fini, annonce d'arrivée, clignement des yeux
+  await expect(page.locator('.place-fade')).toBeHidden({ timeout: 15000 });
+  await waitGameTime(page, 3); // annonce d'arrivée, clignement des yeux
   const names = [];
   for (const [k, id] of changes) {
     try {
       const d = (await cdp.send('DOM.describeNode', { backendNodeId: id })).node;
       const a = d.attributes ?? [];
-      names.push(`${k}${d.localName}.${(a[a.indexOf('class') + 1] ?? '').split(' ')[0]}`);
+      const ci = a.indexOf('class');
+      const cls = ci >= 0 ? (a[ci + 1] ?? '').split(' ')[0] : '';
+      names.push(`${k}${d.localName}${cls ? `.${cls}` : ''}`);
     } catch {
       names.push(`${k}?`);
     }

@@ -71,20 +71,20 @@ test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son pr
   await page.waitForFunction(() => window.paperCart.scanState().reach === 2, null, { timeout: 8000 }); // à chaque image (le héros passe vite)
   await page.keyboard.up('ArrowLeft');
   await page.keyboard.press('Enter');
-  await expect.poll(async () => (await scanState()).active, { timeout: 6000 }).toBe(false);
+  await expect.poll(async () => (await scanState()).active, { timeout: 12000 }).toBe(false);
   await expect(page.locator('.panier-count')).toHaveText('1/1');
   // Retour au rayon 7 : le steak (x 1440) ; le panier est plein → échanger la carte des œufs.
   await page.evaluate(() => window.paperCart.useExit('vers-rayon-a'));
   await arrivedIn(page, 'rayon-essai');
   const before = (await page.evaluate(() => window.paperCart.products())).length;
   await page.keyboard.down('ArrowLeft');
-  await page.waitForFunction(() => window.paperCart.scanState().reach === 4, null, { timeout: 8000 });
+  await page.waitForFunction(() => window.paperCart.scanState().reach === 4, null, { timeout: 12000 });
   await page.keyboard.up('ArrowLeft');
   await page.keyboard.press('Enter');
   await page.locator('.confirm button', { hasText: 'Oui' }).click();
   await page.locator('.panier .card').first().click();
   await expect(page.locator('.panier')).toBeHidden();
-  await expect.poll(async () => (await page.evaluate(() => window.paperCart.products())).length, { timeout: 6000 }).toBe(before + 1);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.products())).length, { timeout: 12000 }).toBe(before + 1);
   const added = (await page.evaluate(() => window.paperCart.products())).at(-1);
   expect(added).toEqual({ id: 'oeufs', x: 1440, scanned: false }); // les œufs, à la place du steak, prêts à scanner
   expect(await page.evaluate(() => window.paperCart.scene().products.items.filter((p) => p.visible).length)).toBeGreaterThan(0);

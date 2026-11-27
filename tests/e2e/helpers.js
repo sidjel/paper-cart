@@ -34,3 +34,9 @@ export async function doubleTap(page, x, y, gapMs = 80) {
     await cdp.detach().catch(() => {});
   }
 }
+
+// Attendre N secondes de temps de jeu simulé (stepper.time), indépendamment de la cadence d'affichage.
+export async function waitGameTime(page, seconds, { timeout = 20_000 } = {}) {
+  const start = await page.evaluate(() => window.paperCart.time());
+  await page.waitForFunction((goal) => window.paperCart.time() >= goal, start + seconds, { timeout });
+}
