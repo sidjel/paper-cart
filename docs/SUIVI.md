@@ -9,7 +9,8 @@ Les points ✅ sont dans `docs/SUIVI-archive.md` (rien n'est perdu ; déplacés 
 ### Séance 80 (audit Claude Opus 5.5 + correctifs Antigravity)
 | Demande ou point ouvert | Séance | État | Notes |
 |---|---|---|---|
-| **RAPPEL — Essai PixiJS v8 (avant Prototype B)** | 80 | 🔧 | **Juste avant le Prototype B (combat)** : essai court **PixiJS v8** (plutôt que Phaser 4) sur branche à part (Rayon 1 + héros), mesuré sur l'Oppo Reno 2 avec le même banc d'essai. Décision sur chiffres. *(Réponse auteur 7a.)* |
+| **RAPPEL — Revoir le chariot (design, gameplay et récupération)** | 82 | 🔧 | **Tâche en attente à rappeler à l'auteur** : revoir le design du chariot, son gameplay et sa façon de le récupérer. |
+| **RAPPEL — Essai et migration PixiJS v8** | 80 | ✅ | POC PixiJS v8 mesuré sur PC et Oppo Reno 2 (6× plus rapide aux transitions, 0 fuite VRAM/RAM), puis migration complète de `src/scene/` vers PixiJS v8 (pivot papier 2.5D GPU, fondu enchaîné `RenderTexture`, downscale ≤ 4096 px) validée par l'auteur (PC + smartphone) et publiée sur `main`. |
 | Élargir le décor du hall d'accueil (`2160 → 2600 px`, zéro bande noire sur 20:9 / 21:9) | 81 | ✅ | Extension équilibrée (+220 G / +220 D → `2600×1080`, extérieur `2800×1080`), recalage complet `accueil.json` et retrait de l'exception largeur dans `tests/unit/data.test.js`. |
 | Valider le style de transition puis supprimer les 5 styles non retenus | 81 | ✅ | **Fondu enchaîné pur** validé par l'auteur ; les 5 autres styles (`mist`, `flip`, `double`, `strips`, `wipe`) et leur CSS/DOM supprimés (`transition-origami.webp` archivé dans `_assets_stock/ui_en_reserve/`). |
 | Clignotement à froid du héros au 1er lancement | 80 | 👀 | `decoding = 'sync'` après `decode()` (`assets.js`) + décodage copies `clouds.js`/`birds.js`. À re-vérifier à froid sur PC et Oppo Reno 2. *(Réponse auteur 1a.)* |
