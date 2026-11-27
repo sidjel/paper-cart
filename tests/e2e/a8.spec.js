@@ -65,14 +65,14 @@ test('A8 : poussé devant le héros, il se retourne au demi-tour ; lâché, il r
 test('A8 : poussé, il passe la porte avec le héros ; lâché, il reste dans son rayon', async ({ page }) => {
   expect(await page.evaluate(() => window.paperCart.useExit('vers-accueil'))).toBe(true);
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'accueil', null, { timeout: 15000 });
-  await expect(page.locator('.chariot')).toBeVisible();
+  expect(await page.evaluate(() => window.paperCart.scene().chariot.visible)).toBe(true);
   let c = await chariot(page);
   expect([c.place, c.pushed]).toEqual(['accueil', true]);
   // Lâché dans le hall, puis le héros retourne seul au rayon : le chariot reste dans le hall.
   await page.evaluate(() => window.paperCart.chariotToggle());
   expect(await page.evaluate(() => window.paperCart.useExit())).toBe(true);
   await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.place() === 'rayon-essai', null, { timeout: 15000 });
-  await expect(page.locator('.chariot')).toBeHidden();
+  expect(await page.evaluate(() => window.paperCart.scene().chariot.visible)).toBe(false);
   c = await chariot(page);
   expect([c.place, c.pushed]).toEqual(['accueil', false]);
 });
@@ -83,7 +83,7 @@ test('A8 : R lâche et reprend le chariot, même près d’un produit', async ({
   await page.keyboard.press('KeyR');
   await expect.poll(async () => (await chariot(page)).pushed).toBe(false);
   // Hors scan, ni le panier ni la Scanette ne sont tenus en permanence sur le héros.
-  await expect(page.locator('img.actor-held:visible')).toHaveCount(0);
+  expect(await page.evaluate(() => window.paperCart.scene().hero.heldVisible)).toBe(0);
   await page.keyboard.press('KeyR');
   await expect.poll(async () => (await chariot(page)).pushed).toBe(true);
 });
@@ -91,7 +91,7 @@ test('A8 : R lâche et reprend le chariot, même près d’un produit', async ({
 test('A8 au doigt : toucher deux fois le chariot le lâche, puis le reprend', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'doigt : téléphone seulement');
   await page.waitForTimeout(600);
-  const box = await page.locator('img.chariot').boundingBox();
+  const box = await page.evaluate(() => window.paperCart.scene().chariot.bounds);
   const x = box.x + box.width * 0.5;
   const y = box.y + box.height * 0.5;
   const dbl = async () => {

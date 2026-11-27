@@ -211,11 +211,15 @@ test('transition fondu enchaîné pur : le héros reste visible dans l’ancien 
   });
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));
   await page.waitForTimeout(180);
-  // Pendant le chargement, le héros est toujours monté dans le décor affiché (pas dans backstage).
-  const heroInStage = await page.evaluate(() => Boolean(document.querySelector('#game .stage .actor')));
-  expect(heroInStage).toBe(true);
+  // Pendant le chargement, la capture RenderTexture de l'ancien décor (avec le héros) reste affichée.
+  const snapActive = await page.evaluate(() => {
+    const s = window.paperCart.scene();
+    return s.dissolving && s.renderTextures === 1 && document.querySelectorAll('#game canvas').length === 1;
+  });
+  expect(snapActive).toBe(true);
   releaseRoute();
   await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play', null, { timeout: 15000 });
+  expect(await page.evaluate(() => window.paperCart.scene().renderTextures)).toBe(0);
 });
 
 test('traversée de bord : au contact du bord gauche, le héros avance seul à 3/4 hors-champ, change de lieu et arrive collé au bord droit sans re-déclencher', async ({ page }, info) => {

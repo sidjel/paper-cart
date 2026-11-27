@@ -1,32 +1,24 @@
 # src/scene/ — règles propres à ce dossier
 
-Affichage de la scène. Vue d'ensemble et leçons des bugs passés : `docs/ARCHITECTURE.md` §4 et §15.
-Chaque règle n'est écrite qu'ici (décisions de l'auteur, séances 61 et 64).
+Affichage de la scène sous **PixiJS v8** (WebGL sur PC et smartphone, repli `CanvasRenderer` propre en CI/headless). Vue d'ensemble et leçons des bugs passés : `docs/ARCHITECTURE.md` §4 et §15.
 
-## Affichage
-- On anime **seulement** `transform` et `opacity`.
-- **Rien n'est créé pendant le jeu** : éléments, images et canevas sont préparés au chargement (ou à l'entrée dans un lieu), puis réutilisés.
-- **Un calque par élément animé** (personnage, objet que l'on contourne), sur son conteneur, qui a **la taille du dessin**. **Jamais un calque par pose.** Les poses sont des images **déjà décodées au chargement**, à l'intérieur de ce calque, une seule montrée à la fois (`hidden`), sans `will-change` ni calque propre, **exactement comme le héros** (référence mesurée : il ne clignote pas sur le téléphone). Un seul mécanisme : `poses.js`.
-- Les poses d'un même élément ont **le même cadre et le même point d'appui** (pas de saut d'une pose à l'autre) ; l'ombre suit le point d'appui et **ne change pas de taille selon la pose**.
-- Un élément invisible ne prend **ni touchers ni sélection** (vaut pour la scène comme pour l'interface : `src/ui/CLAUDE.md`).
-- Fondu au noir : un seul écran pour tout le jeu, les autres lui passent le relais (`docs/ARCHITECTURE.md` §11).
-- **Jamais de changement d'image (`src`) en jeu** sur un personnage ou un objet de la scène : chaque image a son élément, préparé au chargement.
-- **Jamais un calque séparé qui passe de l'opacité 0 à 1** (un calque caché n'est pas préparé : le téléphone le dessine à froid). Un fondu d'un personnage entier reste permis, sur son propre calque.
-- **Rien n'apparaît « à froid »** : tout ce dont le **lieu actif** a besoin (bulle, effet, pose, carte) est préchargé, décodé et préparé avant que le lieu soit jouable (préchauffage : créé, et montré une fois sous le fondu). Seulement le lieu actif, pas tout le jeu. Précision : un élément caché par `hidden` perd son calque ; le préchauffage sert au décodage des images, et seul un calque qui reste en place reste prêt (d'où la règle « un calque par élément animé »).
-- **Pas trop de calques** : chaque calque coûte de la mémoire graphique, surtout sur téléphone. Le test des comptages garde une limite par lieu.
-- **Dans la boucle, lire la page (tailles, positions) avant de la modifier**, jamais l'inverse dans la même image (sinon le navigateur recalcule toute la mise en page). À vérifier à la relecture et dans la skill `audit`.
-- Ne pas réécrire un style qui n'a pas changé (garder la dernière valeur, comparer avant d'écrire).
+## Moteur et rendu (`renderer.js`)
+- Un seul `<canvas>` dans `#game`, initialisé avec **`autoStart: false`** (piloté par la boucle unique de `src/main.js`) et **`preference: ['webgl', 'canvas']`** (ne jamais sonder WebGPU pour éviter les warnings en CI/headless).
+- Hiérarchie fixe dans `app.stage` : `worldRoot` (à l'identité, portant `stage.root`) et `dissolveLayer` (`RenderTexture` temporaire de fondu enchaîné, détruite dès la fin de la transition). `backstage` (hors scène) porte les acteurs persistants entre deux lieux.
+- Écouter `webglcontextlost` / `webglcontextrestored` sur `app.canvas`.
+- **Rien n'est créé pendant le jeu** : `Sprite`, `MeshPlane`, `Graphics` et textures sont préparés au chargement (ou à l'entrée dans un lieu), puis réutilisés.
+- **Zéro `tint !== 0xffffff` sous `CanvasRenderer`** : sur repli `CanvasRenderer`, toute teinte non-blanche alloue un `<canvas>` caché et appelle `getImageData`. Utiliser des `Graphics` pré-alloués pour les formes colorées (confettis, laser, repères) et réserver `tint` au chemin WebGL (`isWebGL`).
+- **Zéro `Filter` WebGL et zéro shader custom** sur la scène en jeu : compatibilité Android 10 garantie.
 - Pas de règle de jeu ici : la logique vit dans `src/core/`, on ne fait que l'afficher.
 
-## Parallaxe
-- Chaque plan de parallaxe est **un seul calque** déplacé par `transform` (jamais `left`, `background-position` ni un déplacement élément par élément).
-- Le coefficient de chaque plan est dans les données du lieu ; la composition des calques ne change jamais pendant le mouvement.
-- Un plan lointain n'est pas plus grand que nécessaire : sa largeur se calcule d'après la course de la caméra et le coefficient (largeur visible + course × (1 − coefficient)) ; un calque presque vide a une taille (`size`) à la mesure de son contenu.
-- 🧪 À TESTER, pas encore une règle : le grain et les traits fins peuvent scintiller quand un plan avance de moins d'un pixel par image ; arrondir peut créer des à-coups d'un pixel. Un arrondi éventuel se fait **au pixel physique** (échelle de la scène × densité), jamais au pixel de la scène, de préférence **seulement quand la caméra s'arrête**, avec un interrupteur d'essai (sans arrondi / à l'arrêt / permanent) : l'auteur choisit sur le téléphone.
-- « Réduire les animations » diminue l'amplitude de la parallaxe (confort, mal des transports).
+## Textures et poses (`assets.js`, `poses.js`)
+- Plafond matériel GPU : **≤ `4 096 px`** sur chaque côté (`Math.min(4096, renderer.maxTextureSize)`). Les assets plus grands (ex. `rayon-avant.webp` 4300 px), les `.svg` et le profil `leger` sont redimensionnés une fois au chargement via un seul canevas réutilisé + `createImageBitmap` (zéro `canvas.toBlob` PNG).
+- **Libération complète en quittant un lieu** (`releaseImages`) : `texture.destroy(true)`, `bitmap?.close?.()`, et mise à jour des compteurs `assetStats`.
+- Les changements de pose passent par **`poses.js`** (échange de référence `sprite.texture` sur le `Sprite` déjà monté, sans réaffectation redondante ni recréation).
+- Sur tout **`MeshPlane`** (ex. Paper Flip 2.5D dans `paperFlip.js`), poser **`autoResize = false`** pour empêcher un changement de texture haute définition de redimensionner la géométrie.
 
-## Lumière et ombres
-- **Pas d'éclairage calculé en direct** : la lumière est dessinée dans les images, ou posée en **calques de lumière et d'obscurité préparés** (halo, pénombre), animés seulement par l'opacité.
-- **Jamais** de `filter`, `box-shadow`, flou ni `mix-blend-mode` animés ou sur de grandes surfaces en jeu. La désaturation et la saleté de la zone 2 sont **dans les images**.
-- Les ombres au sol sont des éléments **séparés** du dessin, qui suivent la profondeur et la hauteur du personnage.
-- Néons qui clignotent : 3 éclairs par seconde au plus, figés par l'option « réduire les clignotements ».
+## Profondeur, parallaxe et ombres
+- Le calque `acteurs` utilise `sortableChildren = true` et les niveaux numériques calculés par `depth.js` (`propLevels` / `actorLevel`). Les produits posés sur un meuble (`loose`) reçoivent `levelOf(on) + 0.1`.
+- Chaque plan de parallaxe est un `Container` déplacé uniquement en `x = camX * (1 - f)` (figé à `0` pour `f < 1` en profil `leger`).
+- Les ombres au sol sont des `Sprite`s séparés du dessin (textures radiales générées une fois au démarrage), qui suivent la profondeur, la hauteur et les réglages (`shadowOpacity`, `contactShadow`).
+- Les overlays de debug (`debugMask.js`, `debugPerspective.js`) sont construits paresseusement uniquement à l'activation (`F4`/`F6`) et détruits quand désactivés ou au changement de lieu.

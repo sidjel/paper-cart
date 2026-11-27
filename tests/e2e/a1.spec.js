@@ -51,8 +51,12 @@ async function toBanana(page) {
 
 test('affiche la version et le rayon', async ({ page }, info) => {
   await expect(page.locator('.version')).toContainText('v ');
-  await expect(page.locator('.layer-fond img')).toBeVisible();
-  await expect(page.locator('.actor-frame:not([hidden])')).toHaveCount(1);
+  await expect(page.locator('#game canvas')).toHaveCount(1);
+  await expect(page.locator('#game canvas')).toBeVisible();
+  const sc = await page.evaluate(() => window.paperCart.scene());
+  expect(sc.hasStage).toBe(true);
+  expect(sc.layers).toContain('fond');
+  expect(sc.hero.visible).toBe(true);
   await page.screenshot({ path: `test-results/captures/a1-${info.project.name}.png` });
 });
 
@@ -171,29 +175,30 @@ test('passe derrière le présentoir puis revient devant', async ({ page }, info
 
 test('la feuille se retourne quand il change de côté', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
-  // Largeur / orientation de la feuille (négative = tournée vers la gauche), lue dans le style.
-  const width = () => page.locator('.actor-flip').evaluate((el) => Number(/scale\((-?[\d.e-]+),/.exec(el.style.transform)?.[1] ?? 1));
-  // Se tourner d'abord à droite (E), puis observer le canevas 2.5D avant le demi-tour à gauche (W)
-  // (observateur dans la page : insensible à la lenteur d'un runner CI sans carte graphique).
+  // Se tourner d'abord à droite (E), puis observer le pivot de la feuille avant le demi-tour à gauche (W).
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(220);
   await page.keyboard.up('ArrowRight');
   await page.evaluate(() => {
-    const c = document.querySelector('.actor-flip-canvas');
-    window.__flipSeen = Boolean(c && !c.hidden);
-    if (c) {
-      new MutationObserver(() => {
-        if (!c.hidden) window.__flipSeen = true;
-      }).observe(c, { attributes: true, attributeFilter: ['hidden'] });
-    }
+    window.__flipSeen = false;
+    window.__flipStop = false;
+    const watch = () => {
+      if (window.paperCart?.scene?.().hero?.flipping) window.__flipSeen = true;
+      if (!window.__flipStop) requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
   });
   await page.keyboard.down('ArrowLeft');
   await expect.poll(() => page.evaluate(() => window.__flipSeen), { timeout: 2500 }).toBe(true);
   await page.waitForTimeout(400);
   await page.keyboard.up('ArrowLeft');
   await page.waitForTimeout(300);
-  await expect(page.locator('.actor-flip-canvas')).toBeHidden();
-  expect(await width()).toBeLessThan(-0.9);
+  const h = await page.evaluate(() => {
+    window.__flipStop = true;
+    return window.paperCart.scene().hero;
+  });
+  expect(h.flipping).toBe(false);
+  expect(h.flipScaleX).toBeLessThan(-0.9);
 });
 
 test('descend jusqu’en bas de l’écran, de face, et le son démarre', async ({ page }, info) => {
@@ -217,10 +222,10 @@ test('descend jusqu’en bas de l’écran, de face, et le son démarre', async 
 test('de la poussière apparaît en marchant, puis disparaît', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
   await page.keyboard.down('ArrowRight');
-  await expect.poll(() => page.locator('.dust:not([hidden])').count(), { timeout: 2000 }).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(() => window.paperCart.scene().dustActive), { timeout: 2000 }).toBeGreaterThan(0);
   await page.screenshot({ path: `test-results/captures/a1-${info.project.name}-poussiere.png` });
   await page.keyboard.up('ArrowRight');
-  await expect.poll(() => page.locator('.dust:not([hidden])').count(), { timeout: 3000 }).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.paperCart.scene().dustActive), { timeout: 3000 }).toBe(0);
 });
 
 test('le profil « Paper Mario » est sélectionné par défaut', async ({ page }) => {
@@ -230,8 +235,8 @@ test('le profil « Paper Mario » est sélectionné par défaut', async ({ page 
 
 test('ombre au sol et personnage plus petit au fond', async ({ page }, info) => {
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
-  await expect(page.locator('.shadow')).toHaveCount(1);
-  const size = () => page.locator('.actor').evaluate((el) => el.getBoundingClientRect().height);
+  expect(await page.evaluate(() => window.paperCart.scene().hero.shadowVisible)).toBe(true);
+  const size = () => page.evaluate(() => window.paperCart.scene().hero.bounds.height);
   const front = await size();
   await page.keyboard.down('ArrowUp');
   await page.waitForFunction(() => window.paperCart.hero().z > 240);
@@ -250,12 +255,12 @@ test('la caméra suit le personnage le long du rayon, avec parallaxe', async ({ 
   const cam = await page.evaluate(() => window.paperCart.camera());
   expect(cam.x).toBeGreaterThan(cam0.x + 800);
   // Le personnage reste à l'écran.
-  const box = await page.locator('.actor').boundingBox();
+  const box = await page.evaluate(() => window.paperCart.scene().hero.bounds);
   const vp = page.viewportSize();
   expect(box.x).toBeGreaterThan(0);
   expect(box.x + box.width).toBeLessThan(vp.width);
   // Les rayons lointains ont glissé moins que le sol : décalage positif par rapport au fond (parallaxe 0,82 → 0,18 × cam.x).
-  const far = await page.locator('.layer-lointain').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+  const far = await page.evaluate(() => window.paperCart.scene().parallaxOffsets.lointain);
   expect(far).toBeGreaterThan(cam.x * 0.1);
   await page.screenshot({ path: `test-results/captures/a2-${info.project.name}-camera.png` });
 });
@@ -300,7 +305,7 @@ for (const [name, w, h] of [['4:3 (tablette)', 1024, 768], ['21:9 (très allong�
     await page.waitForTimeout(200);
     const v = await page.evaluate(() => window.paperCart.camera());
     expect(v.viewW).toBeCloseTo((1080 * w) / h, 0);
-    const box = await page.locator('.actor').boundingBox();
+    const box = await page.evaluate(() => window.paperCart.scene().hero.bounds);
     expect(box.y).toBeGreaterThanOrEqual(0);
     expect(box.y + box.height).toBeLessThanOrEqual(h);
     await expect(page.locator('.hud-bar')).toBeInViewport();
@@ -337,7 +342,7 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   // Pendant B-T2, le rayon de devant est invisible.
   await page.waitForFunction(() => /B-T2/.test([...document.querySelectorAll('.bench-banner')].map((e) => e.textContent).join('')), null, { timeout: 30_000 });
   await page.waitForTimeout(300);
-  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('0');
+  expect(await page.evaluate(() => window.paperCart.scene().layerOpacities['premier-plan'])).toBe(0);
   await page.waitForFunction(() => window.paperCart.quickReport(), null, { timeout: 40_000 });
   const r = await page.evaluate(() => window.paperCart.quickReport());
   expect(r).toContain('Résultat : terminé');
@@ -345,7 +350,7 @@ test('test rapide T0/T1/T2 (version courte) : rapport complet, réglages rendus'
   expect(r.match(/→ (amélioration|dégradation|pas de différence) /g).length).toBe(4);
   expect(r.length).toBeLessThan(4000);
   // Réglages remis comme avant, rien d'enregistré (premier plan opaque par défaut : option 4A).
-  expect(await page.locator('.layer-premier-plan').evaluate((el) => el.style.opacity)).toBe('1');
+  expect(await page.evaluate(() => window.paperCart.scene().layerOpacities['premier-plan'])).toBe(1);
   expect(['{}', null]).toContain(await page.evaluate(() => localStorage.getItem('paper-cart.reglages.v1')));
 });
 
@@ -359,7 +364,7 @@ test('A3 : s’approcher d’un produit le met en évidence, Entrée le scanne, 
   // Monter au pied de l'étagère, sous la banane.
   await toBanana(page);
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).reach).toBe(0);
-  await expect(page.locator('.scan-marker')).toHaveClass(/visible/);
+  await expect.poll(() => page.evaluate(() => window.paperCart.scene().products.markerVisible)).toBe(true);
   await expect(page.locator('.scan-button')).toHaveClass(/visible/);
   await page.keyboard.press('Enter');
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active).toBe(true);
@@ -475,6 +480,7 @@ test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne',
   await page.locator('.scan-button').tap();
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Lait']);
   await page.screenshot({ path: `test-results/captures/a3-${info.project.name}-scan.png` });
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 5000 }).toBe(false);
   await page.locator('.panier-button').tap();
   await expect(page.locator('.panier .card')).toHaveCount(1);
   await page.locator('.panier button', { hasText: 'Fermer ✕' }).tap(); // en haut à droite
@@ -483,7 +489,7 @@ test('A3 au doigt : le bouton Scanner apparaît près d’un produit et scanne',
 
 // Centre d'un produit de l'étagère à l'écran.
 async function productCenter(page, index) {
-  const r = await page.locator('.product').nth(index).boundingBox();
+  const r = await page.evaluate((i) => window.paperCart.scene().products.items[i].bounds, index);
   return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
 }
 
@@ -528,9 +534,7 @@ test('A3 à la souris : double clic sur un produit, puis le clavier annule une a
 });
 
 test('Essai : scanner la boîte d’œufs dans le chariot, de profil (double toucher ou double clic)', async ({ page }, info) => {
-  const n = await page.locator('.product').count();
-  const eggs = page.locator('.product').nth(n - 1); // le dernier produit : les œufs du chariot
-  const r = await eggs.boundingBox();
+  const r = await page.evaluate(() => window.paperCart.scene().products.items.at(-1).bounds);
   const c = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
   if (info.project.name === 'telephone') {
     await page.touchscreen.tap(c.x, c.y);
@@ -545,7 +549,7 @@ test('Essai : scanner la boîte d’œufs dans le chariot, de profil (double tou
   await page.waitForTimeout(450);
   await page.screenshot({ path: `test-results/captures/essai-${info.project.name}-chariot.png` });
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).cards, { timeout: 5000 }).toEqual(['Œufs']);
-  await expect(eggs).toBeHidden();
+  expect(await page.evaluate(() => window.paperCart.scene().products.items.at(-1).visible)).toBe(false);
 });
 
 test('A3 : la pause fige le scan en cours', async ({ page }, info) => {
@@ -757,7 +761,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   let s = await state(page);
   expect(s.gear).toEqual({ scanette: false, panier: false });
   await expect(page.locator('.panier-button')).toBeHidden();
-  await expect(page.locator('.actor-held:visible')).toHaveCount(0); // vraiment invisibles à l'écran
+  expect(await page.evaluate(() => window.paperCart.scene().hero.heldVisible)).toBe(0); // vraiment invisibles à l'écran
   expect(await page.evaluate(() => window.paperCart.place())).toBe('accueil'); // la partie commence dans le hall
   // Passer devant les portiques (on ne les traverse pas), monter contre le mur, puis longer le hall jusqu'au présentoir.
   await pastGates(page);
@@ -789,7 +793,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
   await expect(page.locator('.panier-button')).toBeVisible();
   await expect(page.locator('.panier-count')).toHaveText('0/6');
   // Hors scan, ni la Scanette ni le panier ne sont tenus en main sur le héros (ils sont dans le HUD).
-  await expect(page.locator('.actor-held:visible')).toHaveCount(0);
+  expect(await page.evaluate(() => window.paperCart.scene().hero.heldVisible)).toBe(0);
   await page.waitForTimeout(400);
   await page.screenshot({ path: `test-results/captures/a5a-${info.project.name}-accueil.png` });
 });
@@ -814,7 +818,7 @@ test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan 
   // Dans le rayon, sans Scanette : un double toucher sur un produit ne scanne rien.
   await page.evaluate(() => window.paperCart.useExit());
   await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play');
-  const c = await page.locator('.product').nth(0).boundingBox();
+  const c = await page.evaluate(() => window.paperCart.scene().products.items[0].bounds);
   await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
   await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
   await page.waitForTimeout(2500);
@@ -858,7 +862,7 @@ test('A5a : panier plein, on repose une carte pour faire de la place (choix B)',
   const banane = (await page.evaluate(() => window.paperCart.products()))[0];
   expect(banane.scanned).toBe(false);
   expect(banane.x).toBe(920);
-  await expect(page.locator('.product').nth(0)).toBeVisible();
+  expect(await page.evaluate(() => window.paperCart.scene().products.items[0].visible)).toBe(true);
   // « Non » à la question : rien ne change.
   await page.keyboard.press('Enter'); // la banane est à portée, à la place du lait
   await expect(page.locator('.confirm')).toBeVisible();

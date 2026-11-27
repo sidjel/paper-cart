@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
 import limites from './comptages-limites.json' with { type: 'json' };
 
-// Test des comptages : on compte ce qui ne dépend pas de la machine (le navigateur de test
-// n'a pas de carte graphique, ses temps ne veulent rien dire), pendant un tour du banc d'essai.
+// Test des comptages (PixiJS v8) : on mesure des grandeurs indépendantes de la machine (le navigateur
+// headless de test n'a pas de carte graphique), pendant un tour du banc d'essai.
 // Le test échoue si une modification dépasse une limite du lieu (tests/e2e/comptages-limites.json).
-// Un lieu sans limites inscrites (le hall, séance 56) est seulement mesuré : les valeurs sont proposées
-// à l'auteur, qui décide des limites.
 
 for (const lieu of ['rayon-essai', 'accueil', 'rayon-2'])
 test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page }, info) => {
@@ -31,41 +29,22 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
     window.Image.prototype = NativeImage.prototype;
     const getImageData = CanvasRenderingContext2D.prototype.getImageData;
     CanvasRenderingContext2D.prototype.getImageData = function (...args) {
-      c.pixelReads++;
+      if (c.counting) c.pixelReads++;
       return getImageData.apply(this, args);
     };
   });
   const errors = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  page.on('console', (m) => {
+    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
+  });
   await page.goto(`./?lieu=${lieu}`);
-  // Écran titre : « Commencer » (sauf pour les tests de l'écran titre lui-même).
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
+  await page.waitForTimeout(500);
 
-  // Objets du décor qui changent de calque pendant le parcours (cause de clignotements sur
-  // téléphone : l'objet est redessiné à chaque bascule). Lu dans l'organisation des calques du moteur.
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send('DOM.enable');
-  const { root } = await cdp.send('DOM.getDocument');
-  const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: '.prop' });
-  const propIds = new Set();
-  for (const nodeId of nodeIds) propIds.add((await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId);
-  let propLayerSig = null;
-  let propLayerSwitches = 0;
-  let tracking = false; // le premier relevé du moteur peut être incomplet : on part d'un état établi
-  cdp.on('LayerTree.layerTreeDidChange', (e) => {
-    if (!e.layers) return;
-    const sig = e.layers.filter((l) => propIds.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
-    if (tracking && sig !== propLayerSig) propLayerSwitches++;
-    propLayerSig = sig;
-  });
-  await cdp.send('LayerTree.enable');
-  await page.waitForTimeout(1000);
-  tracking = true;
-
-  // Éléments ajoutés à la scène pendant le jeu (doivent rester à zéro).
+  // Éléments ajoutés à #game pendant le jeu (doivent rester à zéro).
   await page.evaluate(() => {
     const c = window.__comptages;
     new MutationObserver((list) => {
@@ -75,32 +54,20 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
     window.paperCart.startBench(1, 0);
   });
 
-  // Échantillons pendant le parcours : éléments affichés, surface d'image (recouvrements).
+  // Échantillons du graphe de scène PixiJS pendant le parcours.
   const sample = () =>
     page.evaluate(() => {
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const stage = document.querySelector('.stage');
-      let area = 0, visibleImages = 0;
-      for (const img of stage.querySelectorAll('img')) {
-        if (img.hidden || img.closest('[hidden]') || getComputedStyle(img).display === 'none') continue;
-        const layer = img.closest('.layer');
-        if (layer && getComputedStyle(layer).display === 'none') continue;
-        const r = img.getBoundingClientRect();
-        const w = Math.max(0, Math.min(vw, r.right) - Math.max(0, r.left));
-        const h = Math.max(0, Math.min(vh, r.bottom) - Math.max(0, r.top));
-        if (w * h > 0) visibleImages++;
-        area += w * h;
-      }
+      const sc = window.paperCart.scene();
       return {
-        stageElements: stage.querySelectorAll('*').length,
-        layers: stage.querySelectorAll('.layer').length,
-        ambientLayers: stage.querySelectorAll('.cloud, .bird').length,
-        visibleImages,
-        overdraw: area / (vw * vh),
+        stageNodes: sc.stageNodes,
+        layers: sc.layers.length,
+        ambientNodes: sc.ambientCount,
+        visibleSprites: sc.visibleSprites,
+        renderTextures: sc.renderTextures,
       };
     });
 
-  const max = { stageElements: 0, layers: 0, ambientLayers: 0, visibleImages: 0, overdraw: 0 };
+  const max = { stageNodes: 0, layers: 0, ambientNodes: 0, visibleSprites: 0, renderTextures: 0 };
   while (!(await page.evaluate(() => window.paperCart.benchReport()))) {
     const s = await sample();
     for (const k of Object.keys(max)) max[k] = Math.max(max[k], s[k]);
@@ -110,14 +77,12 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
   const assets = await page.evaluate(() => window.paperCart.assets());
   const mesures = {
     ...max,
-    overdraw: Math.round(max.overdraw * 100) / 100,
     images: assets.images,
     megapixels: Math.round(assets.pixels / 1e4) / 100,
     elementsCreatedInPlay: c.created,
     canvasesInPlay: c.canvases,
     domNodesAddedInPlay: c.added,
     pixelReads: c.pixelReads,
-    propLayerSwitches,
   };
   console.log(`Comptages mesurés (${lieu}) :`, JSON.stringify(mesures));
   test.info().annotations.push({ type: 'comptages', description: JSON.stringify(mesures) });
@@ -131,10 +96,9 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
   expect(await page.evaluate(() => window.paperCart.benchReport())).toContain('Résultat : terminé');
 });
 
-// Mémoire après les changements de lieu : des comptages (pas des temps), fiables sans carte graphique.
-// Après 5 allers-retours rayon ↔ accueil, les éléments de page, les écouteurs d'événements, les images
-// chargées et la mémoire JavaScript reviennent à leur niveau de départ (petite marge). Séance 62 : aussi
-// avec un chargement qui échoue au milieu (l'image du hall bloquée une fois : retour au rayon).
+// Mémoire après les changements de lieu : après 5 allers-retours rayon ↔ accueil (avec et sans échec
+// réseau simulé), les textures, pixels, RenderTextures, nœuds DOM, écouteurs et mémoire JS reviennent
+// à leur niveau de départ.
 for (const withFailure of [false, true])
 test(`mémoire : 5 allers-retours rayon ↔ accueil${withFailure ? ', avec un échec de chargement au milieu' : ''}, rien ne s’accumule`, async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
@@ -145,56 +109,84 @@ test(`mémoire : 5 allers-retours rayon ↔ accueil${withFailure ? ', avec un é
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('HeapProfiler.enable');
-  const measure = async () => {
-    await cdp.send('HeapProfiler.collectGarbage');
-    await cdp.send('HeapProfiler.collectGarbage');
-    const dom = await cdp.send('Memory.getDOMCounters');
-    const heap = await cdp.send('Runtime.getHeapUsage');
-    const assets = await page.evaluate(() => window.paperCart.assets());
-    return { nodes: dom.nodes, listeners: dom.jsEventListeners, heapMb: heap.usedSize / 1048576, images: assets.images, pixels: assets.pixels, timings: assets.timings };
-  };
-  const travel = async (to) => {
-    await page.evaluate(() => window.paperCart.useExit());
-    await page.waitForFunction((p) => window.paperCart.place() === p && window.paperCart.state() === 'play', to, { timeout: 15_000 });
-  };
-  // Un premier aller-retour pour amorcer (ce qui est créé une seule fois, à la première visite).
-  await travel('accueil');
-  await travel('rayon-essai');
-  await page.waitForTimeout(500);
-  const start = await measure();
-  for (let k = 0; k < 5; k++) {
-    if (withFailure && k === 2) {
-      // L'image du hall ne se charge pas : retour au rayon, là où le héros est sorti.
-      await page.route('**/accueil-fond.*', (r) => r.abort());
+  try {
+    const measure = async () => {
+      await cdp.send('HeapProfiler.collectGarbage');
+      await cdp.send('HeapProfiler.collectGarbage');
+      const dom = await cdp.send('Memory.getDOMCounters');
+      const heap = await cdp.send('Runtime.getHeapUsage');
+      const assets = await page.evaluate(() => window.paperCart.assets());
+      const sc = await page.evaluate(() => window.paperCart.scene());
+      return {
+        nodes: dom.nodes,
+        listeners: dom.jsEventListeners,
+        heapMb: heap.usedSize / 1048576,
+        images: assets.images,
+        pixels: assets.pixels,
+        timings: assets.timings,
+        renderTextures: sc.renderTextures,
+        stageNodes: sc.stageNodes,
+      };
+    };
+    const travel = async (to) => {
       await page.evaluate(() => window.paperCart.useExit());
-      await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.journal().some((l) => l.includes('momentanément inaccessible')), null, { timeout: 15_000 });
-      expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
-      await page.unroute('**/accueil-fond.*');
-    }
+      await page.waitForFunction((p) => window.paperCart.place() === p && window.paperCart.state() === 'play', to, { timeout: 15_000 });
+    };
+    // Un premier aller-retour pour amorcer (ce qui est créé une seule fois, à la première visite).
     await travel('accueil');
     await travel('rayon-essai');
+    await page.waitForTimeout(500);
+    const start = await measure();
+    for (let k = 0; k < 5; k++) {
+      if (withFailure && k === 2) {
+        // L'image du hall ne se charge pas : retour au rayon, là où le héros est sorti.
+        await page.route('**/accueil-fond.*', (r) => r.abort());
+        await page.evaluate(() => window.paperCart.useExit());
+        await page.waitForFunction(() => window.paperCart.state() === 'play' && window.paperCart.journal().some((l) => l.includes('momentanément inaccessible')), null, { timeout: 15_000 });
+        expect(await page.evaluate(() => window.paperCart.place())).toBe('rayon-essai');
+        await page.unroute('**/accueil-fond.*');
+      }
+      await travel('accueil');
+      await travel('rayon-essai');
+    }
+    await page.waitForTimeout(500);
+    const end = await measure();
+    console.log(`Mémoire après 5 allers-retours${withFailure ? ' (avec un échec)' : ''} :`, JSON.stringify({ start, end }));
+    test.info().annotations.push({ type: 'mémoire', description: JSON.stringify({ start, end }) });
+    expect(end.images).toBe(start.images);
+    expect(end.pixels).toBe(start.pixels);
+    expect(end.timings).toBe(start.timings);
+    expect(end.renderTextures).toBe(0);
+    expect(end.stageNodes).toBe(start.stageNodes);
+    expect(end.listeners).toBeLessThanOrEqual(start.listeners + 5);
+    expect(end.nodes).toBeLessThanOrEqual(start.nodes + 30);
+    expect(end.heapMb).toBeLessThanOrEqual(start.heapMb * 1.15 + 1);
+    expect(errors).toEqual([]);
+  } finally {
+    await cdp.detach().catch(() => {});
   }
-  await page.waitForTimeout(500);
-  const end = await measure();
-  console.log(`Mémoire après 5 allers-retours${withFailure ? ' (avec un échec)' : ''} :`, JSON.stringify({ start, end }));
-  test.info().annotations.push({ type: 'mémoire', description: JSON.stringify({ start, end }) });
-  expect(end.images).toBe(start.images);
-  expect(end.pixels).toBe(start.pixels);
-  expect(end.timings).toBe(start.timings); // l'historique des temps d'image ne grossit plus (séance 62)
-  expect(end.listeners).toBeLessThanOrEqual(start.listeners + 5);
-  expect(end.nodes).toBeLessThanOrEqual(start.nodes + 30); // séance 53 : une fuite de +58 éléments par changement de lieu a été trouvée ainsi
-  expect(end.heapMb).toBeLessThanOrEqual(start.heapMb * 1.15 + 1);
-  expect(errors).toEqual([]);
 });
 
-// Clignotement sur téléphone (séances 59 à 61). Règle (docs/ARCHITECTURE.md §4) : un personnage ou un
-// objet animé = un seul calque, sur son conteneur ; ses poses à l'intérieur, sans calque propre.
-// Pendant la scène de l'agent (le héros marche, l'agent lève le bras puis le baisse, « Stop ! »), aucun
-// changement de pose ne crée de calque ni n'en change, pour le héros comme pour l'agent ; les portiques
-// gardent leur calque fixe (séance 27).
-test('hall : les changements de pose (héros, agent) ne créent ni ne changent aucun calque', async ({ page }, info) => {
+// Hall : les changements de pose (héros 8 directions, agent idle ↔ stop) passent par poses.js
+// (simple échange de référence Texture sur un Sprite déjà monté) sans créer de nœud PixiJS,
+// de <canvas>, ni de lecture pixel.
+test('hall : les changements de pose (héros, agent) ne créent aucun nœud ni canevas', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   test.setTimeout(60_000);
+  await page.addInitScript(() => {
+    const c = { on: false, canvases: 0, pixelReads: 0, added: 0 };
+    window.__hallPoses = c;
+    const ce = Document.prototype.createElement;
+    Document.prototype.createElement = function (tag, ...r) {
+      if (c.on && String(tag).toLowerCase() === 'canvas') c.canvases++;
+      return ce.call(this, tag, ...r);
+    };
+    const gid = CanvasRenderingContext2D.prototype.getImageData;
+    CanvasRenderingContext2D.prototype.getImageData = function (...a) {
+      if (c.on) c.pixelReads++;
+      return gid.apply(this, a);
+    };
+  });
   await page.goto('./?lieu=accueil');
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());
@@ -203,31 +195,15 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
     window.paperCart.markSaid('arrivee');
     for (const [k, v] of [['narrator.speed', 400], ['narrator.timedMin', 1], ['narrator.timedPerChar', 0.005]]) window.paperCart.set(k, v);
   });
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send('DOM.enable');
-  const { root } = await cdp.send('DOM.getDocument');
-  const ids = async (sel) => {
-    const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
-    return Promise.all(nodeIds.map(async (nodeId) => (await cdp.send('DOM.describeNode', { nodeId })).node.backendNodeId));
-  };
-  const containers = new Set([...(await ids('.guard')), ...(await ids('.actor')), ...(await ids('.prop'))]);
-  const poses = new Set([...(await ids('.guard-pose')), ...(await ids('.actor-frame'))]);
-  expect(containers.size).toBe(8); // l'agent, le héros, les 3 portiques, la plante, les paniers rouges et la brume du couloir
-  expect(poses.size).toBeGreaterThan(10); // 2 poses de l'agent, les images du héros
-  let sig = null;
-  let changes = 0;
-  let poseLayers = 0;
-  let tracking = false;
-  cdp.on('LayerTree.layerTreeDidChange', (e) => {
-    if (!e.layers) return;
-    const s = e.layers.filter((l) => containers.has(l.backendNodeId)).map((l) => l.backendNodeId).sort().join(',');
-    if (tracking && s !== sig) changes++;
-    sig = s;
-    if (tracking) poseLayers += e.layers.filter((l) => poses.has(l.backendNodeId)).length;
-  });
-  await cdp.send('LayerTree.enable');
   await page.waitForTimeout(2500); // l'agent va à sa place
-  tracking = true;
+  const nodesBefore = await page.evaluate(() => {
+    const c = window.__hallPoses;
+    new MutationObserver((list) => {
+      if (c.on) for (const m of list) c.added += m.addedNodes.length;
+    }).observe(document.getElementById('game'), { childList: true, subtree: true });
+    c.on = true;
+    return window.paperCart.scene().stageNodes;
+  });
   const poseSeen = new Set();
   const watchPose = async () => poseSeen.add((await page.evaluate(() => window.paperCart.guard())).pose);
   await page.keyboard.down('ArrowLeft');
@@ -245,16 +221,24 @@ test('hall : les changements de pose (héros, agent) ne créent ni ne changent a
     await page.waitForTimeout(700);
     await page.keyboard.up(k);
   }
+  const after = await page.evaluate(() => ({
+    stageNodes: window.paperCart.scene().stageNodes,
+    renderTextures: window.paperCart.scene().renderTextures,
+    gameCanvases: document.querySelectorAll('#game canvas').length,
+    ...window.__hallPoses,
+  }));
   expect([...poseSeen].sort()).toEqual(['idle', 'stop']); // l'agent a bien changé de pose
-  console.log('Hall : changements de calque', changes, ', calques de pose', poseLayers);
-  expect(changes).toBe(0);
-  expect(poseLayers).toBe(0);
+  expect(after.stageNodes).toBe(nodesBefore);
+  expect(after.renderTextures).toBe(0);
+  expect(after.gameCanvases).toBe(1);
+  expect(after.canvases).toBe(0);
+  expect(after.pixelReads).toBe(0);
+  expect(after.added).toBe(0);
 });
 
 // Pendant un scan (séance 63) : la carte qui vole est préparée une fois (remplie à chaque scan), et le
 // texte du haut-parleur ne crée plus de morceaux de texte à chaque lettre. Seule reste la petite carte
-// ajoutée au Panier (dans le panneau caché) : un élément et son contenu. Écart connu, accepté pour
-// l'instant (correction plus risquée : la liste du Panier, ses onglets et le choix au clavier).
+// ajoutée au Panier (dans le panneau caché) : un élément et son contenu.
 test('un scan ne crée que la petite carte du Panier', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'mesuré une fois, en taille PC');
   await page.addInitScript(() => {
@@ -299,9 +283,8 @@ test('un scan ne crée que la petite carte du Panier', async ({ page }, info) =>
   expect(c.added).toEqual({ 'panier-grid': 1 });
 });
 
-// Rien n'apparaît à froid au début de la partie (séance 68 : le héros et la bande du haut-parleur
-// clignotaient sur le téléphone). Une fois la scène dévoilée, plus aucun calque n'est créé ni retiré pendant
-// 6 s, alors que le haut-parleur fait son annonce d'arrivée et que le héros cligne des yeux.
+// Rien n'apparaît à froid au début de la partie (séance 68). Une fois la scène dévoilée, plus aucun
+// calque DOM (#ui / #game) n'est créé ni retiré pendant 6 s, alors que le haut-parleur fait son annonce.
 test('début de partie : après l’apparition du hall, aucun calque créé ni retiré (annonce comprise)', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   test.setTimeout(40_000);
@@ -343,9 +326,8 @@ test('début de partie : après l’apparition du hall, aucun calque créé ni r
   expect(names).toEqual([]);
 });
 
-// Fin de l'intro (séance 68, cause prouvée par l'auteur : intro désactivée, plus de clignotement). Son écran
-// noir est retiré sous l'écran noir des lieux, déjà plein, qui s'efface ensuite comme après un changement de
-// lieu. Pendant tout ce passage, rien d'autre ne gagne ni ne perd son calque.
+// Fin de l'intro (séance 68) : son écran noir est retiré sous l'écran noir des lieux (.place-fade),
+// déjà plein, qui s'efface ensuite comme après un changement de lieu.
 test('fin de l’intro : l’écran noir des lieux prend le relais ; rien d’autre ne change de calque', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   test.setTimeout(60_000);

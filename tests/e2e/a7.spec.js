@@ -87,7 +87,7 @@ test('A7 : panier plein, on repose une carte du rayon 2 dans le rayon 7 : son pr
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.products())).length, { timeout: 6000 }).toBe(before + 1);
   const added = (await page.evaluate(() => window.paperCart.products())).at(-1);
   expect(added).toEqual({ id: 'oeufs', x: 1440, scanned: false }); // les œufs, à la place du steak, prêts à scanner
-  await expect(page.locator('.product').filter({ visible: true }).locator('xpath=.')).not.toHaveCount(0);
+  expect(await page.evaluate(() => window.paperCart.scene().products.items.filter((p) => p.visible).length)).toBeGreaterThan(0);
   await page.screenshot({ path: `test-results/captures/a7-${info.project.name}-echange.png` });
 });
 

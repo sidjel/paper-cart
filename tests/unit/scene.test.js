@@ -77,13 +77,14 @@ describe('retournement de la feuille', () => {
     expect(minWidthForAngle(45, 0.08)).toBeGreaterThan(minWidthForAngle(90, 0.08));
     expect(minWidthForAngle(90, 0.08)).toBeGreaterThan(minWidthForAngle(135, 0.08));
     expect(minWidthForAngle(135, 0.08)).toBeGreaterThan(minWidthForAngle(180, 0.08));
-    // Auto : 2.5D actif sur PC (Normal/Fin), désactivé sur smartphone (touch) et profil Léger
-    expect(shouldUsePaperFlip25d('auto', false, 'fin')).toBe(true);
-    expect(shouldUsePaperFlip25d('auto', false, 'normal')).toBe(true);
-    expect(shouldUsePaperFlip25d('auto', false, 'leger')).toBe(false);
-    expect(shouldUsePaperFlip25d('auto', true, 'fin')).toBe(false);
+    // Auto (choix 2A) : 2.5D GPU active sur PC et smartphone dès que WebGL est actif, sauf profil Léger ou repli Canvas
+    expect(shouldUsePaperFlip25d('auto', true, 'fin')).toBe(true);
+    expect(shouldUsePaperFlip25d('auto', true, 'normal')).toBe(true);
+    expect(shouldUsePaperFlip25d('auto', true, 'leger')).toBe(false);
+    expect(shouldUsePaperFlip25d('auto', false, 'fin')).toBe(false);
     expect(shouldUsePaperFlip25d('oui', true, 'leger')).toBe(true);
-    expect(shouldUsePaperFlip25d('non', false, 'fin')).toBe(false);
+    expect(shouldUsePaperFlip25d('oui', false, 'fin')).toBe(false);
+    expect(shouldUsePaperFlip25d('non', true, 'fin')).toBe(false);
   });
 });
 

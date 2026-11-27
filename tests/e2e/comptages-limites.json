@@ -1,16 +1,15 @@
 {
   "rayon-essai": {
-    "comment": "Limites du test des comptages (mesuré en taille PC 1600×900). Séance 79b : 145 éléments, 28 images visibles, 75 images, 13,5 Mpx. Séance 81 (validation auteur : 4 nouvelles marches 16 images SE/E/NE/N = +48 sprites 480×680 + grille perspective F6) : mesuré 183 éléments, 31 images visibles, 119 images, 18,84 Mpx, 0 créé/ajouté/switché ; limites relevées à 195 / 35 / 125 / 21 VALIDÉES PAR L'AUTEUR.",
-    "stageElements": 195,
+    "comment": "Limites du test des comptages PixiJS v8 (PC 1600×900, accord explicite auteur 3 OK). Mesuré : 75 nœuds PixiJS, 5 plans, 35 sprites visibles, 119 textures, 19,0 Mpx, 0 créé/canvas/pixelRead/renderTexture en jeu.",
+    "stageNodes": 85,
     "layers": 5,
-    "visibleImages": 35,
-    "overdraw": 2.2,
+    "visibleSprites": 40,
     "images": 125,
     "megapixels": 21,
     "elementsCreatedInPlay": 0,
     "canvasesInPlay": 0,
     "domNodesAddedInPlay": 0,
     "pixelReads": 0,
-    "propLayerSwitches": 0
+    "renderTextures": 0
   }
 }
