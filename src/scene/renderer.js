@@ -30,9 +30,10 @@ export async function createRenderer(container, { maxPixelRatio = 2, onContextLo
     height,
     backgroundColor: BG_COLOR,
     antialias: true,
-    // WebGL prioritaire, repli CanvasRenderer sans jamais sonder WebGPU (évite le warning CI headless).
+    // WebGL matériel prioritaire ; repli CanvasRenderer si WebGL est logiciel (SwiftShader/llvmpipe)
+    // ou absent, sans jamais sonder WebGPU (évite les warnings driver ReadPixels et la lenteur en CI).
     preference: ['webgl', 'canvas'],
-    failIfMajorPerformanceCaveat: false,
+    failIfMajorPerformanceCaveat: true,
     resolution,
     autoDensity: true,
     autoStart: false,
