@@ -1,8 +1,9 @@
-// POC PixiJS v8 isolé (branche poc/pixi-v8) : Accueil (2600×1080) & Rayon 1 (3600×1080) + héros
-// 8 directions + parallaxe multi-plans + nuages/oiseaux + props/agent/hôtesse + Paper Flip GPU MeshPlane
-// + même banc d'essai (src/core/bench.js) pour comparer DOM/CSS vs PixiJS v8 sur PC et smartphone.
+// POC PixiJS v8 isolé (branche poc/pixi-v8) : Accueil (2600×1080) ↔ Rayon 1 (3600×1080) avec
+// vraie transition fondu enchaîné (RenderTexture + libération VRAM des textures du lieu quitté),
+// sorties marchables, héros 8 directions + Paper Flip GPU MeshPlane, banc d'essai 3 tours et
+// banc dédié « 5 allers-retours » (10 transitions + mesure fuites VRAM/textures).
 
-import { Application, Assets, Container, Sprite } from 'pixi.js';
+import { Application, Assets, Container, Rectangle, Sprite } from 'pixi.js';
 import { config } from '../config.js';
 import { createStepper } from '../core/stepper.js';
 import { compileMask, clampToBounds } from '../core/walkmask.js';
@@ -33,10 +34,10 @@ const statsEl = document.getElementById('poc-stats');
 const reportEl = document.getElementById('poc-report');
 const benchBtn = document.getElementById('poc-bench');
 const benchFastBtn = document.getElementById('poc-bench-fast');
+const transBenchBtn = document.getElementById('poc-trans-bench');
 const copyBtn = document.getElementById('poc-copy');
 const btnAccueil = document.getElementById('poc-place-accueil');
 const btnRayon = document.getElementById('poc-place-rayon');
-const domLink = document.getElementById('poc-dom-link');
 
 const params = new URLSearchParams(location.search);
 const initialPlaceId = PLACES[params.get('lieu')] ? params.get('lieu') : 'accueil';
@@ -66,6 +67,10 @@ function collectPlaceEntries(place) {
   return entries;
 }
 
+function insideZone(x, z, [x1, z1, x2, z2]) {
+  return x >= x1 && x <= x2 && z >= z1 && z <= z2;
+}
+
 async function boot() {
   const app = new Application();
   await app.init({
@@ -79,9 +84,11 @@ async function boot() {
   });
   rootEl.appendChild(app.canvas);
 
-  // Préchargement unique des sprites du héros 8 directions.
+  // Préchargement unique des sprites du héros 8 directions (conservés d'un lieu à l'autre).
   const heroUrls = collectHeroUrls();
-  await Assets.load(heroUrls.map((u) => BASE + u));
+  const heroFullUrls = heroUrls.map((u) => BASE + u);
+  const heroUrlSet = new Set(heroFullUrls);
+  await Assets.load(heroFullUrls);
   const heroTexMap = new Map();
   for (const u of heroUrls) heroTexMap.set(u, Assets.get(BASE + u));
 
@@ -96,8 +103,12 @@ async function boot() {
   // Foulée d'un demi-cycle complet (identique à src/scene/character.js).
   const walkStride = (firstWalk?.stride ?? 40) * Math.max(2, (firstWalk?.frames?.length ?? 4) / 2);
 
+  // Héros unique réutilisé d'un lieu à l'autre (0 recréation de MeshPlane ni de texture d'ombre).
+  const hero = createPixiHero(heroData, heroTexMap, app.renderer.name !== 'canvas');
+
   const stageRoot = new Container();
-  app.stage.addChild(stageRoot);
+  const dissolveOverlay = new Container();
+  app.stage.addChild(stageRoot, dissolveOverlay);
 
   const rendererName = app.renderer.name || 'webgl';
   const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
@@ -106,34 +117,106 @@ async function boot() {
   const motion = { lift: 0, sx: 1, sy: 1 };
 
   let activeScene = null;
+  let activePlaceUrls = new Set();
+  let switching = false;
+  let dissolve = null; // { sprite, tex, elapsed, duration, onDone }
+
   let bench = null;
   let benchDts = [];
   let benchJs = [];
+  let transBench = null; // banc automatisé 5 allers-retours (10 transitions)
   let lastReport = '';
   let lastFps = 60;
   let lastJsMs = 0;
 
-  async function mountPlace(placeId) {
+  function clearDissolve() {
+    if (!dissolve) return;
+    dissolveOverlay.removeChild(dissolve.sprite);
+    dissolve.sprite.destroy();
+    dissolve.tex.destroy(true);
+    const cb = dissolve.onDone;
+    dissolve = null;
+    if (cb) cb();
+  }
+
+  function snapshotCurrentFrame() {
+    if (!activeScene || app.screen.width < 2 || app.screen.height < 2) return null;
+    app.renderer.render(app.stage);
+    const frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
+    const tex = app.renderer.generateTexture({
+      target: stageRoot,
+      frame,
+      resolution: app.renderer.resolution,
+    });
+    const sprite = new Sprite(tex);
+    sprite.x = 0;
+    sprite.y = 0;
+    sprite.width = app.screen.width;
+    sprite.height = app.screen.height;
+    return { sprite, tex };
+  }
+
+  function disposeCurrentStage() {
+    // Détacher le héros avant de détruire les conteneurs du lieu quitté.
+    hero.shadow.removeFromParent();
+    hero.liftShadow.removeFromParent();
+    hero.root.removeFromParent();
+    for (const child of stageRoot.removeChildren()) {
+      child.destroy({ children: true, texture: false, textureSource: false });
+    }
+  }
+
+  async function mountPlace(placeId, opts = {}) {
+    if (switching) return null;
     const entry = PLACES[placeId] ?? PLACES.accueil;
     const place = entry.data;
-    bench = null;
-    reportEl.hidden = true;
-    copyBtn.hidden = true;
+    switching = true;
+    const {
+      withDissolve = Boolean(activeScene),
+      spawn = place.spawn,
+      facing = 1,
+      fromExit = false,
+      keepReport = false,
+    } = opts;
+
+    if (!keepReport) {
+      bench = null;
+      reportEl.hidden = true;
+      copyBtn.hidden = true;
+    }
     btnAccueil.classList.toggle('active', placeId === 'accueil');
     btnRayon.classList.toggle('active', placeId === 'rayon-essai');
-    domLink.href = `./?lieu=${placeId}`;
     statsEl.textContent = `POC PixiJS v8 — chargement ${entry.label}…`;
 
     const t0 = performance.now();
+
+    // 1. Figer l'image courante dans une RenderTexture pour le fondu enchaîné (sans garder 2 scènes vivantes).
+    clearDissolve();
+    const snap = withDissolve && config.places.fade > 0 ? snapshotCurrentFrame() : null;
+    if (snap) dissolveOverlay.addChild(snap.sprite);
+
+    // 2. Préparer la liste des textures du nouveau lieu et libérer celles exclusives à l'ancien lieu.
     const entries = collectPlaceEntries(place);
-    const uniqueUrls = [...new Set(entries.values())];
+    const nextUrls = new Set(entries.values());
+    const toUnload = [...activePlaceUrls].filter((u) => !nextUrls.has(u) && !heroUrlSet.has(u));
+
+    // Détacher activeScene avant destruction pour que le ticker ne touche plus aux conteneurs détruits
+    // pendant les await (la RenderTexture figée dans dissolveOverlay reste affichée à l'écran).
+    activeScene = null;
+    disposeCurrentStage();
+    if (toUnload.length > 0) {
+      await Assets.unload(toUnload);
+    }
+
+    // 3. Charger uniquement les textures manquantes du nouveau lieu en VRAM.
+    const uniqueUrls = [...nextUrls];
     await Assets.load(uniqueUrls);
     const textures = new Map();
     for (const [k, url] of entries) textures.set(k, Assets.get(url));
+    activePlaceUrls = nextUrls;
     const loadMs = Math.round(performance.now() - t0);
-    const totalTextures = new Set([...uniqueUrls, ...heroUrls.map((u) => BASE + u)]).size;
+    const totalTextures = new Set([...uniqueUrls, ...heroFullUrls]).size;
 
-    stageRoot.removeChildren();
     const layers = {};
     const parallaxLayers = [];
     const fgLayers = [];
@@ -198,12 +281,13 @@ async function boot() {
       produits.addChild(s);
     }
 
-    // Props triés par profondeur (portiques, plante/paniers, brume couloir, présentoirs, chariot…).
+    // Props triés par profondeur — règle identique à src/scene/props.js :
+    // perspectiveScale suit scaleAt(proj, z) ; sinon échelle fixe p.scale ?? 1 (sans scaleAt).
     const fadeProps = [];
     for (const p of place.props ?? []) {
       const im = place.images[p.image];
       const s = new Sprite(textures.get(p.image));
-      const sc = p.perspectiveScale ? p.perspectiveScale * scaleAt(proj, p.at[1]) : (p.scale ?? 1) * scaleAt(proj, p.at[1]);
+      const sc = p.perspectiveScale ? p.perspectiveScale * scaleAt(proj, p.at[1]) : (p.scale ?? 1);
       s.anchor.set(p.anchor[0] / im.size[0], p.anchor[1] / im.size[1]);
       s.width = im.size[0] * sc;
       s.height = im.size[1] * sc;
@@ -231,7 +315,7 @@ async function boot() {
       acteurs.addChild(s);
     }
 
-    // Agent de sécurité (Accueil)
+    // Agent de sécurité (Accueil).
     if (place.guard) {
       const g = place.guard;
       const im = place.images[g.image];
@@ -246,7 +330,7 @@ async function boot() {
       acteurs.addChild(s);
     }
 
-    // Hôtesse derrière le comptoir (Accueil)
+    // Hôtesse derrière le comptoir (Accueil).
     let hotesseSprite = null;
     if (place.hotesse) {
       const h = place.hotesse;
@@ -262,10 +346,12 @@ async function boot() {
       hotesseSprite = { sprite: s, atX: h.at[0], baseScaleX: Math.abs(s.scale.x), baseScaleY: s.scale.y };
     }
 
-    const hero = createPixiHero(heroData, heroTexMap, app.renderer.name !== 'canvas');
     acteurs.addChild(hero.shadow, hero.liftShadow, hero.root);
 
-    const walker = createWalker(place.spawn[0], place.spawn[1]);
+    const walker = createWalker(spawn[0], spawn[1]);
+    walker.facing = facing;
+    const initDir = facing < 0 ? 'W' : (fromExit ? 'E' : 'S');
+    walker.dir = initDir;
     const camera = createCamera();
 
     activeScene = {
@@ -285,14 +371,16 @@ async function boot() {
       fadeProps,
       hotesseSprite,
       loadMs,
+      unloadedCount: toUnload.length,
       totalTextures,
       viewOffX: 0,
       viewScale: 1,
-      shownDir: 'S',
+      exitArmed: !fromExit, // évite un aller-retour immédiat si le point d'arrivée frôle une sortie
+      shownDir: initDir,
       flipP: -1,
       flipStart: 0,
       flipDur: 0.18,
-      flipFromDir: 'S',
+      flipFromDir: initDir,
       flipFromFlip: false,
       flipSign: 1,
       flipAngle: 180,
@@ -307,6 +395,21 @@ async function boot() {
     const nextUrl = new URL(location.href);
     nextUrl.searchParams.set('lieu', placeId);
     history.replaceState(null, '', nextUrl);
+
+    if (snap) {
+      dissolve = {
+        sprite: snap.sprite,
+        tex: snap.tex,
+        elapsed: 0,
+        duration: config.places.fade,
+        onDone: opts.onDissolveDone ?? null,
+      };
+    } else if (opts.onDissolveDone) {
+      opts.onDissolveDone();
+    }
+
+    switching = false;
+    return { loadMs, unloaded: toUnload.length, totalTextures };
   }
 
   function pickAnim(moving, dir) {
@@ -315,7 +418,7 @@ async function boot() {
   }
 
   function startBenchRun(passes = 3, warmup = 2) {
-    if (!activeScene?.place.bench) return;
+    if (!activeScene?.place.bench || transBench) return;
     bench = createBench(activeScene.place.bench, passes, warmup);
     placeAtStart(bench, activeScene.walker);
     benchDts = [];
@@ -325,10 +428,99 @@ async function boot() {
     copyBtn.hidden = true;
   }
 
+  function readHeapMb() {
+    const m = performance.memory?.usedJSHeapSize;
+    return typeof m === 'number' ? +(m / 1048576).toFixed(1) : null;
+  }
+
+  // Banc dédié « 5 allers-retours Accueil ↔ Rayon 1 » (10 transitions en fondu enchaîné) :
+  // mesure les temps de chargement VRAM, les saccades pendant les fondus, et l'absence de fuite textures/mémoire.
+  async function startTransitionBench(roundTrips = 5) {
+    if (switching || transBench) return;
+    bench = null;
+    reportEl.hidden = true;
+    copyBtn.hidden = true;
+
+    if (activeScene?.placeId !== 'accueil') {
+      await mountPlace('accueil', { withDissolve: false, keepReport: true });
+    }
+    const startCacheSize = Assets.cache?._cache?.size ?? null;
+    const startHeap = readHeapMb();
+
+    transBench = {
+      totalSteps: roundTrips * 2,
+      doneSteps: 0,
+      loadTimes: [],
+      unloadedCounts: [],
+      dts: [],
+      jss: [],
+      startCacheSize,
+      startHeap,
+      startTextures: activeScene.totalTextures,
+      phase: 'waiting',
+    };
+
+    const runStep = async () => {
+      if (!transBench) return;
+      if (transBench.doneSteps >= transBench.totalSteps) {
+        const endCacheSize = Assets.cache?._cache?.size ?? null;
+        const endHeap = readHeapMb();
+        const loads = transBench.loadTimes;
+        const dts = [...transBench.dts].sort((a, b) => a - b);
+        const jss = [...transBench.jss].sort((a, b) => a - b);
+        const avgLoad = loads.reduce((s, v) => s + v, 0) / Math.max(1, loads.length);
+        const avgDt = dts.reduce((s, v) => s + v, 0) / Math.max(1, dts.length);
+        const avgJs = jss.reduce((s, v) => s + v, 0) / Math.max(1, jss.length);
+        const over20 = dts.filter((v) => v > 20).length;
+        const over33 = dts.filter((v) => v > 33).length;
+        const totalUnloaded = transBench.unloadedCounts.reduce((s, v) => s + v, 0);
+        const cacheLine = startCacheSize !== null && endCacheSize !== null
+          ? `Cache textures Pixi : ${startCacheSize} → ${endCacheSize} (delta ${endCacheSize - startCacheSize >= 0 ? '+' : ''}${endCacheSize - startCacheSize}, ${totalUnloaded} déchargements VRAM)`
+          : `Textures actives : ${transBench.startTextures} → ${activeScene.totalTextures} (${totalUnloaded} déchargements VRAM)`;
+        const heapLine = startHeap !== null && endHeap !== null
+          ? `Mémoire JS : ${startHeap} Mo → ${endHeap} Mo`
+          : null;
+
+        lastReport = [
+          `POC PixiJS v8 (${rendererName}) — Transitions Accueil ↔ Rayon 1 (${roundTrips} allers-retours = ${transBench.totalSteps} fondus enchaînés)`,
+          `Temps de chargement VRAM/transition : moy ${avgLoad.toFixed(0)} ms · min ${Math.min(...loads)} ms · max ${Math.max(...loads)} ms`,
+          `Détail (ms) : ${loads.join(', ')}`,
+          `Fluidité pendant les fondus (${dts.length} images) : ${(1000 / Math.max(1, avgDt)).toFixed(1)} i/s · p95 ${percentile(dts, 0.95).toFixed(1)} ms · pire ${(dts.at(-1) ?? 0).toFixed(1)} ms`,
+          `Saccades : > 20 ms = ${over20} (${((100 * over20) / Math.max(1, dts.length)).toFixed(2)} %) · > 33 ms = ${over33} (${((100 * over33) / Math.max(1, dts.length)).toFixed(2)} %)`,
+          `Calcul JS : moy ${avgJs.toFixed(2)} ms · p95 ${percentile(jss, 0.95).toFixed(2)} ms · pire ${(jss.at(-1) ?? 0).toFixed(2)} ms`,
+          cacheLine,
+          ...(heapLine ? [heapLine] : []),
+        ].join('\n');
+        reportEl.textContent = lastReport;
+        reportEl.hidden = false;
+        copyBtn.hidden = false;
+        transBench = null;
+        return;
+      }
+
+      const nextId = activeScene.placeId === 'accueil' ? 'rayon-essai' : 'accueil';
+      const res = await mountPlace(nextId, {
+        withDissolve: true,
+        keepReport: true,
+        onDissolveDone: () => {
+          if (!transBench) return;
+          transBench.doneSteps++;
+          setTimeout(runStep, 180);
+        },
+      });
+      if (res && transBench) {
+        transBench.loadTimes.push(res.loadMs);
+        transBench.unloadedCounts.push(res.unloaded);
+      }
+    };
+
+    setTimeout(runStep, 180);
+  }
+
   window.addEventListener('keydown', (e) => keys.add(e.code));
   window.addEventListener('keyup', (e) => keys.delete(e.code));
   app.canvas.addEventListener('pointerdown', (e) => {
-    if (bench || !activeScene) return;
+    if (bench || transBench || switching || !activeScene) return;
     const rect = app.canvas.getBoundingClientRect();
     const s = activeScene.viewScale;
     const sx = (e.clientX - rect.left - activeScene.viewOffX) / s + activeScene.camera.x;
@@ -338,8 +530,9 @@ async function boot() {
     setPath(activeScene.walker, findPath(activeScene.mask, activeScene.walker.x, activeScene.walker.z, target.x, target.z));
   });
 
-  btnAccueil.addEventListener('click', () => mountPlace('accueil'));
-  btnRayon.addEventListener('click', () => mountPlace('rayon-essai'));
+  btnAccueil.addEventListener('click', () => !transBench && mountPlace('accueil'));
+  btnRayon.addEventListener('click', () => !transBench && mountPlace('rayon-essai'));
+  transBenchBtn.addEventListener('click', () => startTransitionBench(5));
   benchBtn.addEventListener('click', () => startBenchRun(3, 2));
   benchFastBtn.addEventListener('click', () => startBenchRun(1, 0.5));
   copyBtn.addEventListener('click', () => navigator.clipboard?.writeText(lastReport));
@@ -365,7 +558,7 @@ async function boot() {
     bench = null;
   }
 
-  await mountPlace(initialPlaceId);
+  await mountPlace(initialPlaceId, { withDissolve: false });
 
   let fpsCount = 0;
   let fpsTimer = 0;
@@ -379,9 +572,17 @@ async function boot() {
     lastNow = tStart;
     const dtSec = dtMs / 1000;
 
-    const { place, proj, mask, walker, camera, hero } = scObj;
+    // Progression du fondu enchaîné (RenderTexture au-dessus du nouveau lieu).
+    if (dissolve) {
+      dissolve.elapsed += dtSec;
+      const t = Math.min(1, dissolve.elapsed / Math.max(0.01, dissolve.duration));
+      dissolve.sprite.alpha = 1 - t;
+      if (t >= 1) clearDissolve();
+    }
 
-    if (bench) {
+    const { place, proj, mask, walker, camera } = scObj;
+
+    if (bench || transBench || switching) {
       intent.moveX = 0;
       intent.moveZ = 0;
     } else {
@@ -399,6 +600,18 @@ async function boot() {
         }
       }
       stepWalker(walker, intent, mask, config.walk, stepper.step, scaleAt(proj, walker.z));
+    }
+
+    // Sorties marchables Accueil ↔ Rayon 1 (identiques aux zones de sortie du jeu).
+    if (!bench && !transBench && !switching && !dissolve && place.exits?.items?.length) {
+      const hit = place.exits.items.find((ex) => PLACES[ex.to] && insideZone(walker.x, walker.z, ex.zone));
+      if (!hit) {
+        scObj.exitArmed = true;
+      } else if (scObj.exitArmed) {
+        scObj.exitArmed = false;
+        mountPlace(hit.to, { withDissolve: true, spawn: hit.arrive, facing: hit.facing ?? 1, fromExit: true });
+        return;
+      }
     }
 
     const a = stepper.alpha;
@@ -556,13 +769,19 @@ async function boot() {
       benchDts.push(dtMs);
       benchJs.push(jsMs);
     }
+    if (transBench) {
+      transBench.dts.push(dtMs);
+      transBench.jss.push(jsMs);
+    }
     fpsCount++;
     fpsTimer += dtMs;
     if (fpsTimer >= 500) {
       lastFps = Math.round((fpsCount * 1000) / fpsTimer);
       fpsCount = 0;
       fpsTimer = 0;
-      const status = bench ? (bench.measuring ? `Banc ${bench.pass + 1}/${bench.passes}` : 'Chauffe…') : scObj.label;
+      const status = transBench
+        ? `Aller-retour ${Math.min(transBench.totalSteps, transBench.doneSteps + 1)}/${transBench.totalSteps}`
+        : (bench ? (bench.measuring ? `Banc ${bench.pass + 1}/${bench.passes}` : 'Chauffe…') : scObj.label);
       statsEl.textContent = `POC PixiJS v8 (${rendererName}) · ${status} · ${lastFps} i/s · JS ${lastJsMs.toFixed(2)} ms`;
     }
   });
@@ -570,6 +789,7 @@ async function boot() {
   window.pixiPoc = {
     setPlace: (id) => mountPlace(id),
     startBench: (passes = 1, warmup = 0) => startBenchRun(passes, warmup),
+    startTransitionBench: (roundTrips = 5) => startTransitionBench(roundTrips),
     report: () => lastReport,
     stats: () => ({ renderer: rendererName, place: activeScene?.placeId, loadMs: activeScene?.loadMs, textures: activeScene?.totalTextures, fps: lastFps, jsMs: lastJsMs }),
   };

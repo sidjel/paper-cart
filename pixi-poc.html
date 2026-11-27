@@ -15,7 +15,8 @@
       .poc-controls button, .poc-controls a { background: #1e5bb8; color: #fff; border: 0; border-radius: 7px; padding: 6px 10px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
       .poc-controls button.alt, .poc-controls a.alt { background: #2c384e; }
       .poc-controls button.active { background: #d9a441; color: #1b1610; }
-      .poc-report { position: fixed; left: 8px; bottom: 8px; max-width: min(680px, calc(100vw - 16px)); max-height: 44vh; overflow: auto; white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; z-index: 12; }
+      .poc-controls button.accent { background: #1d7a5f; }
+      .poc-report { position: fixed; left: 8px; bottom: 8px; max-width: min(700px, calc(100vw - 16px)); max-height: 46vh; overflow: auto; white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; z-index: 12; }
       .poc-report[hidden] { display: none; }
       @media (max-width: 760px) {
         .poc-badge, .poc-controls { font-size: 11px; padding: 5px 8px; }
@@ -30,10 +31,10 @@
       <div class="poc-controls">
         <button id="poc-place-accueil" class="alt" type="button">Accueil</button>
         <button id="poc-place-rayon" class="alt" type="button">Rayon 1</button>
+        <button id="poc-trans-bench" class="accent" type="button">Test 5 allers-retours</button>
         <button id="poc-bench" type="button">Banc (3 tours)</button>
         <button id="poc-bench-fast" class="alt" type="button">Rapide (1 tour)</button>
         <button id="poc-copy" class="alt" type="button" hidden>Copier</button>
-        <a id="poc-dom-link" class="alt" href="./?lieu=accueil">Version DOM</a>
       </div>
     </div>
     <pre class="poc-report" id="poc-report" hidden></pre>
