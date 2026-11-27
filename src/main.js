@@ -1201,7 +1201,7 @@ async function start() {
   walker = createWalker(place.spawn[0], place.spawn[1]);
   marker = createTargetMarker(places.backstage);
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
-  sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent);
+  sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent, { touch });
   chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince'), onBumps: () => say('chariot_cogne'), onForgot: () => say('chariot_oublie') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
   input = createInput({

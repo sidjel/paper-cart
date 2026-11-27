@@ -66,11 +66,22 @@ export function flipElasticScale(p) {
   return extra;
 }
 
-export function createPaperFlipRenderer(parent, [w, h]) {
+// Décide si la déformation 2.5D (<canvas>) est active :
+//  - 'non'  : pivot CSS léger partout ;
+//  - 'oui'  : 2.5D forcé même sur smartphone (test) ;
+//  - 'auto' : 2.5D sur PC (profil Normal/Fin), pivot CSS léger sur smartphone ou profil Léger
+//             (évite la création de calque <canvas> à froid et l'éviction de tuiles GPU sur mobile).
+export function shouldUsePaperFlip25d(mode, touch, profile) {
+  if (mode === 'non') return false;
+  if (mode === 'oui') return true;
+  return !touch && profile !== 'leger';
+}
+
+export function createPaperFlipRenderer(parent, [w, h], { touch = false } = {}) {
   const cw = w + PAD_X * 2;
   const ch = h + PAD_Y * 2;
-  // Résolution interne 2× sur PC pour correspondre aux sprites 480×680 natifs sans perte de netteté.
-  const backing = 2;
+  // Résolution interne 2× sur PC (sprites 480×680 natifs) ; 1× si forcé sur mobile pour préserver le GPU.
+  const backing = touch ? 1 : 2;
   const bw = Math.round(cw * backing);
   const bh = Math.round(ch * backing);
 

@@ -23,6 +23,7 @@ export const config = {
     flipOnFrontBack: true, // retournement aussi quand il passe de face à dos
     flipAllDirs: true, // retournement de la feuille aussi sur les virages 45°/90° (ex. profil → face, droite → diagonale)
     turnFlipDuration: 0.13, // durée (s) du retournement de la feuille sur un virage 45°/90°
+    paperFlip25d: 'auto', // maillage papier 2.5D (<canvas>) : 'auto' (PC oui / smartphone pivot CSS léger anti-clignotement), 'oui', 'non'
     paperTwist: 1.0, // ampleur de la torsion diagonale et courbure en S de la feuille cartonnée (0 = plat, 1 = normal, 2 = prononcé)
     flipShadow: 0.55, // intensité de l'ombre portée dynamique derrière la feuille pendant le retournement (0 = aucune)
     paperSheen: true, // reflet lumineux discret sur la feuille pendant le retournement (style Paper Mario)
@@ -233,6 +234,14 @@ export const TUNABLES = [
   { group: 'Personnage', key: 'character.flipOnFrontBack', label: 'Retournement face/dos aussi', type: 'bool' },
   { group: 'Personnage', key: 'character.flipAllDirs', label: 'Retournement papier sur tous les virages', type: 'bool' },
   { group: 'Personnage', key: 'character.turnFlipDuration', label: 'Durée du retournement (45°/90°)', min: 0, max: 0.4, step: 0.01, unit: 's' },
+  {
+    group: 'Personnage', key: 'character.paperFlip25d', label: 'Effet papier 2.5D (torsion/ombre)', type: 'choice',
+    options: [
+      ['auto', 'Auto (PC 2.5D / mobile léger)'],
+      ['oui', 'Toujours actif (2.5D)'],
+      ['non', 'Désactivé (pivot simple)'],
+    ],
+  },
   { group: 'Personnage', key: 'character.paperTwist', label: 'Torsion papier 2.5D', min: 0, max: 2, step: 0.05, unit: '×' },
   { group: 'Personnage', key: 'character.flipShadow', label: 'Ombre portée au retournement', min: 0, max: 1, step: 0.05 },
   { group: 'Personnage', key: 'character.paperSheen', label: 'Reflet papier au retournement', type: 'bool' },

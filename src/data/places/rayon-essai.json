@@ -82,6 +82,7 @@
       "id": "lointain",
       "image": "rayon-lointain",
       "position": [0, 0],
+      "size": [3600, 750],
       "parallax": 0.82,
       "contains": "plan 3 origami HD V3 : ciel bleu, nuages origami dérivants, 2 oiseaux en vol et 2 oiseaux qui marchent par petits à-coups derrière les 4 verrières + panorama large du rayon 2 avec transition lumineuse douce au seuil de l'arche centrale",
       "hiddenBy": "le fond, sauf par les 4 verrières du plafond et l'arche centrale"
@@ -106,6 +107,7 @@
       "id": "premier-plan",
       "image": "rayon-avant",
       "position": [0, 905],
+      "bounds": "image",
       "parallax": 1.25,
       "opacity": "display.foregroundOpacity",
       "occluders": [

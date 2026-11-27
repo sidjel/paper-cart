@@ -11,6 +11,7 @@
     "character.flipOnFrontBack": "La feuille se retourne aussi quand il passe de face à dos (vers le fond).",
     "character.flipAllDirs": "Joue le retournement de la feuille de papier sur tous les changements de direction (y compris profil → face et cardinale ↔ diagonale), directement sans passer par une vue intermédiaire.",
     "character.turnFlipDuration": "Durée du retournement de la feuille sur un virage de 45° ou 90° (quand « Retournement papier sur tous les virages » est coché). 0 : changement instantané.",
+    "character.paperFlip25d": "Active la déformation papier 2.5D (torsion, tranche et ombre portée). En mode « Auto », elle reste active sur PC mais bascule sur le pivot léger sur smartphone (et profil Léger) pour éviter clignotements et zones noires.",
     "character.paperTwist": "Force de la torsion diagonale (décalage haut/bas) et de la courbure en S de la feuille cartonnée pendant le retournement. 0 : pivot plat ; 1 : équilibré ; plus haut : papier plus souple.",
     "character.flipShadow": "Intensité de l'ombre portée dynamique derrière et sous le personnage quand la feuille se soulève pendant un retournement. 0 : aucune ombre portée.",
     "character.paperSheen": "Ombrage léger quand la feuille pivote puis bref éclat lumineux à la réouverture, strictement sur la silhouette du personnage (aucun débordement).",

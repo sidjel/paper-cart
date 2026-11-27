@@ -7,9 +7,9 @@
 // - ombre au sol séparée du dessin, plus petite et plus pâle quand il s'élève ;
 // - objets tenus en main (Scanette pendant le scan) dessinés à part, suivant le bras image par image.
 
-import { bodyMotion, compileAnimation, flipEffects, frameIndex, frameSrc } from './animation.js';
+import { bodyMotion, compileAnimation, flipEffects, flipWidth, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
-import { createPaperFlipRenderer, turnAngleDeg, turnDirectionSign } from './paperFlip.js';
+import { createPaperFlipRenderer, minWidthForAngle, shouldUsePaperFlip25d, turnAngleDeg, turnDirectionSign } from './paperFlip.js';
 import { directionToView, needsPaperFlip } from '../core/direction.js';
 
 export function characterImageEntries(data, rasterScale) {
@@ -32,9 +32,9 @@ export function characterImageEntries(data, rasterScale) {
   return entries;
 }
 
-// settings : config.character ; display : config.display (réduire les animations) ;
+// settings : config.character ; display : config.display (réduire les animations, profil) ;
 // onFrameEvent(son, effet) : une image d'animation demande un son et/ou un effet (un pas, de la poussière).
-export function createCharacterSprite(data, images, parent, settings, display, onFrameEvent) {
+export function createCharacterSprite(data, images, parent, settings, display, onFrameEvent, { touch = false } = {}) {
   const [w, h] = data.size;
   const [ax, ay] = data.anchor;
   // Ombre : un élément à part, posé au sol sous les pieds, dessiné avant le personnage.
@@ -59,8 +59,11 @@ export function createCharacterSprite(data, images, parent, settings, display, o
 
   // Un élément <img> par image distincte ; une seule visible à la fois, sans calque propre (scene/poses.js).
   const poses = createPoses(images, flip, data.size, 'actor-frame');
-  // Canvas 2.5D pré-alloué pour le retournement papier (caché hors retournement = 0 coût en marche/arrêt).
-  const paperFlip = createPaperFlipRenderer(flip, data.size);
+  // Canvas 2.5D pré-alloué uniquement quand le mode 2.5D est actif au chargement (PC : 0 création en jeu ;
+  // smartphone en mode 'auto' : 0 surface <canvas> GPU allouée, pivot CSS léger sur le calque existant).
+  let paperFlip = shouldUsePaperFlip25d(settings.paperFlip25d, touch, display.profile)
+    ? createPaperFlipRenderer(flip, data.size, { touch })
+    : null;
   const imageEl = (url) => poses.el(url);
   // Objets tenus : un élément par image distincte, derrière les images du héros, ou devant (front) quand
   // l'objet dessine lui-même la main qui le tient.
@@ -266,8 +269,10 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (anim.sounds[i] || anim.effects[i]) onFrameEvent(anim.sounds[i], anim.effects[i]);
     }
     const frame = anim.els[i];
-    if (isFlipping) {
-      // Rendu 2.5D (courbure, torsion, chant blanc, ombrage directionnel et reflet masqué par l'alpha)
+    const use25d = isFlipping && shouldUsePaperFlip25d(settings.paperFlip25d, touch, display.profile);
+    if (use25d) {
+      // Rendu 2.5D (PC par défaut) : courbure, torsion, chant blanc, ombrage directionnel et reflet masqué
+      if (!paperFlip) paperFlip = createPaperFlipRenderer(flip, data.size, { touch });
       const fromAnim = pickAnim8(moving, scanning, aside, flipFromDir);
       const toAnim = pickAnim8(moving, scanning, aside, targetDir);
       const fromI = frameIndex(fromAnim, (time - animStartTime) * 1000, distance - animStartDist, settings.walkAnimSpeed, smooth && fromAnim.stride > 0);
@@ -290,7 +295,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
         sheen: settings.paperSheen !== false,
       });
     } else {
-      paperFlip.hide();
+      if (paperFlip) paperFlip.hide();
       if (poses.show(frame)) stats.frameChanges++;
     }
     placeHeld(anim.srcs[i], anim.viewName, anim.away, scanning);
@@ -312,8 +317,12 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     }
 
     const totalLift = motion.lift + (display.reduceMotion ? 0 : fxFlip.lift);
-    // Pendant le retournement 2.5D, le miroir et la largeur sont gérés par paperFlip.draw (pas de scaleX plat).
-    const fx = (isFlipping ? 1 : shownFacing) * motion.sx;
+    // En 2.5D (PC), le miroir et la largeur sont gérés par paperFlip.draw ; en pivot léger (smartphone),
+    // simple scaleX CSS sur le calque .actor-flip déjà en place (0 calque recréé, 0 clignotement).
+    const cssFlipScale = isFlipping && !use25d
+      ? flipWidth(flipP, minWidthForAngle(flipAngle, settings.edgeThickness))
+      : 1;
+    const fx = (use25d ? 1 : shownFacing * cssFlipScale) * motion.sx;
     if (fx !== lastFlip || motion.sy !== lastBody || totalLift !== lastLift) {
       flip.style.transform = `translateY(${-totalLift}px) scale(${fx}, ${motion.sy})`;
       lastFlip = fx;

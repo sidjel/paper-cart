@@ -22,22 +22,39 @@ export function createStage(container, place, images, getValue) {
     const layer = document.createElement('div');
     layer.className = `layer layer-${def.id}`;
     layer.dataset.contains = def.contains;
-    // size (facultatif) : un calque presque vide (le dehors, la pluie) ne prend que la place de son contenu,
-    // pour ne pas réserver dans la mémoire graphique une surface grande comme tout le lieu.
-    if (def.size) {
-      layer.style.width = `${def.size[0]}px`;
-      layer.style.height = `${def.size[1]}px`;
-    }
     const pos = def.position ?? [0, 0];
-    if (def.image) {
+    // bounds: 'image' (premier plan localisé, ex. pots du hall ou bande basse du rayon) :
+    // dimensionne et place directement le calque GPU sur le dessin au lieu d'allouer tout le lieu
+    // (évite les surfaces GPU géantes vides et les zones noires sur smartphone).
+    if (def.bounds === 'image' && def.image) {
       const img = images.get(def.image);
+      layer.style.left = `${pos[0]}px`;
+      layer.style.top = `${pos[1]}px`;
+      layer.style.width = `${img.w}px`;
+      layer.style.height = `${img.h}px`;
       img.el.className = 'layer-image';
       img.el.width = img.w;
       img.el.height = img.h;
       img.el.alt = '';
       img.el.draggable = false;
-      img.el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
       layer.appendChild(img.el);
+    } else {
+      // size (facultatif) : un calque presque vide (le dehors, le lointain) ne prend que la place de son contenu,
+      // pour ne pas réserver dans la mémoire graphique une surface grande comme tout le lieu.
+      if (def.size) {
+        layer.style.width = `${def.size[0]}px`;
+        layer.style.height = `${def.size[1]}px`;
+      }
+      if (def.image) {
+        const img = images.get(def.image);
+        img.el.className = 'layer-image';
+        img.el.width = img.w;
+        img.el.height = img.h;
+        img.el.alt = '';
+        img.el.draggable = false;
+        img.el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
+        layer.appendChild(img.el);
+      }
     }
     const f = def.parallax ?? 1;
     if (f !== 1) {

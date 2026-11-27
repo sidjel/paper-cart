@@ -126,6 +126,7 @@
       "id": "premier-plan-gauche",
       "image": "accueil-avant-gauche",
       "position": [0, 740],
+      "bounds": "image",
       "parallax": 1.35,
       "opacity": "display.hallForegroundOpacity",
       "occluders": [
@@ -138,6 +139,7 @@
       "id": "premier-plan",
       "image": "accueil-avant-droite",
       "position": [2264, 740],
+      "bounds": "image",
       "parallax": 1.35,
       "opacity": "display.hallForegroundOpacity",
       "occluders": [

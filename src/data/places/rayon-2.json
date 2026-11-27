@@ -74,6 +74,7 @@
       "id": "lointain",
       "image": "rayon2-lointain",
       "position": [0, 0],
+      "size": [3600, 750],
       "parallax": 0.82,
       "contains": "plan 3 origami temporaire : ciel bleu derrière les 4 verrières + perspective lointaine teintée sarcelle derrière l'arche",
       "hiddenBy": "le fond, sauf par les 4 verrières et l'arche"
@@ -98,6 +99,7 @@
       "id": "premier-plan",
       "image": "rayon2-avant",
       "position": [0, 930],
+      "bounds": "image",
       "parallax": 1,
       "opacity": "display.foregroundOpacity",
       "occluders": [
