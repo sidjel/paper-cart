@@ -1,36 +1,35 @@
-// Nuages origami animés dans le ciel (arrière-plan) : affichage DOM minimaliste (transform uniquement).
+// Nuages origami animés dans le ciel (arrière-plan) sous PixiJS v8.
 // Préchargés au chargement du lieu, jamais recréés en jeu ; placés dans le calque lointain avant les oiseaux.
 
+import { Sprite } from 'pixi.js';
 import { cloudPose } from '../core/clouds.js';
 
 export function createClouds(layer, cfg, images, reduceMotion = false) {
-  const claimed = new Set();
   const items = cfg.items.map((def) => {
     const im = images.get(def.image);
-    const el = claimed.has(def.image) ? new Image() : im.el;
-    if (el !== im.el) {
-      el.decoding = 'sync';
-      el.src = im.url;
-      el.decode?.().catch(() => {});
-    }
-    claimed.add(def.image);
-    el.className = 'cloud';
-    el.width = im.w;
-    el.height = im.h;
-    el.alt = '';
-    el.draggable = false;
-    el.style.opacity = def.opacity != null ? String(def.opacity) : '';
-    layer.appendChild(el);
-    return { def, el, w: im.w, h: im.h };
+    const sprite = new Sprite(im.texture);
+    sprite.anchor.set(0.5, 0.5);
+    sprite.alpha = def.opacity ?? 1;
+    layer.addChild(sprite);
+    return {
+      def,
+      sprite,
+      w: im.w,
+      h: im.h,
+      tw: Math.max(1, im.texture.width),
+      th: Math.max(1, im.texture.height),
+    };
   });
 
   function update(time, rm) {
     for (const c of items) {
       const { x, y, scale } = cloudPose(c.def, time, cfg.span, rm);
-      c.el.style.transform = `translate3d(${x - c.w / 2}px, ${y - c.h / 2}px, 0) scale(${scale})`;
+      c.sprite.x = x;
+      c.sprite.y = y;
+      c.sprite.scale.set((c.w * scale) / c.tw, (c.h * scale) / c.th);
     }
   }
 
   update(0, reduceMotion);
-  return { update };
+  return { update, count: items.length };
 }

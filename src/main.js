@@ -23,7 +23,8 @@ import introFile from './data/intro.json';
 import { findPath } from './core/pathfinding.js';
 import { createWorld, planSwap, applySwap, swapEntry } from './core/world.js';
 import { focusOwner, heroFree, inGame } from './core/focus.js';
-import { assetStats, computeRasterScale, loadImages } from './scene/assets.js';
+import { assetStats, computeRasterScale, loadImages, setMaxTextureSize } from './scene/assets.js';
+import { createRenderer } from './scene/renderer.js';
 import { createPlaces } from './game/places.js';
 import { createPileWiring } from './game/pile.js';
 import { createChariotWiring, CHARIOT_IMAGE, CHARIOT_SIZE } from './game/chariot.js';
@@ -87,7 +88,7 @@ window.addEventListener('error', (e) => logError(e.message || String(e.error)));
 window.addEventListener('unhandledrejection', (e) => logError(`promesse : ${e.reason?.message ?? e.reason}`));
 const stepper = createStepper(config.loop.stepHz, config.loop.maxStepsPerFrame);
 
-let stage, proj, mask, walker, sprite, marker, debugMask, debugPerspective, input, props, depthRefs, dust, chariot;
+let renderer, places, stage, proj, mask, walker, sprite, marker, debugMask, debugPerspective, input, props, depthRefs, dust, chariot;
 let fgLayers = [];
 // Dernière position affichée du personnage (pour placer la poussière d'un pas).
 const shown = { x: 0, y: 0, scale: 1, level: 1, time: 0 };
@@ -935,7 +936,9 @@ function layout() {
   if (!stage) return;
   stage.layout(config.camera.zoom);
   const v = stage.view;
-  renderLine = `zoom ${config.camera.zoom} · scène ×${v.scale.toFixed(3)} · visible ${Math.round(v.viewW)}×${Math.round(v.viewH)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${quality().pixelRatio}) · profil ${config.display.profile}`;
+  const engine = renderer ? `PixiJS ${renderer.isWebGL ? 'WebGL' : 'Canvas'}` : 'PixiJS';
+  renderLine = `${engine} · zoom ${config.camera.zoom} · scène ×${v.scale.toFixed(3)} · visible ${Math.round(v.viewW)}×${Math.round(v.viewH)} · images ×${assetStats.rasterScale.toFixed(2)} (densité ${window.devicePixelRatio} plafonnée à ${quality().pixelRatio}) · profil ${config.display.profile}`;
+  if (renderer && !places?.busy && !sm.is('loading')) render();
 }
 
 const camera = createCamera();
@@ -1036,13 +1039,12 @@ function render() {
       const raw = Math.max(0, Math.min(1, (z - z0) / Math.max(1, z1 - z0)));
       const smooth = raw * raw * (3 - 2 * raw);
       const op = Math.round(smooth * p.maxOpacity * 200) / 200;
-      if (op !== p.lastOpacity) {
-        p.lastOpacity = op;
-        p.el.style.opacity = String(op);
-      }
+      p.setOpacity(op);
     }
   }
   if (!walker.hasTarget) marker.hide();
+  marker.update(time, config.display.reduceMotion);
+  renderer.render();
 }
 
 let last = -1;
@@ -1114,74 +1116,83 @@ function frame(now) {
   diag.frame(dt, performance.now() - t0, playing);
 }
 
-// ---------- Lieux (src/game/places.js) : charger, afficher, quitter, changer de lieu ----------
-const places = createPlaces(uiEl, gameEl, {
-  places: PLACES,
-  base: BASE,
-  sm,
-  world,
-  catalog,
-  getValue,
-  commonImages: () => loadedImages,
-  actors: () => [marker, dust, sprite, chariot],
-  walker: () => walker,
-  // On ne quitte un lieu que héros libre : ni scan, ni aparté, ni approche en cours.
-  canLeave: () => !scan.active && !heroAside() && pendingScan < 0,
-  isScanning: () => scan.active,
-  // Un lieu vient d'être construit : le jeu s'y branche.
-  onLoaded({ place: pl, proj: pr, mask: mk, here, view }) {
-    place = pl;
-    proj = pr;
-    mask = mk;
-    endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
-    productState = here.products;
-    pickupState = here.pickups;
-    markTaken();
-    guard.attach(place, view, proj);
-    hotesse.attach(place, view);
-    treadmill.setVisible(!!place.treadmill);
-    chariot.attach(proj);
-    pile.attach(place, view, here, mask);
-    ({ stage, props, depthRefs, products, speakerWaves, debugMask, debugPerspective, clouds, birds } = view);
-    fgLayers = place.layers
-      .filter((l) => l.occluders?.length)
-      .map((l) => ({
-        id: l.id,
-        occluders: l.occluders,
-        opacityKey: l.opacity ?? 'display.hallForegroundOpacity',
-        amount: 0,
-      }));
-    highlighted = -2; // le bouton d'action est recalculé
-    pickupReach = -2;
-    hotesseAction = '';
-    chariotAction = '';
-    pendingScan = -1;
-    camera.ready = false;
-    lastCamTime = -1;
-    layout();
-  },
-  onLeaving() {
-    marker.hide();
-    fgLayers = [];
-    clouds = null;
-    birds = null;
-    stage = null;
-  },
-  // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
-  onArrived() {
-    chariot.arrived(); // poussé, le chariot arrive avec le héros
-    voices.arrivedInPlace();
-    resetCrowCalls(crowCalls);
-  },
-  onTransitionStart() {
-    if (config.audio.rustle) audio.play('froissement');
-  },
-  logError,
-  onLoadFailed: () => say('lieu_inaccessible'),
-  render: () => render(),
-});
-
 async function start() {
+  renderer = await createRenderer(gameEl, {
+    maxPixelRatio: quality().pixelRatio,
+    onContextLost: () => logError('contexte WebGL perdu'),
+    onContextRestored: () => {
+      if (stage) render();
+    },
+  });
+  setMaxTextureSize(renderer.maxTextureSize);
+
+  // ---------- Lieux (src/game/places.js) : charger, afficher, quitter, changer de lieu ----------
+  places = createPlaces(uiEl, renderer, {
+    places: PLACES,
+    base: BASE,
+    sm,
+    world,
+    catalog,
+    getValue,
+    commonImages: () => loadedImages,
+    actors: () => [marker, dust, sprite, chariot],
+    walker: () => walker,
+    // On ne quitte un lieu que héros libre : ni scan, ni aparté, ni approche en cours.
+    canLeave: () => !scan.active && !heroAside() && pendingScan < 0,
+    isScanning: () => scan.active,
+    // Un lieu vient d'être construit : le jeu s'y branche.
+    onLoaded({ place: pl, proj: pr, mask: mk, here, view }) {
+      place = pl;
+      proj = pr;
+      mask = mk;
+      endOfAisleX = place.aisleEndX ?? Infinity; // le narrateur remarque le bout du rayon (donnée du lieu)
+      productState = here.products;
+      pickupState = here.pickups;
+      markTaken();
+      guard.attach(place, view, proj);
+      hotesse.attach(place, view);
+      treadmill.setVisible(!!place.treadmill);
+      chariot.attach(proj);
+      pile.attach(place, view, here, mask);
+      ({ stage, props, depthRefs, products, speakerWaves, debugMask, debugPerspective, clouds, birds } = view);
+      fgLayers = place.layers
+        .filter((l) => l.occluders?.length)
+        .map((l) => ({
+          id: l.id,
+          occluders: l.occluders,
+          opacityKey: l.opacity ?? 'display.hallForegroundOpacity',
+          amount: 0,
+        }));
+      highlighted = -2; // le bouton d'action est recalculé
+      pickupReach = -2;
+      hotesseAction = '';
+      chariotAction = '';
+      pendingScan = -1;
+      camera.ready = false;
+      lastCamTime = -1;
+      layout();
+    },
+    onLeaving() {
+      marker.hide();
+      fgLayers = [];
+      clouds = null;
+      birds = null;
+      stage = null;
+    },
+    // Le héros vient d'être posé dans le nouveau lieu (une annonce en cours change de haut-parleur).
+    onArrived() {
+      chariot.arrived(); // poussé, le chariot arrive avec le héros
+      voices.arrivedInPlace();
+      resetCrowCalls(crowCalls);
+    },
+    onTransitionStart() {
+      if (config.audio.rustle) audio.play('froissement');
+    },
+    logError,
+    onLoadFailed: () => say('lieu_inaccessible'),
+    render: () => render(),
+  });
+
   const nearestZ = Math.min(...place.walkMask.area.map((pt) => pt[1]));
   const frontScale = Math.min(1.25, Math.max(1, scaleAt(createProjection(place.projection, config.scene), nearestZ)));
   const rasterScale = computeRasterScale(place.viewHeight ?? place.size[1], config.camera.zoom, quality().pixelRatio);
@@ -1201,7 +1212,7 @@ async function start() {
   walker = createWalker(place.spawn[0], place.spawn[1]);
   marker = createTargetMarker(places.backstage);
   dust = createDust(places.backstage, loadedImages.get(BASE + DUST_IMAGE), DUST_ANCHOR, config.character, config.display);
-  sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent, { touch });
+  sprite = createCharacterSprite(heroData, loadedImages, places.backstage, config.character, config.display, onFrameEvent, { isWebGL: renderer.isWebGL });
   chariot = createChariotWiring({ walker: () => walker, place: () => place.id, onTurn: () => audio.play('grince'), onBumps: () => say('chariot_cogne'), onForgot: () => say('chariot_oublie') }, loadedImages.get(BASE + CHARIOT_IMAGE), places.backstage);
   await places.load(place.id);
   input = createInput({
@@ -1222,8 +1233,14 @@ async function start() {
 
   onConfigChange((key, value) => {
     if (key === 'camera.zoom') layout();
-    if (key === 'debug.showWalkMask') debugMask?.setVisible(value);
-    if (key === 'debug.showPerspective') debugPerspective?.setVisible(value);
+    if (key === 'debug.showWalkMask') {
+      debugMask?.setVisible(value);
+      if (stage) renderer.render();
+    }
+    if (key === 'debug.showPerspective') {
+      debugPerspective?.setVisible(value);
+      if (stage) renderer.render();
+    }
     if (key === 'loop.stepHz') stepper.setRate(value);
     if (key === 'display.foregroundOpacity' || key === 'display.hallForegroundOpacity') {
       stage?.applyOpacity();
@@ -1240,7 +1257,6 @@ async function start() {
     if (key === 'scene.depthScale') debugPerspective?.refresh();
     if ((key.startsWith('character.') || key === 'scene.depthScale' || key.startsWith('camera.')) && stage) render();
     if (key === 'narrator.screenFx' || key === 'display.reduceMotion') voices.applyScreenFx();
-    if (key === 'display.reduceMotion') stage?.el.classList.toggle('still', value);
     if (key.startsWith('player.')) voices.applyPlayerName();
     if (key.startsWith('audio.')) audio.applyVolumes();
     if (key === 'audio.muted') hud.setMuted(value);
@@ -1299,7 +1315,30 @@ async function start() {
     narrator: () => voices.info(),
     products: () => productState.map((it) => ({ id: it.id, x: it.x, scanned: it.scanned })),
     // Niveaux d'affichage : personnage et objets (pour vérifier qui passe devant qui).
-    levels: () => ({ hero: Number(sprite.el.style.zIndex), ...Object.fromEntries(props.map((p) => [p.id, Number(p.el.style.zIndex)])) }),
+    levels: () => ({ hero: sprite.level(), ...Object.fromEntries(props.map((p) => [p.id, p.level()])) }),
+    // État lecture seule de la scène PixiJS (pour tests E2E et diagnostics).
+    scene: () => {
+      const layerOpacities = {};
+      const parallaxOffsets = {};
+      if (stage) {
+        for (const id of Object.keys(stage.layers)) {
+          layerOpacities[id] = stage.layerOpacity(id);
+          parallaxOffsets[id] = stage.parallaxOffset(id);
+        }
+      }
+      return {
+        ...renderer.stats(),
+        hasStage: Boolean(stage),
+        layers: stage ? Object.keys(stage.layers) : [],
+        layerOpacities,
+        parallaxOffsets,
+        ambientCount: (clouds?.count ?? 0) + (birds?.count ?? 0),
+        hero: sprite ? { ...sprite.info(), bounds: stage ? sprite.boundsClient(stage) : null } : null,
+        chariot: chariot ? { visible: chariot.visible(), bounds: stage ? chariot.boundsClient(stage) : null } : null,
+        dustActive: dust ? dust.activeCount() : 0,
+        products: products && stage ? products.info(stage) : { markerVisible: false, items: [] },
+      };
+    },
     worldToClient(x, z) {
       return stage.stageToClient(worldToStageX(proj, x), worldToStageY(proj, z), { x: 0, y: 0 });
     },

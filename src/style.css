@@ -42,86 +42,12 @@ html, body {
   touch-action: none;
   cursor: pointer;
 }
-
-.stage {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-  overflow: hidden;
-  contain: strict;
-  will-change: transform;
-}
-.layer-parallax { will-change: transform; }
-
-.layer, .layer-image, .debug-mask, .debug-perspective {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-.layer { width: 100%; height: 100%; isolation: isolate; }
-.shadow {
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: 50%;
-  /* Deux ombres en une : petite ombre de contact sombre sous les pieds (--contact, réglable), puis l'ombre douce. */
-  background:
-    radial-gradient(closest-side, rgb(18 14 10 / var(--contact, 0.6)), rgb(18 14 10 / 0) 100%) center / 66% 56% no-repeat,
-    radial-gradient(closest-side, rgb(40 32 22 / 0.5), rgb(40 32 22 / 0.26) 58%, rgb(40 32 22 / 0) 100%);
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-.dust { position: absolute; left: 0; top: 0; display: block; pointer-events: none; will-change: transform, opacity; }
-.dust[hidden] { display: none; }
-.prop { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
-/* Calque fixe : l'objet ne change pas de calque quand le personnage passe derrière lui. */
-.props-layered .prop { will-change: transform; }
-.layer-image { display: block; pointer-events: none; }
-
-.actor {
-  position: absolute;
-  left: 0;
-  top: 0;
-  will-change: transform;
+#game canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
-.actor-flip { position: relative; }
-.actor-frame { position: absolute; left: 0; top: 0; display: block; }
-.actor-flip-canvas { position: absolute; display: block; pointer-events: none; }
-.actor-flip-canvas[hidden] { display: none; }
-/* Objets tenus (Scanette, panier) : derrière le dessin du héros, sa main passe devant. */
-.actor-held { position: absolute; left: 0; top: 0; display: block; z-index: -1; transform-origin: 0 0; } /* pivot calculé dans le code (épaule) */
-.actor-held.front { z-index: 1; } /* l'objet dessine la main qui le tient (anse, poignée) */
-.actor-held[hidden] { display: none; }
-.actor-frame[hidden] { display: none; }
-
-.target-marker {
-  position: absolute;
-  left: -22px;
-  top: -11px;
-  width: 44px;
-  height: 22px;
-  border-radius: 50%;
-  border: 4px solid var(--paper);
-  box-shadow: 0 0 0 2px var(--ink);
-  opacity: 0;
-  transition: opacity 0.25s;
-  pointer-events: none;
-}
-.target-marker.visible { opacity: 0.85; transition: none; }
-
-.debug-mask { pointer-events: none; z-index: 1; }
-.debug-perspective { pointer-events: none; z-index: 2; }
-.persp-ray { stroke: rgb(6 182 212 / 0.45); stroke-width: 2; }
-.persp-z { stroke: rgb(245 158 11 / 0.65); stroke-width: 2; stroke-dasharray: 10 8; }
-.persp-horizon { stroke: rgb(225 29 72 / 0.9); stroke-width: 3; stroke-dasharray: 14 8; }
-.persp-vp { fill: none; stroke: rgb(250 204 21); stroke-width: 3; }
-.persp-label { fill: rgb(254 243 199); stroke: rgb(15 23 42 / 0.85); stroke-width: 4; paint-order: stroke; font: 700 18px system-ui, sans-serif; }
-.persp-horizon-label { fill: rgb(255 228 230); stroke: rgb(136 19 55 / 0.9); stroke-width: 4; paint-order: stroke; font: 700 20px system-ui, sans-serif; }
-.mask-depth { stroke: rgb(40 90 200); stroke-width: 4; stroke-dasharray: 12 8; }
-.mask-area { fill: rgb(80 200 90 / 0.25); stroke: rgb(30 140 50); stroke-width: 3; }
-.mask-obstacle { fill: rgb(220 60 50 / 0.35); stroke: rgb(170 30 20); stroke-width: 3; }
 
 /* ---------- Interface (zone sûre) ---------- */
 #ui {
@@ -589,49 +515,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 .bench-banner[hidden] { display: none; }
 
-/* ---------- Scanner : produits, repère, laser, confettis ---------- */
-.product { position: absolute; left: 0; top: 0; display: block; pointer-events: none; transform-origin: 50% 100%; }
-.product[hidden] { display: none; }
-.scan-marker {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 40px;
-  height: 40px;
-  z-index: 900;
-  opacity: 0;
-  transition: opacity 0.15s;
-  pointer-events: none;
-}
-.scan-marker { will-change: transform; } /* séance 68 : un calque en permanence (il en gagnait et perdait un) */
-.scan-marker.visible { opacity: 1; }
-.scan-laser {
-  position: absolute;
-  left: 0;
-  top: -6px;
-  height: 12px;
-  transform-origin: 0 50%;
-  z-index: 901;
-  display: none;
-  pointer-events: none;
-}
-.scan-laser.visible { display: block; will-change: transform, opacity; }
-.scan-laser-halo { position: absolute; left: 0; right: 0; top: 2px; height: 8px; border-radius: 4px; background: rgb(255 70 60 / 0.35); }
-.scan-laser-core { position: absolute; left: 0; right: 0; top: 4.5px; height: 3px; border-radius: 2px; background: #ff3b30; }
-.scan-bit {
-  position: absolute;
-  left: -6px;
-  top: -4px;
-  width: 12px;
-  height: 8px;
-  border: 1.5px solid #4a4236;
-  border-radius: 2px;
-  z-index: 902;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-.scan-bit[hidden] { display: none; }
-
 /* ---------- Cartes ---------- */
 .card {
   --stage: #6f8f6a;
@@ -948,27 +831,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   .narrator { max-width: calc(100% - 300px); padding: 7px 12px 8px 10px; }
   .narrator-text, .hero-bubble-text { font-size: calc(14px * var(--ts, 1)); }
 }
-
-/* Ondes sous le haut-parleur qui parle (dans la scène). */
-.speaker-waves, .speaker-waves::before, .speaker-waves::after {
-  border-bottom: 3px solid var(--ink);
-  border-radius: 0 0 50% 50% / 0 0 100% 100%;
-}
-.speaker-waves {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 80px;
-  height: 30px;
-  z-index: 899;
-  pointer-events: none;
-  transform-origin: 40px 0;
-  will-change: transform, opacity;
-}
-.speaker-waves::before, .speaker-waves::after { content: ''; position: absolute; top: 0; }
-.speaker-waves::before { left: 26px; width: 28px; height: 10px; }
-.speaker-waves::after { left: 13px; width: 54px; height: 20px; }
-.speaker-waves[hidden] { display: none; }
 
 /* Aparté : bandes « cinéma » et bords assombris (sous les boutons et la bulle). */
 .aside-vignette {
@@ -1655,21 +1517,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .place-fade.paper-fx { background: transparent; }
 .place-fade[hidden] { display: none; }
 
-/* Fondu enchaîné (cross-dissolve) : l'ancien décor reste par-dessus le nouveau et s'estompe doucement. */
-.stage.stage-dissolve { z-index: 2; pointer-events: none; will-change: opacity; }
 .place-fade.paper-fx .place-wait span { background: #fff; border: 1.5px solid #1e5bb8; }
 
-/* Agent de sécurité du hall (A6) : placé par src/game/guard.js. */
-.chariot { position: absolute; left: 0; top: 0; display: block; will-change: transform; pointer-events: none; }
-.guard { position: absolute; left: 0; top: 0; will-change: transform; pointer-events: none; }
-.guard-pose { position: absolute; left: 0; top: 0; display: block; } /* pas de calque propre : voir scene/poses.js */
-.hotesse { position: absolute; left: 0; top: 0; display: block; will-change: transform; pointer-events: none; }
-
-/* Nuages et oiseaux origami dehors (arrière-plan : scene/clouds.js, scene/birds.js). */
-.cloud { position: absolute; left: 0; top: 0; display: block; will-change: transform; pointer-events: none; }
-.bird { position: absolute; left: 0; top: 0; will-change: transform; pointer-events: none; }
-.bird-pose { position: absolute; left: 0; top: 0; display: block; }
-.bird-pose[hidden] { display: none; }
 /* L'agent de sécurité et l'hôtesse parlent : bulle droite (pas en italique), centrée. */
 .hero-bubble.agent .hero-bubble-text,
 .hero-bubble.hotesse .hero-bubble-text { font-style: normal; text-align: center; }

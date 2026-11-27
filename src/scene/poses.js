@@ -1,44 +1,48 @@
 // Poses d'un personnage ou d'un objet animé (le héros, l'agent de sécurité, les personnages à venir).
-// Règle (séance 61, docs/ARCHITECTURE.md §4) : un seul calque, sur le conteneur ; ses poses sont des
-// images à l'intérieur, une seule visible à la fois (hidden), sans will-change ni calque propre.
-// Jamais un calque par pose : un calque caché n'est pas préparé, le téléphone le dessine à froid quand
-// il apparaît, d'où un trou d'une image (l'agent clignotait ainsi, séance 60).
-//
-// images : images décodées (scene/assets.js) ; parent : le conteneur ; size : [largeur, hauteur] ;
-// className : classe des images.
+// Sous PixiJS v8, chaque pose est une Texture préchargée ; on échange uniquement `target.texture`
+// sur le Sprite / MeshPlane déjà monté, sans réaffectation redondante ni allocation en jeu.
 
-export function createPoses(images, parent, [w, h], className) {
-  const els = new Map(); // une image par source distincte
+export function createPoses(images, target, size = null) {
+  const textures = new Map();
   let shown = null;
+
+  function applySize(tex) {
+    if (!target || !size) return;
+    const tw = Math.max(1, tex?.width ?? size[0]);
+    const th = Math.max(1, tex?.height ?? size[1]);
+    if (target.scale?.set) target.scale.set(size[0] / tw, size[1] / th);
+  }
+
   return {
-    // L'élément d'une pose (préparé au chargement, caché).
-    el(url) {
-      if (!els.has(url)) {
-        const img = images.get(url).el;
-        img.className = className;
-        img.width = w;
-        img.height = h;
-        img.alt = '';
-        img.draggable = false;
-        img.hidden = true;
-        parent.appendChild(img);
-        els.set(url, img);
+    // Texture préparée pour une pose donnée (résolue une fois depuis `images`).
+    texture(id) {
+      if (!textures.has(id)) {
+        const rec = images.get(id);
+        textures.set(id, rec?.texture ?? rec);
       }
-      return els.get(url);
+      return textures.get(id);
     },
-    // Montrer une pose (et cacher la précédente). Renvoie true si l'image affichée a changé.
-    show(el) {
-      if (el === shown) return false;
-      if (shown) shown.hidden = true;
-      el.hidden = false;
-      shown = el;
-      return true;
+    // Afficher une pose (et réafficher la cible si elle était cachée). Renvoie true si la texture a changé.
+    show(tex) {
+      if (!tex) return false;
+      const changed = tex !== shown;
+      if (changed) {
+        if (target) {
+          target.texture = tex;
+          applySize(tex);
+        }
+        shown = tex;
+      }
+      if (target && !target.visible) target.visible = true;
+      return changed;
     },
-    // Cacher temporairement la pose active (ex. pendant le rendu canvas 2.5D du retournement).
+    // Cacher temporairement la pose active (ex. pendant le rendu MeshPlane 2.5D du retournement).
     hide() {
-      if (!shown) return;
-      shown.hidden = true;
+      if (target && target.visible) target.visible = false;
       shown = null;
+    },
+    current() {
+      return shown;
     },
   };
 }

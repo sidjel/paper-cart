@@ -16,6 +16,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --trace off"
   },
+  "dependencies": {
+    "pixi.js": "^8.23.0"
+  },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "knip": "^6.45.1",

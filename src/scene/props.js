@@ -1,47 +1,60 @@
-// Objets du décor que le personnage peut contourner (chariot, présentoir…).
-// Chacun est une illustration entière, posée au sol à sa position dans le monde (at),
+// Objets du décor que le personnage peut contourner (chariot, présentoir, portiques, cartons…).
+// Chacun est un Sprite PixiJS posé au sol à sa position dans le monde (at),
 // avec son point d'ancrage dans l'image (anchor) et son point de référence de profondeur (depthRef).
 
+import { Sprite } from 'pixi.js';
 import { scaleAt, worldToStageX, worldToStageY } from './projection.js';
 import { propLevels } from './depth.js';
 
 export function createProps(place, images, parent, proj) {
   const defs = place.props ?? [];
   const levels = propLevels(defs.map((d) => d.depthRef));
-  const used = new Set();
   return defs.map((def, i) => {
     const img = images.get(def.image);
-    // Une même image peut servir pour plusieurs objets : les suivants en reçoivent une copie.
-    const el = used.has(def.image) ? new Image() : img.el;
-    if (el !== img.el) el.src = img.url;
-    used.add(def.image);
-    el.className = 'prop';
-    el.width = img.w;
-    el.height = img.h;
-    el.alt = '';
-    el.draggable = false;
-    el.dataset.prop = def.id;
-    const sx = worldToStageX(proj, def.at[0]) - def.anchor[0];
-    const sy = worldToStageY(proj, def.at[1]) - def.anchor[1];
+    const sprite = new Sprite(img.texture);
+    sprite.label = `prop:${def.id}`;
+    sprite.anchor.set(def.anchor[0] / img.w, def.anchor[1] / img.h);
     // perspectiveScale : suit exactement la même loi de perspective (scaleAt) que le héros.
-    // scale : échelle fixe facultative autour du point d'ancrage.
-    const s = def.perspectiveScale
+    // scale : échelle fixe facultative autour du point d'ancrage (1 sinon).
+    const sc = def.perspectiveScale
       ? def.perspectiveScale * scaleAt(proj, def.at[1])
-      : (def.scale ?? 0);
-    if (s) el.style.transformOrigin = `${def.anchor[0]}px ${def.anchor[1]}px`;
-    el.style.transform = `translate(${sx}px, ${sy}px)${s ? ` scale(${s.toFixed(4)})` : ''}`;
-    el.style.zIndex = levels[i];
-    if (def.fadeZ) el.style.opacity = '0';
-    parent.appendChild(el);
-    return {
+      : (def.scale ?? 1);
+    sprite.width = img.w * sc;
+    sprite.height = img.h * sc;
+    const x = worldToStageX(proj, def.at[0]);
+    const y = worldToStageY(proj, def.at[1]);
+    sprite.x = x;
+    sprite.y = y;
+    sprite.zIndex = levels[i];
+    if (def.fadeZ) sprite.alpha = 0;
+    parent.addChild(sprite);
+    const prop = {
       id: def.id,
-      el,
+      sprite,
       depthRef: def.depthRef,
-      left: sx,
+      left: x - def.anchor[0],
       width: img.w,
       fadeZ: def.fadeZ ?? null,
       maxOpacity: def.maxOpacity ?? 1,
       lastOpacity: def.fadeZ ? 0 : 1,
+      setOpacity(op) {
+        if (op === prop.lastOpacity) return;
+        prop.lastOpacity = op;
+        sprite.alpha = op;
+      },
+      setRotation(deg) {
+        sprite.rotation = (deg * Math.PI) / 180;
+      },
+      setVisible(v) {
+        sprite.visible = Boolean(v);
+      },
+      setLevel(lv) {
+        sprite.zIndex = lv;
+      },
+      level() {
+        return sprite.zIndex;
+      },
     };
+    return prop;
   });
 }

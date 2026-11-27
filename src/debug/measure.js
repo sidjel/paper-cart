@@ -136,13 +136,13 @@ export function createMeasureTools(ui, game) {
   let savedDust = true;
   function applySwitches(on) {
     const b = config.bench;
-    const layers = game.stage().layers;
+    const stage = game.stage();
     // (un lieu peut ne pas avoir ces calques)
-    for (const [id, layerEl] of Object.entries(layers)) {
-      if (id.startsWith('premier-plan')) layerEl.style.display = on && b.noForeground ? 'none' : '';
+    for (const id of Object.keys(stage.layers)) {
+      if (id.startsWith('premier-plan')) stage.setLayerVisible(id, !(on && b.noForeground));
     }
-    if (layers.lointain) layers.lointain.style.display = on && b.noFarLayer ? 'none' : '';
-    game.sprite().shadowEl.style.display = on && b.noShadow ? 'none' : '';
+    stage.setLayerVisible('lointain', !(on && b.noFarLayer));
+    game.sprite().setShadowVisible(!(on && b.noShadow));
     if (on) {
       savedDust = config.character.dust;
       if (b.noDust) config.character.dust = false;

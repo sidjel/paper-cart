@@ -1,35 +1,44 @@
-// Ondes sonores sous le haut-parleur qui parle (les haut-parleurs eux-mêmes sont dessinés dans le décor).
-// Un seul élément, créé au chargement, placé sous le bon haut-parleur au début de chaque annonce.
-// Il pulse au rythme du temps de jeu (figé en pause) ; immobile si « réduire les animations ».
+// Ondes sonores sous le haut-parleur qui parle sous PixiJS v8.
+// Un seul objet Graphics dessiné une fois au chargement du lieu, puis déplacé et mis à l'échelle.
 
-// Un seul élément : trois arcs dessinés en CSS (l'élément et ses deux pseudo-éléments).
+import { Graphics } from 'pixi.js';
 
-// Séance 68 : l'élément n'est jamais caché (son calque reste en place, déjà préparé) ; au repos il est
-// presque transparent (0,001 : encore dessiné, invisible). Le cacher puis le montrer créait un calque à
-// chaque annonce, et le téléphone redessinait alors la scène (le héros clignotait).
-const IDLE = '0.001';
+function addHalfEllipseArc(g, rx, ry, steps = 18) {
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI;
+    const x = Math.cos(a) * rx;
+    const y = Math.sin(a) * ry;
+    if (i === 0) g.moveTo(x, y);
+    else g.lineTo(x, y);
+  }
+}
 
 export function createSpeakerWaves(parent) {
-  const el = document.createElement('div');
-  el.className = 'speaker-waves';
-  el.style.opacity = IDLE;
-  parent.appendChild(el);
-  let x = 0;
-  let y = 0;
+  const g = new Graphics();
+  g.label = 'speaker:waves';
+  addHalfEllipseArc(g, 14, 10);
+  addHalfEllipseArc(g, 27, 20);
+  addHalfEllipseArc(g, 40, 30);
+  g.stroke({ color: 0x3d352a, width: 3, cap: 'round' });
+  g.zIndex = 899;
+  g.visible = false;
+  parent.addChild(g);
+
   return {
     // (sx, sy) : bouche du haut-parleur sur la scène.
     show(sx, sy) {
-      x = sx - 40;
-      y = sy;
+      g.x = sx;
+      g.y = sy;
     },
     // t : temps de jeu (s) ; still : sans mouvement.
     pulse(t, still) {
       const k = still ? 1 : 0.92 + 0.12 * Math.abs(Math.sin(t * 7));
-      el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${k})`;
-      el.style.opacity = still ? 0.85 : 0.55 + 0.4 * Math.abs(Math.sin(t * 7 + 0.6));
+      g.scale.set(k);
+      g.alpha = still ? 0.85 : 0.55 + 0.4 * Math.abs(Math.sin(t * 7 + 0.6));
+      g.visible = true;
     },
     hide() {
-      el.style.opacity = IDLE;
+      g.visible = false;
     },
   };
 }

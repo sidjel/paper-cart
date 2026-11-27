@@ -1,13 +1,8 @@
-// Le gestionnaire de lieux (docs/ARCHITECTURE.md §11) : charger un lieu, l'afficher, le quitter, et passer
-// de l'un à l'autre par un fondu au noir géré par la machine à états. Sorti de main.js à la séance 54.
-// - Les images communes (héros, poussière, produits) restent chargées ; celles du lieu sont libérées en partant.
-// - Le héros, sa poussière et le repère au sol passent d'un lieu à l'autre (ils attendent en coulisse).
+// Le gestionnaire de lieux (docs/ARCHITECTURE.md §11) sous PixiJS v8 : charger un lieu, l'afficher,
+// le quitter, et passer de l'un à l'autre par fondu enchaîné (RenderTexture dans dissolveLayer).
+// - Les textures communes (héros, poussière, produits, chariot) restent chargées ; celles du lieu sont libérées en partant.
+// - Le héros, sa poussière, le chariot et le repère au sol passent d'un lieu à l'autre via renderer.backstage.
 // - Le monde se souvient : l'état de chaque lieu est créé à la première visite, retrouvé ensuite (core/world.js).
-//
-// game : { places (données des lieux), base, sm, world, catalog, getValue,
-//          commonImages(), actors() → [repère, poussière, héros], walker(), canLeave(),
-//          onLoaded({ place, proj, mask, here, view }), onLeaving(), onArrived(), render(),
-//          logError(texte) → diagnostic (F3), onLoadFailed() → le haut-parleur prévient }
 
 import { config } from '../config.js';
 import { compileMask } from '../core/walkmask.js';
@@ -20,13 +15,14 @@ import { createProjection, scaleAt, worldToStageY } from '../scene/projection.js
 import { createPlaceView } from '../scene/placeView.js';
 import { quality } from '../scene/quality.js';
 
-export function createPlaces(ui, container, game) {
+export function createPlaces(ui, renderer, game) {
   let place = null;
   let proj = null; // projection du lieu actif (pour l'échelle du héros selon z)
-  let view = null; // vue du lieu affiché (scene/placeView.js)
+  let view = null; // vue PixiJS du lieu affiché (scene/placeView.js)
   let images = null;
-  const backstage = document.createElement('div'); // où attendent le héros, la poussière et le repère hors d'un lieu
-  // Pré-téléchargement réseau silencieux des lieux voisins (cache HTTP seulement, sans décodage ni calque).
+  const backstage = renderer.backstage; // conteneur PixiJS hors scène pour les acteurs persistants
+
+  // Pré-téléchargement réseau silencieux des lieux voisins (cache HTTP seulement, sans décodage ni texture).
   const prefetched = new Set();
   let prefetchTimer = 0;
   let prefetchCtrl = null;
@@ -72,24 +68,22 @@ export function createPlaces(ui, container, game) {
 
   async function preparePlace(id) {
     const nextPlace = game.places[id];
-    const rasterScale = computeRasterScale(nextPlace.viewHeight ?? nextPlace.size[1], config.camera.zoom, quality().pixelRatio); // profil de qualité
+    const rasterScale = computeRasterScale(nextPlace.viewHeight ?? nextPlace.size[1], config.camera.zoom, quality().pixelRatio);
     assetStats.rasterScale = rasterScale;
-    // Décodées avant l'affichage. L'historique des temps d'image repart de zéro à chaque lieu (il ne grossit plus).
     assetStats.perImage.length = 0;
     const nextImages = await loadImages(
       Object.entries(nextPlace.images).map(([key, im]) => ({ id: key, url: game.base + im.src, w: im.size[0], h: im.size[1], scale: rasterScale })),
     );
-    const proj = createProjection(nextPlace.projection, config.scene);
+    const nextProj = createProjection(nextPlace.projection, config.scene);
     const mask = compileMask(nextPlace.walkMask);
-    // État du lieu : créé à la première visite, retrouvé ensuite (le monde se souvient).
     const back = Math.max(...nextPlace.walkMask.area.map((pt) => pt[1]));
     const here = enterPlace(game.world, nextPlace.id, () => ({
-      products: buildProducts(nextPlace, game.catalog, (z) => worldToStageY(proj, z)),
-      pickups: buildPickups(nextPlace, back, (z) => worldToStageY(proj, z)),
-      pile: nextPlace.pile ? createPile() : null, // pile de cartons (A8) : debout ou tombée
+      products: buildProducts(nextPlace, game.catalog, (z) => worldToStageY(nextProj, z)),
+      pickups: buildPickups(nextPlace, back, (z) => worldToStageY(nextProj, z)),
+      pile: nextPlace.pile ? createPile() : null,
     }));
-    const nextView = createPlaceView(container, nextPlace, nextImages, game.commonImages(), here, proj, config, game.getValue);
-    return { place: nextPlace, images: nextImages, proj, mask, here, view: nextView };
+    const nextView = createPlaceView(renderer, nextPlace, nextImages, game.commonImages(), here, nextProj, config, game.getValue);
+    return { place: nextPlace, images: nextImages, proj: nextProj, mask, here, view: nextView };
   }
 
   function mountPrepared(built) {
@@ -97,7 +91,6 @@ export function createPlaces(ui, container, game) {
     proj = built.proj;
     images = built.images;
     view = built.view;
-    // Le héros, sa poussière et le repère rejoignent le calque des acteurs de ce lieu.
     for (const a of game.actors()) a.mount(view.stage.layers.acteurs);
     game.onLoaded({ place, proj: built.proj, mask: built.mask, here: built.here, view });
     schedulePrefetch();
@@ -116,15 +109,15 @@ export function createPlaces(ui, container, game) {
     view.destroy();
     view = null;
     releaseImages(images);
+    images = null;
   }
 
-  // ---------- Changement de lieu : fondu enchaîné pur (cross-dissolve) ----------
-  // Un seul calque .place-fade pour le relais noir d'intro/erreur et le signe d'attente (.place-wait).
+  // ---------- Changement de lieu : fondu enchaîné GPU (RenderTexture) ----------
+  // Un seul calque DOM .place-fade dans #ui pour le relais noir d'intro/erreur et le signe d'attente (.place-wait).
   const fadeEl = document.createElement('div');
   fadeEl.className = 'place-fade';
   fadeEl.hidden = true;
 
-  // Signe d'attente (trois points de papier qui sautillent), si le chargement dure : jamais d'écran muet.
   const waitEl = document.createElement('div');
   waitEl.className = 'place-wait';
   waitEl.hidden = true;
@@ -133,31 +126,21 @@ export function createPlaces(ui, container, game) {
   waitEl.innerHTML = '<span></span><span></span><span></span>';
   fadeEl.appendChild(waitEl);
   ui.appendChild(fadeEl);
+
   let transition = null;
-  let edgeWalk = null; // traversée automatique d'un bord d'écran ('out' jusqu'à 100 % hors-champ, ou 'in' jusqu'au bord)
-  let dissolving = null; // { view, images } : ancien lieu en cours de fondu enchaîné, libéré dès la fin
-  let lastMs = 0; // durée du dernier changement de lieu dans le noir (pour le diagnostic)
-  let revealT = -1; // dévoilement du début de partie (voir reveal), -1 : aucun
+  let edgeWalk = null;
+  let lastMs = 0;
+  let revealT = -1;
   let revealFade = 0.25;
 
-  function discardDissolving() {
-    if (!dissolving) return;
-    dissolving.view.destroy();
-    releaseImages(dissolving.images);
-    dissolving = null;
-  }
-
   function resetFx() {
-    discardDissolving();
+    renderer.clearDissolve();
     fadeEl.classList.remove('paper-fx');
     fadeEl.style.transform = '';
   }
 
-  // Un chargement qui échoue ne bloque jamais le jeu (séance 62) : on garde ou recharge le lieu de départ
-  // (sortie ignorée tant que le héros n'en est pas ressorti), et le haut-parleur prévient.
-  // Si même le rechargement échoue sans lieu monté : écran d'erreur avec « Réessayer ».
-  let leftFrom = null; // { id, x, z, facing } : où était le héros en partant
-  let ignoredExit = null; // sortie d'où l'on vient de revenir après un échec
+  let leftFrom = null;
+  let ignoredExit = null;
   const errorEl = document.createElement('div');
   errorEl.className = 'place-error';
   errorEl.hidden = true;
@@ -175,7 +158,8 @@ export function createPlaces(ui, container, game) {
     fadeEl.style.transform = '';
     const fadeCfg = config.display.reduceMotion ? { fade: 0 } : config.places;
     const oldOpacity = transitionDissolve(tr, fadeCfg);
-    if (dissolving) dissolving.view.stage.el.style.opacity = String(oldOpacity);
+    renderer.setDissolveAlpha(oldOpacity);
+    renderer.render();
   }
 
   function leaveBy(exit, fromOverride = null, unloadFirst = false) {
@@ -207,7 +191,6 @@ export function createPlaces(ui, container, game) {
       const z = exit.arrive[1];
       const b = edgeBounds(exit.arriveEdge, place.size[0], scaleAt(proj, z));
       putHero(b.outX, z, exit.facing);
-      // Ignorer la sortie du bord d'arrivée tant que le héros n'en est pas ressorti.
       ignoredExit = exitAt(place.exits?.items ?? [], b.outX, z);
       edgeWalk = createEdgeWalk('in', b.inX, b.outX, null);
     } else {
@@ -220,49 +203,38 @@ export function createPlaces(ui, container, game) {
     const t0 = performance.now();
     const keepOld = !transition?.unloadFirst && view;
     if (keepOld) {
-      // En fondu enchaîné / brume, le héros reste visible dans l'ancien décor pendant tout le chargement
-      // du lieu suivant (aucune disparition à vide avant la bascule).
+      // Capture exacte de l'écran (worldRoot à l'identité) dans une RenderTexture, puis destruction
+      // immédiate de l'ancien lieu et libération de ses textures avant le chargement du nouveau lieu
+      // (pic VRAM = 1 seul lieu + 1 RenderTexture, et le héros reste visible à l'écran pendant le chargement).
       cancelPrefetch();
-      const oldView = view;
-      const oldImages = images;
-      oldView.stage.el.classList.add('stage-dissolve');
-      oldView.stage.el.style.opacity = '1';
-      try {
-        const built = await preparePlace(exit.to);
-        game.onLeaving();
-        dissolving = { view: oldView, images: oldImages };
-        view = null;
-        images = null;
-        mountPrepared(built);
-        arriveHero(exit);
-        game.onArrived();
-      } catch (err) {
-        game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
-        oldView.stage.el.classList.remove('stage-dissolve');
-        oldView.stage.el.style.opacity = '';
-        ignoredExit = exit;
-        game.onLoadFailed();
-      }
-    } else {
+      renderer.captureSnapshot();
+      renderer.setDissolveAlpha(1);
+      renderer.render();
       unload();
-      try {
-        await load(exit.to);
-        arriveHero(exit);
-        game.onArrived();
-      } catch (err) {
-        game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
-        discardDissolving();
-        unload(); // ce qui a pu être construit avant l'échec
-        if (await backToStart(exit)) game.onLoadFailed();
-        else errorEl.hidden = false;
+    } else {
+      renderer.clearDissolve();
+      unload();
+    }
+    try {
+      await load(exit.to);
+      arriveHero(exit);
+      game.onArrived();
+    } catch (err) {
+      game.logError(`lieu « ${exit.to} » non chargé : ${err?.message ?? err}`);
+      unload();
+      if (await backToStart(exit)) {
+        game.onLoadFailed();
+      } else {
+        renderer.clearDissolve();
+        errorEl.hidden = false;
       }
     }
     if (view) game.render();
+    else renderer.render();
     lastMs = Math.round(performance.now() - t0);
     placeReady(transition);
   }
 
-  // Recharger le lieu de départ et y remettre le héros. Renvoie false si cela échoue aussi.
   async function backToStart(exit) {
     try {
       await load(leftFrom.id);
@@ -276,13 +248,9 @@ export function createPlaces(ui, container, game) {
     }
   }
 
-  // « Réessayer » (écran d'erreur) : on retente le lieu de départ. L'écran d'erreur passe le relais à
-  // l'écran de fondu (docs/ARCHITECTURE.md §11) : le noir des lieux, plein, est remis dessous dès l'appui ;
-  // l'écran d'erreur reste devant pendant le chargement (signe d'attente si cela dure), n'est retiré que
-  // le lieu prêt, sur le noir déjà plein, puis la scène se dévoile comme après un changement de lieu.
   let retrying = false;
   async function retry() {
-    if (errorEl.hidden || retrying) return; // un seul essai à la fois (double appui)
+    if (errorEl.hidden || retrying) return;
     retrying = true;
     retryBtn.disabled = true;
     resetFx();
@@ -293,12 +261,12 @@ export function createPlaces(ui, container, game) {
     retryBtn.disabled = false;
     if (ok) {
       game.render();
-      errorEl.hidden = true; // dessous, le noir est déjà plein : rien ne clignote
+      errorEl.hidden = true;
       game.sm.go('play');
-      revealT = 0; // la scène se dévoile depuis le noir (revealStep, à chaque image de jeu)
+      revealT = 0;
       revealFade = config.places.fade;
     } else {
-      fadeEl.hidden = true; // toujours sous l'écran d'erreur : invisible
+      fadeEl.hidden = true;
       retryBtn.focus({ preventScroll: true });
     }
   }
@@ -306,20 +274,16 @@ export function createPlaces(ui, container, game) {
   return {
     backstage,
     load,
-    // Un changement de lieu est en cours (fondu) : rien d'autre ne bouge.
     get busy() {
       return transition !== null;
     },
-    // Traversée automatique d'un bord d'écran (sortie engagée ou entrée au bord).
     get autoWalking() {
       return edgeWalk !== null;
     },
-    // Un lieu est affiché.
     get ready() {
       return view !== null;
     },
     lastTransitionMs: () => lastMs,
-    // Pas de logique : si le héros traverse un bord automatiquement, remplace l'intention du joueur.
     stepEdge(intent, dt) {
       if (!edgeWalk) return;
       const walker = game.walker();
@@ -339,14 +303,13 @@ export function createPlaces(ui, container, game) {
       intent.moveX = res.moveX;
       intent.moveZ = res.moveZ;
     },
-    // À chaque image de jeu : le héros entre-t-il dans une sortie ?
     watchExits() {
       if (transition || edgeWalk || !game.canLeave()) return;
       const walker = game.walker();
       const exit = exitAt(place.exits?.items ?? [], walker.x, walker.z);
       const scale = proj ? scaleAt(proj, walker.z) : 1;
       const touched = exit && edgeTouched(exit, walker.x, place.size[0], scale);
-      if (exit === ignoredExit && touched) return; // revenu après échec ou entrée au bord : il doit d'abord en ressortir
+      if (exit === ignoredExit && touched) return;
       if (!touched) {
         ignoredExit = null;
         return;
@@ -362,27 +325,23 @@ export function createPlaces(ui, container, game) {
         leaveBy(exit);
       }
     },
-    // À chaque image pendant le changement de lieu : seul le volet papier avance.
     update(dt) {
       if (stepTransition(transition, dt, config.places) === 'load') change(transition.exit);
       paintFade(transition);
       const wait = showWait(transition, config.places);
       if (waitEl.hidden === wait) {
         waitEl.hidden = !wait;
-        waitEl.classList.toggle('still', config.display.reduceMotion); // « réduire les animations » : points immobiles
+        waitEl.classList.toggle('still', config.display.reduceMotion);
       }
       if (transition.phase === 'done') {
         transition = null;
         fadeEl.hidden = true;
         resetFx();
-        game.sm.go(view ? 'play' : 'erreur'); // sans lieu : l'écran d'erreur attend « Réessayer »
+        renderer.render();
+        game.sm.go(view ? 'play' : 'erreur');
         if (!view) retryBtn.focus({ preventScroll: true });
       }
     },
-    // Début de partie (séance 68) : la scène se dévoile depuis le noir, avec l'écran noir des changements de
-    // lieu (sa propre couche dès le départ, effacé par son opacité, retiré une fois transparent : il ne fait
-    // pas clignoter). L'intro lui passe le relais (son propre écran noir, retiré, faisait clignoter le héros
-    // et la bande du haut-parleur : test de l'auteur, intro désactivée). fade : durée de l'effacement (s).
     reveal(fade) {
       revealT = 0;
       revealFade = fade;
@@ -390,7 +349,6 @@ export function createPlaces(ui, container, game) {
       fadeEl.hidden = false;
       fadeEl.style.opacity = '1';
     },
-    // À chaque image de jeu.
     revealStep(dt) {
       if (revealT < 0) return;
       revealT += dt;
@@ -401,7 +359,6 @@ export function createPlaces(ui, container, game) {
         fadeEl.style.opacity = '0';
       } else fadeEl.style.opacity = String(o);
     },
-    // Tests : prendre une sortie du lieu (comme si le héros y entrait), sans marcher jusque-là.
     useExit(id, unloadFirst = false) {
       const exit = (place.exits?.items ?? []).find((e) => !id || e.id === id);
       if (!exit || transition || !game.sm.is('play')) return false;
@@ -409,7 +366,6 @@ export function createPlaces(ui, container, game) {
       return true;
     },
     retry,
-    // Tests : quitter le lieu puis y revenir (vue détruite, images libérées, tout reconstruit).
     async reload() {
       const id = place.id;
       unload();

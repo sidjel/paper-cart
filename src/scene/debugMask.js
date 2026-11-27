@@ -1,40 +1,57 @@
-// Affichage de debug du masque de zone de marche (F4 ou réglage « Afficher la zone de marche »).
-// Dessiné une fois, puis seulement montré ou caché : aucun coût quand il est caché.
+// Affichage de debug du masque de zone de marche (F4 ou réglage « Afficher la zone de marche ») sous PixiJS v8.
+// Dessiné paresseusement à la première activation, puis seulement montré ou caché : aucun coût quand caché.
 
+import { Graphics } from 'pixi.js';
 import { worldToStageX, worldToStageY } from './projection.js';
 
-const NS = 'http://www.w3.org/2000/svg';
-
-function polygon(points, proj, cls) {
-  const p = document.createElementNS(NS, 'polygon');
-  p.setAttribute('points', points.map(([x, z]) => `${worldToStageX(proj, x)},${worldToStageY(proj, z)}`).join(' '));
-  p.setAttribute('class', cls);
-  return p;
+function drawDashedLine(g, x1, y1, x2, y2, dash, gap) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  if (len <= 0) return;
+  const ux = dx / len;
+  const uy = dy / len;
+  for (let d = 0; d < len; d += dash + gap) {
+    const end = Math.min(len, d + dash);
+    g.moveTo(x1 + ux * d, y1 + uy * d);
+    g.lineTo(x1 + ux * end, y1 + uy * end);
+  }
 }
 
 // props : objets du décor ; leur point de référence de profondeur est tracé en pointillés bleus.
 export function createDebugMask(parent, place, proj, props) {
-  const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('class', 'debug-mask');
-  svg.setAttribute('viewBox', `0 0 ${place.size[0]} ${place.size[1]}`);
-  svg.setAttribute('width', place.size[0]);
-  svg.setAttribute('height', place.size[1]);
-  svg.appendChild(polygon(place.walkMask.area, proj, 'mask-area'));
-  for (const o of place.walkMask.obstacles) svg.appendChild(polygon(o.points, proj, 'mask-obstacle'));
-  for (const p of props) {
-    const y = worldToStageY(proj, p.depthRef);
-    const line = document.createElementNS(NS, 'line');
-    line.setAttribute('x1', p.left);
-    line.setAttribute('x2', p.left + p.width);
-    line.setAttribute('y1', y);
-    line.setAttribute('y2', y);
-    line.setAttribute('class', 'mask-depth');
-    svg.appendChild(line);
+  const g = new Graphics();
+  g.label = 'debug:mask';
+  g.visible = false;
+  parent.addChild(g);
+
+  let built = false;
+
+  function build() {
+    if (built) return;
+    built = true;
+    const areaPts = [];
+    for (const [x, z] of place.walkMask.area) areaPts.push(worldToStageX(proj, x), worldToStageY(proj, z));
+    g.poly(areaPts).fill({ color: 0x50c85a, alpha: 0.25 }).stroke({ color: 0x1e8c32, width: 3 });
+
+    for (const o of place.walkMask.obstacles) {
+      const pts = [];
+      for (const [x, z] of o.points) pts.push(worldToStageX(proj, x), worldToStageY(proj, z));
+      g.poly(pts).fill({ color: 0xdc3c32, alpha: 0.35 }).stroke({ color: 0xaa1e14, width: 3 });
+    }
+
+    for (const p of props) {
+      const y = worldToStageY(proj, p.depthRef);
+      drawDashedLine(g, p.left, y, p.left + p.width, y, 12, 8);
+    }
+    if (props.length) g.stroke({ color: 0x285ac8, width: 4 });
   }
-  parent.appendChild(svg);
+
   return {
     setVisible(v) {
-      svg.style.display = v ? '' : 'none';
+      const on = Boolean(v);
+      if (on) build();
+      g.visible = on;
     },
   };
 }

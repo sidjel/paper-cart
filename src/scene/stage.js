@@ -1,80 +1,58 @@
-// La scène : le lieu entier (par exemple 3600×1080), vu à travers la caméra.
+// La scène PixiJS d'un lieu (par exemple 3600×1080), vue à travers la caméra :
 // - toute la hauteur du décor est visible (zoom 1) quelle que soit la forme de l'écran ;
-//   un écran plus allongé (20:9) montre simplement plus de largeur, sans rien couper ;
-// - la caméra fait glisser la scène ; les calques avec une parallaxe (rayons lointains,
-//   premier plan) glissent moins vite ou plus vite, ce qui donne la profondeur ;
-// - les calques sont créés d'après la pile déclarée dans les données du lieu.
+// - la caméra fait glisser stage.root ; les calques avec parallaxe glissent de dx = camX * (1 - f) ;
+// - les calques sont créés dans l'ordre déclaré par les données du lieu (acteurs.sortableChildren = true).
 
+import { Container, Sprite } from 'pixi.js';
 import { quality } from './quality.js';
 
 // getValue(clé) : lit un réglage (pour les calques dont l'opacité est réglable).
-export function createStage(container, place, images, getValue) {
+export function createStage(renderer, place, images, getValue) {
   const [W, H] = place.size;
-  const el = document.createElement('div');
-  el.className = 'stage';
-  el.style.width = `${W}px`;
-  el.style.height = `${H}px`;
+  const root = new Container();
+  root.label = `stage:${place.id}`;
 
   const layers = {};
-  const parallax = []; // [élément, facteur, x, y] des calques qui ne glissent pas à la vitesse du sol
+  const parallax = []; // { layer, f, id, last } des plans qui ne glissent pas à la vitesse du sol
   const farStill = !quality().farParallax; // lu une fois : le profil s'applique au chargement
   for (const def of place.layers) {
-    const layer = document.createElement('div');
-    layer.className = `layer layer-${def.id}`;
-    layer.dataset.contains = def.contains;
+    const layer = new Container();
+    layer.label = `layer:${def.id}`;
+    if (def.id === 'acteurs') layer.sortableChildren = true;
     const pos = def.position ?? [0, 0];
-    // bounds: 'image' (premier plan localisé, ex. pots du hall ou bande basse du rayon) :
-    // dimensionne et place directement le calque GPU sur le dessin au lieu d'allouer tout le lieu
-    // (évite les surfaces GPU géantes vides et les zones noires sur smartphone).
-    if (def.bounds === 'image' && def.image) {
+    if (def.image) {
       const img = images.get(def.image);
-      layer.style.left = `${pos[0]}px`;
-      layer.style.top = `${pos[1]}px`;
-      layer.style.width = `${img.w}px`;
-      layer.style.height = `${img.h}px`;
-      img.el.className = 'layer-image';
-      img.el.width = img.w;
-      img.el.height = img.h;
-      img.el.alt = '';
-      img.el.draggable = false;
-      layer.appendChild(img.el);
-    } else {
-      // size (facultatif) : un calque presque vide (le dehors, le lointain) ne prend que la place de son contenu,
-      // pour ne pas réserver dans la mémoire graphique une surface grande comme tout le lieu.
-      if (def.size) {
-        layer.style.width = `${def.size[0]}px`;
-        layer.style.height = `${def.size[1]}px`;
-      }
-      if (def.image) {
-        const img = images.get(def.image);
-        img.el.className = 'layer-image';
-        img.el.width = img.w;
-        img.el.height = img.h;
-        img.el.alt = '';
-        img.el.draggable = false;
-        img.el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
-        layer.appendChild(img.el);
-      }
+      const sprite = new Sprite(img.texture);
+      sprite.x = pos[0];
+      sprite.y = pos[1];
+      sprite.width = img.w;
+      sprite.height = img.h;
+      layer.addChild(sprite);
     }
     const f = def.parallax ?? 1;
-    if (f !== 1) {
-      layer.classList.add('layer-parallax');
-      parallax.push({ el: layer, f, id: def.id, last: NaN });
-    }
-    el.appendChild(layer);
+    if (f !== 1) parallax.push({ layer, f, id: def.id, last: NaN });
+    root.addChild(layer);
     layers[def.id] = layer;
   }
-  container.appendChild(el);
+  renderer.worldRoot.addChild(root);
 
   // Opacité des calques qui la déclarent (par exemple le premier plan en transparence).
   const opacities = {};
   function setLayerOpacity(id, value) {
-    const elLayer = layers[id];
-    if (!elLayer) return;
+    const layer = layers[id];
+    if (!layer) return;
     const v = Math.round(value * 1000) / 1000;
     if (opacities[id] === v) return;
     opacities[id] = v;
-    elLayer.style.opacity = String(v);
+    layer.alpha = v;
+  }
+  function layerOpacity(id) {
+    if (id in opacities) return opacities[id];
+    return layers[id]?.alpha ?? 1;
+  }
+  function setLayerVisible(id, v) {
+    const layer = layers[id];
+    if (layer) layer.visible = Boolean(v);
   }
   function applyOpacity() {
     for (const def of place.layers) {
@@ -82,6 +60,7 @@ export function createStage(container, place, images, getValue) {
     }
   }
   applyOpacity();
+
   function parallaxOffset(id) {
     const p = parallax.find((x) => x.id === id);
     return p && Number.isFinite(p.last) ? p.last : 0;
@@ -94,13 +73,15 @@ export function createStage(container, place, images, getValue) {
 
   function apply() {
     const s = view.scale;
-    el.style.transform = `translate3d(${view.offX - view.camX * s}px, ${view.offY - view.camY * s}px, 0) scale(${s})`;
+    root.x = view.offX - view.camX * s;
+    root.y = view.offY - view.camY * s;
+    root.scale.set(s);
     for (const p of parallax) {
       // Décalage par rapport au sol : un calque lointain (f < 1) « recule » moins vite.
-      // Profil Léger : les plans lointains (f < 1) suivent le décor (moins de mouvement à dessiner).
+      // Profil Léger : les plans lointains (f < 1) suivent le décor.
       const dx = p.f < 1 && farStill ? 0 : view.camX * (1 - p.f);
       if (dx !== p.last) {
-        p.el.style.transform = `translate3d(${dx}px, 0, 0)`;
+        p.layer.x = dx;
         p.last = dx;
       }
     }
@@ -131,11 +112,13 @@ export function createStage(container, place, images, getValue) {
   let rectLeft = 0;
   let rectTop = 0;
   function layout(zoom) {
-    const r = container.getBoundingClientRect();
+    const el = renderer.container;
+    const r = el.getBoundingClientRect();
     rectLeft = r.left;
     rectTop = r.top;
-    vw = container.clientWidth;
-    vh = container.clientHeight;
+    vw = el.clientWidth;
+    vh = el.clientHeight;
+    renderer.resize(vw, vh);
     baseScale = (vh / refH) * zoom;
     scaleTo();
   }
@@ -163,5 +146,25 @@ export function createStage(container, place, images, getValue) {
     return out;
   }
 
-  return { el, layers, view, layout, setZoom, setCamera, clientToStage, stageToClient, applyOpacity, setLayerOpacity, parallaxOffset };
+  function destroy() {
+    if (root.parent) root.parent.removeChild(root);
+    root.destroy({ children: true, texture: false, textureSource: false });
+  }
+
+  return {
+    root,
+    layers,
+    view,
+    layout,
+    setZoom,
+    setCamera,
+    clientToStage,
+    stageToClient,
+    applyOpacity,
+    setLayerOpacity,
+    layerOpacity,
+    setLayerVisible,
+    parallaxOffset,
+    destroy,
+  };
 }

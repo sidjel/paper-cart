@@ -1,14 +1,6 @@
-// Agent de sécurité du hall (A6), branché sur le jeu : la règle est dans core/guard.js, la boîte et ses
-// deux poses (repos, geste d'arrêt) sont construites avec le lieu (scene/placeView.js), rangée en
-// profondeur avec les objets du décor. Ici : avancer à chaque pas ; la première fois, l'agent interpelle
-// le héros (figé le temps de la bulle) ; ensuite, s'il force, « Stop ! » et, une fois la bulle fermée,
-// le héros fait demi-tour de quelques pas ; placer la boîte et dire où est la tête de l'agent (pour sa bulle).
-//
-// Quand l'agent l'interpelle, le héros sursaute : « !! » et gouttes de sueur au-dessus de sa tête
-// (élément créé une fois, au chargement, dans l'interface).
-//
-// game : { ui, onWarn(), onStop(), talking() → l'agent parle, back(dx) → demi-tour de dx vers la droite,
-//          heroHead() → haut de la tête du héros, en pixels d'écran }
+// Agent de sécurité du hall (A6), branché sur le jeu : la règle est dans core/guard.js, le Sprite et ses
+// deux poses (repos, geste d'arrêt) sont construits avec le lieu (scene/placeView.js), rangés en
+// profondeur avec les objets du décor.
 
 import { config } from '../config.js';
 import { createGuard, stepGuard } from '../core/guard.js';
@@ -28,11 +20,11 @@ const SURPRISE_SVG =
 export function createGuardWiring(game) {
   let data = null;
   let state = null;
-  let view = null; // { box, idle, stop, poses }
+  let view = null; // { sprite, idle, stop, poses, size }
   let proj = null;
   let pose = 'idle';
   let backT = 0;
-  let backDist = 0; // demi-tour à faire quand l'agent aura fini de parler
+  let backDist = 0;
   const head = { x: 0, y: 0 };
   const surprise = document.createElement('div');
   surprise.className = 'hero-surprise';
@@ -46,7 +38,6 @@ export function createGuardWiring(game) {
   }
 
   return {
-    // Un lieu vient d'être construit : avec ou sans agent.
     attach(place, v, pr) {
       data = place.guard ?? null;
       state = data ? createGuard(data) : null;
@@ -57,7 +48,6 @@ export function createGuardWiring(game) {
       backDist = 0;
       setSurprise(0);
     },
-    // Les commandes du joueur attendent : l'agent parle, ou repousse le héros.
     holding: () => state !== null && (backT > 0 || backDist > 0 || game.talking()),
     step(walker, intent, dt) {
       if (!state) return;
@@ -67,19 +57,16 @@ export function createGuardWiring(game) {
       if (e === 'warn') {
         game.onWarn();
         setSurprise(SURPRISE_TIME);
-      }
-      else if (e === 'stop') {
+      } else if (e === 'stop') {
         game.onStop();
         backDist = data.backDist;
       }
-      // Le demi-tour, seulement une fois que l'agent a fini de parler.
       if (backDist > 0 && !game.talking()) {
         game.back(backDist);
         backDist = 0;
         backT = BACK_TIME;
       }
     },
-    // alpha : part du pas en cours (affichage lissé).
     render(alpha) {
       if (!state) return;
       if (surpriseT > 0) {
@@ -94,12 +81,15 @@ export function createGuardWiring(game) {
       head.y = fy - HEAD * s;
       const p = state.stopT > 0 || game.talking() ? 'stop' : 'idle';
       if (p !== pose) {
-        view.poses.show(p === 'stop' ? view.stop : view.idle); // comme le héros : une image montrée, l'autre cachée
+        view.poses.show(p === 'stop' ? view.stop : view.idle);
         pose = p;
       }
-      view.box.style.transform = `translate3d(${fx - data.anchor[0]}px, ${fy - data.anchor[1]}px, 0) scale(${s})`;
+      const tex = view.sprite.texture;
+      view.sprite.x = fx;
+      view.sprite.y = fy;
+      view.sprite.scale.set((view.size[0] * s) / Math.max(1, tex.width), (view.size[1] * s) / Math.max(1, tex.height));
     },
-    head: () => head, // en coordonnées de la scène
+    head: () => head,
     info: () => (state ? { x: state.x, z: state.z, warned: state.warned, pose } : null),
   };
 }
