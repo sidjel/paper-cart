@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import limites from './comptages-limites.json' with { type: 'json' };
+import { watchConsole } from './helpers.js';
 
 // Test des comptages (PixiJS v8) : on mesure des grandeurs indépendantes de la machine (le navigateur
 // headless de test n'a pas de carte graphique), pendant un tour du banc d'essai.
@@ -34,10 +35,7 @@ test(`comptages du lieu « ${lieu} » pendant le banc d’essai`, async ({ page 
     };
   });
   const errors = [];
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
+  watchConsole(page, errors);
   await page.goto(`./?lieu=${lieu}`);
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());

@@ -30,10 +30,12 @@ export async function createRenderer(container, { maxPixelRatio = 2, onContextLo
     height,
     backgroundColor: BG_COLOR,
     antialias: true,
-    // WebGL matériel prioritaire ; repli CanvasRenderer si WebGL est logiciel (SwiftShader/llvmpipe)
-    // ou absent, sans jamais sonder WebGPU (évite les warnings driver ReadPixels et la lenteur en CI).
+    // WebGL prioritaire, repli CanvasRenderer sans jamais sonder WebGPU (évite le warning CI headless).
+    // On désactive EventSystem de PixiJS (inutilisé : tout le pointeur passe par src/input/pointer.js sur #game).
     preference: ['webgl', 'canvas'],
-    failIfMajorPerformanceCaveat: true,
+    failIfMajorPerformanceCaveat: false,
+    eventMode: 'none',
+    eventFeatures: { move: false, globalMove: false, click: false, wheel: false },
     resolution,
     autoDensity: true,
     autoStart: false,

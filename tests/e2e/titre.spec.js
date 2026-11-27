@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole } from './helpers.js';
 
 // Écran titre : grand nom du jeu, image, Commencer et Options (doigt, souris, clavier).
 
 const errors = [];
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
   await page.goto('./');
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
 });

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole } from './helpers.js';
 
 // Bouton « Passer » (séance 77) : toutes les répliques d'un coup, jusqu'à une question (ici : le nom du
 // joueur, pendant la première rencontre) ; chaque réplique passée reste dans l'historique.
@@ -6,10 +7,7 @@ import { test, expect } from '@playwright/test';
 const errors = [];
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
   await page.goto('./?lieu=rayon-essai');
   await page.waitForFunction(() => window.paperCart?.state() === 'title');
   await page.evaluate(() => window.paperCart.startGame());

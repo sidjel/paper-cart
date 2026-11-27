@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole, doubleTap } from './helpers.js';
 
 // A8 : le chariot poussé (choix de l'auteur, séances 73-74). Devant le héros ; il se retourne
 // avec lui ; lâché, il reste là ; poussé, il passe les portes avec le héros. Point de départ de test
@@ -8,10 +9,7 @@ import { test, expect } from '@playwright/test';
 const errors = [];
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
   await page.goto('./?depart=chariot');
   await page.waitForFunction(() => window.paperCart?.state() === 'play' && window.paperCart.chariot());
 });
@@ -94,11 +92,7 @@ test('A8 au doigt : toucher deux fois le chariot le lâche, puis le reprend', as
   const box = await page.evaluate(() => window.paperCart.scene().chariot.bounds);
   const x = box.x + box.width * 0.5;
   const y = box.y + box.height * 0.5;
-  const dbl = async () => {
-    await page.touchscreen.tap(x, y);
-    await page.waitForTimeout(80);
-    await page.touchscreen.tap(x, y);
-  };
+  const dbl = () => doubleTap(page, x, y);
   await dbl();
   await expect.poll(async () => (await chariot(page)).pushed).toBe(false);
   await page.waitForTimeout(500);

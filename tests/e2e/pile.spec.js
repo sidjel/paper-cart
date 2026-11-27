@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole } from './helpers.js';
 
 // A8 (séances 75-76) : la pile de cartons du rayon 8. À la main, il faut pousser un moment ; au chariot
 // avec élan, elle tombe d'un coup. Tombée, elle laisse prendre le rouleau de Papier Toilette (monnaie
@@ -7,10 +8,7 @@ import { test, expect } from '@playwright/test';
 const errors = [];
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
 });
 test.afterEach(() => expect(errors, 'aucune erreur ni alerte dans la console').toEqual([]));
 

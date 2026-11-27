@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole, doubleTap } from './helpers.js';
 
 // Étape A1 : le jeu démarre sans erreur, on marche au clavier, à la souris, au doigt,
 // la pause fige le personnage, les panneaux s'ouvrent.
@@ -7,10 +8,7 @@ const errors = [];
 
 test.beforeEach(async ({ page }, info) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
   // La partie commence dans le hall d'accueil (présentoir). Les tests du rayon y commencent directement
   // (lien ?lieu=) ; ceux du présentoir commencent dans le hall.
   const hall = /^(A5a (: mains vides|au doigt|: Scanette sans panier)|A6)/.test(info.title);
@@ -64,24 +62,22 @@ test('marche au clavier (flèches et ZQSD) et se retourne', async ({ page }, inf
   test.skip(info.project.name === 'telephone', 'clavier : PC seulement');
   const start = await hero(page);
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(400);
+  await expect.poll(async () => (await hero(page)).x, { timeout: 6000 }).toBeGreaterThan(start.x + 50);
   await page.keyboard.up('ArrowRight');
   const after = await hero(page);
-  expect(after.x).toBeGreaterThan(start.x + 50);
   expect(after.facing).toBe(1);
 
   // Q sur AZERTY = A sur QWERTY : même touche physique (KeyA) → vers la gauche
   await page.keyboard.down('KeyA');
-  await page.waitForTimeout(300);
+  await expect.poll(async () => (await hero(page)).facing, { timeout: 6000 }).toBe(-1);
   await page.keyboard.up('KeyA');
-  expect((await hero(page)).facing).toBe(-1);
 
   await page.keyboard.down('KeyW');
-  await page.waitForTimeout(300);
+  await expect.poll(async () => {
+    const h = await hero(page);
+    return h.away && h.z > after.z;
+  }, { timeout: 6000 }).toBe(true);
   await page.keyboard.up('KeyW');
-  const back = await hero(page);
-  expect(back.away).toBe(true);
-  expect(back.z).toBeGreaterThan(after.z);
 });
 
 test('va au point cliqué ou touché', async ({ page }, info) => {
@@ -497,8 +493,7 @@ test('A3 au doigt : un double toucher sur un produit lointain y emmène le perso
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   // Céréales (3e produit), à droite du départ : visible à l'écran.
   const c = await productCenter(page, 2);
-  await page.touchscreen.tap(c.x, c.y);
-  await page.touchscreen.tap(c.x, c.y);
+  await doubleTap(page, c.x, c.y);
   await expect.poll(async () => (await page.evaluate(() => window.paperCart.scanState())).active, { timeout: 8000 }).toBe(true);
   const h = await hero(page);
   expect(Math.abs(h.x - 1000)).toBeLessThanOrEqual(150);
@@ -537,8 +532,7 @@ test('Essai : scanner la boîte d’œufs dans le chariot, de profil (double tou
   const r = await page.evaluate(() => window.paperCart.scene().products.items.at(-1).bounds);
   const c = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
   if (info.project.name === 'telephone') {
-    await page.touchscreen.tap(c.x, c.y);
-    await page.touchscreen.tap(c.x, c.y);
+    await doubleTap(page, c.x, c.y);
   } else {
     await page.mouse.dblclick(c.x, c.y);
   }
@@ -582,13 +576,13 @@ test('A4 : le narrateur accueille le joueur, lettre par lettre ; toucher la band
   const b = await band.boundingBox();
   const h = await page.locator('.hud-bar').boundingBox();
   expect(b.x + b.width).toBeLessThanOrEqual(h.x);
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-narrateur.png` });
+  // Premier toucher pendant l'écriture (avant capture, qui peut prendre > 1,5 s sans GPU) : complète le texte.
   if (info.project.name === 'telephone') await band.tap();
   else await band.click();
   const n2 = await narr(page);
   expect(n2.shown).toBe(n2.text.length);
   await expect(band).toContainText(n2.text);
+  await page.screenshot({ path: `test-results/captures/a4-${info.project.name}-narrateur.png` });
   if (info.project.name === 'telephone') await band.tap();
   else await band.click();
   await expect(band).toBeHidden();
@@ -801,8 +795,7 @@ test('A5a : mains vides au début ; à l’accueil, on prend la Scanette puis le
 test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan est refusé', async ({ page }, info) => {
   test.skip(info.project.name !== 'telephone', 'téléphone simulé');
   const p = await page.evaluate(() => window.paperCart.worldToClient(1875, 380)); // pile de paniers (y ≈ 800 dans le hall 2600 px)
-  await page.touchscreen.tap(p.x, p.y);
-  await page.touchscreen.tap(p.x, p.y);
+  await doubleTap(page, p.x, p.y);
   await expect.poll(async () => (await state(page)).gear.panier, { timeout: 8000 }).toBe(true);
   await expect(page.locator('.item-reveal')).toBeVisible();
   // Mode paysage smartphone : toute la fenêtre et le bouton « Continuer » tiennent dans l'écran sans être coupés.
@@ -819,8 +812,7 @@ test('A5a au doigt : double toucher sur le présentoir ; sans Scanette, le scan 
   await page.evaluate(() => window.paperCart.useExit());
   await page.waitForFunction(() => window.paperCart.place() === 'rayon-essai' && window.paperCart.state() === 'play');
   const c = await page.evaluate(() => window.paperCart.scene().products.items[0].bounds);
-  await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
-  await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2);
+  await doubleTap(page, c.x + c.width / 2, c.y + c.height / 2);
   await page.waitForTimeout(2500);
   const s = await state(page);
   expect(s.active).toBe(false);
@@ -1016,9 +1008,7 @@ test('Panier : double toucher sur la grande carte : elle se retourne une fois et
   const x = box.x + box.width * 0.85;
   const y = box.y + box.height / 2;
   if (phone) {
-    await page.touchscreen.tap(x, y);
-    await page.waitForTimeout(80);
-    await page.touchscreen.tap(x, y);
+    await doubleTap(page, x, y, 80);
   } else await page.mouse.dblclick(x, y);
   await expect.poll(() => flip.getAttribute('class')).toBe('card-flip'); // retournée une fois (recto)
   await expect(page.locator('.card-detail')).toBeVisible(); // toujours ouverte
@@ -1080,7 +1070,7 @@ test('doigt qui glisse : le héros suit, et le chemin n’est calculé qu’une 
 });
 
 test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), puis « Stop ! » et le héros fait demi-tour s’il force', async ({ page }, info) => {
-  test.setTimeout(40_000);
+  test.setTimeout(60_000);
   await page.evaluate(() => {
     window.paperCart.markSaid('arrivee'); // l'accueil du haut-parleur et ses pensées ont leurs propres tests
     for (const [k, v] of [['narrator.speed', 400], ['narrator.hold', 0.6], ['narrator.holdPerChar', 0], ['narrator.followDelay', 0.1], ['narrator.enabled', false], ['narrator.enabled', true]]) window.paperCart.set(k, v);
@@ -1104,28 +1094,26 @@ test('A6 : l’agent va une fois au milieu ; il interpelle le héros (figé), pu
   await page.waitForTimeout(300);
   expect((await hero(page)).x).toBe(frozen);
   await page.keyboard.up('ArrowLeft');
-  const t0 = Date.now();
-  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 8000 }); // fermée seule, sans toucher
-  expect(Date.now() - t0).toBeLessThan(7000); // 126 lettres : ≈ 6,3 s depuis son début (2,5 s + 50 ms par lettre)
+  const t0 = await page.evaluate(() => window.paperCart.narrator().t);
+  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 20000 }); // fermée seule, sans toucher
+  const t1 = await page.evaluate(() => window.paperCart.narrator().t);
+  expect(t1 - t0).toBeLessThan(7); // en temps de jeu : ≈ 6 s au plus (narrator.timedMax), indépendant des i/s
   await page.keyboard.down('ArrowLeft');
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-agent.png` });
   // Il force contre la barrière : « Stop ! », et il fait demi-tour de quelques pas. Il ne passe jamais.
-  await expect.poll(said, { timeout: 10000 }).toMatch(/agent: Stop\s?! De l.autre côté/);
+  await expect.poll(said, { timeout: 15000 }).toMatch(/agent: Stop\s?! De l.autre côté/);
   // Le demi-tour attend que l'agent ait fini de parler.
   const atStop = (await hero(page)).x;
   await page.waitForTimeout(300);
   if (await page.locator('.hero-bubble.agent:not([hidden])').isVisible()) expect((await hero(page)).x).toBeLessThan(atStop + 5);
-  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 4000 });
+  await expect(page.locator('.hero-bubble.agent:not([hidden])')).toBeHidden({ timeout: 12000 });
   let minX = Infinity;
-  let back = false;
-  for (let k = 0; k < 60 && !back; k++) {
+  await expect.poll(async () => {
     const x = (await hero(page)).x;
-    if (x > minX + 100) back = true;
     minX = Math.min(minX, x);
-    await page.waitForTimeout(100);
-  }
+    return x > minX + 100;
+  }, { timeout: 15000 }).toBe(true);
   await page.keyboard.up('ArrowLeft');
-  expect(back, 'demi-tour de quelques pas').toBe(true);
   expect(minX).toBeGreaterThan(700);
   await page.screenshot({ path: `test-results/captures/a6-${info.project.name}-stop.png` });
   const gd = await guard();

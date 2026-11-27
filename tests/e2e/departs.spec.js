@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole } from './helpers.js';
 
 // Points de départ (tests rapides) : ⚙ → Départ, ou lien ?depart=<id>.
 
 const errors = [];
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
 });
 test.afterEach(async () => {
   expect(errors, 'aucune erreur ni alerte dans la console').toEqual([]);
@@ -77,13 +75,13 @@ test('lieux : quitter le lieu et y revenir — le monde se souvient, rien ne s�
   // Et le jeu continue : il marche, puis scanne.
   const x0 = (await page.evaluate(() => window.paperCart.hero())).x;
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(400);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.hero())).x, { timeout: 6000 }).toBeGreaterThan(x0 + 50);
   await page.keyboard.up('ArrowRight');
-  expect((await page.evaluate(() => window.paperCart.hero())).x).toBeGreaterThan(x0 + 50);
   await page.screenshot({ path: `test-results/captures/lieu-recharge-${info.project.name}.png` });
 });
 
 test('A6 : du rayon à l’accueil et retour — fondu, le rayon se souvient, la mémoire ne grimpe pas', async ({ page }, info) => {
+  test.setTimeout(90_000);
   await page.goto('./?depart=3-cartes');
   await page.waitForFunction(() => window.paperCart?.state() === 'play');
   const place = () => page.evaluate(() => window.paperCart.place());
@@ -91,7 +89,7 @@ test('A6 : du rayon à l’accueil et retour — fondu, le rayon se souvient, la
     await page.keyboard.down(key);
     await expect.poll(place, { timeout: 15000 }).toBe(to);
     await page.keyboard.up(key);
-    await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play'); // le fondu est fini
+    await expect.poll(() => page.evaluate(() => window.paperCart.state()), { timeout: 15000 }).toBe('play'); // le fondu est fini
     await expect(page.locator('.place-fade')).toBeHidden();
   };
   const assets = () => page.evaluate(() => window.paperCart.assets());
@@ -100,8 +98,8 @@ test('A6 : du rayon à l’accueil et retour — fondu, le rayon se souvient, la
   await page.keyboard.down('ArrowLeft');
   await page.waitForFunction(() => window.paperCart.state() === 'transition' && !document.querySelector('.place-fade').hidden, null, { timeout: 15000 });
   await page.keyboard.up('ArrowLeft');
-  await expect.poll(place).toBe('accueil');
-  await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('play');
+  await expect.poll(place, { timeout: 15000 }).toBe('accueil');
+  await expect.poll(() => page.evaluate(() => window.paperCart.state()), { timeout: 15000 }).toBe('play');
   await expect(page.locator('#game canvas')).toHaveCount(1);
   expect(await page.evaluate(() => window.paperCart.scene().hero.visible)).toBe(true);
   await expect(page.locator('.panier-count')).toHaveText('3/6'); // les cartes suivent le héros

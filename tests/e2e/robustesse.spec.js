@@ -37,9 +37,8 @@ test('le rayon ne se charge pas : retour au hall, là où le héros est sorti ; 
   expect(await page.evaluate(() => window.paperCart.errors().join(' '))).toMatch(/rayon-essai/); // noté pour le diagnostic
   // Toujours jouable : il marche.
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(400);
+  await expect.poll(async () => (await page.evaluate(() => window.paperCart.hero())).x, { timeout: 6000 }).toBeGreaterThan(after.x + 50);
   await page.keyboard.up('ArrowRight');
-  expect((await page.evaluate(() => window.paperCart.hero())).x).toBeGreaterThan(after.x + 50);
   // L'image revient : le rayon s'ouvre normalement.
   await page.unroute('**/rayon-fond.*');
   await page.evaluate(() => window.paperCart.useExit('vers-rayon'));

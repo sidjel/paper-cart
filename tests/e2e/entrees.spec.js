@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { watchConsole, doubleTap } from './helpers.js';
 
 // Séance des entrées (séance 70) : manette simulée (l'API Gamepad est remplacée par une fausse manette,
 // pilotée depuis le test), relâchement général quand le jeu perd le focus, aides selon le dernier appareil.
@@ -8,10 +9,7 @@ const errors = [];
 
 test.beforeEach(async ({ page }) => {
   errors.length = 0;
-  page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`);
-  });
-  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  watchConsole(page, errors);
   // Fausse manette : 17 boutons, 4 axes (disposition standard), absente au départ.
   await page.addInitScript(() => {
     const pad = { index: 0, connected: false, id: 'essai', mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })) };
@@ -178,9 +176,7 @@ test('fiche « Nouvel objet » au doigt : double toucher à portée ne la referm
   await expect.poll(() => page.evaluate(() => window.paperCart.scanState().pickup), { timeout: 8000 }).toBe(0);
   // Double toucher directement sur le présentoir alors que le héros est déjà à portée : la fiche doit rester ouverte !
   const stand = await page.evaluate(() => window.paperCart.worldToClient(1590, 560));
-  await page.touchscreen.tap(stand.x, stand.y);
-  await page.waitForTimeout(60);
-  await page.touchscreen.tap(stand.x, stand.y);
+  await doubleTap(page, stand.x, stand.y, 60);
   await expect(page.locator('.item-reveal')).toBeVisible();
   await page.waitForTimeout(300);
   await expect(page.locator('.item-reveal')).toBeVisible();
