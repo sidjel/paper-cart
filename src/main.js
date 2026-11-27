@@ -1173,7 +1173,7 @@ async function start() {
       layout();
     },
     onLeaving() {
-      marker.hide();
+      marker.hide(true);
       fgLayers = [];
       clouds = null;
       birds = null;

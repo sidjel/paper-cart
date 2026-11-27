@@ -68,6 +68,7 @@ export function createPlaceView(renderer, place, images, common, here, proj, con
     guard,
     hotesse,
     destroy() {
+      products.destroy();
       debugPerspective.destroy();
       stage.destroy();
     },

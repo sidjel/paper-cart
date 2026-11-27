@@ -10,7 +10,7 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { bodyMotion, compileAnimation, flipEffects, flipWidth, frameIndex, frameSrc } from './animation.js';
 import { createPoses } from './poses.js';
-import { createPaperFlipRenderer, minWidthForAngle, shouldUsePaperFlip25d, turnAngleDeg, turnDirectionSign } from './paperFlip.js';
+import { createPaperFlipRenderer, flipProgress, minWidthForAngle, shouldUsePaperFlip25d, turnAngleDeg, turnDirectionSign } from './paperFlip.js';
 import { directionToView, needsPaperFlip } from '../core/direction.js';
 
 export function characterImageEntries(data, rasterScale) {
@@ -234,6 +234,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
   let shownIndex = -1;
   let lastWalkStep = -1;
   let lastFlip = 1;
+  let lastHeldScaleX = 1;
   let lastX = 0;
   let lastY = 0;
   let lastS = data.scale;
@@ -362,6 +363,7 @@ export function createCharacterSprite(data, images, parent, settings, display, o
     const up = settings.bounceHeight > 0 ? motion.lift / settings.bounceHeight : 0;
     const shadowScale = scale * settings.shadowSize * (1 - 0.18 * up);
 
+    let heldScaleX = 1;
     if (use25d) {
       const fromAnim = pickAnim8(moving, scanning, aside, flipFromDir);
       const toAnim = pickAnim8(moving, scanning, aside, targetDir);
@@ -370,6 +372,9 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       const fromTex = fromAnim.texs[fromI] ?? flipFromTex ?? frameTex;
       const toTex = toAnim.texs[toI] ?? frameTex;
       const toFlip = directionToView(targetDir).flip;
+      const prog = flipProgress(flipP);
+      const minW = minWidthForAngle(flipAngle, settings.edgeThickness);
+      heldScaleX = (prog >= 0.5 ? toFlip : flipFromFlip) * flipWidth(prog, minW);
       poses.hide();
       paperFlip.draw({
         p: flipP,
@@ -392,6 +397,15 @@ export function createCharacterSprite(data, images, parent, settings, display, o
       if (poses.show(frameTex)) stats.frameChanges++;
     }
     placeHeld(anim.srcs[i], anim.viewName, anim.away, scanning);
+    // En 2.5D, flip.scale.x vaut +motion.sx (le MeshPlane gère son propre miroir) : on applique
+    // le miroir et l'amincissement autour de l'ancre (ax) aux objets tenus pour qu'ils restent solidaires.
+    if (heldScaleX !== lastHeldScaleX) {
+      lastHeldScaleX = heldScaleX;
+      heldBack.scale.x = heldScaleX;
+      heldBack.x = -ax * heldScaleX;
+      heldFront.scale.x = heldScaleX;
+      heldFront.x = -ax * heldScaleX;
+    }
 
     const totalLift = motion.lift + (display.reduceMotion ? 0 : fxFlip.lift);
     const simpleFlipScale = isFlipping && !use25d

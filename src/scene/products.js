@@ -28,6 +28,8 @@ export function createProducts(items, images, parent, effectsParent, settings, d
   function place(i) {
     const it = items[i];
     const s = sprites[i];
+    const tex = images.get(it.def.image)?.texture;
+    if (tex && s.texture !== tex) s.texture = tex;
     const into = it.loose ? loose.parent : parent;
     if (s.parent !== into) into.addChild(s);
     s.zIndex = it.loose ? loose.levelOf(it.on) + 0.1 : 0;
@@ -213,5 +215,11 @@ export function createProducts(items, images, parent, effectsParent, settings, d
     };
   }
 
-  return { setMarker, markAt, update, remove, sync: place, reserve, adopt, info };
+  function destroy() {
+    for (const sp of spares) {
+      if (!sp.sprite.parent && !sp.sprite.destroyed) sp.sprite.destroy();
+    }
+  }
+
+  return { setMarker, markAt, update, remove, sync: place, reserve, adopt, info, destroy };
 }

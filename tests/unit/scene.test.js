@@ -181,6 +181,8 @@ describe('poussière et profil par défaut', () => {
 
 import { bodyMotion } from '../../src/scene/animation.js';
 import { createProjection, scaleAt } from '../../src/scene/projection.js';
+import { createTargetMarker } from '../../src/scene/targetMarker.js';
+import { Container } from 'pixi.js';
 
 describe('profondeur et corps vivant', () => {
   const P = { bounceHeight: 7, walkSquash: 0.05, breathAmount: 0.02, breathRate: 0.5, stopSquash: 0.1, stopDuration: 0.2 };
@@ -224,5 +226,45 @@ describe('profondeur et corps vivant', () => {
     expect(out.sy).toBeLessThan(1);
     bodyMotion(out, P, false, 0, 80, 0, 0.5);
     expect(out.sy).toBeCloseTo(1);
+  });
+});
+
+describe('repère au sol (scene/targetMarker.js)', () => {
+  it('s’efface en fondu en 0,25 s, ou immédiatement au changement de lieu / remontage', () => {
+    const a = new Container();
+    const b = new Container();
+    const marker = createTargetMarker(a);
+    const g = a.children[0];
+    expect(g.visible).toBe(false);
+
+    marker.showAt(120, 340);
+    expect(g.visible).toBe(true);
+    expect(g.alpha).toBeCloseTo(0.85);
+
+    // Fondu normal de 0,25 s.
+    marker.hide();
+    marker.update(10, false);
+    expect(g.visible).toBe(true);
+    marker.update(10.125, false);
+    expect(g.alpha).toBeCloseTo(0.425);
+    marker.update(10.3, false);
+    expect(g.visible).toBe(false);
+    expect(g.alpha).toBe(0);
+
+    // hide(true) coupe le fondu immédiatement (ex. changement de lieu).
+    marker.showAt(200, 400);
+    marker.hide(true);
+    expect(g.visible).toBe(false);
+    expect(g.alpha).toBe(0);
+
+    // Remontage pendant un fondu en cours : ne réapparaît jamais dans le nouveau lieu.
+    marker.showAt(200, 400);
+    marker.hide();
+    marker.mount(b);
+    expect(g.parent).toBe(b);
+    expect(g.visible).toBe(false);
+    expect(g.alpha).toBe(0);
+    marker.update(20, false);
+    expect(g.visible).toBe(false);
   });
 });

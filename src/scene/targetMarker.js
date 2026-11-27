@@ -23,6 +23,12 @@ export function createTargetMarker(parent) {
   return {
     // Passe sur le calque des acteurs du lieu affiché.
     mount(to) {
+      if (!visible) {
+        fading = false;
+        fadeStart = -1;
+        g.visible = false;
+        g.alpha = 0;
+      }
       to.addChild(g);
     },
     showAt(sx, sy) {
@@ -34,7 +40,15 @@ export function createTargetMarker(parent) {
       fading = false;
       fadeStart = -1;
     },
-    hide() {
+    hide(immediate = false) {
+      if (immediate) {
+        visible = false;
+        fading = false;
+        fadeStart = -1;
+        g.visible = false;
+        g.alpha = 0;
+        return;
+      }
       if (!visible) return;
       visible = false;
       fading = true;
