@@ -1,24 +1,66 @@
 // Rendu du héros 8 directions + retournement papier 2.5D matériel (GPU MeshPlane, 24 bandes) sous PixiJS v8.
-// Zéro redessin Canvas 2D CPU : pendant le pivot, seuls les sommets du MeshPlane (50 vertices) sont déformés
-// directement sur le tampon GPU (torsion diagonale, courbe en S, perspective 2.5D, amplitude selon l'angle réel).
+// Zéro redessin Canvas 2D CPU en jeu : pendant le pivot, seuls les sommets du MeshPlane (50 vertices) sont
+// déformés sur le tampon GPU (torsion diagonale, courbe en S, perspective 2.5D, amplitude selon l'angle réel).
 
-import { Container, Graphics, MeshPlane, Sprite } from 'pixi.js';
+import { Container, MeshPlane, Sprite, Texture } from 'pixi.js';
 import { flipWidth } from '../scene/animation.js';
 import { turnAngleDeg, turnDirectionSign, minWidthForAngle, flipProgress, flipElasticScale } from '../scene/paperFlip.js';
 
 const STRIPS = 24;
 
+// Génère une seule fois la texture radiale douce de l'ombre au sol (identique au double dégradé CSS de .shadow).
+function createGroundShadowTexture() {
+  const cw = 256;
+  const ch = 128;
+  const c = document.createElement('canvas');
+  c.width = cw;
+  c.height = ch;
+  const ctx = c.getContext('2d');
+  if (ctx) {
+    ctx.save();
+    ctx.translate(cw / 2, ch / 2);
+    ctx.scale(1, ch / cw);
+    const outer = ctx.createRadialGradient(0, 0, 0, 0, 0, cw / 2);
+    outer.addColorStop(0, 'rgba(40, 32, 22, 0.50)');
+    outer.addColorStop(0.58, 'rgba(40, 32, 22, 0.26)');
+    outer.addColorStop(1, 'rgba(40, 32, 22, 0)');
+    ctx.fillStyle = outer;
+    ctx.beginPath();
+    ctx.arc(0, 0, cw / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Petite ombre de contact plus sombre juste sous les pieds
+    ctx.scale(0.66, 0.56 / (ch / cw) * (ch / cw));
+    const inner = ctx.createRadialGradient(0, 0, 0, 0, 0, cw / 2);
+    inner.addColorStop(0, 'rgba(18, 14, 10, 0.60)');
+    inner.addColorStop(1, 'rgba(18, 14, 10, 0)');
+    ctx.fillStyle = inner;
+    ctx.beginPath();
+    ctx.arc(0, 0, cw / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  return Texture.from(c);
+}
+
 export function createPixiHero(heroData, textures, useMesh = true) {
   const [w, h] = heroData.size;
   const [ax, ay] = heroData.anchor;
+  const shadowW = (heroData.shadow?.width ?? 120) * heroData.scale;
+  const shadowH = (heroData.shadow?.height ?? 28) * heroData.scale;
 
   const root = new Container();
-  const shadow = new Graphics();
-  shadow.ellipse(0, 0, 56, 16).fill({ color: 0x101828, alpha: 0.48 });
+  const shadowTex = createGroundShadowTexture();
+  const shadow = new Sprite(shadowTex);
+  shadow.anchor.set(0.5, 0.5);
+  shadow.width = shadowW;
+  shadow.height = shadowH;
 
   // Ombre portée dynamique pendant le soulèvement du papier (visible uniquement en pivot)
-  const liftShadow = new Graphics();
-  liftShadow.ellipse(0, 0, 62, 18).fill({ color: 0x0b1220, alpha: 0.35 });
+  const liftShadow = new Sprite(shadowTex);
+  liftShadow.anchor.set(0.5, 0.5);
+  liftShadow.width = shadowW * 1.15;
+  liftShadow.height = shadowH * 1.25;
   liftShadow.visible = false;
 
   const firstTex = textures.values().next().value;
@@ -127,8 +169,9 @@ export function createPixiHero(heroData, textures, useMesh = true) {
 
     liftShadow.visible = shadowAmt > 0 && twistEnv > 0.04;
     if (liftShadow.visible) {
-      liftShadow.alpha = shadowAmt * twistEnv * 0.65;
-      liftShadow.scale.set(0.85 + 0.35 * twistEnv, 0.8 + 0.25 * twistEnv);
+      liftShadow.alpha = shadowAmt * twistEnv * 0.55;
+      liftShadow.width = shadowW * (1.05 + 0.3 * twistEnv);
+      liftShadow.height = shadowH * (1.05 + 0.25 * twistEnv);
     }
   }
 
@@ -136,6 +179,7 @@ export function createPixiHero(heroData, textures, useMesh = true) {
     root,
     shadow,
     liftShadow,
+    shadowBaseSize: [shadowW, shadowH],
     setTexture(tex, flipX = 1) {
       const target = plane ?? sprite;
       if (tex && tex !== lastTex) {
