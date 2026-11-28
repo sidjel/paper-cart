@@ -4,6 +4,25 @@ import { watchConsole } from './helpers.js';
 // Suite dédiée au moteur WebGL de PixiJS v8 (démarrage, fondu RenderTexture, retournement 2.5D,
 // zéro erreur console). Toutes les attentes reposent sur l'état du jeu (indépendantes des i/s
 // même en WebGL logiciel à ~4 i/s sur le runner CI).
+// Ne réussit jamais en silence si WebGL est absent : échec obligatoire en CI, saut explicite en local.
+
+function requireWebGL(sc) {
+  if (sc.isWebGL) return;
+  if (process.env.CI) {
+    expect(sc.isWebGL, 'WebGL doit être actif sur le runner CI (jamais de repli Canvas silencieux)').toBe(true);
+  }
+  test.skip(true, 'WebGL indisponible dans ce navigateur local (repli Canvas : saut explicite)');
+}
+
+async function detectGpuRenderer(page) {
+  return page.evaluate(() => {
+    const c = document.querySelector('#game canvas');
+    const gl = c?.getContext?.('webgl2') || c?.getContext?.('webgl');
+    if (!gl) return 'aucun';
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    return (ext && gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) || gl.getParameter(gl.RENDERER) || 'WebGL';
+  });
+}
 
 const errors = [];
 test.beforeEach(({ page }) => {
@@ -24,7 +43,9 @@ test('WebGL : démarrage dans l’accueil puis le rayon sans erreur', async ({ p
   await expect(page.locator('#game canvas')).toBeVisible();
 
   const sc = await page.evaluate(() => window.paperCart.scene());
-  console.log(`WebGL démarrage (accueil) : renderer=${sc.renderer}, isWebGL=${sc.isWebGL}, stageNodes=${sc.stageNodes}`);
+  const gpu = await detectGpuRenderer(page);
+  console.log(`WebGL démarrage (accueil) : renderer=${sc.renderer}, isWebGL=${sc.isWebGL}, gpu=${gpu}, stageNodes=${sc.stageNodes}`);
+  requireWebGL(sc);
   expect(sc.hasStage).toBe(true);
   expect(sc.hero.visible).toBe(true);
   expect(sc.layers).toContain('fond');
@@ -35,6 +56,8 @@ test('WebGL : changement de lieu accueil ↔ rayon (RenderTexture fondu, zéro f
   test.setTimeout(60_000);
   await page.goto('./?depart=3-cartes');
   await page.waitForFunction(() => window.paperCart?.state() === 'play', null, { timeout: 20_000 });
+  const sc0 = await page.evaluate(() => window.paperCart.scene());
+  requireWebGL(sc0);
   const before = await page.evaluate(() => window.paperCart.assets());
 
   expect(await page.evaluate(() => window.paperCart.useExit('vers-accueil'))).toBe(true);
@@ -63,9 +86,10 @@ test('WebGL : retournement 2.5D de la feuille sans erreur console', async ({ pag
     window.paperCart.markSaid('rencontre');
   });
 
-  // Vérifie la présence des 2 MeshPlane 2.5D quand WebGL est réellement actif (77 nœuds vs 75 en Canvas).
+  // Vérifie la présence réelle de WebGL et des 2 MeshPlane 2.5D (77 nœuds vs 75 en Canvas).
   const sc0 = await page.evaluate(() => window.paperCart.scene());
-  if (sc0.isWebGL) expect(sc0.stageNodes).toBeGreaterThanOrEqual(77);
+  requireWebGL(sc0);
+  expect(sc0.stageNodes).toBeGreaterThanOrEqual(77);
 
   // Marcher vers la droite jusqu'à orientation E (et fin d'un éventuel pivot initial), puis demi-tour vers W.
   await page.keyboard.down('ArrowRight');

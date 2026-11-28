@@ -18,6 +18,30 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 84 — 28/11/2026 — Audit organisationnel, nettoyage Git et étape P1.1 (Playwright Windows + `webgl` honnête)
+
+*(Note : le rattrapage synthétique des séances 81–83, dont la migration PixiJS v8, est planifié à l'étape P2.1.)*
+
+**Décisions de l'auteur** :
+- Nettoyage des branches Git : 4 branches déjà contenues dans `main` supprimées (`feat/pixi-v8-scene`, `test/krita-mcp`, `ccr-3443bb6f-i7a92k`, `ccr-7df55fba-kq76y9`) ; étiquette `archive/poc-pixi-v8` créée sur `4abc34d` avant suppression de `poc/pixi-v8` (`1C`).
+- Plan d'organisation validé par petites étapes en mode `/plan` (`2A`, `3A`, `4A`, `5A`, `6B`, `7A`), en commençant par **P1.1** : garder le build frais dans `webServer.command` (sans `run.mjs` ni changement de `package.json`), dossier temporaire dans `node_modules/.cache/pw-tmp` nettoyé même en cas d'échec, et projet `webgl` en fenêtre visible sur la vraie carte graphique en local.
+
+**Fait (P1.1)** :
+- `playwright.config.js` + `tests/e2e/teardown.js` : redirection de `TEMP`/`TMP` sous Windows vers `node_modules/.cache/pw-tmp` (évite les boucles `EPERM` de suppression du profil Chromium quand `%TEMP%` n'a pas de droits hérités), nettoyage systématique dans `globalTeardown` même si un test échoue, appel direct à Vite dans `webServer.command` (`build && preview`, toujours sur une version fraîche), et projet `webgl` en fenêtre visible en local (`headless: Boolean(process.env.CI)`).
+- `tests/e2e/webgl.spec.js` : garde `requireWebGL` dans les 3 tests (échec obligatoire en CI sans WebGL, saut explicite en local, suppression du `if (sc0.isWebGL)` silencieux) et journalisation de la carte graphique détectée.
+- `index.html` : ajout d'une icône SVG inline (`<link rel="icon">`) supprimant les erreurs 404 `/favicon.ico` visibles en mode fenêtre.
+- `docs/ARCHITECTURE.md` §15 : ajout de la leçon correspondante.
+
+**Vérifié en local (PC Windows)** :
+- `npm test` : **260/260** tests unitaires + Knip verts (`34` fichiers).
+- `npm run test:e2e` (deux lancements complets consécutifs sans blocage) : passage #1 **132 réussis, 61 sautés** (`7,9 min`), passage #2 **132 réussis, 61 sautés** (`8,0 min`) ; `node_modules/.cache/pw-tmp` supprimé après succès comme après échec, 0 serveur `vite preview` restant sur le port `4173`.
+- **Projet `webgl`** : **3/3 réussis, 0 sauté** — carte graphique détectée : **`ANGLE (NVIDIA, NVIDIA GeForce GTX 970 (0x000013C2) Direct3D11 vs_5_0 ps_5_0, D3D11)`** (`renderer=WebGL, isWebGL=true`, `MeshPlane` 2.5D vérifié).
+- `npm run build` : vert (`902 ms`).
+
+**Prochaine séance** : étape **P1.2** (protections Git sur `main` + essai sans risque des hooks dans Antigravity Desktop avec `git push --force --dry-run`).
+
+---
+
 ## Séance 80 — 25/11/2026 — Suite audit Claude Opus 5.5 : correctifs `mist`, fiche objet, pluie réaliste CC0, retrait musique synthétique et code mort, garde-fous
 
 **Contexte & commits intermédiaires depuis la séance 79 (`8bdfe05` → `c06fb72`)** :
