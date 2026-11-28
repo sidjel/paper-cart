@@ -18,6 +18,36 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 86 — 28/11/2026 — Étape P1.3 Temps 1 (nouveau `GEMINI.md`, 5 règles `.agents/rules/*.md`, essai `glob` vs `model_decision`, `ARCHITECTURE.md` §14)
+
+*(Temps 1 uniquement : ajouts et mises à jour sans aucune suppression ; les anciens fichiers `CLAUDE.md`, `src/*/CLAUDE.md` et `.claude/` restent en place sur `main` pour relecture côte à côte avant le Temps 2.)*
+
+**Fait** :
+- `docs/ARCHITECTURE.md` §14 : source unique des appareils de référence mise à jour (**PC d'abord** décision du 26/11/2026 : `Intel Core i5-4460`, `NVIDIA GeForce GTX 970` 4 Go, `12 Go`, écran 4K ; smartphone `Oppo Reno 2` en bonus profil `Léger`, en remplaçant la décision de la séance 24 tout en gardant les conditions « téléphone en bon état » pour les mesures sur téléphone) ; leçon ajoutée en §15 sur l'essai différentiel des triggers de règles.
+- `GEMINI.md` : réécriture exhaustive de toutes les règles de travail validées (zéro mention d'un autre agent, `docs/VISION.md` toujours lu au début de séance, règle `/learn`, renvoi à `docs/ARCHITECTURE.md` §14, index vers `.agents/rules/*.md`).
+- `.agents/rules/{core,scene,input,audio,ui}.md` : création des 5 règles de dossier (avec rétablissement dans `scene.md` et `ui.md` des règles validées disparues lors de la migration PixiJS, conformément à la décision `3A`).
+
+**Résultat exact de l'essai par mots témoins (nouvelle session Antigravity Desktop 2.36.0 Windows)** :
+- Essai 1 (`trigger: glob`, `globs: "src/scene/**"` et `"src/audio/**"`) :
+  - Avant lecture : `scene` = **INCONNU**, `audio` = **INCONNU**, `GEMINI.md` = **chargé**.
+  - Après `read_file` sur `src/scene/renderer.js` (puis au tour suivant) : `scene` = **INCONNU**, `audio` = **INCONNU**.
+  - Après `read_file` sur `src/audio/audio.js` : `audio` = **INCONNU** (aucun pointeur `.agents/rules/` injecté).
+- Essai différentiel 2 (3 modes testés ensemble) :
+  - `core.md` en `trigger: always_on` → **mot témoin vu immédiatement** (`<RULE[...\.agents\rules\core.md]>`).
+  - `audio.md` en `trigger: model_decision` → **mot témoin de description vu immédiatement** dans la liste des règles conditionnelles.
+  - `scene.md` en `trigger: glob` (`**/src/scene/**, src/scene/**, *renderer.js`) → **INCONNU** même après `read_file` sur `src/scene/renderer.js`.
+- **Conclusion appliquée** : passage des 5 `.agents/rules/*.md` en **`trigger: model_decision`** (signalées automatiquement dès le démarrage avec coût minimal, lues à la demande avant toute tâche dans le dossier concerné), et retrait complet de tous les mots témoins avant commit.
+
+**Vérifié en local (PC Windows)** :
+- Aucun mot témoin résiduel, aucune mention d'un autre agent dans `GEMINI.md` ni `.agents/rules/*.md`.
+- `npm test` : **35 fichiers, 266/266 tests verts** + Knip vert.
+- `npm run test:e2e` : **131/132 réussis, 61 sautés** au premier passage (`a1.spec.js:753` en échec transitoire isolé, puis **1/1 réussi** au relancement ciblé en `6,2 s`), dont **projet `webgl` 3/3 réussis, 0 sauté** sur **`NVIDIA GeForce GTX 970 (ANGLE Direct3D11)`**.
+- `npm run build` : vert (`975 ms`).
+
+**Prochaine étape** : relecture du Temps 1 sur GitHub par l'auteur, puis feu vert pour le **Temps 2 de P1.3** (suppression des doublons sauf `.claude/skills/`, mise à jour de tous les renvois et protection `force_ask` sur `GEMINI.md` et `.agents/rules/`).
+
+---
+
 ## Séance 85 — 28/11/2026 — Suites P1.1 et étape P1.2 (triple protection Git et validation réelle de `.agents/hooks.json`)
 
 **Fait** :
