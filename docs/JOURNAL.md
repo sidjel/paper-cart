@@ -29,7 +29,7 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 **Fait (P1.1)** :
 - `playwright.config.js` + `tests/e2e/teardown.js` : redirection de `TEMP`/`TMP` sous Windows vers `node_modules/.cache/pw-tmp` (évite les boucles `EPERM` de suppression du profil Chromium quand `%TEMP%` n'a pas de droits hérités), nettoyage systématique dans `globalTeardown` même si un test échoue, appel direct à Vite dans `webServer.command` (`build && preview`, toujours sur une version fraîche), et projet `webgl` en fenêtre visible en local (`headless: Boolean(process.env.CI)`).
 - `tests/e2e/webgl.spec.js` : garde `requireWebGL` dans les 3 tests (échec obligatoire en CI sans WebGL, saut explicite en local, suppression du `if (sc0.isWebGL)` silencieux) et journalisation de la carte graphique détectée.
-- `index.html` : ajout d'une icône SVG inline (`<link rel="icon">`) supprimant les erreurs 404 `/favicon.ico` visibles en mode fenêtre.
+- `index.html` : ajout d'une icône SVG inline `[TEMP]` (`<link rel="icon">`, provisoire) supprimant les erreurs 404 `/favicon.ico` visibles en mode fenêtre.
 - `docs/ARCHITECTURE.md` §15 : ajout de la leçon correspondante.
 
 **Vérifié en local (PC Windows)** :
