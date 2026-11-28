@@ -81,6 +81,6 @@
 
 ## Où sont les règles (index)
 Chaque règle n'est écrite **qu'à un seul endroit**, près de ce qu'elle concerne (deux copies finissent toujours par se contredire).
-- Code d'un dossier (règles conditionnelles `model_decision` signalées automatiquement par Antigravity — à lire obligatoirement avant toute tâche dans le dossier concerné) : `.agents/rules/core.md` (`src/core/`), `.agents/rules/scene.md` (`src/scene/` : affichage PixiJS v8, profondeur, parallaxe, lumière, ombres), `.agents/rules/input.md` (`src/input/` : entrées), `.agents/rules/audio.md` (`src/audio/` : son), `.agents/rules/ui.md` (`src/ui/` : menus, bulles).
+- Code d'un dossier (règles `always_on` chargées automatiquement dès le démarrage par Antigravity) : `.agents/rules/core.md` (`src/core/`), `.agents/rules/scene.md` (`src/scene/` : affichage PixiJS v8, profondeur, parallaxe, lumière, ombres), `.agents/rules/input.md` (`src/input/` : entrées), `.agents/rules/audio.md` (`src/audio/` : son), `.agents/rules/ui.md` (`src/ui/` : menus, bulles).
 - Vue d'ensemble technique : `docs/ARCHITECTURE.md` (boucle §3, rendu §4, lieux et chargements §11, son §12, sauvegarde §13, appareils §14, leçons §15).
 - Expérience de jeu (menus, dialogues, chargements, test du gris) : `docs/GAME_DESIGN.md`.

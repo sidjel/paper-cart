@@ -1,6 +1,6 @@
 ---
-trigger: model_decision
-description: "À lire et appliquer obligatoirement avant toute tâche dans src/core/ : logique pure du jeu (pas de DOM/window, pas fixe sans setTimeout, hasard à graine, tests unitaires obligatoires)."
+trigger: always_on
+description: "Règles propres au dossier src/core/ : logique pure du jeu (pas de DOM/window, pas fixe sans setTimeout, hasard à graine, tests unitaires obligatoires)."
 ---
 
 # src/core/ — règles propres à ce dossier

@@ -18,6 +18,32 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 87 — 28/11/2026 — Ajustements P1.3 Temps 1 (passage `always_on` vérifié 5/5, compléments PixiJS v8 / CSS / audio, note `a1.spec.js:753`)
+
+*(Toujours Temps 1 uniquement : aucune suppression avant votre dernière vérification sur GitHub et votre feu vert pour le Temps 2.)*
+
+**Décisions de l'auteur (`1B`, `2A` + précisions)** :
+- Passage des 5 règles `.agents/rules/*.md` en **`trigger: always_on`** (~3 100 tokens au total, garantie à 100 % dès le démarrage), vérifié une fois en nouvelle session par 5 mots témoins dans le corps de chaque fichier, puis retirés avant publication.
+- Compléments de règles approuvés : « en avance (`currentTime` + marge) » rétabli dans `audio.md` ; équivalents PixiJS v8 ajoutés dans `scene.md` (animations peu coûteuses sans `Graphics.clear()` ni `Text` en boucle, modes de fusion simples GPU natifs listés vs modes avancés interdits, limites d'affichage `tests/e2e/comptages-limites.json`) ; règles de performance CSS rétablies dans `ui.md` (y compris grandes surfaces, exception `.veil-blur`, et précision sur l'absence de fondu d'opacité pour ce qui passe par-dessus la scène).
+- Test instable `tests/e2e/a1.spec.js:753` noté dans `docs/SUIVI.md` (sans le modifier ici).
+
+**Vérification `always_on` par 5 mots témoins (nouvelle session isolée, sans aucune lecture de fichier)** :
+- `core.md` (`TEMOIN_CORE_101`), `scene.md` (`TEMOIN_SCENE_202`), `input.md` (`TEMOIN_INPUT_303`), `audio.md` (`TEMOIN_AUDIO_404`), `ui.md` (`TEMOIN_UI_505`) et `GEMINI.md` : **6/6 présents dès le démarrage dans `<user_rules>`** ; tous les mots témoins retirés ensuite (`0` occurrence restante).
+
+**Fait** :
+- `GEMINI.md` (index mis à jour vers `always_on`) et `.agents/rules/{core,scene,input,audio,ui}.md` (passés en `always_on` + compléments `scene.md`, `audio.md`, `ui.md`).
+- `docs/ARCHITECTURE.md` §15 (leçon précisée sur `glob` testé à la lecture seule, `model_decision` description seule, et preuve `always_on` 5/5).
+- `docs/SUIVI.md` (ligne `🔧` ajoutée pour `tests/e2e/a1.spec.js:753` et son défaut `pickup >= 0`).
+
+**Vérifié en local (PC Windows)** :
+- `npm test` : **35 fichiers, 266/266 verts** + Knip vert.
+- `npm run test:e2e` : **131/132 réussis, 61 sautés** au premier passage (échec transitoire de position clavier sur `a7.spec.js:59` sous charge 2 workers, noté dans `docs/SUIVI.md`, puis **1/1 réussi en `13,4 s`** au relancement isolé), dont **projet `webgl` 3/3 réussis, 0 sauté** sur **`NVIDIA GeForce GTX 970 (ANGLE Direct3D11)`**.
+- `npm run build` : vert (`1,05 s`).
+
+**Prochaine étape** : dernière vérification sur GitHub par l'auteur, puis feu vert pour le **Temps 2 de P1.3**.
+
+---
+
 ## Séance 86 — 28/11/2026 — Étape P1.3 Temps 1 (nouveau `GEMINI.md`, 5 règles `.agents/rules/*.md`, essai `glob` vs `model_decision`, `ARCHITECTURE.md` §14)
 
 *(Temps 1 uniquement : ajouts et mises à jour sans aucune suppression ; les anciens fichiers `CLAUDE.md`, `src/*/CLAUDE.md` et `.claude/` restent en place sur `main` pour relecture côte à côte avant le Temps 2.)*

@@ -1,6 +1,6 @@
 ---
-trigger: model_decision
-description: "À lire et appliquer obligatoirement avant toute tâche dans src/scene/ : rendu PixiJS v8, textures, poses, profondeur, parallaxe, lumière, ombres et règles validées d'accessibilité."
+trigger: always_on
+description: "Règles propres au dossier src/scene/ : rendu PixiJS v8, textures, poses, profondeur, parallaxe, lumière, ombres et règles validées d'accessibilité."
 ---
 
 # src/scene/ — règles propres à ce dossier
@@ -12,11 +12,13 @@ Affichage de la scène sous **PixiJS v8** (WebGL sur PC et smartphone, repli `Ca
 - Hiérarchie fixe dans `app.stage` : `worldRoot` (à l'identité, portant `stage.root`) et `dissolveLayer` (`RenderTexture` temporaire de fondu enchaîné, détruite dès la fin de la transition). `backstage` (hors scène) porte les acteurs persistants entre deux lieux.
 - Écouter `webglcontextlost` / `webglcontextrestored` sur `app.canvas`.
 - **Rien n'est créé pendant le jeu** : `Sprite`, `MeshPlane`, `Graphics` et textures sont préparés au chargement (ou à l'entrée dans un lieu), puis réutilisés.
+- **Animations peu coûteuses en jeu** : en boucle de jeu, n'animer que les propriétés de transformation (`x`, `y`, `scale`, `rotation`, `alpha`, `visible`), l'échange de textures préchargées (`poses.js`) ou les sommets d'un `MeshPlane` pré-alloué (`paperFlip.js`). Ne jamais appeler `Graphics.clear()` ni régénérer une texture à chaque image (un redessin ponctuel de `Graphics` n'est permis qu'à un changement d'état rare, comme le début d'un scan). Ne pas modifier un objet `Text` en boucle de jeu (chaque changement redessine un canevas et ré-envoie une texture au GPU ; comparer avant d'écrire ou préférer l'interface HTML / `BitmapText`).
 - **Rien n'apparaît « à froid »** : tout ce dont le **lieu actif** a besoin (bulle, effet, pose, carte) est préchargé, décodé et préparé avant que le lieu soit jouable (seulement le lieu actif, pas tout le jeu ; un éventuel pré-envoi GPU explicite sous PixiJS ne s'ajoute qu'après mesure sur l'appareil réel).
 - **Fondu au noir** : un seul écran de transition (`.place-fade`) pour tout le jeu, les autres (intro, écran d'erreur) lui passent le relais (`docs/ARCHITECTURE.md` §11).
 - **Élément invisible** : un élément invisible ne prend **ni touchers ni sélection** (vaut pour la scène comme pour l'interface : `.agents/rules/ui.md`).
 - **Zéro `tint !== 0xffffff` sous `CanvasRenderer`** : sur repli `CanvasRenderer`, toute teinte non-blanche alloue un `<canvas>` caché et appelle `getImageData`. Utiliser des `Graphics` pré-alloués pour les formes colorées (confettis, laser, repères) et réserver `tint` au chemin WebGL (`isWebGL`).
-- **Zéro `Filter` WebGL et zéro shader custom** sur la scène en jeu : compatibilité Android 10 garantie.
+- **Zéro `Filter` WebGL, zéro shader custom et zéro mode de fusion avancé** sur la scène en jeu : compatibilité Android 10 et fluidité garanties. En PixiJS v8, seuls les **modes de fusion simples GPU natifs** restent permis (`'normal'`, `'add'`, `'multiply'`, `'screen'`, `'erase'`, `'none'`, `'inherit'`, ainsi que les variantes `'-npm'` et `'min'`/`'max'` en WebGL2, en évitant d'alterner inutilement pour préserver le batching) ; tous les modes avancés de `pixi.js/advanced-blend-modes` (`'overlay'`, `'darken'`, `'lighten'`, `'hard-light'`, `'soft-light'`, `'color-dodge'`, `'color-burn'`, `'difference'`, `'exclusion'`, `'subtract'`, `'color'`, `'luminosity'`, etc.) sont interdits car ils passent par des `Filter`.
+- **Limites d'affichage par lieu (`tests/e2e/comptages-limites.json`)** : le nombre de nœuds d'affichage (`stageNodes`), de plans, de sprites visibles, de textures et de mégapixels est borné par lieu et vérifié par `tests/e2e/comptages.spec.js` (avec `0` élément/canevas/lecture pixel/`RenderTexture` créés en jeu). Une limite ne se relève qu'avec l'accord explicite de l'auteur.
 - Pas de règle de jeu ici : la logique vit dans `src/core/`, on ne fait que l'afficher.
 
 ## Textures et poses (`assets.js`, `poses.js`)

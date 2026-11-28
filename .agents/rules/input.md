@@ -1,6 +1,6 @@
 ---
-trigger: model_decision
-description: "À lire et appliquer obligatoirement avant toute tâche dans src/input/ : actions abstraites, clavier/souris/manette/doigt, perte de focus, exception marche continue, zones tactiles ≥ 44 px CSS."
+trigger: always_on
+description: "Règles propres au dossier src/input/ : actions abstraites, clavier/souris/manette/doigt, perte de focus, exception marche continue, zones tactiles ≥ 44 px CSS."
 ---
 
 # src/input/ — règles propres à ce dossier
