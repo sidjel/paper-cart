@@ -18,6 +18,35 @@ Le rapport le plus récent est en haut. Les étapes validées par l'auteur y son
 
 > Rapports plus anciens : `docs/journal/anciens-rapports.md` (déplacés tels quels à la séance 51).
 
+## Séance 85 — 28/11/2026 — Suites P1.1 et étape P1.2 (triple protection Git et validation réelle de `.agents/hooks.json`)
+
+**Fait** :
+- **Suites P1.1 (commits séparés)** :
+  - `86246e0` : ajout des hypothèses écartées et essais différentiels à la leçon P1.1 (`docs/ARCHITECTURE.md` §15) ; icône d'onglet inline dans `index.html` marquée `[TEMP]`.
+  - `4ab040f` : `playwright.config.js` passé à `reuseExistingServer: false` (échoue clairement si le port `4173` est occupé, garantit de toujours tester une version fraîchement construite).
+- **Étape P1.2 (protections Git et fichiers sensibles)** :
+  - Règle GitHub `protection-main` (`id 28287583`) vérifiée active via API sur `main` (`deletion` + `non_fast_forward`, aucun contournement).
+  - Hook Antigravity `.agents/hooks.json` + `.agents/hooks/garde-git.mjs` + `tests/unit/garde-git-agents.test.js` : bloque la réécriture Git (y compris `+branche`, `-uf`, `filter-branch`, `filter-repo`, `replace`), demande accord (`force_ask`) sur `git clean` (protège `_assets_stock/`), sur les commandes Unix/PowerShell et éditions directes visant `docs/VISION.md`, `tests/e2e/comptages-limites.json`, `.agents/hooks.json` et `.agents/hooks/`.
+  - Liste **Deny** (7 commandes Git) + **Ask** (`git clean`) ajoutée par l'auteur dans Antigravity (`Settings > General`).
+
+**Résultat exact des essais réels (Antigravity Desktop 2.36.0)** :
+- `git push --force --dry-run` (avant création effective en session courante : passé ; dès session suivante / rechargement tour suivant) → **bloqué par le hook** (`tool call denied by pre-tool hook`).
+- `git push origin main --force --dry-run` (avant Deny list) → **bloqué par le hook**.
+- `git push origin +main --dry-run` (avant Deny list) → **bloqué par le hook**.
+- `git push -uf origin main --dry-run` (avant Deny list) → **bloqué par le hook**.
+- `edit_file` sur `docs/VISION.md` → **accord demandé (`force_ask`)** ; modification de test annulée aussitôt (`git checkout -- docs/VISION.md` a aussi déclenché **accord demandé**, `git diff docs/VISION.md` vide).
+- `git clean -n` → **accord demandé (`force_ask`)**.
+- `git push --force --dry-run` (après ajout de la Deny list Antigravity) → **bloqué en premier par le hook** (le hook `PreToolUse` s'exécute avant la Deny list, qui reste le second filet si le hook venait à manquer).
+
+**Vérifié en local (PC Windows)** :
+- `npm test` : **35 fichiers, 266/266 tests verts** (dont 6 tests `.agents/hooks/garde-git.mjs` avec payload JSON officiel `PreToolUse` sur `stdin`), Knip vert.
+- `npm run test:e2e` (avec `reuseExistingServer: false`) : **132 réussis, 61 sautés**, dont **projet `webgl` 3/3 réussis, 0 sauté** sur **`NVIDIA GeForce GTX 970 (ANGLE Direct3D11)`**.
+- `npm run build` : vert.
+
+**Prochaine séance** : étape **P1.3** (nouveau `GEMINI.md` et `.agents/rules/*.md` en `trigger: glob`, relus et validés par l'auteur avant toute suppression des anciens fichiers).
+
+---
+
 ## Séance 84 — 28/11/2026 — Audit organisationnel, nettoyage Git et étape P1.1 (Playwright Windows + `webgl` honnête)
 
 *(Note : le rattrapage synthétique des séances 81–83, dont la migration PixiJS v8, est planifié à l'étape P2.1.)*

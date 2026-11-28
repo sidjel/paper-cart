@@ -1,0 +1,26 @@
+{
+  "garde-git": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/garde-git.mjs",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "edit_file|write_file|replace_file_content|multi_replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/garde-git.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
