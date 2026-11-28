@@ -351,7 +351,7 @@ test('fin de l’intro : l’écran noir des lieux prend le relais ; rien d’au
     }
     prev = cur;
   });
-  await page.locator('.title-button', { hasText: 'Commencer' }).click();
+  await page.locator('.title-button', { hasText: 'Nouvelle Partie' }).click();
   await page.waitForFunction(() => window.paperCart.state() === 'intro');
   await page.waitForTimeout(1500);
   tracking = true; // avant la fin de l'intro

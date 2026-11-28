@@ -1,8 +1,9 @@
-// Écran titre : grand nom du jeu, image mystérieuse, et le menu (Commencer, Options).
-// Doigt, souris, clavier (Tab ou flèches, Entrée) et manette (croix ou LB/RB, A).
+// Écran titre : illustration origami plein écran (logo intégré) et menu (Nouvelle Partie, Options).
+// Doigt, souris, clavier (flèches haut/bas/gauche/droite ou Tab, Entrée) et manette (croix ou LB/RB, A).
 
 // departs : boutons des points de départ (mode dev : config.debug.devMode), ou null.
-export function createTitleScreen(root, { image, onStart, onOptions, onFullscreen = null, departs = null, version = '' }) {
+// onSelect() : petit son joué lorsque le choix de bouton change.
+export function createTitleScreen(root, { image, onStart, onOptions, onSelect = () => {}, onFullscreen = null, departs = null, version = '' }) {
   const el = document.createElement('div');
   el.className = 'title-screen';
   el.hidden = true;
@@ -12,7 +13,7 @@ export function createTitleScreen(root, { image, onStart, onOptions, onFullscree
     <div class="title-content">
       <h1 class="title-name"><span class="title-main">Paper Cart</span><span class="title-sub">The Final Checkout</span></h1>
       <nav class="title-menu" aria-label="Menu principal">
-        <button class="title-button" data-act="start">Commencer</button>
+        <button class="title-button title-button-primary" data-act="start">Nouvelle Partie</button>
         <button class="title-button" data-act="options">Options</button>
       </nav>
     </div>`;
@@ -74,8 +75,31 @@ export function createTitleScreen(root, { image, onStart, onOptions, onFullscree
     else buttons.push(...el.querySelectorAll('.title-menu > .title-button'));
   };
   refresh();
-  root.appendChild(el);
+
   let focus = 0;
+  function selectButton(idx, playSound) {
+    if (idx < 0 || idx >= buttons.length) return;
+    const changed = idx !== focus;
+    focus = idx;
+    buttons[focus].focus({ preventScroll: true });
+    if (playSound && changed) onSelect();
+  }
+
+  // Survol à la souris ou navigation au clavier (Tab) : change le choix et joue le petit son.
+  const bindHover = (container) => {
+    container.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const btn = e.target?.closest?.('button');
+      if (!btn) return;
+      refresh();
+      const idx = buttons.indexOf(btn);
+      if (idx >= 0 && idx !== focus) selectButton(idx, true);
+    });
+  };
+  bindHover(el.querySelector('.title-menu'));
+  if (list) bindHover(list);
+
+  root.appendChild(el);
   function closeDeparts() {
     if (!list || list.hidden) return false;
     list.hidden = true;
@@ -87,6 +111,7 @@ export function createTitleScreen(root, { image, onStart, onOptions, onFullscree
   return {
     show() {
       el.hidden = false;
+      refresh();
       focus = 0;
       buttons[0].focus({ preventScroll: true });
     },
@@ -99,8 +124,8 @@ export function createTitleScreen(root, { image, onStart, onOptions, onFullscree
     // Gauche/haut : bouton précédent ; droite/bas : suivant.
     move(dir) {
       refresh();
-      focus = (focus + dir + buttons.length) % buttons.length;
-      buttons[focus].focus({ preventScroll: true });
+      const next = (focus + dir + buttons.length) % buttons.length;
+      selectButton(next, true);
     },
     // Échap, B : fermer la liste des départs si elle est ouverte. Renvoie true si quelque chose s'est fermé.
     back: () => closeDeparts(),

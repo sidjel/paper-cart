@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { watchConsole } from './helpers.js';
 
-// Écran titre : grand nom du jeu, image, Commencer et Options (doigt, souris, clavier).
+// Écran titre : illustration origami, Nouvelle Partie (couleur distincte), Options et son au changement de choix.
 
 const errors = [];
 test.beforeEach(async ({ page }) => {
@@ -14,14 +14,19 @@ test.afterEach(async () => {
   expect(errors, 'aucune erreur ni alerte dans la console').toEqual([]);
 });
 
-test('écran titre : nom du jeu, image, Commencer lance la partie', async ({ page }, info) => {
+test('écran titre : nom du jeu, image, Nouvelle Partie lance la partie', async ({ page }, info) => {
   const screen = page.locator('.title-screen');
   await expect(screen).toBeVisible();
   await expect(screen.locator('.title-main')).toHaveText(/Paper Cart/i);
   await expect(screen.locator('.title-sub')).toHaveText('The Final Checkout');
   await expect.poll(() => screen.locator('.title-image').evaluate((img) => img.complete && img.naturalWidth > 0)).toBe(true);
+  // « Nouvelle Partie » a une couleur distincte de « Options ».
+  const start = screen.locator('.title-button', { hasText: 'Nouvelle Partie' });
+  const opts = screen.locator('.title-button', { hasText: 'Options' });
+  const bgStart = await start.evaluate((e) => getComputedStyle(e).backgroundImage);
+  const bgOpts = await opts.evaluate((e) => getComputedStyle(e).backgroundImage);
+  expect(bgStart).not.toBe(bgOpts);
   await page.screenshot({ path: `test-results/captures/titre-${info.project.name}.png` });
-  const start = screen.locator('.title-button', { hasText: 'Commencer' });
   if (info.project.name === 'telephone') await start.tap();
   else await start.click();
   // Intro : texte blanc sur fond noir, une ligne à la fois.
@@ -43,16 +48,17 @@ test('écran titre : nom du jeu, image, Commencer lance la partie', async ({ pag
   await expect(screen).toBeHidden();
 });
 
-test('écran titre : Options ouvre les réglages, Fermer revient au titre ; clavier', async ({ page }, info) => {
+test('écran titre : Options ouvre les réglages, Fermer revient au titre ; clavier et son de sélection', async ({ page }, info) => {
   test.skip(info.project.name !== 'pc', 'PC');
-  await page.keyboard.press('ArrowRight'); // « Options » mis en avant
+  await page.keyboard.press('ArrowDown'); // « Options » mis en avant (+ petit son de sélection)
+  await expect.poll(() => page.evaluate(() => window.paperCart.audio().byName.menu ?? 0), { timeout: 5000 }).toBeGreaterThanOrEqual(1);
   await page.keyboard.press('Enter');
   await expect(page.locator('.player-options')).toBeVisible();
   expect(await page.evaluate(() => window.paperCart.state())).toBe('options');
   await page.keyboard.press('Escape');
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('title');
   await expect(page.locator('.title-screen')).toBeVisible();
-  await page.keyboard.press('Enter'); // de retour au titre, « Commencer » est mis en avant
+  await page.keyboard.press('Enter'); // de retour au titre, « Nouvelle Partie » est mis en avant
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('intro');
   await page.keyboard.press('Enter'); // ligne suivante
   await expect(page.locator('.intro-text')).toContainText('parking');
@@ -71,8 +77,8 @@ test('Options : plein écran (choix) et filtre écran cathodique', async ({ page
   await page.keyboard.press('Escape');
   await expect.poll(() => page.evaluate(() => window.paperCart.state())).toBe('title');
   await page.screenshot({ path: `test-results/captures/titre-${info.project.name}-crt.png` });
-  // Le filtre ne bloque pas les clics : Commencer lance la partie.
-  const start = page.locator('.title-button', { hasText: 'Commencer' });
+  // Le filtre ne bloque pas les clics : Nouvelle Partie lance la partie.
+  const start = page.locator('.title-button', { hasText: 'Nouvelle Partie' });
   if (info.project.name === 'telephone') await start.tap();
   else await start.click();
   await page.locator('.intro-skip').click();

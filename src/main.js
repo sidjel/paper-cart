@@ -178,9 +178,10 @@ applyCrt();
 const titleUi = createTitleScreen(uiEl, {
   version: VERSION,
   departs: config.debug.devMode ? departButtons() : null, // mode dev : « Départ » sur l'écran titre
-  image: `${BASE}art/placeholder/titre/titre.svg`,
+  image: `${BASE}art/titre/ecran-titre.webp`,
   onStart: () => startGame(true),
   onOptions: () => sm.go('options'),
+  onSelect: () => audio.play('menu'),
   onFullscreen: () => toggleFullscreen(),
 });
 // Options du joueur (écran titre) : assorties au titre, sans réglages de développement.
@@ -720,6 +721,7 @@ function handleAction(action) {
     case 'up':
     case 'down':
       if (who === 'options') playerOptions.move(dir);
+      else if (who === 'title') titleUi.move(dir);
       else if (who === 'pause') journal.move(dir);
       else if (who === 'name') voices.namePicker.move(dir);
       else if (who === 'panier') basketUi.move(dir);

@@ -44,9 +44,9 @@ export function createAudio(settings, base = '') {
     pas: 'pas', blip: 'texte', blipHeros: 'texte', froissement: 'papier', retourne: 'papier',
     bip: 'scanner', aspire: 'scanner', carte: 'scanner', prise: 'scanner',
     grince: 'chariot', chute: 'chariot', annonce: 'voix', ding: 'voix',
-    aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance',
+    aparte: 'aparte', corbeau: 'ambiance', portes: 'ambiance', menu: 'ui',
   };
-  const FAMILY_LIMITS = { pas: 2, texte: 3, papier: 2, scanner: 4, voix: 2, aparte: 1, ambiance: 2 };
+  const FAMILY_LIMITS = { pas: 2, texte: 3, papier: 2, scanner: 4, voix: 2, aparte: 1, ambiance: 2, ui: 3 };
   const playing = {}; // famille → sons en cours [{ sources, left }], du plus ancien au plus récent
   let collecting = null; // sources créées par le son en train de démarrer
   function limit(family) {
@@ -507,7 +507,8 @@ export function createAudio(settings, base = '') {
     return [src, lp, g];
   }
 
-  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding };
+  const menu = () => tone('triangle', 620, 760, ctx.currentTime, 0.045, 0.14);
+  const SOUNDS = { pas: step, bip, aspire, carte, retourne, prise, decouverte, grince, chute, annonce, blip, froissement, blipHeros, aparte, corbeau, portes, ding, menu };
 
   return {
     // Appelé au premier geste du joueur.
